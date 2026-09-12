@@ -479,3 +479,29 @@ revert.
 4. Не создавать `modules/utils.py`/`misc.py`; хелперы — в подсистемы.
 5. Не удалять orphan-модули до подтверждения владельцем (внешние сценарии не исключены).
 6. Не менять семантику `load_general_settings` (перечитывание файла) при выносе settings.
+
+## TECH-DEBT: несовместимые грамматики тегов (находка Batch #2, 2026-09-12)
+
+После переноса tag-движка в `modules/tag_manager.py` (Batch #2) в модуле
+намеренно сосуществуют ДВЕ несовместимые реализации с разными грамматиками
+тегов. Унификация — ОТДЕЛЬНОЕ решение владельца, не механический рефакторинг
+(любое слияние меняет поведение приложения).
+
+| Пара (монолит → modules/tag_manager.py) | Расхождение (проверено на тестовых входах) |
+|---|---|
+| `runs_to_tagged_text` ↔ `TagManager.runs_to_tagged_text` | Разные входы (python-docx Paragraph'ы vs `List[FormattingRun]`). bold+italic: монолит → `x <b><i>bi</i></b>`, TagManager → `x <bi>bi</bi>`. Пустой форматированный run: монолит пропускает, TagManager даёт `<b></b>after`. |
+| `tagged_text_to_runs` ↔ `TagManager.tagged_text_to_runs` | Одинаковая сигнатура. `<bi>combined</bi>`: монолит возвращает литерал `'<bi>combined</bi>'` (bold=False), TagManager — `combined` (bold=True, italic=True). `<li>…</li>`: монолит оставляет теги литералом, TagManager снимает. На текстах только с `<b>/<i>/<u>/<sub>/<sup>` (9 тестов, вкл. несбалансированные/пересекающиеся) — идентичны. |
+| `strip_formatting_tags` ↔ `TagManager.strip_tags` | Идентичны на `<b>/<i>/<u>/<sub>/<sup>`; расходятся на `<bi>`/`<li>` (TagManager снимает, монолит оставляет). |
+
+Оба набора вызовов живые: TagManager-методы использует `docx_handler`
+(`self.tag_manager.*`), функции из монолит-блока — сам монолит. НЕ объединять
+и не переключать callsites между блоками.
+
+Дополнительно: `get_docx_language_code` монолита и `modules/docx_handler.py`
+поведенчески РАЗНЫЕ (монолит распознаёт больше языков: `english (uk)` →
+`en-GB` vs `en-US`; `flemish` → `nl-BE` vs `en-US`; `brazilian portuguese` →
+`pt-BR` vs `en-US`; `sr` → `sr-RS` vs `en-US`; `qq` → `qq-QQ` vs `en-US` —
+5 из 17 тестовых входов). `set_docx_language` — идентичны на реальном
+Document. Унификация направления `docx_handler ← tag_manager` (см. Step 2,
+dependencies) должна учесть это расхождение — слепое переключение docx_handler
+на монолит-версию изменит поведение экспорта.

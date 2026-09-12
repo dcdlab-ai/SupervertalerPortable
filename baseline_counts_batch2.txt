@@ -1,0 +1,101 @@
+Baseline counts BEFORE extraction batch 2 (all .py files in repo, regex counts)
+.connect(: 1211
+QShortcut(: 18
+create_shortcut(: 35
+QTimer( instantiations: 24
+timeout.connect: 24
+QTimer.timeout (attr access): 0
+singleShot: 85
+QMetaObject.invokeMethod: 2
+
+--- .connect( ---
+Supervertaler.py: 781
+modules/ai_file_viewer_dialog.py: 4
+modules/chat_view_widget.py: 22
+modules/clipboard_manager_widget.py: 19
+modules/database_manager.py: 2
+modules/database_migrations.py: 1
+modules/dictation_toast.py: 1
+modules/extract_tm.py: 2
+modules/find_replace_qt.py: 10
+modules/keyboard_shortcuts_widget.py: 14
+modules/local_llm_setup.py: 15
+modules/merge_prompt_dialog.py: 4
+modules/pdf_rescue_Qt.py: 12
+modules/project_home_panel.py: 2
+modules/project_tm.py: 1
+modules/pseudo_translate_dialog.py: 2
+modules/quick_access_sidebar.py: 8
+modules/quicktrans.py: 31
+modules/ribbon_widget.py: 4
+modules/sdltm_handler.py: 1
+modules/settings_sidebar.py: 1
+modules/statistics_analyzer.py: 1
+modules/statistics_dialog_qt.py: 9
+modules/styled_widgets.py: 1
+modules/superbrowser.py: 6
+modules/superdocs_viewer_qt.py: 4
+modules/term_picker_dialog.py: 6
+modules/termbase_entry_editor.py: 20
+modules/termlens_popup.py: 4
+modules/termlens_widget.py: 18
+modules/tm_editor_dialog.py: 1
+modules/tm_manager_qt.py: 19
+modules/tmx_editor_qt.py: 65
+modules/trados_bridge_client.py: 2
+modules/translation_memory.py: 1
+modules/translation_results_panel.py: 16
+modules/unified_prompt_manager_qt.py: 48
+modules/usage_report_dialog.py: 5
+modules/voice_command_dialog.py: 4
+modules/voice_commands.py: 5
+modules/voice_dictation.py: 11
+modules/voice_tab.py: 24
+scripts/migrations/add_termbase_readonly_field.py: 1
+scripts/migrations/fix_null_termbase_priorities.py: 1
+scripts/migrations/set_tms_readonly_by_default.py: 1
+scripts/sv_tm_diagnose.py: 1
+
+--- QShortcut( ---
+Supervertaler.py: 8
+modules/quicktrans.py: 6
+modules/termlens_popup.py: 1
+modules/voice_dictation.py: 3
+
+--- create_shortcut( ---
+Supervertaler.py: 35
+
+--- QTimer( instantiations ---
+Supervertaler.py: 16
+modules/chat_view_widget.py: 1
+modules/clipboard_manager_widget.py: 3
+modules/quicktrans.py: 1
+modules/termlens_popup.py: 1
+modules/termlens_widget.py: 1
+modules/trados_bridge_client.py: 1
+
+--- timeout.connect ---
+Supervertaler.py: 16
+modules/chat_view_widget.py: 1
+modules/clipboard_manager_widget.py: 3
+modules/quicktrans.py: 1
+modules/termlens_popup.py: 1
+modules/termlens_widget.py: 1
+modules/trados_bridge_client.py: 1
+
+--- QTimer.timeout (attr access) ---
+
+--- singleShot ---
+Supervertaler.py: 67
+modules/clipboard_manager_widget.py: 2
+modules/local_llm_setup.py: 1
+modules/platform_helpers.py: 1
+modules/quicktrans.py: 4
+modules/termbase_entry_editor.py: 1
+modules/termlens_popup.py: 6
+modules/termlens_widget.py: 1
+modules/trados_bridge_client.py: 1
+modules/voice_commands.py: 1
+
+--- QMetaObject.invokeMethod ---
+Supervertaler.py: 2

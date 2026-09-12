@@ -1,0 +1,251 @@
+===== runs_to_tagged_text =====
+Supervertaler.py:495: def runs_to_tagged_text(paragraphs) -> str:
+Supervertaler.py:38668: source_text = runs_to_tagged_text(source_cell.paragraphs)
+Supervertaler.py:38669: target_text = runs_to_tagged_text(target_cell.paragraphs)
+modules/docx_handler.py:364: text_with_tags = self.tag_manager.runs_to_tagged_text(runs)
+modules/docx_handler.py:429: text_with_tags = self.tag_manager.runs_to_tagged_text(runs)
+modules/tag_manager.py:149: def runs_to_tagged_text(self, runs: List[FormattingRun]) -> str:
+
+===== strip_formatting_tags =====
+Supervertaler.py:562: def strip_formatting_tags(text: str) -> str:
+Supervertaler.py:51224: source_clean = strip_formatting_tags(source_clean) if has_formatting_tags(source_clean) else source_clean
+Supervertaler.py:51225: target_clean = strip_formatting_tags(target_clean) if has_formatting_tags(target_clean) else target_clean
+
+===== strip_outer_wrapping_tags =====
+Supervertaler.py:577: def strip_outer_wrapping_tags(text: str) -> tuple:
+Supervertaler.py:17864: source_text, _ = strip_outer_wrapping_tags(source_text)
+Supervertaler.py:17865: target_text, _ = strip_outer_wrapping_tags(target_text) if target_text else (target_text, None)
+Supervertaler.py:17956: source_text, _ = strip_outer_wrapping_tags(source_text)
+Supervertaler.py:17957: target_text, _ = strip_outer_wrapping_tags(target_text) if target_text else (target_text, None)
+Supervertaler.py:18041: source_text, _ = strip_outer_wrapping_tags(source_text)
+Supervertaler.py:18042: target_text, _ = strip_outer_wrapping_tags(target_text)
+Supervertaler.py:34785: source, _ = strip_outer_wrapping_tags(source)
+Supervertaler.py:34786: target, _ = strip_outer_wrapping_tags(target)
+Supervertaler.py:43916: stripped, stripped_source_tag = strip_outer_wrapping_tags(segment.source)
+Supervertaler.py:43980: stripped, stripped_target_tag = strip_outer_wrapping_tags(segment.target)
+Supervertaler.py:49136: search_source, _ = strip_outer_wrapping_tags(search_source)
+Supervertaler.py:51222: source_clean, _ = strip_outer_wrapping_tags(source_clean)
+Supervertaler.py:51223: target_clean, _ = strip_outer_wrapping_tags(target_clean)
+Supervertaler.py:51953: source_text, _ = strip_outer_wrapping_tags(source_text)
+Supervertaler.py:52041: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:53413: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:54030: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:54225: search_source, _ = strip_outer_wrapping_tags(search_source)
+Supervertaler.py:55681: stripped, _ = strip_outer_wrapping_tags(source_for_display)
+Supervertaler.py:55697: stripped, _ = strip_outer_wrapping_tags(target_for_display)
+Supervertaler.py:55705: src_display, _ = strip_outer_wrapping_tags(src_display)
+Supervertaler.py:59547: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:59577: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:60297: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:60853: stripped_source, _ = strip_outer_wrapping_tags(segment.source)
+Supervertaler.py:60855: stripped_target, _ = strip_outer_wrapping_tags(segment.target)
+Supervertaler.py:62784: search_source, _ = strip_outer_wrapping_tags(search_source)
+Supervertaler.py:63893: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:64381: search_source, _ = strip_outer_wrapping_tags(search_source)
+Supervertaler.py:64580: _ssrc, _ = strip_outer_wrapping_tags(_ssrc)
+Supervertaler.py:64675: display_text, _ = strip_outer_wrapping_tags(display_text)
+Supervertaler.py:65652: search_source, _ = strip_outer_wrapping_tags(search_source)
+Supervertaler.py:65850: search_source, _ = strip_outer_wrapping_tags(search_source)
+
+===== get_docx_language_code =====
+Supervertaler.py:658: def get_docx_language_code(lang_name_or_code: str) -> str:
+Supervertaler.py:16277: target_lang_code = get_docx_language_code(self.current_project.target_lang)
+Supervertaler.py:16391: target_lang_code = get_docx_language_code(self.current_project.target_lang)
+Supervertaler.py:38428: target_lang_code = get_docx_language_code(self.current_project.target_lang)
+modules/docx_handler.py:30: def get_docx_language_code(lang_name_or_code: str) -> str:
+modules/docx_handler.py:652: lang_code = get_docx_language_code(target_lang)
+
+===== set_docx_language =====
+Supervertaler.py:812: def set_docx_language(doc, lang_code: str):
+Supervertaler.py:16278: set_docx_language(doc, target_lang_code)
+Supervertaler.py:16392: set_docx_language(doc, target_lang_code)
+Supervertaler.py:38429: set_docx_language(doc, target_lang_code)
+modules/docx_handler.py:77: def set_docx_language(doc, lang_code: str):
+modules/docx_handler.py:653: set_docx_language(doc, lang_code)
+
+===== has_formatting_tags =====
+Supervertaler.py:910: def has_formatting_tags(text: str) -> bool:
+Supervertaler.py:6169: if has_formatting_tags(text):
+Supervertaler.py:39254: if has_formatting_tags(translation):
+Supervertaler.py:39405: if has_formatting_tags(text):
+Supervertaler.py:51224: source_clean = strip_formatting_tags(source_clean) if has_formatting_tags(source_clean) else source_clean
+Supervertaler.py:51225: target_clean = strip_formatting_tags(target_clean) if has_formatting_tags(target_clean) else target_clean
+
+===== apply_formatting_tags =====
+Supervertaler.py:924: def apply_formatting_tags(text: str, tag: str) -> str:
+
+===== get_formatted_html_display =====
+Supervertaler.py:940: def get_formatted_html_display(text: str) -> str:
+Supervertaler.py:3091: html = get_formatted_html_display(text)
+Supervertaler.py:6170: html = get_formatted_html_display(text)
+
+===== tagged_text_to_runs =====
+Supervertaler.py:991: def tagged_text_to_runs(text: str) -> list:
+Supervertaler.py:39407: runs = tagged_text_to_runs(text)
+modules/docx_handler.py:797: run_specs = self.tag_manager.tagged_text_to_runs(tagged_text)
+modules/tag_manager.py:233: def tagged_text_to_runs(self, text: str) -> List[Dict[str, Any]]:
+
+===== extract_memoq_tags =====
+Supervertaler.py:1080: def extract_memoq_tags(text: str) -> list:
+Supervertaler.py:1634: source_tags = extract_memoq_tags(source_text)
+Supervertaler.py:1647: target_tags = extract_memoq_tags(target_text)
+Supervertaler.py:2493: has_memoq_tags = bool(extract_memoq_tags(source_text))
+Supervertaler.py:5965: has_memoq_tags = bool(extract_memoq_tags(source_text))
+
+===== extract_html_tags =====
+Supervertaler.py:1105: def extract_html_tags(text: str) -> list:
+Supervertaler.py:2494: has_html_tags = bool(extract_html_tags(source_text))
+Supervertaler.py:5966: has_html_tags = bool(extract_html_tags(source_text))
+
+===== compact_tags =====
+Supervertaler.py:1128: def compact_tags(text: str, tag_map: dict = None) -> str:
+Supervertaler.py:1258: Обратная операция к compact_tags() — заменяет нумерованные плейсхолдеры
+Supervertaler.py:43923: source_for_display = compact_tags(source_for_display, _compact_tag_map)
+Supervertaler.py:43988: target_for_display = compact_tags(target_for_display, _compact_tag_map)
+Supervertaler.py:44109: display_source = compact_tags(display_source, compact_map)
+Supervertaler.py:55684: source_for_display = compact_tags(source_for_display)
+Supervertaler.py:55706: compact_tags(src_display, tag_map)
+Supervertaler.py:55707: target_for_display = compact_tags(target_for_display, tag_map)
+Supervertaler.py:60862: source_for_display = compact_tags(source_for_display, tag_map)
+Supervertaler.py:60863: target_for_display = compact_tags(target_for_display, tag_map)
+Supervertaler.py:63286: # target cells through compact_tags + apply_invisible_replacements at load
+Supervertaler.py:63295: display_target = compact_tags(display_target, target_widget._compact_tag_map)
+
+===== protect_tags_from_linebreak =====
+Supervertaler.py:1225: # словам не могла разорвать тег посередине (см. protect_tags_from_linebreak).
+Supervertaler.py:1243: def protect_tags_from_linebreak(text: str) -> str:
+Supervertaler.py:4406: # protect_tags_from_linebreak inserts (to stop tags wrapping mid-way).
+Supervertaler.py:55753: # word-wrap (see protect_tags_from_linebreak) – runs even when no
+Supervertaler.py:55757: text = protect_tags_from_linebreak(text)
+Supervertaler.py:55802: # display-only (inserted by protect_tags_from_linebreak) and must never
+
+===== expand_compact_tags =====
+Supervertaler.py:1151: чтением (expand_compact_tags); он должен жить столько же, сколько
+Supervertaler.py:1256: def expand_compact_tags(text: str, tag_map: dict) -> str:
+Supervertaler.py:2543: compare_target = expand_compact_tags(current_target, compact_map) if compact_map else current_target
+Supervertaler.py:6015: compare_target = expand_compact_tags(current_target, compact_map) if compact_map else current_target
+Supervertaler.py:44029: new_text = expand_compact_tags(new_text, compact_map)
+Supervertaler.py:48608: new_text = expand_compact_tags(new_text, compact_map)
+
+===== extract_all_tags =====
+Supervertaler.py:1283: def extract_all_tags(text: str) -> list:
+Supervertaler.py:1298: # AutoTagger использует собственный, более полный шаблон, чем extract_all_tags:
+Supervertaler.py:1301: # чтобы поведение extract_all_tags (используется другими возможностями)
+Supervertaler.py:1598: source_tags = extract_all_tags(source_text)
+Supervertaler.py:1599: target_tags = extract_all_tags(target_text)
+modules/pseudo_translate.py:31: # Supervertaler.extract_all_tags() — it matches the same three tag families:
+
+===== autotag_extract_tags =====
+Supervertaler.py:1312: def autotag_extract_tags(text: str) -> list:
+Supervertaler.py:1461: for tag in autotag_extract_tags(text):
+Supervertaler.py:1480: src_tags = Counter(autotag_extract_tags(source_text))
+Supervertaler.py:1481: cand_tags = Counter(autotag_extract_tags(candidate_target))
+Supervertaler.py:1506: tags = autotag_extract_tags(source_text)
+Supervertaler.py:8039: if not autotag_extract_tags(segment.source):
+Supervertaler.py:8076: if not autotag_extract_tags(segment.source) or not (segment.target or "").strip():
+Supervertaler.py:50027: if autotag_extract_tags(s.source) and (s.target or "").strip()]
+Supervertaler.py:63216: if not autotag_extract_tags(segment.source):
+Supervertaler.py:63307: n = len(autotag_extract_tags(segment.source))
+Supervertaler.py:63824: if autotag_extract_tags(s.source) and (s.target or "").strip()]
+
+===== strip_all_tags =====
+Supervertaler.py:1319: def strip_all_tags(text: str) -> str:
+Supervertaler.py:1491: if _normalize_for_word_compare(strip_all_tags(candidate_target)) != _normalize_for_word_compare(clean_target):
+Supervertaler.py:8041: clean_target = strip_all_tags(segment.target or "")
+Supervertaler.py:16097: def strip_all_tags(text):
+Supervertaler.py:16214: source_clean = strip_all_tags(seg.source) if seg.source else ""
+Supervertaler.py:16290: def strip_all_tags(text):
+Supervertaler.py:21309: text = strip_all_tags(seg.source) if seg.source else ""
+Supervertaler.py:63225: clean_target = strip_all_tags(segment.target)
+
+===== _normalize_ws_for_compare =====
+Supervertaler.py:1329: def _normalize_ws_for_compare(text: str) -> str:
+
+===== _normalize_for_word_compare =====
+Supervertaler.py:1350: def _normalize_for_word_compare(text: str) -> str:
+Supervertaler.py:1491: if _normalize_for_word_compare(strip_all_tags(candidate_target)) != _normalize_for_word_compare(clean_target):
+
+===== _reinsert_tags_into_target =====
+Supervertaler.py:1341: # через _reinsert_tags_into_target().
+Supervertaler.py:1360: def _reinsert_tags_into_target(candidate: str, clean_target: str):
+Supervertaler.py:1537: recon = _reinsert_tags_into_target(candidate, clean_target)
+
+===== _classify_tag =====
+Supervertaler.py:1416: def _classify_tag(tag: str):
+Supervertaler.py:1462: kind, key = _classify_tag(tag)
+
+===== _tags_well_formed =====
+Supervertaler.py:1458: def _tags_well_formed(text: str) -> tuple:
+Supervertaler.py:1493: ok, why = _tags_well_formed(candidate_target)
+
+===== validate_tag_transfer =====
+Supervertaler.py:1474: def validate_tag_transfer(source_text: str, candidate_target: str, clean_target: str) -> tuple:
+Supervertaler.py:1504: возвращает только результат, прошедший validate_tag_transfer, поэтому
+Supervertaler.py:1531: ok, reason = validate_tag_transfer(source_text, candidate, clean_target)
+Supervertaler.py:1539: rok, _ = validate_tag_transfer(source_text, recon, clean_target)
+
+===== place_tags_via_llm =====
+Supervertaler.py:1499: def place_tags_via_llm(client, prompt_manager, source_text: str, clean_target: str,
+Supervertaler.py:8057: new_target, reason = place_tags_via_llm(
+Supervertaler.py:63258: new_target, reason = place_tags_via_llm(
+
+===== count_pipe_symbols =====
+Supervertaler.py:1547: def count_pipe_symbols(text: str) -> int:
+Supervertaler.py:1565: source_pipes = count_pipe_symbols(source_text)
+Supervertaler.py:1566: target_pipes = count_pipe_symbols(target_text)
+
+===== get_next_pipe_count_needed =====
+Supervertaler.py:1552: def get_next_pipe_count_needed(source_text: str, target_text: str) -> int:
+Supervertaler.py:2525: pipes_needed = get_next_pipe_count_needed(source_text, current_target)
+Supervertaler.py:2560: pipes_needed = get_next_pipe_count_needed(source_text, current_target)
+Supervertaler.py:5997: pipes_needed = get_next_pipe_count_needed(source_text, current_target)
+Supervertaler.py:6032: pipes_needed = get_next_pipe_count_needed(source_text, current_target)
+
+===== get_tag_pair =====
+Supervertaler.py:1570: def get_tag_pair(tag_number: int) -> tuple:
+Supervertaler.py:1651: opening, closing = get_tag_pair(num)
+
+===== find_next_unused_tag =====
+Supervertaler.py:1583: def find_next_unused_tag(source_text: str, target_text: str) -> str:
+Supervertaler.py:2539: # Try memoQ tags and HTML tags (find_next_unused_tag handles both)
+Supervertaler.py:2544: next_tag = find_next_unused_tag(source_text, compare_target)
+Supervertaler.py:6011: # Try memoQ tags and HTML tags (find_next_unused_tag handles both)
+Supervertaler.py:6016: next_tag = find_next_unused_tag(source_text, compare_target)
+
+===== get_wrapping_tag_pair =====
+Supervertaler.py:1616: def get_wrapping_tag_pair(source_text: str, target_text: str) -> tuple:
+Supervertaler.py:2505: opening_tag, closing_tag = get_wrapping_tag_pair(source_text, current_target)
+Supervertaler.py:5977: opening_tag, closing_tag = get_wrapping_tag_pair(source_text, current_target)
+
+===== get_html_wrapping_tag_pair =====
+Supervertaler.py:1658: def get_html_wrapping_tag_pair(source_text: str, target_text: str) -> tuple:
+Supervertaler.py:2515: opening_tag, closing_tag = get_html_wrapping_tag_pair(source_text, current_target)
+Supervertaler.py:5987: opening_tag, closing_tag = get_html_wrapping_tag_pair(source_text, current_target)
+
+===== _strip_inline_tags =====
+Supervertaler.py:16605: def _strip_inline_tags(cls, text):
+Supervertaler.py:16646: seg_target = self._strip_inline_tags(
+Supervertaler.py:16859: seg_target = self._strip_inline_tags(
+Supervertaler.py:16905: seg_target = self._strip_inline_tags(raw_target)
+
+===== _raw_to_visible_offset =====
+Supervertaler.py:16617: def _raw_to_visible_offset(cls, raw_text, raw_off):
+Supervertaler.py:16914: vis_start = self._raw_to_visible_offset(raw_target, comment.anchor_start)
+Supervertaler.py:16915: vis_end = self._raw_to_visible_offset(raw_target, comment.anchor_end)
+
+===== _wysiwyg_runs_to_tagged_text =====
+Supervertaler.py:60740: def _wysiwyg_runs_to_tagged_text(runs):
+Supervertaler.py:60817: rebuilt = self._wysiwyg_runs_to_tagged_text(runs)
+
+===== WORD_JOINER =====
+Supervertaler.py:1228: WORD_JOINER = chr(0x2060)  # U+2060 WORD JOINER (нулевая ширина, без переноса)
+Supervertaler.py:1253: lambda m: m.group(0).replace('/', '/' + WORD_JOINER), text)
+Supervertaler.py:4408: wj = WORD_JOINER
+Supervertaler.py:55804: result = result.replace(WORD_JOINER, '')
+
+===== _INLINE_TAG_RE =====
+Supervertaler.py:15923: for tag in self._INLINE_TAG_RE.findall(text or ''):
+Supervertaler.py:16602: _INLINE_TAG_RE = re.compile(r'</?[A-Za-z][^<>]*?/?>')
+Supervertaler.py:16614: return cls._INLINE_TAG_RE.sub('', text)
+Supervertaler.py:16628: m = cls._INLINE_TAG_RE.match(raw_text, i)
+
