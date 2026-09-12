@@ -1,0 +1,9 @@
+Counts AFTER extraction batch 1 (all .py files in repo, regex counts)
+.connect(: 1211
+QShortcut(: 18
+create_shortcut: 35
+QTimer( instantiations: 24
+timeout.connect: 24
+QTimer.timeout (attr access): 0
+singleShot: 85
+QMetaObject.invokeMethod: 2

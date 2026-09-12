@@ -1,0 +1,89 @@
+Callsites BEFORE extraction batch 1 (78 hits)
+Supervertaler.py:1775: [class Comment] class Comment:
+Supervertaler.py:1938: [class Segment] class Segment:
+Supervertaler.py:2124: [class Project] class Project:
+Supervertaler.py:1988: [Comment(] self.comments = [Comment(
+Supervertaler.py:2015: [Comment(] comment = Comment(
+Supervertaler.py:2063: [Comment(] self.comments = [Comment(
+Supervertaler.py:17319: [Comment(] legacy_comment = Comment(
+Supervertaler.py:48097: [Comment(] seg.comments.append(Comment(
+Supervertaler.py:11965: [Segment(] # 🗑 Delete Segment(s) — removes the selected source segment(s). Only
+Supervertaler.py:11969: [Segment(] delete_seg_action = QAction(self.tr("🗑 &Delete Segment(s)"), self)
+Supervertaler.py:33001: [Segment(] segment = Segment(
+Supervertaler.py:36757: [Segment(] segment = Segment(
+Supervertaler.py:37097: [Segment(] segments.append(Segment(
+Supervertaler.py:37105: [Segment(] segments.append(Segment(
+Supervertaler.py:37113: [Segment(] segments.append(Segment(
+Supervertaler.py:37225: [Segment(] segments.append(Segment(
+Supervertaler.py:37232: [Segment(] segments.append(Segment(
+Supervertaler.py:37240: [Segment(] segments.append(Segment(
+Supervertaler.py:38089: [Segment(] file_segments.append(Segment(
+Supervertaler.py:38098: [Segment(] file_segments.append(Segment(
+Supervertaler.py:38108: [Segment(] file_segments.append(Segment(
+Supervertaler.py:38167: [Segment(] segment = Segment(
+Supervertaler.py:39332: [Segment(] segment = Segment(
+Supervertaler.py:39607: [Segment(] segment = Segment(
+Supervertaler.py:40125: [Segment(] segment = Segment(
+Supervertaler.py:40622: [Segment(] segment = Segment(
+Supervertaler.py:40857: [Segment(] segment = Segment(
+Supervertaler.py:41048: [Segment(] segment = Segment(
+Supervertaler.py:42017: [Segment(] return Segment(
+Supervertaler.py:42661: [Segment(] segment = Segment(
+Supervertaler.py:43144: [Segment(] segment = Segment(
+Supervertaler.py:50505: [Segment(] confirm_action = menu.addAction(f"✅ Confirm {n} Segment(s)")
+Supervertaler.py:50530: [Segment(] lock_action = menu.addAction(f"🔒 Lock {unlocked_count} Segment(s)")
+Supervertaler.py:50532: [Segment(] unlock_action = menu.addAction(f"🔓 Unlock {locked_count} Segment(s)")
+Supervertaler.py:50535: [Segment(] unlock_action = menu.addAction(f"🔓 Unlock {locked_count} Segment(s)")
+Supervertaler.py:50538: [Segment(] lock_action = menu.addAction(f"🔒 Lock {n} Segment(s)")
+Supervertaler.py:32972: [Project(] self.current_project = Project(
+Supervertaler.py:36780: [Project(] project = Project(
+Supervertaler.py:37127: [Project(] project = Project(
+Supervertaler.py:37247: [Project(] project = Project(
+Supervertaler.py:38223: [Project(] project = Project(
+Supervertaler.py:39301: [Project(] self.current_project = Project(
+Supervertaler.py:39576: [Project(] self.current_project = Project(
+Supervertaler.py:40164: [Project(] self.current_project = Project(
+Supervertaler.py:40639: [Project(] self.current_project = Project(
+Supervertaler.py:40875: [Project(] self.current_project = Project(
+Supervertaler.py:41139: [Project(] self.current_project = Project(
+Supervertaler.py:41587: [Project(] self.current_project = Project(
+Supervertaler.py:42149: [Project(] self.current_project = Project(
+Supervertaler.py:42362: [Project(] self.current_project = Project(
+Supervertaler.py:42800: [Project(] self.current_project = Project(
+Supervertaler.py:43128: [Project(] self.current_project = Project(
+Supervertaler.py:1827: [forward-ref 'Comment'] def from_dict(cls, data: Dict[str, Any]) -> 'Comment':
+Supervertaler.py:1950: [forward-ref 'Comment'] comments: List['Comment'] = field(default_factory=list)  # v1.10.57: структурированные комментарии
+Supervertaler.py:2007: [forward-ref 'Comment'] anchor_end: int = 0) -> 'Comment':
+Supervertaler.py:2044: [forward-ref 'Comment'] def get_comment(self, comment_id: str) -> Optional['Comment']:
+Supervertaler.py:44341: [forward-ref 'Comment'] 'comment':  ('Cmt',  'Comment'),
+Supervertaler.py:2079: [forward-ref 'Segment'] def from_dict(cls, data: Dict[str, Any]) -> 'Segment':
+Supervertaler.py:41940: [forward-ref 'Segment'] file_name: str = "", locked: bool = False) -> 'Segment':
+Supervertaler.py:57805: [forward-ref 'Segment'] def _comment_context_menu(self, segment: 'Segment', comment_id: str, anchor_widget):
+Supervertaler.py:57859: [forward-ref 'Segment'] def _edit_comment_dialog(self, segment: 'Segment', comment_id: str):
+Supervertaler.py:2289: [forward-ref 'Project'] def from_dict(cls, data: Dict[str, Any]) -> 'Project':
+Supervertaler.py:6938: [forward-ref 'Project'] tb_label = "Project" if is_project else "Background"
+Supervertaler.py:13130: [forward-ref 'Project'] # project_group = RibbonGroup("Project")
+Supervertaler.py:20399: [forward-ref 'Project'] "Read", "Write", "Project", "AI", "🎤 Voice", "🔍 SuperLookup",
+Supervertaler.py:20669: [forward-ref 'Project'] terms_table.setHorizontalHeaderLabels(["Source Term", "Target Term", "Domain", "Notes", "Project", "Client", "Forbidden"
+Supervertaler.py:20968: [forward-ref 'Project'] "Project", "Client", "Forbidden", "Created", ""
+Supervertaler.py:21990: [forward-ref 'Project'] project_name = getattr(self.current_project, 'name', None) or 'Project'
+Supervertaler.py:22600: [forward-ref 'Project'] terms_table.setHorizontalHeaderLabels(["Source", "Target", "Domain", "Notes", "Project", "Client", "Forbidden"])
+modules\memoqrtf_handler.py:180: [forward-ref 'Comment'] # Look for language headers (skip "ID", "Comment", "Status")
+modules\statistics_dialog_qt.py:502: [forward-ref 'Project'] w.writerow(["Project", self._project_name])
+modules\termbase_import_export.py:416: [forward-ref 'Project'] 'Notes', 'Project', 'Client', 'Forbidden']
+modules\trados_docx_handler.py:116: [forward-ref 'Segment'] if 'Segment' not in self.header_row[0]:
+modules\unified_prompt_manager_qt.py:1579: [forward-ref 'Project'] "Project's source language",
+modules\unified_prompt_manager_qt.py:1584: [forward-ref 'Project'] "Project's target language",
+modules\usage_log.py:221: [forward-ref 'Project'] "Project": lambda r: r.get("project") or "(none)",
+modules\usage_log.py:240: [forward-ref 'Project'] keyfn = _DIMENSIONS.get(dimension, _DIMENSIONS["Project"])
+modules\usage_report_dialog.py:105: [forward-ref 'Project'] dim = self.cmb_group.currentText() or "Project"
+
+=== strip_invisible_markers callsites (pre-flight scope amendment) ===
+Supervertaler.py:1735: [def strip_invisible_markers] definition (moves to modules/models.py)
+Supervertaler.py:2087: [strip_invisible_markers(] Segment.from_dict
+Supervertaler.py:2089: [strip_invisible_markers(] Segment.from_dict
+Supervertaler.py:3972: [strip_invisible_markers(] monolith UI
+Supervertaler.py:3978: [strip_invisible_markers(] monolith UI
+Supervertaler.py:4009: [strip_invisible_markers(] monolith UI
+Supervertaler.py:4014: [strip_invisible_markers(] monolith UI
+Supervertaler.py:35620: [strip_invisible_markers(] save_project_to_file
