@@ -63,7 +63,7 @@ E:\Dev\SupervertalerPortable\
 | 494–1767 | ~30 функций верхнего уровня: DOCX tag/formatting engine (`runs_to_tagged_text`, `tagged_text_to_runs`, `compact_tags`, `validate_tag_transfer`…) |
 | 67106–67311 | Хелперы SuperLookup: `_SearchTermHighlighter`, `_NumericTableWidgetItem`, `_ReadOnlyHtmlCell`, `_SuperLookupSearchSignals`, `_SuperLookupSearchWorker` |
 | 67312–72548 | **`SuperlookupTab`** — 115 методов |
-| 72559–72869 | `Pink/Blue/OrangeCheckmarkCheckBox`, `CustomRadioButton` (дубликаты `modules/styled_widgets.py`) |
+| 69759–70069 (до Batch #3c; в документе ошибочно 72559–72869) | `Pink/Blue/OrangeCheckmarkCheckBox`, `CustomRadioButton` — ПЕРЕНЕСЕНЫ в `modules/styled_widgets.py` (Batch #3c). Чекбоксы действительно были идентичны `CheckmarkCheckBox` с точностью до цвета; `CustomRadioButton` дублем НЕ был (18px кольцо+зелёная точка против 16px зелёная заливка+белая точка у `CheckmarkRadioButton`) и перенесён ВЕРБАТИМ отдельным классом |
 | 72876–73337 | Диагностический лог, `main()`, `if __name__` |
 
 Аномалии уровня файла (важно для рефакторинга):
@@ -1227,7 +1227,7 @@ E:\Dev\SupervertalerPortable\
 
 | Дубликаты | LOC |
 |---|---|
-| `Pink/Blue/OrangeCheckmarkCheckBox.paintEvent` | 3×46 (копия `styled_widgets.CheckmarkCheckBox`) |
+| `Pink/Blue/OrangeCheckmarkCheckBox.paintEvent` | 3×46 (копия `styled_widgets.CheckmarkCheckBox`) — подтверждено поведенчески в Batch #3c (12 offscreen-сценариев пиксельно идентичны при подстановке цветов); перенесены в styled_widgets как тонкие подклассы |
 | `SearchHighlightDelegate/WordWrapDelegate`: `set_highlight`, `clear_highlight`, `clear_all_highlights` | 3 пары |
 | `TMSearchWorker.cancel` = `ProofreadWorker.cancel` | 2 |
 | `__init__` трёх event-фильтров | идентичны |
@@ -1236,7 +1236,7 @@ E:\Dev\SupervertalerPortable\
 
 | Имя | В монолите | В modules/ | Вывод |
 |---|---|---|---|
-| `CheckmarkCheckBox`-семейство | Pink/Blue/Orange + CustomRadioButton (72559–72869) | `styled_widgets.py` (базовые + Purple/Teal) | монолит дублирует библиотеку виджетов |
+| `CheckmarkCheckBox`-семейство | Pink/Blue/Orange + CustomRadioButton (69759–70069 до Batch #3c; в документе ошибочно 72559–72869) | `styled_widgets.py` (базовые + Purple/Teal) | чекбоксы — дубль по цвету (слиты как подклассы, Batch #3c); CustomRadioButton дублем НЕ был — перенесён вербатим |
 | `strip_tags` | **3 копии внутри монолита** (38750, 38879, 38960 — вложенные) | `docx_handler`, `tag_manager` | 5 реализаций одной операции |
 | `runs_to_tagged_text`, `tagged_text_to_runs` | верхний уровень (494, 990) | `tag_manager.py` | legacy-дубль |
 | `get_docx_language_code`, `set_docx_language` | верхний уровень | `docx_handler.py` | legacy-дубль |
@@ -1431,7 +1431,7 @@ E:\Dev\SupervertalerPortable\
 После Batch #3a в `modules/event_filters.py`: `_QuitEventFilter`, `_LoneCtrlEventFilter`, `_WheelGuard`, `GridTableEventFilter`. В монолите остались `_CtrlReturnEventFilter` (676) и `_GridArrowKeyEventFilter` (728) — зависят от `ReadOnlyGridTextEditor`/`EditableGridTextEditor` и `_cleaned_modifiers`; переносятся после извлечения грид-редакторов. Принимают `mw`/`main_window` параметром (кроме _WheelGuard), логика компактная (2–5 методов).
 
 ## 13.4 Чекбоксы
-`Pink/Blue/OrangeCheckmarkCheckBox`, `CustomRadioButton` (72559–72869, ~310 строк) — дублируют `modules/styled_widgets.py` (там CheckmarkCheckBox/Purple/Teal/CheckmarkRadioButton). При переносе — объединить с styled_widgets, а не создавать новый модуль.
+`Pink/Blue/OrangeCheckmarkCheckBox`, `CustomRadioButton` (фактически 69759–70069 до переноса, ~311 строк; в документе ошибочно 72559–72869) — ПЕРЕНЕСЕНЫ в `modules/styled_widgets.py` в Batch #3c: чекбоксы слиты как тонкие подклассы `CheckmarkCheckBox` (идентичность-по-цвету подтверждена гейтом 1.4), `CustomRadioButton` перенесён ВЕРБАТИМ отдельным классом (не дубль `CheckmarkRadioButton`).
 
 # 14. Natural Module Boundaries
 

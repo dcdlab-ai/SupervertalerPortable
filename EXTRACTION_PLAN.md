@@ -104,7 +104,7 @@ revert.
 ### Goal
 Вынести автономные Qt-компоненты.
 ### Source
-`Supervertaler.py` 2403–2901 (фильтры), 7190–7786 + 8782–9091 (диалоги), 72559–72869 (чекбоксы).
+`Supervertaler.py` 2403–2901 (фильтры), 7190–7786 + 8782–9091 (диалоги), 69759–70069 (чекбоксы по факту на момент Batch #3c; в документе ранее ошибочно 72559–72869).
 ### Destination
 `modules/event_filters.py`; `modules/dialogs/` (theme_editor.py, detached_log.py, advanced_filters.py, scratchpad.py, live_progress.py, import_progress.py); чекбоксы → `modules/styled_widgets.py` (переиспользование!).
 ### Objects to move
@@ -135,6 +135,9 @@ revert.
 
 #### Статус Step 3 после Batch #3b (2026-09-13)
 Все 6 диалогов перенесены в новый пакет `modules/dialogs/` (по одному классу на файл + `__init__.py` с реэкспортом): `theme_editor.py` (`ThemeEditorDialog`), `detached_log.py` (`DetachedLogWindow`), `advanced_filters.py` (`AdvancedFiltersDialog`), `scratchpad.py` (`ScratchpadDialog`), `live_progress.py` (`LiveProgressDialog`), `import_progress.py` (`_ImportProgressDialog`). Диапазоны из этого плана (7190–7786 + 8782–9091) были устаревшими: фактические границы по AST — 5307–5901 (4 диалога) и 6903–7206 (2 прогресс-диалога, перемежались с воркерами Step 4); тела 4 воркеров не задеты (проверено байт-в-байт). Монолит импортирует все 6 имён одной строкой из `modules.dialogs`; callsite-ы конструкторов не менялись. Остаётся в Step 3: чекбоксы (Batch #3c) → слияние с `modules/styled_widgets.py`.
+
+#### Статус Step 3 после Batch #3c (2026-09-13) — Step 3 ЗАВЕРШЁН
+`Pink/Blue/OrangeCheckmarkCheckBox` и `CustomRadioButton` перенесены в существующий `modules/styled_widgets.py`. Диапазон из этого плана (72559–72869) был устаревшим: фактические границы по AST — 69759–70069. Гейт поведенческого сравнения (1.4): три чекбокса подтверждены идентичными `CheckmarkCheckBox` с точностью до цвета (12 offscreen-сценариев пиксельно идентичны, stylesheet отличается ровно 4 hex-подстановками) — реализованы как тонкие подклассы приватной базы `_ColoredCheckmarkCheckBox` без дублирования paintEvent. `CustomRadioButton` оказался НЕ дублем `CheckmarkRadioButton` (18px кольцо + зелёная точка против 16px зелёной заливки + белой точки) — перенесён ВЕРБАТИМ отдельным классом согласно предусмотренному протоколом исходу Этапа 2.2. Монолит импортирует все 4 имени из `modules.styled_widgets`; 16 callsite-ов конструкторов текстуально не менялись. On this Step 3 полностью завершён; следующий — Step 4 (чистые QThread-воркеры), запуск только по команде владельца.
 
 ## Step 4 — Чистые QThread-воркеры
 

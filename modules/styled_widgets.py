@@ -339,3 +339,160 @@ class CheckmarkRadioButton(QRadioButton):
             painter.drawEllipse(center_pt, radius, radius)
         finally:
             painter.end()
+
+
+# ---------------------------------------------------------------------------
+# Цветные варианты чекбокса (Batch #3c, Step 3 EXTRACTION_PLAN.md).
+#
+# Монолит нёс Pink/Blue/Orange-копии CheckmarkCheckBox, чьи тела отличались
+# от базового класса только четырьмя hex-значениями в stylesheet (проверено
+# гейтом 1.4 Batch #3c: 12 offscreen-сценариев рендера пиксельно идентичны,
+# отличия stylesheet — ровно 4 подстановки цвета). Тела paintEvent не
+# дублируются: используется единственный CheckmarkCheckBox.paintEvent, цвета
+# задаются двумя class-атрибутами через шаблон ниже.
+# ---------------------------------------------------------------------------
+
+_CHECKMARK_COLOR_STYLESHEET = """
+            QCheckBox {
+                font-size: 9pt;
+                spacing: 6px;
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #999;
+                border-radius: 3px;
+                background-color: white;
+            }
+            QCheckBox::indicator:checked {
+                background-color: @CHECKED@;
+                border-color: @CHECKED@;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #666;
+            }
+            QCheckBox::indicator:checked:hover {
+                background-color: @CHECKED_HOVER@;
+                border-color: @CHECKED_HOVER@;
+            }
+        """
+
+
+class _ColoredCheckmarkCheckBox(CheckmarkCheckBox):
+    """Приватная база цветных вариантов :class:`CheckmarkCheckBox`.
+
+    Сигнатура конструктора ``__init__(text="", parent=None)`` наследуется от
+    базового класса; переопределяется только stylesheet с подстановкой двух
+    цветов. Белая галочка рисуется унаследованным paintEvent.
+    """
+
+    _checked_color = None        # checked: заливка + рамка индикатора
+    _checked_hover_color = None  # checked+hover: заливка + рамка
+
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setStyleSheet(
+            _CHECKMARK_COLOR_STYLESHEET
+            .replace("@CHECKED@", self._checked_color)
+            .replace("@CHECKED_HOVER@", self._checked_hover_color)
+        )
+
+
+class PinkCheckmarkCheckBox(_ColoredCheckmarkCheckBox):
+    """Чекбокс с розовым фоном и белой галочкой в отмеченном состоянии (для термбаз проекта)."""
+
+    _checked_color = "#FFB6C1"
+    _checked_hover_color = "#FF99AD"
+
+
+class BlueCheckmarkCheckBox(_ColoredCheckmarkCheckBox):
+    """Чекбокс с синим фоном и белой галочкой в отмеченном состоянии (для глобальных/фоновых термбаз)."""
+
+    _checked_color = "#4d94ff"
+    _checked_hover_color = "#3d7dd9"
+
+
+class OrangeCheckmarkCheckBox(_ColoredCheckmarkCheckBox):
+    """Чекбокс с оранжевым фоном и белой галочкой в отмеченном состоянии (для AI-инъекции контекста)."""
+
+    _checked_color = "#FF9800"
+    _checked_hover_color = "#F57C00"
+
+
+# CustomRadioButton (Batch #3c): перенесён ВЕРБАТИМ из Supervertaler.py.
+# Это НЕ дубль CheckmarkRadioButton, хотя оба рисуют точку в круглом
+# индикаторе: монолитный виджет — 18px кольцо #4CAF50 на белом фоне с
+# ЗЕЛЁНОЙ центральной точкой (r = min*0.25); CheckmarkRadioButton — 16px
+# зелёная ЗАЛИВКА с БЕЛОЙ точкой (r = width*0.25). Слияние запрещено
+# решением гейта 1.4 Batch #3c.
+class CustomRadioButton(QRadioButton):
+    """Переключатель с круглым индикатором: зелёное кольцо и зелёная точка в отмеченном состоянии.
+    
+    В ранних версиях класса рисовался квадратный индикатор с белой галочкой на
+    зелёной заливке — визуально точная копия чекбокса, из-за чего как минимум один
+    пользователь (отзыв на форуме, май 2026) решил, что список LLM-провайдеров
+    допускает множественный выбор, хотя выбор на самом деле взаимоисключающий.
+    Теперь вид соответствует универсальному обозначению переключателя: пустой
+    кружок в выключенном состоянии, залитая точка в центре — во включённом."""
+
+    def __init__(self, text="", parent=None):
+        super().__init__(text, parent)
+        self.setCheckable(True)
+        self.setEnabled(True)
+        # 18 px diameter → border-radius 9 px = a perfect circle.
+        self.setStyleSheet("""
+            QRadioButton {
+                font-size: 9pt;
+                spacing: 6px;
+            }
+            QRadioButton::indicator {
+                width: 18px;
+                height: 18px;
+                border: 2px solid #999;
+                border-radius: 9px;
+                background-color: white;
+            }
+            QRadioButton::indicator:checked {
+                border-color: #4CAF50;
+                background-color: white;
+            }
+            QRadioButton::indicator:hover {
+                border-color: #666;
+            }
+            QRadioButton::indicator:checked:hover {
+                border-color: #45a049;
+            }
+        """)
+
+    def paintEvent(self, event):
+        """Рисует центральную точку при отметке — визуальный сигнал «именно
+                этот радиобаттон активен». Рисуется вручную, потому что движок
+                таблиц стилей Qt не даёт удобного способа поместить цветную
+                точку внутрь стилизованного ::indicator, не потеряв кольцо
+                и поведение при наведении, только что заданные."""
+        super().paintEvent(event)
+        if not self.isChecked():
+            return
+
+        from PyQt6.QtWidgets import QStyleOptionButton
+        from PyQt6.QtGui import QPainter, QColor
+        from PyQt6.QtCore import QRectF
+
+        opt = QStyleOptionButton()
+        self.initStyleOption(opt)
+        indicator_rect = self.style().subElementRect(
+            self.style().SubElement.SE_RadioButtonIndicator, opt, self
+        )
+        if not indicator_rect.isValid():
+            return
+
+        # Centre dot: ~50% of the indicator diameter, green to match the ring.
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#4CAF50"))
+        cx = indicator_rect.x() + indicator_rect.width() / 2
+        cy = indicator_rect.y() + indicator_rect.height() / 2
+        r = min(indicator_rect.width(), indicator_rect.height()) * 0.25
+        painter.drawEllipse(QRectF(cx - r, cy - r, r * 2, r * 2))
+        painter.end()
