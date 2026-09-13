@@ -76,6 +76,79 @@ Before running project commands, verify:
 4. Temporary project artifacts are being written to the appropriate directory under:
    `D:\Temp\SupervertalerPortable\`
 If a tool reports a different Python interpreter, package location, working directory, or temporary directory than specified here, correct the environment before continuing.
+### Bundled runtime quirk: CWD is not on sys.path
+The embedded distribution (`E:\Dev\python-embed\`) ignores the current directory
+(it ships a `._pth` file that excludes it). Ad-hoc scripts that import project
+modules (`Supervertaler`, `modules.*`) must add the project directory explicitly:
+```python
+import os, sys
+sys.path.insert(0, os.getcwd())
+```
+Symptom if forgotten: `ModuleNotFoundError: No module named 'modules'`.
+
+### Path and tooling quirks (Git Bash on Windows)
+* The embedded Python does not understand Git Bash `/tmp` paths (they map to
+  `D:\Temp`). Pass explicit `D:\Temp\SupervertalerPortable\...` paths to Python
+  scripts, never `/tmp/...`.
+* The bundled `grep.exe` prints backslash path separators on Windows
+  (`modules\dialogs\file.py`). Forward-slash `grep -v` filters will not match
+  them — account for this when post-filtering grep output.
+* Prefer the Edit/Write file tools over chained `sed -i` edits for test
+  scripts: quoting/backslash mangling in long sed pipelines caused rework
+  repeatedly in Batches #3a/#3b.
+
+### GUI (PyQt6) testing
+Run GUI checks offscreen and non-interactively:
+* Set `QT_QPA_PLATFORM=offscreen` for every GUI test process.
+* Modal dialogs never close offscreen and block forever: `QDialog.exec()`,
+  `QMessageBox.*`, `QFileDialog.*`, `QColorDialog.getColor`,
+  `QInputDialog.getText`. Monkeypatch them in the test harness (e.g. auto-accept
+  `QDialog.exec`), or use programmatic alternatives (build a `Project` object
+  and assign `current_project` instead of calling `new_project()`, which opens
+  a modal wizard).
+* Run GUI test scripts unbuffered (`python.exe -u script.py > out.txt 2>&1`)
+  with output in the stage directory; run them in the background and poll the
+  file. Buffered stdout makes a hung run look like a silent one.
+* Instantiating `SupervertalerQt` takes roughly 1–2 minutes (database, prompt
+  library, hotkeys, sidecar). Do not kill a run before ~3 minutes have elapsed;
+  confirm a real hang with a stack dump (below), not by silence.
+* To diagnose a hang, add at the top of the script:
+  ```python
+  import faulthandler, sys
+  faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
+  ```
+  The repeated thread-stack dump names the exact blocking call.
+* After each GUI test process, kill leftover `python.exe`/`java.exe` before the
+  next run: the app spawns an Okapi sidecar subprocess, and test scripts that
+  exit via `os._exit()` leave it orphaned.
+
+### Git line-ending artifacts
+Comparing `git show HEAD:<file>` bytes against the working copy can produce
+false differences (LF in the repository vs CRLF in the tree, e.g. observed on
+`modules/tag_manager.py`). For "what really changed" checks use `git status` /
+`git diff` or file-to-file hash manifests captured from the same source (both
+from the filesystem, or both from git), never one from each.
+
+### Refactoring batch validation practices
+Validated in Batches #2, #3a, #3b — keep doing this:
+* Documented line ranges in `CODE_MAP_REFACTOR.md` / `EXTRACTION_PLAN.md` go
+  stale after every batch. Always re-derive class boundaries with AST
+  (`ast.parse`, `lineno`/`end_lineno`); never trust documented numbers, but do
+  fix the documents when they are proven wrong.
+* Before editing, snapshot the to-be-moved blocks from `git HEAD` into the
+  stage directory together with their sha256; after creating the new files,
+  verify the verbatim transfer by comparing file tails byte-wise against the
+  snapshots. Re-verify once more immediately before the commit.
+* Count the 8 baseline metrics with the identical command before and after
+  (`grep -rE`, parens escaped: `\.connect\(`, `QShortcut\(`, `create_shortcut\(`,
+  `QTimer\(`, `timeout\.connect`, `QTimer\.timeout`, `singleShot`,
+  `QMetaObject\.invokeMethod`), always excluding `__pycache__`.
+* Collect callsites and external-name inventories via AST, not by eyeballing:
+  an external-name scan must walk the whole top-level (imports inside
+  `try:`/`if:` blocks count) and must report names resolved by monolith imports
+  too, not only unresolvable ones — this is how the `CheckmarkCheckBox`,
+  `contextmanager`, `time` header dependencies were nearly missed in Batch #3b.
+
 ### Exceptions
 The rules in this section may be overridden only when:
 * the task explicitly requires another environment;
