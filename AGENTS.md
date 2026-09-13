@@ -26,6 +26,15 @@ Do not install project dependencies into:
 * another Python installation.
 When installing or upgrading a package, verify that pip is associated with:
 `E:\Dev\python-embed\python.exe`
+### Refactoring batch documents
+Finished per-batch documents are committed to the repository (NOT to `D:\Temp` and NOT to the repo root):
+* `docs/refactoring/prompts/` — the per-batch prompt files (`Promt - EXTRACTION BATCH #N.txt`);
+* `docs/refactoring/reports/` — the per-batch result reports (`ОТЧЁТ Batch #N.txt`);
+* `docs/refactoring/audits/` — the measurement artifacts (`baseline_counts*`, `callsites_*`, `counts_*`, `manifest_*`).
+When a new batch is completed, write its prompt, report and audit artifacts directly into these folders
+and commit them together with the batch commit. Do not leave such files in the repo root.
+`requirements.txt` and `user_data/api_keys.example.txt` are live project files and stay where they are.
+
 ### Temporary files and test artifacts
 Use the dedicated project temporary workspace:
 `D:\Temp\SupervertalerPortable\`

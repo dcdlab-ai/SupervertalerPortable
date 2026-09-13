@@ -1,9 +1,11 @@
 # Python
 __pycache__/
 
-# Extraction batch report artifacts (kept in repo root, not committed)
+# Safety net: batch report artifacts must live in docs/refactoring/, not in the repo root.
+# (Rules are root-anchored, so the committed copies under docs/refactoring/ are unaffected.)
 /ОТЧЁТ*.txt
 /ОТЧЕТ*.txt
+/Promt - EXTRACTION*.txt
 /baseline_counts*.txt
 /callsites_*.txt
 /counts_*.txt
