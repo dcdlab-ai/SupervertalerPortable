@@ -34,6 +34,9 @@ Finished per-batch documents are committed to the repository (NOT to `D:\Temp` a
 When a new batch is completed, write its prompt, report and audit artifacts directly into these folders
 and commit them together with the batch commit. Do not leave such files in the repo root.
 `requirements.txt` and `user_data/api_keys.example.txt` are live project files and stay where they are.
+At the end of every batch/step also update `PROJECT_STATUS.md` (progress table, monolith
+line count, "next step" section with re-derived AST boundaries) and commit it with the
+final batch commit.
 
 ### Temporary files and test artifacts
 Use the dedicated project temporary workspace:

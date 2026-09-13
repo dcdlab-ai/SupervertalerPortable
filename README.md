@@ -31,7 +31,8 @@ Python packages are installed into the same bundled runtime via
 ## Refactoring campaign
 
 The codebase is being incrementally extracted from the monolith into `modules/` packages
-according to `EXTRACTION_PLAN.md`, with per-batch verification documented in
+according to `EXTRACTION_PLAN.md`. Current progress and next step: see **`PROJECT_STATUS.md`**
+(the single entry point for project state). Per-batch verification is documented in
 `CODE_MAP_REFACTOR.md`, `DEPENDENCY_MAP.md`, `DEAD_CODE_REPORT.md` and `VALIDATION_BACKLOG.md`.
 Environment, testing and validation practices for agents working on this repository are
 codified in `AGENTS.md`.
