@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+
+# Extraction batch report artifacts (kept in repo root, not committed)
+/ОТЧЁТ*.txt
+/ОТЧЕТ*.txt
+/baseline_counts*.txt
+/callsites_*.txt
+/counts_*.txt
+/manifest_*.txt
