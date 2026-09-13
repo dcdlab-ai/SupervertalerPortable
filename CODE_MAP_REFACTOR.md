@@ -54,7 +54,7 @@ E:\Dev\SupervertalerPortable\
 |---|---|
 | 1–494 | Шапка, version-хелперы (`_read_version`, `get_user_data_path`…), config paths |
 | 1775–2402 | **Модели данных**: `Comment` (1775), `Segment` (1938), `Project` (2124) |
-| 2403–2901 | **Event-фильтры**: `_QuitEventFilter`, `_CtrlReturnEventFilter`, `_GridArrowKeyEventFilter`, `_WheelGuard`, `_LoneCtrlEventFilter`, `GridTableEventFilter` |
+| 676–892 (до Batch #3a: 675–1043, в документе ошибочно 2403–2901) | **Event-фильтры**: остались в монолите `_CtrlReturnEventFilter` (676), `_GridArrowKeyEventFilter` (728); `_QuitEventFilter`, `_WheelGuard`, `_LoneCtrlEventFilter`, `GridTableEventFilter` перенесены в `modules/event_filters.py` (Batch #3a) |
 | 2902–6760 | **Грид-редакторы**: `GridTextEditor`, `ReadOnlyGridTextEditor` (31 метод), `TagHighlighter`, `EditableGridTextEditor` (33 метода) |
 | 6761–7189 | **Делегаты/подсветка**: `SearchHighlightDelegate`, `ClickableHighlightLabel`, `TermbaseHighlightWidget`, `WordWrapDelegate` |
 | 7190–7786 | **Диалоги**: `ThemeEditorDialog`, `DetachedLogWindow`, `AdvancedFiltersDialog`, `ScratchpadDialog` |
@@ -1428,7 +1428,7 @@ E:\Dev\SupervertalerPortable\
 `ThemeEditorDialog` (7190), `DetachedLogWindow` (7407), `AdvancedFiltersDialog` (7491), `ScratchpadDialog` (7715), `LiveProgressDialog` (8782), `_ImportProgressDialog` (8958) — все без прямой зависимости от MainWindow (аргументы/parent).
 
 ## 13.3 Event-фильтры (modules/event_filters.py)
-`_QuitEventFilter`, `_CtrlReturnEventFilter`, `_GridArrowKeyEventFilter`, `_LoneCtrlEventFilter`, `_WheelGuard`, `GridTableEventFilter` — принимают `mw`/`main_window` параметром (кроме _WheelGuard), логика компактная (2–5 методов).
+После Batch #3a в `modules/event_filters.py`: `_QuitEventFilter`, `_LoneCtrlEventFilter`, `_WheelGuard`, `GridTableEventFilter`. В монолите остались `_CtrlReturnEventFilter` (676) и `_GridArrowKeyEventFilter` (728) — зависят от `ReadOnlyGridTextEditor`/`EditableGridTextEditor` и `_cleaned_modifiers`; переносятся после извлечения грид-редакторов. Принимают `mw`/`main_window` параметром (кроме _WheelGuard), логика компактная (2–5 методов).
 
 ## 13.4 Чекбоксы
 `Pink/Blue/OrangeCheckmarkCheckBox`, `CustomRadioButton` (72559–72869, ~310 строк) — дублируют `modules/styled_widgets.py` (там CheckmarkCheckBox/Purple/Teal/CheckmarkRadioButton). При переносе — объединить с styled_widgets, а не создавать новый модуль.
@@ -1441,7 +1441,7 @@ E:\Dev\SupervertalerPortable\
 |---|---|---|---|
 | 1 | `modules/models.py` | `Comment`, `Segment`, `Project` (26 классов-методов) | чистые данные, нулевые зависимости |
 | 2 | `modules/tag_formatting.py` | ~30 топ-функций + `_strip_inline_tags`, `_raw_to_visible_offset`, `_wysiwyg_runs_to_tagged_text` + поглощение `tag_manager.py` | единый tag-движок, дублируется с modules |
-| 3 | `modules/event_filters.py` | 5 фильтров + `GridTableEventFilter` | компактные QObject-классы |
+| 3 | `modules/event_filters.py` | 3 фильтра + `GridTableEventFilter` (Batch #3a); 2 оставшихся — после извлечения грид-редакторов | компактные QObject-классы |
 | 4 | `modules/grid/` (editors.py, delegates.py, render.py, pagination.py, filters.py, match_panel.py, helpers.py) | grid-редакторы, делегаты, ~120 методов `SupervertalerQt` (populate/render/pagination/filters/selection) | крупнейший кластер (GRID) |
 | 5 | `modules/dialogs/` | 6 диалогов монолита | нулевая связность с окном |
 | 6 | `modules/workers/` | TMSearchWorker, ProofreadWorker, GlossaryExtractionWorker (+ позже PreTranslationWorker после декомпозиции) | чистые QThread |

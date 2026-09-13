@@ -128,6 +128,11 @@ revert.
 ### Expected result
 −1 900 строк; 15 классов в modules/.
 
+#### Статус Step 3 после Batch #3a (2026-09-13)
+Скоуп фильтров сокращён решением владельца. Перенесено в `modules/event_filters.py`: `_QuitEventFilter`, `_WheelGuard`, `_LoneCtrlEventFilter`, `GridTableEventFilter`. **НЕ перенесены** (остались в монолите, Supervertaler.py:676–892): `_CtrlReturnEventFilter`, `_GridArrowKeyEventFilter` — оба делают `isinstance`-проверки против `ReadOnlyGridTextEditor`/`EditableGridTextEditor`, `_GridArrowKeyEventFilter` также вызывает хелпер `_cleaned_modifiers`; вербатим-перенос невозможен без циклического импорта.
+
+**PRE-CONDITION для будущего батча «грид-редакторы»:** сначала извлечь `ReadOnlyGridTextEditor`, `EditableGridTextEditor` и `_cleaned_modifiers` из монолита в modules/; только после этого `_CtrlReturnEventFilter` и `_GridArrowKeyEventFilter` переносятся в `modules/event_filters.py` вербатим. Не переносить эти два фильтра раньше редакторов и не разрешать `modules/` импортировать из монолита (запуск как `__main__` создал бы второй экземпляр модуля и сломал isinstance-сравнения).
+
 ## Step 4 — Чистые QThread-воркеры
 
 ### Goal
