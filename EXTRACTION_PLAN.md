@@ -133,12 +133,15 @@ revert.
 
 **PRE-CONDITION для будущего батча «грид-редакторы»:** сначала извлечь `ReadOnlyGridTextEditor`, `EditableGridTextEditor` и `_cleaned_modifiers` из монолита в modules/; только после этого `_CtrlReturnEventFilter` и `_GridArrowKeyEventFilter` переносятся в `modules/event_filters.py` вербатим. Не переносить эти два фильтра раньше редакторов и не разрешать `modules/` импортировать из монолита (запуск как `__main__` создал бы второй экземпляр модуля и сломал isinstance-сравнения).
 
+#### Статус Step 3 после Batch #3b (2026-09-13)
+Все 6 диалогов перенесены в новый пакет `modules/dialogs/` (по одному классу на файл + `__init__.py` с реэкспортом): `theme_editor.py` (`ThemeEditorDialog`), `detached_log.py` (`DetachedLogWindow`), `advanced_filters.py` (`AdvancedFiltersDialog`), `scratchpad.py` (`ScratchpadDialog`), `live_progress.py` (`LiveProgressDialog`), `import_progress.py` (`_ImportProgressDialog`). Диапазоны из этого плана (7190–7786 + 8782–9091) были устаревшими: фактические границы по AST — 5307–5901 (4 диалога) и 6903–7206 (2 прогресс-диалога, перемежались с воркерами Step 4); тела 4 воркеров не задеты (проверено байт-в-байт). Монолит импортирует все 6 имён одной строкой из `modules.dialogs`; callsite-ы конструкторов не менялись. Остаётся в Step 3: чекбоксы (Batch #3c) → слияние с `modules/styled_widgets.py`.
+
 ## Step 4 — Чистые QThread-воркеры
 
 ### Goal
 Вынести воркеров без зависимости от MainWindow.
 ### Source
-`Supervertaler.py` 7787–7912 (TMSearchWorker), 8622–8779 (ProofreadWorker), 9092–9169 (GlossaryExtractionWorker).
+`Supervertaler.py` (после Batch #3b, фактические границы по AST): TMSearchWorker 5333–5456, ProofreadWorker 6168–6325, GlossaryExtractionWorker 6336–6407 (в документе ранее были ошибочные 7787–7912 / 8622–8779 / 9092–9169; PreTranslationWorker 5459–6165 — НЕ переносится, см. Step 13).
 ### Destination
 `modules/workers/` (`tm_search.py`, `proofread.py`, `glossary.py`).
 ### Objects to move

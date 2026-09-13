@@ -57,8 +57,8 @@ E:\Dev\SupervertalerPortable\
 | 676–892 (до Batch #3a: 675–1043, в документе ошибочно 2403–2901) | **Event-фильтры**: остались в монолите `_CtrlReturnEventFilter` (676), `_GridArrowKeyEventFilter` (728); `_QuitEventFilter`, `_WheelGuard`, `_LoneCtrlEventFilter`, `GridTableEventFilter` перенесены в `modules/event_filters.py` (Batch #3a) |
 | 2902–6760 | **Грид-редакторы**: `GridTextEditor`, `ReadOnlyGridTextEditor` (31 метод), `TagHighlighter`, `EditableGridTextEditor` (33 метода) |
 | 6761–7189 | **Делегаты/подсветка**: `SearchHighlightDelegate`, `ClickableHighlightLabel`, `TermbaseHighlightWidget`, `WordWrapDelegate` |
-| 7190–7786 | **Диалоги**: `ThemeEditorDialog`, `DetachedLogWindow`, `AdvancedFiltersDialog`, `ScratchpadDialog` |
-| 7787–9169 | **QThread-воркеры**: `TMSearchWorker`, `PreTranslationWorker` (11 методов, держит `parent_app`), `ProofreadWorker`, `LiveProgressDialog`, `_ImportProgressDialog`, `GlossaryExtractionWorker` |
+| — (до Batch #3b: 7190–7786, в документе ошибочно; фактически 5307–5901) | **Диалоги**: `ThemeEditorDialog`, `DetachedLogWindow`, `AdvancedFiltersDialog`, `ScratchpadDialog` перенесены в `modules/dialogs/` (Batch #3b) |
+| (до Batch #3b фактически 5908–7284, в документе ошибочно 7787–9169) | **QThread-воркеры**: `TMSearchWorker` (5333–5456), `PreTranslationWorker` (5459–6165, 11 методов, держит `parent_app`), `ProofreadWorker` (6168–6325), `GlossaryExtractionWorker` (6336–6407); `LiveProgressDialog` и `_ImportProgressDialog` перенесены в `modules/dialogs/` (Batch #3b, были 6903–7206) |
 | **9170–67098** | **`SupervertalerQt`** — 819 методов |
 | 494–1767 | ~30 функций верхнего уровня: DOCX tag/formatting engine (`runs_to_tagged_text`, `tagged_text_to_runs`, `compact_tags`, `validate_tag_transfer`…) |
 | 67106–67311 | Хелперы SuperLookup: `_SearchTermHighlighter`, `_NumericTableWidgetItem`, `_ReadOnlyHtmlCell`, `_SuperLookupSearchSignals`, `_SuperLookupSearchWorker` |
@@ -1394,11 +1394,11 @@ E:\Dev\SupervertalerPortable\
 
 | Класс | Строки | Зависимость от MainWindow | Сигналы | Извлекаемость |
 |---|---|---|---|---|
-| `TMSearchWorker` | 7787–7910 | **нет** (чистые аргументы) | `results_ready(int,list)`, `search_failed(int,str)` → `_on_tm_search_results`/`_on_tm_search_failed` | **LOW** — готов к переносу |
-| `ProofreadWorker` | 8622–8779 | нет (аргументы) | 5 сигналов → **локальные замыкания** в `_run_proofreading` | LOW |
-| `GlossaryExtractionWorker` | 9092–9163 | нет | `finished_ok`, `failed` → замыкание | LOW |
-| `PreTranslationWorker` | 7913–8619 | **ДА**: `self.parent_app` (7969, 8204–8297 — читает `parent_app.current_project`, настройки) | `progress_update`, `translation_complete`, `translation_error`, `retry_needed` → замыкания | **HIGH** — сначала рефакторить на параметры |
-| `LiveProgressDialog`, `_ImportProgressDialog` | — | нет | — | LOW (диалоги) |
+| `TMSearchWorker` | 5333–5456 (до Batch #3b: 5908–6031, в документе ошибочно 7787–7910) | **нет** (чистые аргументы) | `results_ready(int,list)`, `search_failed(int,str)` → `_on_tm_search_results`/`_on_tm_search_failed` | **LOW** — готов к переносу |
+| `ProofreadWorker` | 6168–6325 | нет (аргументы) | 5 сигналов → **локальные замыкания** в `_run_proofreading` | LOW |
+| `GlossaryExtractionWorker` | 6336–6407 | нет | `finished_ok`, `failed` → замыкание | LOW |
+| `PreTranslationWorker` | 5459–6165 | **ДА**: `self.parent_app` (читает `parent_app.current_project`, настройки) | `progress_update`, `translation_complete`, `translation_error`, `retry_needed` → замыкания | **HIGH** — сначала рефакторить на параметры |
+| `LiveProgressDialog`, `_ImportProgressDialog` | перенесены в `modules/dialogs/` (Batch #3b) | нет | — | готово (Batch #3b) |
 | `_SuperLookupSearchWorker(QRunnable)` + signals | 67211–67309 | через `tab` (SuperlookupTab) | 4 сигнала | MEDIUM (вместе с табом) |
 
 ## 12.2 threading.Thread/Timer-воркеры внутри SupervertalerQt
@@ -1424,8 +1424,8 @@ E:\Dev\SupervertalerPortable\
 | `SearchHighlightDelegate`, `WordWrapDelegate` | 6761–7189 | родитель-виджет |
 | `TermbaseHighlightWidget`, `ClickableHighlightLabel`, `_SearchTermHighlighter`, `_NumericTableWidgetItem` | — | лёгкая |
 
-## 13.2 Диалоги (переносимы в modules/dialogs/)
-`ThemeEditorDialog` (7190), `DetachedLogWindow` (7407), `AdvancedFiltersDialog` (7491), `ScratchpadDialog` (7715), `LiveProgressDialog` (8782), `_ImportProgressDialog` (8958) — все без прямой зависимости от MainWindow (аргументы/parent).
+## 13.2 Диалоги (modules/dialogs/, Batch #3b)
+Все 6 диалогов перенесены в `modules/dialogs/` (Batch #3b): `theme_editor.py`, `detached_log.py`, `advanced_filters.py`, `scratchpad.py`, `live_progress.py`, `import_progress.py` + `__init__.py` (реэкспорт). До переноса находились в монолите на строках 5307–5901 (4 диалога; в документе ошибочно 7190–7786) и 6903–7206 (2 прогресс-диалога; в документе ошибочно 8782–9091). Все — без прямой зависимости от MainWindow (аргументы/parent), что подтверждено AST-инвентаризацией внешних имён перед переносом.
 
 ## 13.3 Event-фильтры (modules/event_filters.py)
 После Batch #3a в `modules/event_filters.py`: `_QuitEventFilter`, `_LoneCtrlEventFilter`, `_WheelGuard`, `GridTableEventFilter`. В монолите остались `_CtrlReturnEventFilter` (676) и `_GridArrowKeyEventFilter` (728) — зависят от `ReadOnlyGridTextEditor`/`EditableGridTextEditor` и `_cleaned_modifiers`; переносятся после извлечения грид-редакторов. Принимают `mw`/`main_window` параметром (кроме _WheelGuard), логика компактная (2–5 методов).
