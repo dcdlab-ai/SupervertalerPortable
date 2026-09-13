@@ -1,0 +1,26 @@
+675:class _QuitEventFilter(QObject):
+706:class _CtrlReturnEventFilter(QObject):
+758:class _GridArrowKeyEventFilter(QObject):
+925:class _WheelGuard(QObject):
+947:class _LoneCtrlEventFilter(QObject):
+1041:class GridTableEventFilter:
+5127:    двойные щелчки перехватываются через installEventFilter на viewport."""
+8437:        # Ctrl+Up/Down - Segment navigation is handled by _GridArrowKeyEventFilter
+8526:        # Handled by _GridArrowKeyEventFilter (QTableWidget eats vertical arrow keys
+8544:            self._ctrl_return_event_filter = _CtrlReturnEventFilter(self)
+8545:            QApplication.instance().installEventFilter(self._ctrl_return_event_filter)
+8553:            self._grid_arrow_key_event_filter = _GridArrowKeyEventFilter(self)
+8554:            QApplication.instance().installEventFilter(self._grid_arrow_key_event_filter)
+8616:        # Handled by _GridArrowKeyEventFilter (QTableWidget eats vertical arrow keys
+8660:            self._lone_ctrl_event_filter = _LoneCtrlEventFilter(self)
+8661:            QApplication.instance().installEventFilter(self._lone_ctrl_event_filter)
+22258:                   предназначенные области прокрутки. См. ``_WheelGuard``.
+22297:        guard = _WheelGuard(scroll)
+22301:                w.installEventFilter(guard)
+31323:            self._quit_event_filter = _QuitEventFilter(self)
+31324:            QApplication.instance().installEventFilter(self._quit_event_filter)
+45230:            badge.installEventFilter(self)
+45238:                lock_lbl.installEventFilter(self)
+45263:        status_label.installEventFilter(self)
+45290:            match_label.installEventFilter(self)
+45299:            short_lbl.installEventFilter(self)

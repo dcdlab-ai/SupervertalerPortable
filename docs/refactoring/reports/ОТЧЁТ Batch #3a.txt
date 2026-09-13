@@ -1,0 +1,223 @@
+ОТЧЁТ Batch #3a (Step 3 EXTRACTION_PLAN.md — под-батч «event-фильтры»)
+Дата: 2026-09-13
+Коммит: c7497d6 "Extract Qt event filters into modules/event_filters.py (Batch #3a, Step 3 of EXTRACTION_PLAN.md)"
+База: 1ac400d (Batch #2)
+
+═══════════════════════════════════════════════════════════════
+РЕШЕНИЕ ВЛАДЕЛЬЦА, ИЗМЕНИВШЕЕ СКОУП
+═══════════════════════════════════════════════════════════════
+Pre-flight Этапа 1.2 провалился: _CtrlReturnEventFilter и
+_GridArrowKeyEventFilter делают isinstance-проверки против классов
+монолита ReadOnlyGridTextEditor (1485–3067) / EditableGridTextEditor
+(3398–5030), а _GridArrowKeyEventFilter также вызывает модульный
+хелпер _cleaned_modifiers (Supervertaler.py:661). Вербатим-перенос в
+modules/event_filters.py без циклического импорта невозможен
+(запуск монолита как __main__ сделал бы isinstance-сравнения с
+другими объектами классов — тихая смена поведения).
+
+По решению владельца скоуп сокращён до 4 чистых классов:
+  Перенесены:  _QuitEventFilter, _WheelGuard, _LoneCtrlEventFilter,
+               GridTableEventFilter
+  Остались:    _CtrlReturnEventFilter (Supervertaler.py:676–725),
+               _GridArrowKeyEventFilter (Supervertaler.py:728–892)
+
+PRE-CONDITION для будущего батча «грид-редакторы» (зафиксирован в
+EXTRACTION_PLAN.md): сначала извлечь ReadOnlyGridTextEditor,
+EditableGridTextEditor и _cleaned_modifiers в modules/; только после
+этого два оставшихся фильтра переносятся вербатим. Не разрешать
+modules/ импортировать из монолита.
+
+Также исправлен CODE_MAP_REFACTOR.md: в документе было ошибочно
+указано 2403–2901; фактически до батча классы находились на строках
+675–1043 (диапазон 2403–2901 попадал внутрь ReadOnlyGridTextEditor).
+После Batch #3a в монолите остались фильтры на 676–892.
+
+═══════════════════════════════════════════════════════════════
+ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
+═══════════════════════════════════════════════════════════════
+- Рабочая копия чистая, HEAD = 1ac400d (Batch #2).
+- py_compile всех .py — чисто (PY_COMPILE_OK).
+- manifest_before_batch3a.txt: SHA256 всех 126 .py-файлов.
+- baseline_counts_batch3a.txt (8 метрик):
+  .connect( = 1211, QShortcut( = 18, create_shortcut( = 35,
+  QTimer( = 24, timeout.connect = 24, QTimer.timeout = 0,
+  singleShot = 85, QMetaObject.invokeMethod = 2.
+
+═══════════════════════════════════════════════════════════════
+ЭТАП 1 — PRE-FLIGHT
+═══════════════════════════════════════════════════════════════
+1.1 ГРАНИЦЫ И СОСТАВ (AST)
+- Все 6 классов найдены AST-парсером, состав совпал со списком скоупа
+  точно: ничего лишнего, ничего пропущенного.
+- Фактические границы (до переноса): _QuitEventFilter 675–703,
+  _CtrlReturnEventFilter 706–755, _GridArrowKeyEventFilter 758–922,
+  _WheelGuard 925–944, _LoneCtrlEventFilter 947–1038,
+  GridTableEventFilter 1041–1043.
+  Диапазон 2403–2901 из CODE_MAP_REFACTOR.md — устаревшие номера.
+- GridTableEventFilter — стаб-примесь (докстринг + pass), ссылок на
+  него в коде нет ни одной.
+
+1.2 ЧИСТОТА КЛАССОВ / ИНТЕРФЕЙС
+- _QuitEventFilter(main_window), _CtrlReturnEventFilter(main_window),
+  _GridArrowKeyEventFilter(main_window), _LoneCtrlEventFilter(main_window)
+  — единый параметр main_window.
+- _WheelGuard: СВОЕГО __init__ НЕТ (подтверждено по телу, как и
+  утверждал CODE_MAP §13.3); создаётся как _WheelGuard(scroll) —
+  scroll служит только QObject-parent.
+- ПРОВАЛ для _CtrlReturnEventFilter и _GridArrowKeyEventFilter:
+  isinstance-проверки против монолитных классов (строки 750, 807, 832,
+  856, 875) + вызов _cleaned_modifiers (строка 788). Решение владельца
+  — см. выше.
+- Остальные 4 класса чисты: наружу нужен только PyQt6 (QObject, Qt,
+  QEvent/QApplication — лениво внутри eventFilter).
+
+1.3 modules/event_filters.py НЕ существовал — создан с нуля.
+
+1.4 КРИТИЧЕСКИЙ ГЕЙТ — ДУБЛИ
+Дублей не найдено, гейт формально пройден. В modules/ есть 4 метода
+eventFilter (chat_view_widget.py:1019, clipboard_manager_widget.py:518,
+help_system.py:212, term_picker_dialog.py:353), но все —
+виджет-специфичные фильтры с иным назначением (Enter/копирование в
+чате, жизненный цикл превью изображений, F1-справка, навигация по
+дереву терминов). Ни один не пересекается с назначением переносимых
+app-level фильтров.
+
+1.5 CALLSITES (callsites_before_batch3a.txt)
+- _CtrlReturnEventFilter(self): 8544 + installEventFilter 8545
+  (QApplication.instance()).
+- _GridArrowKeyEventFilter(self): 8553 + installEventFilter 8554
+  (QApplication.instance()).
+- _LoneCtrlEventFilter(self): 8660 + installEventFilter 8661
+  (QApplication.instance()).
+- _WheelGuard(scroll): 22297, по экземпляру на scroll-area настроек
+  (список _settings_wheel_guards), w.installEventFilter(guard) 22301
+  для каждого QSlider/QAbstractSpinBox/QComboBox.
+- _QuitEventFilter(self): 31323 + installEventFilter 31324
+  (QApplication.instance(), в _setup_tray_icon ДО проверки наличия
+  трея).
+- GridTableEventFilter: ноль вызовов.
+Явно подтверждено: ни один из 6 классов не вызывается как
+self.ИмяКласса(...) нигде в коде → делегаты не требуются, замена —
+только смена источника импорта.
+
+1.6 DYNAMIC_ENTRY_POINT / СТРОКОВЫЕ ССЫЛКИ
+getattr/hasattr/setattr по именам классов, QMetaObject.invokeMethod,
+строковые литералы с именами — 0 совпадений. В списке
+DYNAMIC_ENTRY_POINT (DEAD_CODE_REPORT.md) ни одно из 6 имён не
+числится (eventFilter упомянут только как общая категория Qt-override).
+
+1.7 ЛЕНИВЫЕ ИМПОРТЫ ВНУТРИ КЛАССОВ
+Есть, перенесены как есть: QEvent (×5 тел), QApplication (×3),
+QTextCursor (×2 в _GridArrowKeyEventFilter — остался в монолите
+вместе с классом).
+
+═══════════════════════════════════════════════════════════════
+ЭТАП 2 — ПЕРЕНОС
+═══════════════════════════════════════════════════════════════
+- Создан modules/event_filters.py: баннер + from PyQt6.QtCore import
+  QObject, Qt + 4 тела классов ВЕРБАТИМ из Supervertaler.py
+  (675–703, 925–944, 947–1038, 1041–1043).
+- Вербатим доказан машинно: построчное сравнение всех 4 тел с
+  исходными срезами монолита — ALL_VERBATIM (совпадение с точностью
+  до байт, без правок форматирования).
+- В Supervertaler.py добавлен импорт (строка 413, сразу после блока
+  modules.*):
+  from modules.event_filters import _QuitEventFilter, _WheelGuard, _LoneCtrlEventFilter, GridTableEventFilter
+- Из монолита удалены 4 определения перенесённых классов
+  (sed одним проходом, снизу вверх, без изменения остального текста).
+- Все места вызова и installEventFilter(...) остались текстуально
+  идентичными.
+
+═══════════════════════════════════════════════════════════════
+ЭТАП 3 — ВАЛИДАЦИЯ
+═══════════════════════════════════════════════════════════════
+1. py_compile Supervertaler.py + modules/event_filters.py — чисто.
+2. Метрики (counts_after_batch3a.txt): все 8 совпали точно
+   (1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2).
+3. Callsites (callsites_after_batch3a.txt): из монолита удалены ровно
+   4 определения классов (перенесённые _QuitEventFilter, _WheelGuard,
+   _LoneCtrlEventFilter, GridTableEventFilter); определения 2
+   оставшихся классов (_CtrlReturnEventFilter, _GridArrowKeyEventFilter)
+   из листинга выпадали только из-за диапазонного фильтра grep и
+   подтверждены отдельно через AST (676–725, 728–892). Добавлена
+   ровно одна строка — импорт; все места вызова текстуально
+   идентичны (сверка с нормализацией номеров строк).
+4. SHA256 (manifest_after_batch3a.txt): изменился только
+   Supervertaler.py; создан modules/event_filters.py; остальные
+   125 .py-файлов байт-в-байт идентичны базовой линии. Сверх
+   ожидаемых 2 файлов изменены 2 документа (.md) — по явному решению
+   владельца (EXTRACTION_PLAN.md, CODE_MAP_REFACTOR.md).
+5. ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ.
+   Автоматизированный прогон: offscreen PyQt6, реальные Qt-события —
+   РОВНО 12 СЦЕНАРИЕВ, ВСЕ PASS (12/12). Перечень — по одному пункту
+   на каждый программный assertion теста:
+   1)  _QuitEventFilter: QEvent.Quit → _really_quit=True, событие
+       НЕ поглощено ✅
+   2)  _QuitEventFilter: QEvent.Close → флаг НЕ ставится (крестик
+       окна не выходит) ✅
+   3)  _QuitEventFilter: поведение идентично при close-to-tray
+       вкл/выкл (фильтр реагирует только на Quit) ✅
+   4)  _WheelGuard: колесо над слайдером без фокуса — поглощено,
+       значение НЕ изменилось ✅
+   5)  _WheelGuard: колесо с явным фокусом — проходит, значение
+       меняется ✅
+   6)  _WheelGuard: колесо над combo-box без фокуса — поглощено ✅
+   7)  _LoneCtrlEventFilter: одиночный Ctrl → show_term_insert_popup,
+       release поглощён ✅
+   8)  _LoneCtrlEventFilter: Ctrl+C отменяет распознавание ✅
+   9)  _LoneCtrlEventFilter: Ctrl+колесо отменяет (зум работает) ✅
+   10) _LoneCtrlEventFilter: ShortcutOverride отменяет ✅
+   11) _LoneCtrlEventFilter: autorepeat Ctrl не срабатывает ✅
+   12) GridTableEventFilter: примесь-стаб, инстанцируется, тела нет ✅
+   Отдельно, НЕ в зачёт 12: _CtrlReturnEventFilter (Ctrl+Enter) и
+   _GridArrowKeyEventFilter (стрелки/пагинация) — классы ОСТАЛИСЬ в
+   монолите, вне сокращённого скоупа; их тела не тронуты, поэтому
+   событийные сценарии для них не прогонялись — поведение покрыто
+   smoke-тестом (инициализация фильтров + сквозной сценарий).
+6. Smoke-тест (реальный SupervertalerQt, offscreen, два отдельных
+   процесса, как в Batch #2):
+   - Процесс 1: окно поднялось; все 4 фильтра установлены (3 — при
+     инициализации окна, _QuitEventFilter — через _setup_tray_icon);
+     создан проект из 2 сегментов; правка target («Hallo welt») и
+     статуса (translated); сохранение .svproj — SAVE_OK.
+   - Процесс 2 (перезапуск): load_project → 2 сегмента,
+     «Hello world → Hallo welt» (translated), второй сегмент не тронут
+     — SMOKE_PROCESS2: OK.
+   - Полный GUI-сценарий «импорт DOCX → подтверждение → экспорт»
+     headless не прогонялся (требует интерактива); поведение
+     подтверждено 12 событийными сценариями + сохранение/загрузка.
+
+═══════════════════════════════════════════════════════════════
+ЭТАП 4 — ИТОГ
+═══════════════════════════════════════════════════════════════
+- Diff stat — дословный вывод `git show c7497d6 --stat`:
+    CODE_MAP_REFACTOR.md     |   6 +-
+    EXTRACTION_PLAN.md       |   5 ++
+    Supervertaler.py         | 153 +------------------------------------------
+    modules/event_filters.py | 167 +++++++++++++++++++++++++++++++++++++++++++++++
+    4 files changed, 176 insertions(+), 155 deletions(-)
+  Расшифровка numstat (сверка арифметики):
+    CODE_MAP_REFACTOR.md      3 +  /  3 -
+    EXTRACTION_PLAN.md        5 +  /  0 -
+    Supervertaler.py          1 +  /152 -   (1 вставка = строка импорта; 152 удаления = 4 тела классов)
+    modules/event_filters.py 167 +  /  0 -    (новый файл, wc -l = 167)
+    Итого: 176 вставок (3+5+1+167) / 155 удалений (3+0+152+0) — сходится.
+  Примечание: в первой версии отчёта было указано «event_filters.py
+  176 строк» — неверно, в файле 167 строк; цифра 176 — это суммарные
+  вставки коммита.
+- GO. Перенос механически точный (вербатим доказан построчно),
+  поведение подтверждено 12 сценариями на реальных Qt-событиях и
+  двухпроцессным smoke-тестом; метрики и callsites идентичны;
+  dead-код не помечался и не удалялся; DYNAMIC_ENTRY_POINT и
+  строковые ссылки — 0; один коммит: c7497d6.
+- Артефакты валидации: manifest_before_batch3a.txt,
+  manifest_after_batch3a.txt, baseline_counts_batch3a.txt,
+  counts_after_batch3a.txt, callsites_before_batch3a.txt,
+  callsites_after_batch3a.txt — в корне репозитория, теперь покрыты
+  .gitignore (коммит 740f440 владельца) и не попадают в коммиты.
+- Примечание к истории: после c7497d6 в репозитории появился коммит
+  владельца 740f440 (.gitignore); HEAD на момент финальной версии
+  отчёта = 740f440, коммит Batch #3a = c7497d6 = HEAD~1.
+
+СТОП-УСЛОВИЕ 3: жду подтверждения владельца перед Batch #3b
+(диалоги). Автоматически не продолжать.

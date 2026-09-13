@@ -1,0 +1,40 @@
+ОТЧЁТ: Batch #1 — Extract Comment/Segment/Project to modules/models.py
+Итог: GO. Коммит создан: Extract Comment/Segment/Project to modules/models.py (Batch #1, Step 1 of EXTRACTION_PLAN.md). Работа остановлена до вашего подтверждения перед Batch #2.
+
+Scope amendment (по вашему решению)
+Scope amendment: strip_invisible_markers (Supervertaler.py:1735–1767) добавлена в перенос как обнаруженная pre-flight зависимость Segment.from_dict; DEAD_CODE_REPORT/CODE_MAP не фиксировали её. EXTRACTION_PLAN.md Step 1 требует правки dependencies-поля постфактум (сейчас план ошибочно утверждает «Только stdlib (dataclasses, datetime)»).
+
+Перенесено 4 сущности: strip_invisible_markers > models.py:17, Comment > :53, Segment > :113, Project > :295. В монолите одна строка импорта (Supervertaler.py:373): from modules.models import Comment, Segment, Project, strip_invisible_markers. Тела перенесены вербатим — доказано побайтовым сравнением каждого блока с версией из git HEAD.
+
+Diff stat
+
+text
+Supervertaler.py  | 522 +-------  (?521 строк: 4 перенесённых блока; +1: строка импорта)
+modules/models.py | 543 +++  (новый)
+Git-diff доказал точность: multiset удалённых строк монолита байт-в-байт совпадает с 4 перенесёнными диапазонами (1735–1767, 1774–1831, 1937–2116, 2123–2372), единственная добавленная строка — импорт.
+
+Этап 1 — pre-flight результаты
+Границы (AST): Comment 1774–1831, Segment 1937–2116, Project 2123–2372, все — @dataclass. Методы: Comment 4 (__post_init__, is_anchored @property, to_dict, from_dict), Segment 9 ?, Project 3 ?. Расхождение «Comment ~6 vs 4» объяснимо: отчёт, видимо, считал автогенераты dataclass (__init__/__repr__/__eq__); скрытого контента нет — не блокировал (по вашему «не доверять цифрам дословно»).
+PyQt6 в диапазонах классов: отсутствует. Внешние имена тел: только stdlib + DEFAULT_STATUS (modules.statuses) + strip_invisible_markers + _uuid/hashlib (локальные импорты внутри методов — перенеслись как есть).
+Мутабельные class-level атрибуты: голых нет; comments/proofreading_notes — корректные field(default_factory=...). Чинить нечего.
+Сериализация: JSON json.dump(self.current_project.to_dict()) / json.load(f) + Project.from_dict(data); pickle не используется нигде (grep по монолиту и modules/) — риска нет: перенос вербатим не меняет формат.
+strip_invisible_markers: тело чисто-stdlib (только str.replace, без self/Qt/глобалов/замыканий); 1 определение (коллизий нет); 7 вызовов — все в монолите; в строках (getattr/hasattr/invokeMethod) и DYNAMIC_ENTRY_POINT не упоминается.
+Этап 3 — валидация (пункт за пунктом)
+py_compile Supervertaler.py + modules/models.py — чисто (и все 125 файлов репозитория).
+baseline_counts.txt vs counts_after.txt: все 8 метрик совпали точно — .connect( 1211, QShortcut( 18, create_shortcut 35, QTimer( 24, timeout.connect 24, singleShot 85, QMetaObject.invokeMethod 2.
+Callsites: 83 site'ов вызовов/ссылок до > 84 после; единственная структурная разница — перенесённые тела (определения теперь только в models.py: class Comment/Segment/Project, def strip_invisible_markers), все вызовы в монолите текстуально идентичны, строка импорта новая.
+SHA256 (125 .py): изменился ровно 1 файл (Supervertaler.py) + 1 новый (models.py); остальные 123 байт-в-байт совпадают с manifest_before.txt.
+Smoke-тест (реальный SupervertalerQt, QT offscreen, два отдельных процесса = закрытие/перезапуск; модальные диалоги авто-принимались тестовой обвязкой):
+создание нового проекта — пройдено
+импорт TXT (2 сегмента, import_simple_txt) — пройдено
+правка сегмента (target='Hola mundo.') + комментарий через Segment.add_comment — пройдено
+подтверждение сегмента (confirm_selected_segments) — пройдено
+сохранение .svproj — пройдено
+перезапуск > load_project > source/target/status='confirmed'/комментарий (текст+автор) на месте — пройдено
+Файловая регрессия .svproj: пользовательских .svproj на машине не нашлось (repo, user_data, %USERPROFILE%) — эталон сгенерирован старым кодом из git HEAD (эквивалент «сохранено до изменения»). Новый код открыл и пересохранил его: единственное расхождение — поле .modified проекта (обновляется при сохранении по дизайну); все сегменты, статусы, комментарии (включая created комментария) и снимки настроек идентичны. Это же покрыло п.7: файл, сохранённый до коммита, загружен уже изменённой версией кода.
+Примечание к инфраструктуре: на машине ни один интерпретатор не имел PyQt6 (запуск из источника был невозможен). Установил минимальный набор зависимостей (PyQt6, python-docx, lxml и др.) в E:\Dev\python-embed — вне репозитория. Тестовые скрипты и .svproj-фикстуры — в %TEMP%\sv_smoke\.
+
+GO/NO-GO: GO
+Перенос механически точный (вербатим доказан байтами), поведение идентично (счётчики, callsites, сериализация, файловая регрессия), изменены ровно 2 файла, недокументированная зависимость обработана по вашему решению и задокументирована. Единственное «пасхальное» наблюдение вне скоупа: сегмент при сохранении логируется как target='EMPTY' в отладочном логе — это поведение синхронизации сетки, существовавшее и до батча, не тронуто.
+
+«подтверждено на двух средах: PyQt6 6.11.0/Qt 6.11.0 (агент, smoke-тест) и PyQt6 6.11.0/Qt6 6.11.1 (пользователь, ручной прогон приложения)»

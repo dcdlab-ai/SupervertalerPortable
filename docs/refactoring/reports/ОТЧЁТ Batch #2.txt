@@ -1,0 +1,74 @@
+ОТЧЁТ: Batch #2 — Extract DOCX tag engine into modules/tag_manager.py
+Итог: GO. Коммит создан: "Extract DOCX tag engine into modules/tag_manager.py (Batch #2, Step 2 of EXTRACTION_PLAN.md)". Работа остановлена до вашего подтверждения перед Batch #3.
+
+═══════════════════════════════════════════════════════
+СТОП-УСЛОВИЕ ЭТАПА 1.4 И РЕШЕНИЕ ВЛАДЕЛЬЦА (ключевой пункт)
+═══════════════════════════════════════════════════════
+Этап 1.4 нашёл поведенческие РАСХОЖДЕНИЯ между парами «монолит ↔ tag_manager», помеченными в CODE_MAP_REFACTOR.md:1241 как legacy-дубли. Протоколом работа была остановлена; решение получено от владельца: ПОДТВЕРЖДЁН ВАРИАНТ 1 — перенос вербатим, callsites НЕ переключаются, грамматики НЕ унифицируются. Дополнительно владелец потребовал: (а) баннер-разделение блоков в tag_manager.py + обновлённый докстринг файла; (б) фиксацию техдолга в EXTRACTION_PLAN.md с конкретными расходящимися примерами. Оба выполнены.
+
+Расхождения (проверено на 9+11+8 тестовых входах):
+1) runs_to_tagged_text ↔ TagManager.runs_to_tagged_text: разные входы (python-docx Paragraph'ы vs List[FormattingRun]); bold+italic: монолит → "x <b><i>bi</i></b>", TagManager → "x <bi>bi</bi>"; пустой форматированный run: монолит пропускает, TagManager даёт "<b></b>after".
+2) tagged_text_to_runs ↔ TagManager.tagged_text_to_runs: одинаковая сигнатура; "<bi>combined</bi>": монолит → литерал '<bi>combined</bi>' (bold=False), TagManager → 'combined' (bold=True, italic=True); "<li>…</li>": монолит оставляет литералом, TagManager снимает. На текстах только с <b>/<i>/<u>/<sub>/<sup> (9 тестов, вкл. несбалансированные и пересекающиеся) — поведение идентично.
+3) strip_formatting_tags ↔ TagManager.strip_tags: идентичны на <b>/<i>/<u>/<sub>/<sup> (8 тестов); расходятся на <bi>/<li>.
+Наблюдение вне гейта: get_docx_language_code монолита vs docx_handler.py поведенчески РАЗНЫЕ ("english (uk)"→en-GB vs en-US; "flemish"→nl-BE vs en-US; "brazilian portuguese"→pt-BR vs en-US; "sr"→sr-RS vs en-US; "qq"→qq-QQ vs en-US — 5 из 17 входов); set_docx_language — идентичны на реальном Document (снимок w:lang для параграфов/таблиц/стиля Normal).
+Всё это зафиксировано в EXTRACTION_PLAN.md, раздел "TECH-DEBT: несовместимые грамматики тегов".
+
+═══════════════════════════════════════════════════════
+ЭТАП 1.3 — ИНВЕНТАРИЗАЦИЯ tag_manager.py И ТАБЛИЦА СТАТУСОВ
+═══════════════════════════════════════════════════════
+В tag_manager.py до переноса: dataclass FormattingRun (has_formatting, get_tag_name) + класс TagManager (TAG_PATTERN, tag_colors, extract_runs, runs_to_tagged_text, tagged_text_to_runs, validate_tags, count_tags, strip_tags, get_tag_color, format_for_display). Функций верхнего уровня не было.
+
+Статус всех 30 функций монолита (AST, фактический список; диапазон 495–1733):
+  уникальные (перенесены вербатим): runs_to_tagged_text*, tagged_text_to_runs*, strip_formatting_tags*, strip_outer_wrapping_tags, get_docx_language_code, set_docx_language, has_formatting_tags, apply_formatting_tags, get_formatted_html_display, extract_memoq_tags, extract_html_tags, compact_tags, protect_tags_from_linebreak, expand_compact_tags, extract_all_tags, autotag_extract_tags, strip_all_tags, _normalize_ws_for_compare, _normalize_for_word_compare, _reinsert_tags_into_target, _classify_tag, _tags_well_formed, validate_tag_transfer, place_tags_via_llm, count_pipe_symbols, get_next_pipe_count_needed, get_tag_pair, find_next_unused_tag, get_wrapping_tag_pair, get_html_wrapping_tag_pair.
+  * — имена совпадают с методами TagManager, но по решению владельца (расхождения выше) это НЕ дубли: сосуществуют как module-level функции рядом с классом.
+Вместе с функциями перенесены их модульные константы-зависимости: WORD_JOINER, _TAG_LINEBREAK_PROTECT_RE, _ALL_TAGS_PATTERN, _AUTOTAG_TAG_PATTERN, _WORD_COMPARE_FOLD. WORD_JOINER используется также монолитом (4408, 55804) — возвращён через импорт.
+
+Этап 2.2 (удаление дубля с переключением callsites) НЕ применялся ни к одной паре — подтверждённо-идентичных дублей не найдено (см. 1.4).
+
+═══════════════════════════════════════════════════════
+ЭТАПЫ 1.1/1.2/1.6/1.7 — pre-flight
+═══════════════════════════════════════════════════════
+1.1: фактический состав = 30 функций в диапазоне 495–1733 (заявленные «~30 функций, 494–1767»); список совпадает с перечисленным в скоупе + 3 не поименованных, но входящих в план («и др.»): protect_tags_from_linebreak, strip_all_tags, _normalize_for_word_compare. Имя get_docx_language фактически get_docx_language_code. Вложенные strip_all_tags×2 (внутри export-методов, 16097/16290 по HEAD) и strip_tags×3 (38750/38879/38960) — НЕ тронуты (LIVE_BUT_LEGACY.11 отложен).
+1.2: чистота подтверждена AST-анализом свободных переменных: PyQt6 нет; self нет (у 3 хелперов — только cls._INLINE_TAG_RE); свободные имена — только взаимные вызовы + 5 констант + локальные замыкания.
+1.6: getattr/hasattr/setattr/invokeMethod/строковые ссылки на все переносимые имена — 0; в DYNAMIC_ENTRY_POINT хелперы не входят. docx_handler импортирует из tag_manager только класс TagManager — не затронут; bare-import fallback docx_handler.py:21-24 не тронут (перенос его не ухудшил: tag_manager по-прежнему самодостаточен, stdlib+python-docx).
+1.7: ленивые импорты внутри тел (import re, import html, import unicodedata, from collections import Counter/defaultdict, from docx.oxml.ns import qn, from docx.oxml import OxmlElement, from modules import usage_log) перенесены как есть. place_tags_via_llm сохранила callback-паттерн (прямой зависимости от llm_clients нет).
+
+═══════════════════════════════════════════════════════
+ЭТАП 2 — ПЕРЕНОС (решение 1.5: делегаты)
+═══════════════════════════════════════════════════════
+Решение 1.5: оставлены тонкие делегаты в классе SupervertalerQt (по умолчанию протокола). Затрагивает 6 call sites (self._strip_inline_tags ×3, self._raw_to_visible_offset ×2, self._wysiwyg_runs_to_tagged_text ×1) плюс self._INLINE_TAG_RE на 15923 (HEAD). Причина: минимальный диаметр изменений, лёгкий откат.
+  - В tag_manager.py: 30 функций + 5 констант вербатим; хелперы — module-level функции _strip_inline_tags(text), _raw_to_visible_offset(raw_text, raw_off), _wysiwyg_runs_to_tagged_text(runs); модульная константа _INLINE_TAG_RE.
+    Одобренные трансформации тел (единственные отступления от вербатим): удалён параметр cls/декораторы; cls._INLINE_TAG_RE → _INLINE_TAG_RE.
+  - В монолите: блок 491–1733 удалён; добавлен импорт-блок (36 имён) + в классе: _INLINE_TAG_RE = _tag_manager._INLINE_TAG_RE (алиас для self._INLINE_TAG_RE на 15923) и 3 делегата с сохранением сигнатур (@classmethod/@staticmethod).
+Вербатим-доказательство: блок 495–1733 HEAD байт-в-байт присутствует в tag_manager.py; из 1070 удалённых из монолита непустых строк 1068 найдены байт-в-байт среди добавленных в tag_manager, оставшиеся 2 — строки cls._INLINE_TAG_RE, закономерно трансформированные (см. выше). Добавления монолита — ровно импорт-блок + делегаты.
+
+═══════════════════════════════════════════════════════
+ЭТАП 3 — ВАЛИДАЦИЯ
+═══════════════════════════════════════════════════════
+1. py_compile всех 126 .py — чисто.
+2. Counts (все 8 метрик, baseline_counts_batch2.txt vs counts_after_batch2.txt): ТОЧНОЕ СОВПАДЕНИЕ — .connect( 1211, QShortcut( 18, create_shortcut( 35, QTimer( 24, timeout.connect 24, QTimer.timeout 0, singleShot 85, QMetaObject.invokeMethod 2. (Примечание: в baseline Batch #1 метрика create_shortcut считалась с открывающей скобкой; воспроизведено.)
+3. Callsites: callsites_before vs callsites_after — мультимножество реальных мест использования ИДЕНТИЧНО по всем 35 именам (проверка по текстам строк). Ожидаемые отличия: +1 упоминание на имя (def в tag_manager + строка импорта), +3 докстринга делегатов, cls._INLINE_TAG_RE → _INLINE_TAG_RE в перенесённых телах (2 строки).
+4. SHA256 (manifest_before_batch2 vs manifest_after_batch2): изменились ровно 2 файла — Supervertaler.py и modules/tag_manager.py; 124 из 126 байт-в-байт совпадают. Вне манифеста (.py) дополнительно изменён EXTRACTION_PLAN.md — по вашему требованию (б), TECH-DEBT раздел.
+5. DOCX ROUND-TRIP (3 фикстуры: смешанный инлайн-формат в предложениях + sub/sup; таблица с форматированными ячейками; списки):
+   Путь: import_docx_from_path (Okapi sidecar v0.1.8, скачан pinned-релиз в %LOCALAPPDATA%\Supervertaler\okapi-sidecar) → target := source для всех сегментов (имитация «без правки») → export_target_only_docx (реальные методы окна, offscreen).
+   РЕЗУЛЬТАТ: run-уровень (текст+bold/italic/underline/sub/sup каждого run) исходного и экспортированного DOCX + число сегментов — ПОЛНОСТЬЮ ИДЕНТИЧНЫ между новым кодом и контрольной группой на git HEAD (worktree, те же фикстуры и драйвер) по всем 3 фикстурам. Сравнение с оригиналом: fixture1 5/5 параграфов точных, fixture3 5/5; fixture2 — 3/8 и на новом коде, и на HEAD (потеря bold/italic в ячейках таблицы при Okapi-merge — ПРЕДСЕСТВУЮЩЕЕ поведение sidecar-слияния, НЕ вводимое батчем; заголовки/списки/инлайн-формат круг проходят точно). Побайтовое отличие ZIP объясняется метаданными (временные метки), содержание run-структуры идентично.
+6. Smoke (реальный SupervertalerQt, offscreen, два отдельных процесса):
+   create: новый проект → import_simple_txt (2 сегмента) → правка target='Hola <b>mundo</b>.' → _refresh_grid_display_mode (дисплейный путь тегов) → confirm_selected_segments (status=confirmed) → save_project_as — ПРОЙДЕНО.
+   load (перезапуск): load_project → сегменты=2, target с тегами, статус, комментарий (текст+автор), модульные хелперы get_formatted_html_display/strip_formatting_tags/has_formatting_tags — ПРОЙДЕНО.
+
+═══════════════════════════════════════════════════════
+DIFF STAT
+═══════════════════════════════════════════════════════
+Supervertaler.py       | 1344 ± (−1298 нетто)
+modules/tag_manager.py | 1337 +
+EXTRACTION_PLAN.md     | 26 +
+3 files changed, 1409 insertions(+), 1298 deletions(-)
+
+═══════════════════════════════════════════════════════
+GO/NO-GO
+═══════════════════════════════════════════════════════
+GO. Перенос механически точный (вербатим доказан байтами; единственные отклонения — одобренные cls-трансформации и требуемые вами баннер/докстринг/TECH-DEBT), поведение идентично (счётчики, callsites, run-структура DOCX round-trip против контрольной группы на HEAD, smoke-тест с перезапуском), изменены ровно 2 .py-файла (+EXTRACTION_PLAN.md по вашему решению). Зависимость place_tags_via_llm от llm_clients не создана; bare-import docx_handler не ухудшен; DYNAMIC_ENTRY_POINT не затронуты; dead-код не помечался и не удалялся.
+
+Примечание к инфраструктуре: для round-trip потребовался Okapi sidecar (JAR v0.1.8 скачан в %LOCALAPPDATA%\Supervertaler\okapi-sidecar — штатное место поиска, вне репозитория). Замечание вне скоупа: при завершении offscreen-процессов Qt даёт segfault при teardown — тестовый артефакт, к батчу отношения не имеет.
+
+Работа остановлена до вашего подтверждения перед Batch #3.

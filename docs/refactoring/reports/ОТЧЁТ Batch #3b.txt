@@ -1,0 +1,199 @@
+ОТЧЁТ Batch #3b — Extract dialogs into modules/dialogs/ package
+=================================================================
+Дата: 2026-09-13. База: коммит 740f440 (HEAD на старте; история: c7497d6 = Batch #3a).
+Исполнитель: ZCode. Интерпретатор всех проверок: E:\Dev\python-embed\python.exe (AGENTS.md соблюдён;
+артефакты этапа — в D:\Temp\SupervertalerPortable\refactoring\batch-3b\run-001\).
+
+ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
+----------------------
+- Рабочая копия чистая (только untracked промт-файлы владельца). git log: 740f440 (HEAD),
+  перед ним c7497d6 (Batch #3a).
+- SHA256 всех 127 .py → manifest_before_batch3b.txt (рабочая копия на момент старта == HEAD).
+- py_compile всех .py — 0 ошибок.
+- baseline_counts_batch3b.txt (8 метрик, метод идентичен Batch #3a):
+  .connect( = 1211 | QShortcut( = 18 | create_shortcut( = 35 | QTimer( = 24 |
+  timeout.connect = 24 | QTimer.timeout = 0 | singleShot = 85 | QMetaObject.invokeMethod = 2
+
+ЭТАП 1 — PRE-FLIGHT
+-------------------
+1.1 ГРАНИЦЫ (AST, не по документу). Заявленные в промте/документах диапазоны
+    (7190–7786 и 8782–9091) УСТАРВШИ. Фактические границы всех 6 классов (top-level):
+      ThemeEditorDialog       5311–5521  (с баннером секции 5307–5310)
+      DetachedLogWindow       5528–5596  (с баннером 5524–5527)
+      AdvancedFiltersDialog   5612–5833
+      ScratchpadDialog        5836–5901
+      LiveProgressDialog      6903–7061
+      _ImportProgressDialog   7079–7206  (с баннером 7064–7078)
+    Состав скоупа подтверждён: ровно эти 6 имён существуют как top-level классы.
+    Подтверждена «особенность скоупа»: LiveProgressDialog и _ImportProgressDialog
+    физически перемежаются с воркерами. Соседи (НЕ тронуты):
+      TMSearchWorker 5908–6031, PreTranslationWorker 6034–6740,
+      ProofreadWorker 6743–6900, GlossaryExtractionWorker 7213–7284.
+    Граница ScratchpadDialog/первый воркер чистая: 5901 → (пустые) → 5908.
+    Между DetachedLogWindow и AdvancedFiltersDialog находится блок-алиас
+    TERM METADATA (5599–5609, TermMetadataDialog = _TermbaseEntryEditor) — не в скоупе,
+    остался в монолите нетронутым (проверено после переноса).
+
+1.2 ЧИСТОТА КЛАССОВ. __init__-сигнатуры (не менялись):
+      ThemeEditorDialog(parent, theme_manager); DetachedLogWindow(parent);
+      AdvancedFiltersDialog(parent=None); ScratchpadDialog(parent=None, notes_text="");
+      LiveProgressDialog(parent, total_segments, provider_info);
+      _ImportProgressDialog(parent, title="Importing", initial_label="Working…", initial_total=1).
+    Прямой зависимости от MainWindow ни у одного нет (подтверждено инвентаризацией
+    внешних имён AST): только parent/данные/PyQt. Особенности:
+      - _ImportProgressDialog — класс БЕЗ баз (обёртка-контекстный менеджер над QProgressDialog);
+      - DetachedLogWindow читает parent.windowIcon() и parent.session_log_text/session_log,
+        пишет в parent.detached_log_windows (duck-typing, как и было).
+
+1.3 modules/dialogs/ — не существовало (ни пакета, ни modules/dialogs.py). Подтверждено.
+
+1.4 ГЕЙТ ДУБЛЕЙ (по каждому из 6 отдельно):
+      ThemeEditorDialog      — дублей не найдено (в modules/theme_manager.py только данные/логика
+                               Theme/ThemeManager, которые диалог и использует — не UI-дубль).
+      DetachedLogWindow      — дублей не найдено (классов лог-окон в modules/ нет).
+      AdvancedFiltersDialog  — дублей не найдено.
+      ScratchpadDialog       — дублей не найдено.
+      LiveProgressDialog     — дублей не найдено (прогресс-диалогов в modules/ нет).
+      _ImportProgressDialog  — дублей не найдено.
+    Просмотрены все 26 dialog-классов modules/ — ни одного совпадения по имени/назначению.
+
+1.5 CALLSITES (до переноса; callsites_before_batch3b.txt):
+      ThemeEditorDialog       1:  SupervertalerQt.show_theme_editor (64032)
+      DetachedLogWindow       1:  SupervertalerQt.detach_log_window (13147)
+      AdvancedFiltersDialog   1:  SupervertalerQt.show_advanced_filters_dialog (55080)
+      ScratchpadDialog        1:  SupervertalerQt.show_scratchpad (64014)
+      LiveProgressDialog      2:  SupervertalerQt.autotag_segments_bulk (62475),
+                                  SupervertalerQt.translate_batch (63249)
+      _ImportProgressDialog  16:  SupervertalerQt._apply_pagination_to_grid (29868 — переиспользуется
+                                  как прогресс загрузки 200+ сегментов в грид) и import_* методы:
+                                  import_simple_txt, _import_multifile_project, import_memoq_bilingual,
+                                  import_memoq_rtf, import_memoq_xliff, import_po_file,
+                                  import_cafetran_bilingual, import_trados_bilingual,
+                                  import_sdlppx_package, import_standalone_sdlxliff,
+                                  import_sdlxliff_folder, import_phrase_bilingual,
+                                  import_dejavu_bilingual, import_review_table,
+                                  import_bilingual_markdown (подтверждено AST, не по предположению).
+    (17-я строка grep, 7084 — пример использования внутри docstring самого класса.)
+    Все 6 — top-level классы; делегаты не требовались. Решение по умолчанию применено:
+    modules/dialogs/__init__.py реэкспортирует 6 имён, монолит импортирует одной строкой,
+    callsite-ы конструкторов не менялись текстуально.
+
+1.6 DYNAMIC_ENTRY_POINT / строковые ссылки: 0 — ни getattr/hasattr/setattr, ни
+    QMetaObject.invokeMethod, ни globals()[...], ни упоминаний в DYNAMIC_ENTRY_POINT
+    по всем 6 именам.
+
+1.7 ЛЕНИВЫЕ ИМПОРТЫ внутри тел: только ThemeEditorDialog — QColorDialog (5431),
+    QInputDialog (5468), Theme (5478), ThemeManager (5506) — перенесены вербатим вместе
+    с телом. У остальных локальных импортов нет.
+
+ЭТАП 2 — ПЕРЕНОС
+----------------
+- Создан пакет modules/dialogs/ (не файл!): __init__.py, theme_editor.py, detached_log.py,
+  advanced_filters.py, scratchpad.py, live_progress.py, import_progress.py — один класс на файл.
+- Каждый класс перенесён ВЕРБАТИМ (блок «баннер+класс» вырезан из HEAD байт-в-байт,
+  sha256 эталонных блоков зафиксированы до правок). Доказательство: хвост каждого нового
+  файла побайтово равен эталонному блоку из HEAD (ALL_VERBATIM, проверено дважды —
+  после сборки и финально перед коммитом).
+- Шапки новых файлов (единственное новое содержимое): комментарий о механическом переносе
+  + явные импорты, эквивалентные дававшимся монолитом (PyQt6 QtWidgets/QtGui/QtCore,
+  modules.styled_widgets: CheckmarkCheckBox/CheckmarkRadioButton для AdvancedFiltersDialog,
+  contextlib.contextmanager и time). Подобраны полной инвентаризацией внешних имён AST
+  (первая версия шапок была неполной: QColor ошибочно в QtWidgets, пропущены
+  CheckmarkCheckBox/CheckmarkRadioButton/time/contextmanager — поймано импорт-тестом
+  и полной инвентаризацией, исправлено в шапках; тела не менялись).
+- Supervertaler.py: удалены ровно 6 блоков (878 строк: 215+73+222+66+159+143),
+  добавлена 1 строка импорта (после modules.event_filters, строка 414):
+    from modules.dialogs import (ThemeEditorDialog, DetachedLogWindow, AdvancedFiltersDialog,
+    ScratchpadDialog, LiveProgressDialog, _ImportProgressDialog)  # Диалоги (Batch #3b)
+- git diff монолита: 1 insertion / 878 deletions; единственная добавленная строка — импорт.
+- Тела 4 воркеров-соседей: НУЛЕВОЙ diff (AST-вырезка до/после побайтово идентична:
+  TMSearchWorker 5193 байт, PreTranslationWorker 37282, ProofreadWorker 7120,
+  GlossaryExtractionWorker 2614). Новые позиции: 5333–5456 / 5459–6165 / 6168–6325 / 6336–6407.
+
+ЭТАП 3 — ВАЛИДАЦИЯ
+------------------
+1. py_compile Supervertaler.py + 7 файлов modules/dialogs/ — чисто.
+2. Метрики 8/8 идентичны baseline (counts_after_batch3b.txt == baseline_counts_batch3b.txt):
+   1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2.
+3. Callsites: все 22 текстуально идентичны; сдвинуты только номера строк (минус 878 строк
+   выше по файлу). Единственное содержательное «расхождение» — docstring-пример
+   _ImportProgressDialog теперь физически в modules/dialogs/import_progress.py:28.
+4. SHA256: изменён ровно 1 файл (Supervertaler.py); добавлены ровно 7 (6 диалогов + __init__.py);
+   остальные 126 .py байт-идентичны манифесту до (manifest_diff3, «UNCHANGED: 126»).
+   Примечание: промежуточное сравнение «git show HEAD» vs рабочая копия ложного различия
+   modules/tag_manager.py (артефакт eol-конверсии git) — опровергнуто файл-к-файл сравнением
+   и git status (чисто).
+5. ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, QT_QPA_PLATFORM=offscreen, реальные методы;
+   модальные QDialog/QMessageBox/QColorDialog/QInputDialog подменены тест-харнессом):
+   ThemeEditorDialog (6): 1.1 pick_color меняет цвет темы; 1.2 Apply применяет тему;
+     1.3 Apply вызывает refresh_theme_colors родителя; 1.4 Save as Custom Theme;
+     1.5 кастомная тема в комбобоксе; 1.6 Delete Custom Theme. — 6/6 PASS
+   DetachedLogWindow (3): 2.1 копирует лог при создании; 2.2 closeEvent удаляет окно из
+     parent.detached_log_windows; 2.3 новые строки попадают в отсоединённое окно. — 3/3 PASS
+   AdvancedFiltersDialog (2): 3.1 get_filters возвращает настройки; 3.2 Reset сбрасывает. — 2/2 PASS
+   ScratchpadDialog (2): 4.1 ввод и get_notes; 4.2 текст восстановлен при переоткрытии. — 2/2 PASS
+   LiveProgressDialog (4): 5.1 update_progress двигает прогресс-бар; 5.2 счётчики success/error;
+     5.3 add_console_line; 5.4 show_completion_message. — 4/4 PASS
+   _ImportProgressDialog (4): 6.1 update → continue=True; 6.2 parse_callback/grid_callback;
+     6.3 вход/выход context manager; 6.4 cancelled() после выхода. — 4/4 PASS
+   Итого виджет-уровень: 21/21 PASS.
+   Монолит-уровень (реальный SupervertalerQt, offscreen): 3/3 PASS —
+     (1) detach_log_window(): окно создано, w.log("LINE-AFTER-DETACH-123") попадает в него;
+     (2) смена темы + refresh_theme_colors(): цвет сегмента грида реально перекрасился
+         (#000000 → #e0e0e0) — путь Apply из ThemeEditorDialog;
+     (3) apply_advanced_filters(): confirmed-фильтр скрывает draft-строку, сброс возвращает.
+   Сквозной импорт через _ImportProgressDialog (реальный entry point import_simple_txt,
+   файловый диалог подменён): 3 сегмента импортированы из тестового TXT — PASS.
+   (LiveProgressDialog в реальной операции headless не прогонялся — оба call site требуют
+   LLM-провайдера; диалог проверен виджет-уровнем 4/4, call site-ы текстуально не менялись.)
+6. Smoke-тест (2 процесса, offscreen, как в Batch #2/#3a):
+   Процесс 1: SupervertalerQt поднялся; проект 2 сегмента; правка target «Hallo welt»
+     + статус translated; save_project_to_file(.svproj) — SMOKE_PROCESS1: SAVE_OK.
+   Процесс 2 (перезапуск): load_project → 2 сегмента, «Hello world → Hallo welt»
+     (translated), второй сегмент не тронут — SMOKE_PROCESS2: OK.
+
+ЭТАП 4 — ДИАГНОСТИКА ПО ХОДУ РАБОТЫ (для прозрачности)
+------------------------------------------------------
+- Три прогона монолит-сценариев «зависали» — классические артефакты headless-тестов,
+  НЕ регрессии переноса: new_project() и диалог настроек import_simple_txt() — модальные
+  QDialog.exec(), блокирующие offscreen навсегда (диагноз — faulthandler-дамп стека:
+  Supervertaler.py:34277 dialog.exec()). Решение — программное создание проекта и
+  авто-принятие QDialog.exec() в тест-харнессе. Осиротевший sidecar-java после os._exit()
+  гипотетически держал порт — опровергнуто (зависание повторялось после его остановки).
+
+ЭТАП 4 — ИТОГ
+-------------
+- Diff stat — дословный вывод `git diff --stat`:
+    CODE_MAP_REFACTOR.md  |  18 +-
+    EXTRACTION_PLAN.md    |   5 +-
+    Supervertaler.py      | 879 +--------------------------------------------------
+    3 files changed, 14 insertions(+), 888 deletions(-)
+  numstat: CODE_MAP_REFACTOR.md 9+/9-, EXTRACTION_PLAN.md 4+/1-, Supervertaler.py 1+/878-.
+  Новый пакет modules/dialogs/ (untracked до коммита): 939 строк суммарно
+  (__init__ 18, theme_editor 222, detached_log 79, advanced_filters 229, scratchpad 72,
+  live_progress 168, import_progress 151; из них 878 = вербатим-тела, остальное — шапки).
+- Callsites diff: 22/22 текстуально идентичны (см. 3.3).
+- Counts diff: 8/8 метрик идентичны.
+- SHA256 diff: изменён 1 (Supervertaler.py) + добавлено 7 (пакет); 126 без изменений;
+  нулевой diff тел 4 воркеров подтверждён отдельно.
+- Чеклист функциональных сценариев: 21/21 (виджет-уровень) + 3/3 (монолит-уровень) +
+  импорт e2e PASS + smoke 2 процесса PASS.
+- ЗАПРЕТЫ соблюдены: переименований нет, сигнатуры конструкторов не менялись,
+  call site-ы install/конструкторов не менялись, DYNAMIC_ENTRY_POINT не тронут,
+  dead-код не помечался и не удалялся, workers не тронуты, modules/dialogs/ — пакет,
+  один шаг = один коммит.
+- Валидация документации: CODE_MAP_REFACTOR.md (§3 таблица диапазонов, §12.1, §13.2)
+  и EXTRACTION_PLAN.md (статус Step 3 после Batch #3b; фактические диапазоны воркеров
+  для Step 4) обновлены с пометками об устаревших числах.
+- Артефакты валидации: D:\Temp\SupervertalerPortable\refactoring\batch-3b\run-001\
+  (manifest_before/after_batch3b.txt, baseline_counts_batch3b.txt,
+  counts_after_batch3b.txt, callsites_before/after_batch3b.txt, refblocks/ — эталонные
+  блоки и sha256, сценарии и их выводы).
+
+ГО/НО-ГО: GO.
+Перенос механически точный (вербатим доказан побайтово по 6 файлам), поведение
+подтверждено 24 функциональными проверками + сквозным импортом + двухпроцессным
+smoke-тестом; метрики и callsites идентичны; тела соседних воркеров — нулевой diff;
+запреты соблюдены. Один коммит:
+  "Extract dialogs into modules/dialogs/ package (Batch #3b, Step 3 of EXTRACTION_PLAN.md)"
+СТОП: после коммита жду подтверждения владельца перед Batch #3c (чекбоксы).

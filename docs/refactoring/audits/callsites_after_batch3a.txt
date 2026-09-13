@@ -1,0 +1,28 @@
+modules/event_filters.py:5:# Step 3 of EXTRACTION_PLAN.md): _QuitEventFilter (Supervertaler.py:675),
+modules/event_filters.py:6:# _WheelGuard (925), _LoneCtrlEventFilter (947), GridTableEventFilter (1041).
+modules/event_filters.py:10:# _CtrlReturnEventFilter и _GridArrowKeyEventFilter перенесены НЕ были
+modules/event_filters.py:18:class _QuitEventFilter(QObject):
+modules/event_filters.py:49:class _WheelGuard(QObject):
+modules/event_filters.py:71:class _LoneCtrlEventFilter(QObject):
+modules/event_filters.py:165:class GridTableEventFilter:
+Supervertaler.py:413:from modules.event_filters import _QuitEventFilter, _WheelGuard, _LoneCtrlEventFilter, GridTableEventFilter  # Qt event-фильтры (Batch #3a)
+Supervertaler.py:4976:    двойные щелчки перехватываются через installEventFilter на viewport."""
+Supervertaler.py:8286:        # Ctrl+Up/Down - Segment navigation is handled by _GridArrowKeyEventFilter
+Supervertaler.py:8375:        # Handled by _GridArrowKeyEventFilter (QTableWidget eats vertical arrow keys
+Supervertaler.py:8393:            self._ctrl_return_event_filter = _CtrlReturnEventFilter(self)
+Supervertaler.py:8394:            QApplication.instance().installEventFilter(self._ctrl_return_event_filter)
+Supervertaler.py:8402:            self._grid_arrow_key_event_filter = _GridArrowKeyEventFilter(self)
+Supervertaler.py:8403:            QApplication.instance().installEventFilter(self._grid_arrow_key_event_filter)
+Supervertaler.py:8465:        # Handled by _GridArrowKeyEventFilter (QTableWidget eats vertical arrow keys
+Supervertaler.py:8509:            self._lone_ctrl_event_filter = _LoneCtrlEventFilter(self)
+Supervertaler.py:8510:            QApplication.instance().installEventFilter(self._lone_ctrl_event_filter)
+Supervertaler.py:22107:                   предназначенные области прокрутки. См. ``_WheelGuard``.
+Supervertaler.py:22146:        guard = _WheelGuard(scroll)
+Supervertaler.py:22150:                w.installEventFilter(guard)
+Supervertaler.py:31172:            self._quit_event_filter = _QuitEventFilter(self)
+Supervertaler.py:31173:            QApplication.instance().installEventFilter(self._quit_event_filter)
+Supervertaler.py:45079:            badge.installEventFilter(self)
+Supervertaler.py:45087:                lock_lbl.installEventFilter(self)
+Supervertaler.py:45112:        status_label.installEventFilter(self)
+Supervertaler.py:45139:            match_label.installEventFilter(self)
+Supervertaler.py:45148:            short_lbl.installEventFilter(self)
