@@ -149,6 +149,46 @@ Validated in Batches #2, #3a, #3b — keep doing this:
   too, not only unresolvable ones — this is how the `CheckmarkCheckBox`,
   `contextmanager`, `time` header dependencies were nearly missed in Batch #3b.
 
+### Behavioral comparison of duplicate/merged implementations (Batch #3c)
+When a batch merges classes into an existing module (or the plan claims code is
+a "duplicate"), prove the behavioral claim before merging:
+* Static: `ast.dump()` both method bodies (docstrings/control-flow shape may
+  differ textually while rendering stays identical) and diff the final
+  stylesheet strings char-by-char — in #3c the difference was exactly 4 hex
+  substitutions.
+* Dynamic: offscreen pixel comparison of `widget.grab().toImage()` renders,
+  pixel-by-pixel over scenarios (unchecked / checked / checked+resize /
+  disabled+checked), saving PNG evidence per scenario per state.
+* A pixel-level FAIL may be a test-harness bug, not a code difference — in #3c
+  the base widget was compared without applying the counterpart's stylesheet.
+  Before diagnosing a regression, verify the harness actually tests what its
+  label claims (an "expected equal" check that prints FAIL with equal-length
+  strings usually means the wrong objects are compared).
+* The reusable scripts live in `tools/batch_validation/` (see its README):
+  `render_compare.py` (pixel gate), `probe.py` (full-app snapshot),
+  `smoke.py` (2-process save/load), `manifest.py`/`counts.py` (baseline).
+* Every numeric claim in the Этап 4 report must be reproduced from a
+  measurement command (`wc -l` before/after), not carried from memory —
+  in #3c the report initially claimed "−313 lines" while the real net was
+  −310 (311-line block deleted, import line grew from 1 to 2 lines).
+
+### Full-app before/after probes and user-data isolation
+* To compare live-app behavior DO/POS, `git worktree add <stage>/head-wt HEAD`
+  and run the same probe script in both trees; compare JSON snapshots
+  (per class: `findChildren`, count, text, checked/enabled, size,
+  sha256 of `styleSheet()`). Expect the only diff to be `class_module`.
+* User data does NOT follow cwd: `get_user_data_path()` resolves from the
+  global `~/.supervertaler_config.json` (in #3c a worktree probe resolved to
+  the production `D:\_old\Supervertaler-Portable\Supervertaler`). Read-only
+  probes are therefore safe anywhere, but smoke tests WRITE to that shared
+  location (project saves, versioned backups) from any tree — keep probes
+  read-only, and remember smoke artifacts land in the production user data.
+* Widgets created inside modal dialogs never appear at startup. Cover them by
+  monkeypatching `QDialog.exec` with a stub that snapshots
+  `dialog.findChildren(...)` and returns `QDialog.DialogCode.Rejected`, then
+  call the dialog-opening method directly (used in #3c for
+  `_show_create_termbase_dialog`).
+
 ### Exceptions
 The rules in this section may be overridden only when:
 * the task explicitly requires another environment;

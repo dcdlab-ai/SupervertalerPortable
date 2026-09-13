@@ -144,7 +144,7 @@ revert.
 ### Goal
 Вынести воркеров без зависимости от MainWindow.
 ### Source
-`Supervertaler.py` (после Batch #3b, фактические границы по AST): TMSearchWorker 5333–5456, ProofreadWorker 6168–6325, GlossaryExtractionWorker 6336–6407 (в документе ранее были ошибочные 7787–7912 / 8622–8779 / 9092–9169; PreTranslationWorker 5459–6165 — НЕ переносится, см. Step 13).
+`Supervertaler.py` (после Batch #3c, фактические границы по AST; сдвиг +1 относительно post-3b из-за второй строки импорта styled_widgets): TMSearchWorker 5334–5457, ProofreadWorker 6169–6326, GlossaryExtractionWorker 6337–6408 (в документе ранее были ошибочные 7787–7912 / 8622–8779 / 9092–9169; PreTranslationWorker 5460–6166 — НЕ переносится, см. Step 13).
 ### Destination
 `modules/workers/` (`tm_search.py`, `proofread.py`, `glossary.py`).
 ### Objects to move
@@ -156,7 +156,7 @@ revert.
 ### Dependencies
 Только аргументы + pyqtSignal. ВНИМАНИЕ: `ProofreadWorker.cancel` и `TMSearchWorker.cancel` идентичны — не дублировать, оставить по классу.
 ### Required import changes
-Монолит: импорт воркеров; места запуска (21929, 51294, 66378) и замыкания-обработчики остаются в монолите на этом шаге.
+Монолит: импорт воркеров; места создания/запуска (фактические после Batch #3c: GlossaryExtractionWorker 19152/19159, ProofreadWorker 48517/48601, TMSearchWorker 63579/63594) и замыкания-обработчики остаются в монолите на этом шаге.
 ### Circular dependency risks
 Нет. (PreTranslationWorker НЕ переносится — см. Step 13.)
 ### Risk
