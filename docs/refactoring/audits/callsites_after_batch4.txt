@@ -1,0 +1,17 @@
+Supervertaler.py: from modules.workers import (TMSearchWorker, ProofreadWorker, GlossaryExtractionWorker)  # QThread-воркеры (Batch #4)
+Supervertaler.py: worker = GlossaryExtractionWorker(client, prompt)
+Supervertaler.py: через TMSearchWorker."""
+Supervertaler.py: # in on-demand via TMSearchWorker on navigation.
+Supervertaler.py: worker = ProofreadWorker(
+Supervertaler.py: self._tm_search_worker = TMSearchWorker(
+Supervertaler.py: TMSearchWorker.
+modules/workers/glossary.py: # modules.workers.glossary - GlossaryExtractionWorker QThread worker, extracted verbatim from Supervertaler.py
+modules/workers/glossary.py: class GlossaryExtractionWorker(QThread):
+modules/workers/proofread.py: # modules.workers.proofread - ProofreadWorker QThread worker, extracted verbatim from Supervertaler.py
+modules/workers/proofread.py: class ProofreadWorker(QThread):
+modules/workers/tm_search.py: # modules.workers.tm_search - TMSearchWorker QThread worker, extracted verbatim from Supervertaler.py
+modules/workers/tm_search.py: class TMSearchWorker(QThread):
+modules/workers/__init__.py: from .tm_search import TMSearchWorker
+modules/workers/__init__.py: from .proofread import ProofreadWorker
+modules/workers/__init__.py: from .glossary import GlossaryExtractionWorker
+modules/workers/__init__.py: __all__ = ["TMSearchWorker", "ProofreadWorker", "GlossaryExtractionWorker"]

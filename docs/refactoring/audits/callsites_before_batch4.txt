@@ -1,0 +1,9 @@
+Supervertaler.py: class TMSearchWorker(QThread):
+Supervertaler.py: class ProofreadWorker(QThread):
+Supervertaler.py: class GlossaryExtractionWorker(QThread):
+Supervertaler.py: worker = GlossaryExtractionWorker(client, prompt)
+Supervertaler.py: через TMSearchWorker."""
+Supervertaler.py: # in on-demand via TMSearchWorker on navigation.
+Supervertaler.py: worker = ProofreadWorker(
+Supervertaler.py: self._tm_search_worker = TMSearchWorker(
+Supervertaler.py: TMSearchWorker.

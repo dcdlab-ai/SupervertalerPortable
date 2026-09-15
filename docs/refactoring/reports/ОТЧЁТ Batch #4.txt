@@ -1,0 +1,260 @@
+ОТЧЁТ Batch #4 — Extract QThread workers into modules/workers/
+(Step 4 of EXTRACTION_PLAN.md)
+Дата: 2026-09-15. Исполнитель: Cline (ACTIVE REFACTOR с pre-flight).
+Коммит: «Extract QThread workers into modules/workers/ (Batch #4, Step 4 of EXTRACTION_PLAN.md)»
+
+════════════════════════════════════════════════════════════════
+ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
+════════════════════════════════════════════════════════════════
+- Рабочая копия чистая (только untracked: сам файл промпта Batch #4 и посторонний
+  3444.txt в корне — файл с учётными данными, к батчу не относится, в коммит НЕ
+  включён; владельцу рекомендуется убрать его из каталога репозитория).
+- Предпосылка выполнена: отдельный коммит a9d2a52 «Close manual-validation items
+  #1-#7 in VALIDATION_BACKLOG; add out-of-scope finding #8» сделан ДО батча;
+  VALIDATION_BACKLOG.md в diff Batch #4 не входит.
+- SHA256-манифест: 142 .py-файла → docs/refactoring/audits/manifest_before_batch4.txt.
+- py_compile всех 142 .py — 0 ошибок.
+- baseline_counts_batch4.txt (8 метрик, те же команды до/после):
+  .connect( = 1211; QShortcut( = 18; create_shortcut( = 35; QTimer( = 24;
+  timeout.connect = 24; QTimer.timeout = 0; singleShot = 87;
+  QMetaObject.invokeMethod = 2.
+
+════════════════════════════════════════════════════════════════
+ЭТАП 1 — PRE-FLIGHT
+════════════════════════════════════════════════════════════════
+1.1 ГРАНИЦЫ (AST, ast.parse/lineno/end_lineno — не по документированным числам):
+  TMSearchWorker           5334–5457 (124 строки) — совпадает с заявленным
+  PreTranslationWorker     5460–6166 (707 строк) — совпадает с заявленным
+  ProofreadWorker          6169–6326 (158 строк) — совпадает с заявленным
+  GlossaryExtractionWorker 6337–6408 (72 строки)  — совпадает с заявленным
+  PreTranslationWorker изолирован чисто: между end_lineno TMSearchWorker (5457)
+  и lineno PreTranslationWorker (5460) — только 2 пустые строки; между
+  end_lineno PreTranslationWorker (6166) и lineno ProofreadWorker (6169) —
+  только 2 пустые строки. Ни декораторов (0 у всех четырёх), ни комментариев
+  в этих зазорах.
+  Находка вне зазоров PTW: баннер «# WORKER ИЗВЛЕЧЕНИЯ AI-ГЛОССАРИЯ»
+  (6333–6335) — class-level комментарий, логически принадлежащий
+  GlossaryExtractionWorker; перенесён ВМЕСТЕ с классом в glossary.py.
+  Баннер 5330–5332 «# WORKER ПАКЕТНОГО ПЕРЕВОДА И ДИАЛОГ ПРОГРЕССА» описывает
+  PreTranslationWorker и остался на месте (после удаления TMSearchWorker он
+  теперь находится непосредственно над PreTranslationWorker, как и задумано).
+
+1.2 ЧИСТОТА КЛАССОВ / ИНТЕРФЕЙС:
+  - TMSearchWorker.__init__(self, db_path: str, source_text: str, segment_id: int,
+    tm_ids: list = None, source_lang: str = None, target_lang: str = None,
+    fuzzy_threshold: float = 0.75, max_matches: int = 10, tm_metadata: dict = None)
+    — только примитивы.
+  - ProofreadWorker.__init__(self, segments_to_check, provider, model,
+    custom_prompt, api_keys, source_lang, target_lang, base_url=None,
+    custom_api_key=None, http_proxy=None) — только примитивы.
+  - GlossaryExtractionWorker.__init__(self, client, prompt: str) — только примитивы.
+  - Подтверждено фактически (AST-walk всех трёх тел): НОЛЬ обращений к
+    parent_app / main_window (ни атрибутов, ни голых имён). Именно это отличает
+    их от PreTranslationWorker и оправдывает перенос в этом батче.
+
+1.3 modules/workers/ НЕ существовал до батча (проверено). Создан новый пакет.
+
+1.4 ГЕЙТ «ДУБЛЕЙ»:
+  Дублей вне батча НЕ НАЙДЕНО, гейт формально пройден. Просмотрены все
+  QThread-наследники в modules/ (ModelDownloadWorker, ConnectionTestWorker,
+  MTFetchWorker, StatisticsWorker, TMXImportThread, TMCleanupThread,
+  _AutoPromptWorker, RecordingThread, TranscriptionThread, QuickDictationThread,
+  _VADListenerThread, _ListenerThread) — ни один не делает нечёткий TM-поиск,
+  AI-вычитку или извлечение AI-глоссария; совпадений по имени/назначению нет.
+  ОТДЕЛЬНОЕ подтверждение по cancel(): тела TMSearchWorker.cancel и
+  ProofreadWorker.cancel ТЕКСТОВО ИДЕНТИЧНЫ
+      def cancel(self):
+          self._cancelled = True
+  Оба перенесены КАК РАЗДЕЛЬНЫЕ методы в раздельных классах, без вынесения
+  базового класса/миксина/delegate — по решению владельца (EXTRACTION_PLAN.md
+  §Step 4), не пересматривалось.
+
+1.5 CALLSITES (callsites_before_batch4.txt / callsites_after_batch4.txt):
+  - Создание воркеров (по одному на операцию, инстанцирования вида
+    self.ИмяКласса(...) нигде нет — подтверждено):
+      GlossaryExtractionWorker — Supervertaler.py:19152
+        (worker.finished_ok.connect 19153, worker.failed.connect 19154,
+         worker.start() 19159, ссылка в worker_holder['worker'])
+      ProofreadWorker — Supervertaler.py:48517 (конструктор 48517–48528,
+        self._proofread_worker = worker 48531, worker.cancel() 48535,
+        connects 48595–48598, worker.start() 48601)
+      TMSearchWorker — Supervertaler.py:63579 (hasattr/cancel/wait 63574–63576,
+        connects 63592–63593, start 63594)
+  - Прочие упоминания имён: docstring 32322, комментарий 32352, docstring
+    63618 — только текст, не вызовы.
+  - QMetaObject.invokeMethod (68827, 68841) — pynput-хоткеи, к трём классам не
+    относятся. Строковых ссылок на имена классов ("TMSearchWorker" и т.п.) — 0.
+
+1.6 DYNAMIC_ENTRY_POINT / строковые ссылки: в списке DYNAMIC_ENTRY_POINT
+  (DEAD_CODE_REPORT.md) три класса не фигурируют; getattr/hasattr/setattr по
+  именам классов — нет (единственный hasattr в 63574 — по self._tm_search_worker,
+  атрибут экземпляра, не класс).
+
+1.7 ЛЕНИВЫЕ ИМПОРТЫ внутри тел классов (перенесены как есть, без изменений):
+  TMSearchWorker: import sqlite3; from modules.database_manager import
+  DatabaseManager; import traceback.
+  ProofreadWorker: import re; from modules.llm_clients import LLMClient.
+  GlossaryExtractionWorker: import json; import re as _re.
+  Внешние имена всех трёх классов (AST-скан Load-имён): только QThread и
+  pyqtSignal — оба разрешаются верхнеуровневым импортом в новых файлах
+  (from PyQt6.QtCore import QThread, pyqtSignal). Неразрешённых имён: 0.
+
+1.8 СНИМОК PreTranslationWorker снят по AST-границам 5460–6166 →
+  pretranslation_worker_before_batch4.txt, SHA256
+  e4d3abfe2aa0e70255ae8fba34b8891c112707c110282bb33cbcd43ce274ac5e (39 946 байт).
+  Примечание к методике: первый вариант инструмента снимка считал смещение в
+  символах, а применял его как байтовое (кириллица давала сдвиг); дефект
+  обнаружен по несовпадению SHA256 с контрольным снимком из git HEAD и
+  исправлен (срез по списку строк). Все проверки ниже выполнены исправленным
+  методом; на перенос дефект не повлиял.
+
+════════════════════════════════════════════════════════════════
+ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════
+- Создан пакет modules/workers/: __init__.py (реэкспорт по образцу
+  modules/dialogs/__init__.py), tm_search.py, proofread.py, glossary.py —
+  строго один класс на файл.
+- Тела трёх классов перенесены ВЕРБАТИМ (побайтовое сравнение каждого файла с
+  снимками из git HEAD: PASS по всем трём; в glossary.py — вместе с баннером
+  6333–6335, см. 1.1).
+- В Supervertaler.py добавлен импорт сразу после строки modules.dialogs
+  (строка 415):
+    from modules.workers import (TMSearchWorker, ProofreadWorker,
+    GlossaryExtractionWorker)  # QThread-воркеры (Batch #4)
+- Удалены оригинальные определения трёх классов: строки 5334–5457
+  (TMSearchWorker) и 6169–6410 (ProofreadWorker + пустые строки + баннер
+  глоссария + GlossaryExtractionWorker + 2 хвостовые пустые строки), всего
+  366 строк (242 + 124).
+- PreTranslationWorker НЕ ТРОНУТ: ни одной его строки, ни окружающих пустых
+  строк 5458–5459/6167–6168, ни баннера 5330–5332.
+- Немедленно после удаления сняты новые AST-границы PreTranslationWorker:
+  5337–6043 (сдвиг ровно на 123 = −124 удалённые строки +1 строка импорта) и
+  блок сверен байт-в-байт со снимком 1.8 — полное совпадение (см. Этап 3.5).
+- Все конструкторы/.start()/.cancel()/.connect(...) на три класса в остальном
+  коде монолита остались текстуально идентичными — меняется только источник
+  импорта (подтверждено multiset-сравнением callsites, см. Этап 3.3).
+
+════════════════════════════════════════════════════════════════
+ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════
+3.1 py_compile: 146 .py-файлов (142 + 4 новых) — 0 ошибок.
+
+3.2 Counts diff (8 метрик, идентичные команды до/после) — ВСЕ СОВПАЛИ ТОЧНО:
+  .connect(               1211 → 1211
+  QShortcut(                18 → 18
+  create_shortcut(          35 → 35
+  QTimer(                   24 → 24
+  timeout.connect           24 → 24
+  QTimer.timeout             0 → 0
+  singleShot                87 → 87
+  QMetaObject.invokeMethod   2 → 2
+
+3.3 Callsites diff (before/after): набор мест вызова идентичен по содержимому.
+  Мультимножество строк-упоминаний до (9 в монолите: 3 определения классов,
+  3 докстринг-упоминания, 3 места создания/запуска) vs после: те же 6 строк
+  использования/докстрингов в монолите байт-в-байт, 3 определения классов
+  теперь в modules/workers/{tm_search,proofread,glossary}.py. Ожидаемые
+  новые строки: 1 импорт в монолите + 3 импорта в __init__.py + 3 заголовка
+  новых файлов + __all__. Сдвиг номеров строк вызовов после переноса (для всех
+  трёх одинаковый, −365 = −366 удалённых строк + 1 строка импорта):
+  GlossaryExtractionWorker 19152 → 18787, ProofreadWorker 48517 → 48152,
+  TMSearchWorker 63579 → 63214.
+
+3.4 SHA256 diff: изменился ровно 1 файл — Supervertaler.py (1 вставка, 366
+  удалений по git diff --stat); добавлены ровно 4 новых файла
+  modules/workers/{__init__,tm_search,proofread,glossary}.py; остальные 141
+  файл из manifest_before_batch4.txt — байт-в-байт без изменений (проверено
+  сравнением манифестов; unexpected changes: нет).
+
+3.5 PreTranslationWorker BYTE-IDENTITY CHECK:
+  SHA256 до:  e4d3abfe2aa0e70255ae8fba34b8891c112707c110282bb33cbcd43ce274ac5e
+  SHA256 после: e4d3abfe2aa0e70255ae8fba34b8891c112707c110282bb33cbcd43ce274ac5e
+  РЕЗУЛЬТАТ: PASS (границы 5460–6166 → 5337–6043, содержимое идентично байт-в-байт;
+  перепроверено повторно непосредственно перед коммитом).
+
+3.6 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, реальные QThread-потоки; скрипт и лог —
+  D:\Temp\SupervertalerPortable\refactoring\batch4\run-001\):
+  - TMSearchWorker — точное совпадение по реальной тестовой TM-базе
+    (sqlite, схема translation_units): results_ready(1, [similarity 1.0,
+    match_pct 100, target «Hallo wereld», tm_name «Test TM»]) — PASS
+  - TMSearchWorker.cancel() на середине (cancel до start): ни одного сигнала,
+    без краша — PASS
+  - TMSearchWorker, битая БД: search_failed(segment_id, «DatabaseError: …»),
+    без краша — PASS (проверен путь «поиск не молчит»)
+  - ProofreadWorker.cancel() на середине (cancel до start, 2 сегмента):
+    finished_proofreading(0, 0, 0), без краша — PASS
+  - ProofreadWorker, путь ошибки (невалидный ключ): batch_error + финальный
+    finished_proofreading, без краша — PASS
+  - GlossaryExtractionWorker, извлечение терминов (stub-клиент LLM, ответ с
+    ```json-забором): finished_ok со списком пар, whitespace-нормализация и
+    парсинг забора работают, client.translate(...) вызван с skip_cleaning=True
+    — PASS
+  - GlossaryExtractionWorker, ответ без пар: failed(«The AI returned no usable
+    term pairs.», raw) — PASS
+  Итого: 7/7 PASS.
+  - PreTranslationWorker (не переносился, но лежал между переносимыми):
+    повреждение по соседству исключено байт-identity (3.5) + полный подъём
+    живого приложения (см. ниже); end-to-end сценарий пакетного перевода —
+    см. «Непокрытые проверки».
+
+3.7 ПОЛНОЭКРАННАЯ СРАВНИТЕЛЬНАЯ ПРОБА ЖИВОГО ПРИЛОЖЕНИЯ (tools/batch_validation/
+  probe_app.py, offscreen, read-only; до — из git-worktree HEAD a9d2a52, после —
+  рабочее дерево): JSON-снимки (окно «Supervertaler Workbench v1.10.371»,
+  инстансы чекбоксов/радио с текстом/состоянием/стилями + захват виджетов
+  модального диалога через патч QDialog.exec) — РАЗЛИЧИЙ: ПУСТО (снимки
+  идентичны). Дополнительно: import Supervertaler — в HEAD классы резолвятся
+  из Supervertaler (монолит), в рабочем дереве — из modules.workers.*.
+
+3.8 SMOKE-ТЕСТ ПРОЕКТА (tools/batch_validation/smoke_project.py, 2 процесса):
+  save: SAVE_OK 3202 (программный проект smoke_batch4, 3 сегмента, запись
+  .svproj + версионный бэкап) — PASS.
+  load (отдельный процесс): LOAD_OK smoke_batch4 3 «Segment 1 source» (имя,
+  количество сегментов, состояние первого сегмента сверены) — PASS.
+
+════════════════════════════════════════════════════════════════
+НЕПОКРЫТЫЕ ПРОВЕРКИ (для VALIDATION_BACKLOG.md)
+════════════════════════════════════════════════════════════════
+1. TM-поиск end-to-end из SuperLookup / грида сегментов через реальную TM
+   пользователя. Почему: требуется живое приложение с открытым проектом и
+   заполненной TM-базой; компонентный уровень покрыт (7 сценариев, включая
+   cancel и ошибку). Риск: низкий — сигнатуры, сигналы и вызовы не менялись
+   (вербатим + identical callsites + идентичные полные снапшоты приложения).
+   Как проверить вручную: открыть проект, кликнуть сегмент с совпадением в TM,
+   убедиться, что панель совпадений заполняется; нажать на другой сегмент
+   посреди поиска (cancel-path).
+2. Proofread-прогон end-to-end на нескольких сегментах с реальным LLM-ключом
+   (включая отмену посреди прогона). Почему: нужен действующий API-ключ. Риск:
+   низкий — тело run() перенесено вербатим; init/ошибка/отмена покрыты.
+   Как проверить вручную: Proofreading → прогон на 2–3 сегментах → отмена
+   посреди второй партии.
+3. Извлечение терминов end-to-end из termbase-вкладки с реальным LLM. Почему:
+   нужен API-ключ; парсер и сигналы покрыты stub-клиентом. Риск: низкий. Как
+   проверить вручную: вкладка Termbases → Extract Terms → убедиться в списке
+   извлечённых пар.
+4. Пакетный перевод через PreTranslationWorker end-to-end. Почему: класс не
+   переносился (остался в монолите байт-в-байт, PASS 3.5), но живой прогон
+   требует API-ключа. Риск: минимальный — содержимое класса не менялось ни на
+   байт, сдвинуты только номера строк. Как проверить вручную: обычный пакетный
+   перевод проекта с LLM-ключом.
+
+════════════════════════════════════════════════════════════════
+ИТОГ
+════════════════════════════════════════════════════════════════
+Diff stat: Supervertaler.py 1 insertion(+), 366 deletions(-); новые файлы
+modules/workers/{__init__,tm_search,proofread,glossary}.py (реэкспорт +
+вербатим-тела); документы: промпт батча, отчёт, аудит-артефакты
+(manifest/baseline_counts/callsites до и после), обновлённый PROJECT_STATUS.md.
+Монолит: 70 227 → 69 862 строки.
+Один git-коммит: «Extract QThread workers into modules/workers/ (Batch #4,
+Step 4 of EXTRACTION_PLAN.md)».
+
+GO / NO-GO: **GO**.
+Обоснование: все pre-flight гейты пройдены (границы совпали, PTW изолирован,
+дублей нет, parent_app отсутствует, DYNAMIC_ENTRY_POINT не затронут); перенос
+вербатим побайтово подтверждён; все 8 метрик совпали точно; callsites
+идентичны по содержимому; изменён ровно 1 существующий файл; PreTranslationWorker
+byte-identity PASS (дважды, включая повтор непосредственно перед коммитом);
+функциональные сценарии 7/7; полный снапшот живого приложения до/после —
+идентичен; smoke-тест сохранения/загрузки проекта — PASS. После Этапа 4 —
+ОСТАНОВКА: переход к Step 5 (Undo-менеджер, Batch #5) только после явного
+подтверждения владельца, без автопродолжения.

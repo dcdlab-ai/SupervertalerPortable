@@ -4,14 +4,14 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-13 • **Текущий шаг:** Step 4 (следующий, не начат)
+**Обновлено:** 2026-09-15 • **Текущий шаг:** Step 5 (следующий; Batch #5 запускать только после подтверждения владельца по отчёту Batch #4)
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **70 227**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
-Выполнены **Step 1–3** (батчи #1, #2, #3a, #3b, #3c). Следующий — **Step 4: чистые
-QThread-воркеры**. Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
+сейчас **69 862**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+Выполнены **Step 1–4** (батчи #1, #2, #3a, #3b, #3c, #4). Следующий — **Step 5:
+Undo-менеджер**. Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
 прочтению перед любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
@@ -22,8 +22,8 @@ QThread-воркеры**. Среда, тестирование и валидац
 | 1 | Модели данных → `modules/models.py` | ✅ выполнен | Batch #1, коммит `969c9fe`; отчёт `docs/refactoring/reports/ОТЧЁТ Batch #1.txt` |
 | 2 | DOCX tag-движок → `modules/tag_manager.py` | ✅ выполнен | Batch #2, коммит `1ac400d`; см. TECH-DEBT в конце `EXTRACTION_PLAN.md` |
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
-| 4 | Чистые QThread-воркеры | ⬜ **следующий** | см. «Что дальше» |
-| 5 | Undo-менеджер | ⬜ не начат | — |
+| 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
+| 5 | Undo-менеджер | ⬜ **следующий** (ожидает GO владельца) | см. «Что дальше» |
 | 6 | Grid: helpers/pagination/filters | ⬜ не начат | — |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
@@ -34,20 +34,34 @@ QThread-воркеры**. Среда, тестирование и валидац
 | 13 | Перевод-ядро (вкл. PreTranslationWorker) | ⬜ не начат | — |
 | 14 | SuperLookup + Voice + финальный cleanup | ⬜ не начат | — |
 
-## Что дальше: Step 4 — QThread-воркеры
+## Что дальше: Step 5 — Undo-менеджер
 
-Из монолита выносятся три чистых воркера (актуальные границы по AST **после Batch #3c**,
-документированные диапазоны в плане устарели — всегда пересчитывать AST-ом):
+Batch #5 НЕ запускать автоматически: по промпту Batch #4 после Этапа 4 нужна
+явная приёмка владельцем (GO по отчёту `docs/refactoring/reports/ОТЧЁТ Batch #4.txt`).
 
-- `TMSearchWorker` — Supervertaler.py 5334–5457
-- `ProofreadWorker` — 6169–6326
-- `GlossaryExtractionWorker` — 6337–6408
-- `PreTranslationWorker` (5460–6166) — **НЕ переносить на этом шаге** (относится к Step 13).
+Планируется вынос undo/redo-подсистемы в `modules/undo_manager.py` (по плану
+`EXTRACTION_PLAN.md` §Step 5: 7 методов + состояние `undo_stack`, `redo_stack`,
+`max_undo_levels`). Актуальные границы методов внутри `SupervertalerQt`
+(пересчитаны AST-ом сразу после Batch #4; **перед стартом Batch #5 пересчитать
+заново** — номера смещаются после каждого батча):
 
-Callsites создания/запуска: GlossaryExtractionWorker 19152/19159, ProofreadWorker
-48517/48601, TMSearchWorker 63579/63594; замыкания-обработчики остаются в монолите.
-Базовые метрики, снимки и проверки — по чек-листу «Общая валидация» в `EXTRACTION_PLAN.md`
-и практикам `AGENTS.md` (разделы про батчи #2/#3a–#3c и `tools/batch_validation/`).
+- `record_undo_state` — 9373–9401
+- `record_undo_states_batch` — 9403–9447
+- `_apply_undo_redo_action` — 9480–9515
+- `undo_redo_action_handler` — местоположение уточнить при старте батча (в
+  перечне плана, отдельным методом SupervertalerQt не найден — возможно,
+  замыкание/другое имя)
+- `_push_structural_undo` — 9731–9746
+- `_apply_structural_history` — 9888–9939
+- `update_undo_redo_actions` — 9941–9944
+
+Состояние `PreTranslationWorker` после Batch #4: перенесён в монолите на
+5337–6043, содержимое байт-в-байт без изменений (относится к Step 13).
+Справка по перенесённым в Batch #4 воркерам: `modules/workers/`
+(`TMSearchWorker`, `ProofreadWorker`, `GlossaryExtractionWorker`); их callsites
+в монолите: 18787 (glossary), 48152 (proofread), 63214 (TM search). Базовые
+метрики, снимки и проверки — по чек-листу «Общая валидация» в `EXTRACTION_PLAN.md`
+и практикам `AGENTS.md` (разделы про батчи #2/#3a–#4 и `tools/batch_validation/`).
 
 ## Важные решения и подводные камни (не перечитывать всё)
 
