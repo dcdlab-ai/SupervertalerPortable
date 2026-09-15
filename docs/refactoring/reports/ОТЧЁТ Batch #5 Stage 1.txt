@@ -1,0 +1,403 @@
+ОТЧЁТ Batch #5, STAGE 1 — инвентаризация Step 5 (Undo-менеджер) и рекомендация по архитектуре
+Проект: SupervertalerPortable, HEAD 435b0c4 («Extract QThread workers into modules/workers/ (Batch #4, Step 4 of EXTRACTION_PLAN.md)»)
+Дата: 15.09.2026. Режим: READ-ONLY ANALYSIS. Ни одна строка кода не изменена (см. «Статус репозитория» в конце).
+
+════════════════════════════════════════════════════════════════
+0. ГЛАВНОЕ ЗАБЛУЖДЕНИЕ ДОКУМЕНТОВ: УСТАРЕВШИЕ НОМЕРА СТРОК
+════════════════════════════════════════════════════════════════
+EXTRACTION_PLAN.md и CODE_MAP_REFACTOR.md называют диапазон 12493–13066 (+12851–12886).
+ФАКТИЧЕСКИ (ast.parse по рабочему дереву = HEAD 435b0c4, файл 69 863 строки):
+окно Step 5 лежит в 9373–9989. Смещение −3120 строк — результат Batch #4
+(вынос QThread-воркеров). PROJECT_STATUS.md это предвидел («перед стартом
+Batch #5 пересчитать»). ОТНОСИТЕЛЬНЫЙ порядок и РАЗМЕРЫ методов совпадают
+с CODE_MAP_REFACTOR.md (29/45/15/14/36/16/42/35/... строк) — расхождение
+только в абсолютных номерах. Все проверки ниже — по фактическим AST-границам.
+
+════════════════════════════════════════════════════════════════
+1.1 ПОЛНАЯ AST-ИНВЕНТАРИЗАЦИЯ ОКНА (факт, 9373–9989)
+════════════════════════════════════════════════════════════════
+Класс SupervertalerQt занимает 6050–63934. Все методы окна (по порядку):
+
+#  Метод                       Факт (start-end)  Строк  Статус       CODE_MAP совпадает?
+1  record_undo_state            9373–9401         29    MOVE         да (размер 29 ✓, номер устарел: был 12493)
+2  record_undo_states_batch     9403–9447         45    MOVE         да (45 ✓, был 12523)
+3  undo_action_handler          9449–9463         15    MOVE         да (15 ✓, был 12569)
+4  redo_action_handler          9465–9478         14    MOVE         да (14 ✓, был 12585)
+5  _apply_undo_redo_action      9480–9515         36    MOVE         да (36 ✓, был 12600)
+6  _segment_for_grid_row        9518–9533         16    NOT MOVE     да (16 ✓, был 12638)
+7  _split_segment_at_row        9535–9576         42    NOT MOVE     да (42 ✓, был 12655)
+8  _merge_segment_at_row        9578–9612         35    NOT MOVE     да (35 ✓, был 12698)
+9  _delete_segments_at_rows     9614–9662         49    NOT MOVE     да (49 ✓, был 12734)
+10 delete_current_segments      9664–9686         23    NOT MOVE     да (23 ✓, был 12784)
+11 split_current_segment        9689–9718         30    NOT MOVE     да (30 ✓, был 12809)
+12 merge_current_segment        9720–9729         10    NOT MOVE     да (10 ✓, был 12840)
+13 _push_structural_undo        9731–9746         16    MOVE         да (16 ✓, был 12851)
+14 _sync_after_structural       9748–9764         17    NOT MOVE*    да (17 ✓, был 12868) *пограничный — см. 1.5
+15 _recompute_list_numbers      9766–9793         28    NOT MOVE     да (28 ✓, был 12886)
+16 _reindex_grid_rows_from      9795–9816         22    NOT MOVE     да (22 ✓, был 12915)
+17 _select_grid_row_by_id       9818–9839         22    NOT MOVE     да (22 ✓, был 12938)
+18 _split_segment_grid_fast     9841–9867         27    NOT MOVE     да (27 ✓, был 12961)
+19 _merge_segment_grid_fast     9869–9886         18    NOT MOVE     да (18 ✓, был 12989)
+20 _apply_structural_history    9888–9939         52    MOVE         да (52 ✓, был 13008)
+21 update_undo_redo_actions     9941–9944          4    MOVE         да (4 ✓, был 13061)
+22 create_quick_access_toolbar  9946–9989         44    NOT MOVE     да (44 ✓, был 13066)
+
+- Вложенные/локальные функции в окне: НЕ ОБНАРУЖЕНЫ (обход AST внутри каждого
+  метода окна; локальные функции есть у соседей окна — _create_tm_list_tab,
+  import_tmx_file — но это вне скоупа Step 5).
+- Методы, найденные фактически, но отсутствующие в гипотезе промпта: НЕТ.
+
+════════════════════════════════════════════════════════════════
+1.2 РАЗРЕШЕНИЕ ПРОТИВОРЕЧИЯ «7 vs 8»
+════════════════════════════════════════════════════════════════
+ПОДТВЕРЖДЕНО 8 МЕТОДОВ НА ПЕРЕНОС:
+  1. record_undo_state          9373–9401
+  2. record_undo_states_batch   9403–9447
+  3. undo_action_handler        9449–9463
+  4. redo_action_handler        9465–9478
+  5. _apply_undo_redo_action    9480–9515
+  6. _push_structural_undo      9731–9746
+  7. _apply_structural_history  9888–9939
+  8. update_undo_redo_actions   9941–9944
+Обоснование: все 8 существуют как методы SupervertalerQt (AST), размеры блоков
+совпадают с CODE_MAP_REFACTOR.md; все 8 работают над общим состоянием
+undo_stack/redo_stack/max_undo_levels (см. 1.8) и неотделимы от него.
+Противоречие «7 vs 8» — дефект текста EXTRACTION_PLAN.md §Step 5: строка
+«Source» перечисляет 7 имён, потому что пропускает `update_undo_redo_actions`,
+а пункт «Objects to move» («7 методов + состояние») унаследовал эту цифру.
+CODE_MAP_REFACTOR.md (8 строк) прав. update_undo_redo_actions обязан
+переноситься: его вызывают 5 из остальных 7 методов (7 call sites: 9401, 9447,
+9459, 9463, 9474, 9478, 9745), и он читает то же состояние + QAction'ы меню.
+
+════════════════════════════════════════════════════════════════
+1.3 СНИМКИ «ЧУЖИХ» МЕТОДОВ
+════════════════════════════════════════════════════════════════
+Файл: docs/refactoring/audits/not_moved_methods_batch5_snapshot.txt
+Зафиксировано 14 NOT MOVE методов, 20 574 байт суммарно. Формат: имя →
+фактические границы → строки → байты → SHA256 → вербатим-блок. Контрольная
+точка Stage 2: после выреза соседних MOVE-методов каждый из 14 блоков обязан
+совпасть байт-в-байт по SHA256 (координаты сдвинутся — сверять содержимое,
+не номера строк).
+
+════════════════════════════════════════════════════════════════
+1.4 МЕХАНИЗМ DYNAMIC_ENTRY_POINT для undo_action_handler / redo_action_handler
+════════════════════════════════════════════════════════════════
+Найдено ровно 4 места, где имена этих методов используются НЕ как обычный
+self-вызов из соседнего метода (все — в Supervertaler.py; в modules/*.py
+ссылок на handler'ы нет):
+
+(a) Меню (MENU_ACTION, прямой bound-метод в connect), create_menus:
+    8810: self.undo_action.triggered.connect(self.undo_action_handler)
+    8816: self.redo_action.triggered.connect(self.redo_action_handler)
+    QAction создаются там же: self.undo_action 8808–8812, self.redo_action
+    8814–8818 (shortcut через QKeySequence.StandardKey). create_menus
+    ОСТАЁТСЯ в монолите (это Step «menus_factory», не Step 5).
+
+(b) Клавиатурный fallthrough из ячейки грида (EXTERNAL_ATTR_REF + HASATTR_REF +
+    STRING_REF), EditableGridTextEditor.keyPressEvent:
+    4213: mw = self._get_main_window()
+    4214: if mw and hasattr(mw, 'undo_action_handler'):
+    4215:     mw.undo_action_handler()
+    4224: mw = self._get_main_window()
+    4225: if mw and hasattr(mw, 'redo_action_handler'):
+    4226:     mw.redo_action_handler()
+    Это ДРУГОЙ класс монолита; окно достаётся через _get_main_window()
+    (3388–3399), вызов — утиной типизацией с проверкой hasattr по СТРОКЕ.
+
+ВЫВОД (однозначный): да, имена self.undo_action_handler /
+self.redo_action_handler обязаны продолжать существовать как АТРИБУТЫ
+ЭКЗЕМПЛЯРА SupervertalerQt после переноса:
+  - (a) connect(self.undo_action_handler) выполняется при построении меню и
+    требует живого callable-атрибута на экземпляре;
+  - (b) hasattr(mw, 'undo_action_handler') вернёт False, если атрибут исчез
+    с экземпляра → Ctrl+Z/Ctrl+Y из ячейки МОЛЧА перестанут доходить до
+    app-level undo (без ошибки — просто потеря функциональности, худший тип
+    регрессии, невидимый для статических тестов).
+«Функциональность доступна как-то иначе» (напрямую на объекте undo-менеджера)
+недостаточно: обе точки входа резолвят атрибут ПО ИМЕНИ НА ЭКЗЕМПЛЯРЕ
+главного окна. Делегат-обёртка на SupervertalerQt обязательна минимум для
+этих двух методов.
+
+ВАЖНОЕ УТОЧНЕНИЕ К DEAD_CODE_REPORT.md (документ неполон/устарел): гипотеза
+промпта «остальные 6 методов по имени в DEAD_CODE_REPORT.md не встречаются»
+проверена и оказалась НЕПОЛНОЙ. Ещё ДВА переносимых метода имеют внешние
+duck-typed ссылки, которых в отчёте нет:
+  - record_undo_state — EditableGridTextEditor._copy_source_to_target:
+    4722: if old_target != source_text and hasattr(main_window, 'record_undo_state'):
+    4724:     main_window.record_undo_state(...)
+    → атрибут обязан остаться на экземпляре, иначе undo при «copy source to
+    target» (Ctrl+Shift+S) молча перестанет записываться.
+  - record_undo_states_batch — modules/pseudo_translate_dialog.py:264:
+    263: try:
+    264:     mw.record_undo_states_batch(undo_entries)
+    265: except Exception as exc:
+
+════════════════════════════════════════════════════════════════
+1.5 ПОГРАНИЧНЫЙ СЛУЧАЙ _sync_after_structural (9748–9764)
+════════════════════════════════════════════════════════════════
+Тело прочитано целиком. Метод НЕ обращается к undo_stack / redo_stack /
+max_undo_levels вообще (AST-инвентарь self.* по телу: getattr(current_project),
+_original_segment_order, project_modified, update_window_title,
+update_progress_stats, refresh_preview — и больше ничего). Его задача —
+«лёгкая бухгалтерия»: синхронизировать _original_segment_order, пометить
+проект изменённым, обновить заголовок/статистику/превью (сетку НЕ
+перестраивает, точечный апдейт делает вызывающий).
+
+Кто его вызывает (факт, AST): _split_segment_at_row, _merge_segment_at_row —
+то есть ровно те же методы, которые вызывают _push_structural_undo
+(9535–9576, 9578–9612). Сам _sync_after_structural НЕ вызывается ни одним из
+8 MOVE-методов.
+
+РЕКОМЕНДАЦИЯ: оставить в монолите как есть (значение по умолчанию — он и не
+входит в список 8). Обоснование: (а) нулевая связность с undo-подсистемой —
+переносить его в modules/undo_manager.py нечего, его семантика — grid/segments;
+(б) он входит в будущий Step 6 (grid helpers / segments_controller) вместе со
+своими вызывающими _split/_merge/_delete_segments_at_rows; (в) включение его в
+Step 5 создало бы ложную зависимость undo_manager → _original_segment_order /
+refresh_preview. Единственный аргумент «за включение» (тот же вызывающий
+набор, что у _push_structural_undo) не перевешивает: общий вызывающий код —
+не общая ответственность.
+
+════════════════════════════════════════════════════════════════
+1.6 ПОЛНАЯ ИНВЕНТАРИЗАЦИЯ CALL SITES
+════════════════════════════════════════════════════════════════
+Фактически ФАКТИЧЕСКОЕ число call sites — 43 (план ожидал «23+» — подтверждено
+с превышением). Разбивка по методам (S = self.-стиль внутри SupervertalerQt,
+M = из метода, который САМ переносится (MOVE→MOVE), E = внешний/не-self):
+
+record_undo_state — 18 мест:
+  S (17, все из методов, ОСТАЮЩИХСЯ в монолите):
+    29600, 29614 (on_match_inserted)
+    41532 (_populate_single_row)
+    46065 (update_status_icon)
+    49408 (search_and_display_tm_matches)
+    50215 (insert_term_translation)
+    50901 (_execute_single_fr_operation)
+    51235 (replace_current_match)
+    51399 (replace_all_matches)
+    56466 (copy_source_to_grid_target)
+    56498 (clear_grid_target)
+    56938 (_replace_current_target_segment_text)
+    57585 (_confirm_current_row_segment)
+    57663 (_auto_propagate_to_identical)
+    60168, 60381 (translate_current_segment)
+    60637 (autotag_current_segment)
+    63401 (_auto_insert_tm_match)
+  E (1, другой класс): 4724 (EditableGridTextEditor._copy_source_to_target,
+    под hasattr(main_window, 'record_undo_state') на 4722)
+record_undo_states_batch — 7 мест:
+  S (6, все в монолите): 47524 (clear_selected_translations),
+    47605 (copy_source_to_target_bulk), 47733 (copy_source_to_target_-
+    non_translatable_bulk), 47796 (_copy_source_to_target_selected),
+    61266 (autotag_segments_bulk), 62051 (translate_batch)
+  E (1, modules/): pseudo_translate_dialog.py:264 (mw.record_undo_states_batch,
+    внутри try/except)
+undo_action_handler — 2 места (E/S, не M):
+  8810 create_menus — self.-стиль: self.undo_action.triggered.connect(
+        self.undo_action_handler) — create_menus остаётся в монолите
+  4215 EditableGridTextEditor.keyPressEvent — не self.: mw.undo_action_handler()
+        под hasattr(mw, 'undo_action_handler') на 4214
+redo_action_handler — 2 места: 8816 (create_menus, self.-стиль connect) и
+  4226 (EditableGridTextEditor.keyPressEvent, mw.redo_action_handler() под
+  hasattr на 4225)
+_apply_undo_redo_action — 2 места, оба MOVE→MOVE (self.-стиль):
+  9461 (undo_action_handler), 9476 (redo_action_handler)
+_apply_structural_history — 2 места, оба MOVE→MOVE (self.-стиль):
+  9457 (undo_action_handler), 9472 (redo_action_handler)
+_push_structural_undo — 3 места, ВСЕ из методов, ОСТАЮЩИХСЯ в монолите
+  (self.-стиль) — КЛЮЧЕВОЙ АРГУМЕНТ ДЛЯ АРХИТЕКТУРЫ:
+  9561 (_split_segment_at_row)
+  9599 (_merge_segment_at_row)
+  9656 (_delete_segments_at_rows)
+update_undo_redo_actions — 7 мест, все MOVE→MOVE (self.-стиль):
+  9401 (record_undo_state), 9447 (record_undo_states_batch),
+  9459, 9463 (undo_action_handler), 9474, 9478 (redo_action_handler),
+  9745 (_push_structural_undo)
+
+Итоги по характеру вызова:
+  - self.-стиль из методов, ОСТАЮЩИХСЯ в монолите: 17 + 6 + 2 (menu-connect) +
+    3 (_push_structural_undo) = 28
+  - MOVE→MOVE (нормализуются автоматически при переносе тела): 2 + 2 + 7 = 11
+════════════════════════════════════════════════════════════════
+1.7 ЗАВИСИМОСТИ / КОЛБЭКИ (по телу метода, AST; не по документу)
+════════════════════════════════════════════════════════════════
+Метод                     | Состояние undo/redo            | Атрибуты/методы MainWindow, к которым обращается
+-------------------------|--------------------------------|--------------------------------------------------
+record_undo_state        | undo_stack, redo_stack,        | update_undo_redo_actions
+                         | max_undo_levels                |
+record_undo_states_batch | undo_stack, redo_stack,        | update_undo_redo_actions
+                         | max_undo_levels                |
+undo_action_handler      | undo_stack, redo_stack         | _apply_undo_redo_action, _apply_structural_history,
+                         |                                | update_undo_redo_actions
+redo_action_handler      | undo_stack, redo_stack         | _apply_undo_redo_action, _apply_structural_history,
+                         |                                | update_undo_redo_actions
+_apply_undo_redo_action  | —                              | current_project, table, project_modified,
+                         |                                | _find_row_for_segment, _update_status_cell,
+                         |                                | update_progress_stats, update_window_title,
+                         |                                | apply_invisible_replacements
+_push_structural_undo    | undo_stack, redo_stack,        | project_modified, update_undo_redo_actions
+                         | max_undo_levels                |
+_apply_structural_history| —                              | current_project, _select_grid_row_by_id,
+                         |                                | _split_segment_grid_fast, _merge_segment_grid_fast,
+                         |                                | _original_segment_order, load_segments_to_grid,
+                         |                                | update_progress_stats, update_window_title,
+                         |                                | refresh_preview, log, project_modified
+update_undo_redo_actions | undo_stack, redo_stack         | undo_action, redo_action (QAction меню)
+
+Проверка утверждения EXTRACTION_PLAN.md («методы читают current_project, table;
+нужны update_window_title, update_progress_stats, _update_status_cell,
+load_segments_to_grid»): ЧАСТИЧНО неверно. current_project и table читают
+ТОЛЬКО _apply_undo_redo_action (и _apply_structural_history — current_project);
+record_undo_state, record_undo_states_batch, _push_structural_undo и
+update_undo_redo_actions не трогают ни current_project, ни table. Из списка
+плана подтверждается: update_window_title (2 метода), update_progress_stats (2),
+_update_status_cell (1), load_segments_to_grid (1). Полный фактический набор
+дополнительных зависимостей — в таблице выше (в плане не названы:
+project_modified, refresh_preview, log, apply_invisible_replacements,
+_original_segment_order, _find_row_for_segment, _select_grid_row_by_id,
+_split_segment_grid_fast, _merge_segment_grid_fast, undo_action, redo_action).
+
+════════════════════════════════════════════════════════════════
+1.8 СОСТОЯНИЕ undo_stack / redo_stack / max_undo_levels
+════════════════════════════════════════════════════════════════
+Инициализация — SupervertalerQt.__init__, единственная точка:
+  6212: self.undo_stack = []        # List of (segment_id, old_target, new_target, old_status, new_status)
+  6213: self.redo_stack = []        # List of undone actions that can be redone
+  6214: self.max_undo_levels = 100  # Maximum number of undo levels to keep
+
+Полный список обращений (grep по всему файлу, включая контексты без self.):
+  undo_stack: 6212 (init) + 9391, 9394, 9395 (record_undo_state), 9428, 9441,
+    9443 (record_undo_states_batch), 9451, 9454, 9473, 9477 (undo/redo handlers),
+    9734, 9742, 9743 (_push_structural_undo), 9943 (update_undo_redo_actions)
+  redo_stack: 6213 (init) + 9398, 9446, 9458, 9462, 9467, 9470, 9744, 9944
+  max_undo_levels: 6214 (init) + 9394, 9441, 9742
+ВСЕ обращения (кроме трёх строк инициализации в __init__) лежат ВНУТРИ
+8 MOVE-методов. Никакой третий потребитель вне переносимого набора
+не обнаружен — в том числе в _sync_after_structural (см. 1.5).
+
+СЕРИАЛИЗАЦИЯ В .svproj: НЕТ. Поиск по всему монолиту пар
+(undo|redo) × (json|to_dict|from_dict|svproj|save|load) дал ровно одно
+совпадение — лог-строку 9926 («Fast undo/redo refresh failed...»), не
+сериализацию. Дополнительно: полный grep всех трёх имён (см. список выше)
+не содержит ни одного вызова вне undo-методов и __init__ — значит ни
+save/load проекта, ни to_dict/from_dict их не читают и не пишут.
+ВЫВОД: состояние undo/redo — чисто внутрисессионное; вынос его наружу класса
+════════════════════════════════════════════════════════════════
+1.9 РЕКОМЕНДАЦИЯ ПО АРХИТЕКТУРЕ
+════════════════════════════════════════════════════════════════
+Гипотеза координатора («единообразные делегаты-обёртки для ВСЕХ 8 методов,
+а не выборочно и не полная замена 23+ call sites») — ПОДТВЕРЖДЕНА фактическим
+анализом 1.4/1.6. Подтверждающие примеры (не «по умолчанию», а с цифрами):
+
+(1) Минимум 4, а не 2 метода обязаны остаться атрибутами экземпляра
+    SupervertalerQt (аргумент (а) гипотезы — подтверждён и усилен):
+    - undo_action_handler: 8810 (connect в create_menus) + 4215 (hasattr+call
+      из EditableGridTextEditor);
+    - redo_action_handler: 8816 + 4226 (аналогично);
+    - record_undo_state: 4722 hasattr(main_window, 'record_undo_state') +
+      4724 вызов из EditableGridTextEditor._copy_source_to_target;
+    - record_undo_states_batch: modules/pseudo_translate_dialog.py:264,
+      mw.record_undo_states_batch(...) внутри try/except (молчаливая потеря
+      undo при исчезновении атрибута).
+(2) 28 из 43 call sites — self.-стиль из методов, которые САМИ остаются в
+    монолите (17 record_undo_state + 6 record_undo_states_batch + 2 menu-connect
+    + 3 _push_structural_undo из _split/_merge/_delete_segments_at_rows).
+    Аргумент (б) гипотезы — подтверждён.
+(3) 11 call sites — MOVE→MOVE; они нормализуются сами собой при переносе тел
+    в модуль (это не аргумент против делегатов, а просто объём бесплатной
+    работы).
+(4) 4 внешних call sites (E) доказывают, что «полная замена call sites» не
+    может быть выполнена в рамках Step 5 без правок в ДРУГИХ единицах:
+    EditableGridTextEditor (класс монолита, другой шаг рефакторинга) и
+    modules/pseudo_translate_dialog.py (модуль). Замена этих 4 вызовов на
+    undо-менеджер означала бы, что каждый потребитель держит ссылку на
+    менеджер — это расширение скоупа и рост связности, а не декомпозиция.
+
+АЛЬТЕРНАТИВА, которую стоит рассмотреть владельцу (и которая на самом деле не
+противоречит гипотезе, а уточняет её форму): гибрид «тонкие делегаты для
+внешних/динамических 4 методов + прямые вызовы менеджера внутри 8 тел».
+При любом варианте минимум для 4 методов делегаты ОБЯЗАТЕЛЬНЫ; для остальных 4
+(record_undo_state — нет, он уже в 4-ке; остаются _apply_undo_redo_action,
+_push_structural_undo, _apply_structural_history, update_undo_redo_actions)
+делегаты нужны, потому что их вызывают только монолитные методы
+(_push_structural_undo — 3 вызова из _split/_merge/_delete) или сами
+переносимые тела.
+Полная замена 28 self.-стиль call sites отклоняется: она (а) не решает
+проблему hasattr/connect-входов, (б) трогает EditableGridTextEditor и модуль
+вне скоупа, (в) увеличивает риск молчаливой регрессии Ctrl+Z (класс
+регрессий, невидимых статическим проверкам), (г) противоречит прецеденту
+Batch #2/#3c (делегаты-обёртки как переходный период).
+
+Итоговая рекомендация Stage 1:
+  - 8 методов переносятся в modules/undo_manager.py;
+  - на SupervertalerQt остаются 8 делегатов-обёрток с ТЕМИ ЖЕ именами
+    (текстуально идентичные call sites — ноль правок в 43 местах);
+  - состояние undo_stack/redo_stack/max_undo_levels переезжает в менеджер,
+    инициализация 6212–6214 заменяется созданием менеджера (единственная
+    правка вне делегатов), сериализацию .svproj трогать НЕ нужно (1.8);
+  - менеджер получает колбэки, а не ссылку на окно (см. таблицу 1.7);
+  - _sync_after_structural (1.5) остаётся в монолите.
+
+════════════════════════════════════════════════════════════════
+ОТКРЫТЫЕ ВОПРОСЫ К ВЛАДЕЛЬЦУ (нужны до Stage 2)
+════════════════════════════════════════════════════════════════
+В1. Форма делегатов: (i) 8 тонких делегатов + общий объект менеджера
+    (рекомендуется), или (ii) что-то иное? Явного решения владельца требует
+    именно вопрос «делегаты vs замена call sites» (§Step 5 EXTRACTION_PLAN.md).
+В2. Подтверждение состава: 8 методов (включая update_undo_redo_actions, ранее
+    отсутствовавший в плане) + состояние trio.
+В3. Нужно ли в рамках Step 5 сколько-нибудь трогать 4 внешних вход из (1) —
+    или они сознательно остаются как есть (рекомендация: остаются как есть,
+    это минимальный риск).
+В4. ASCII/UTF-8 и публичность имён модуля: modules/undo_manager.py, класс
+    UndoManager (фиксированное планом имя) — подтверждается ли?
+
+════════════════════════════════════════════════════════════════
+ИТОГОВЫЙ ВЕРДИКТ: ГОТОВ К STAGE 2 (с 4 открытыми вопросами выше)
+════════════════════════════════════════════════════════════════
+Блокеров, мешающих переносу, не найдено. Открытые вопросы — архитектурные
+(В1–В4), они требуют решения владельца, а не дополнительного анализа.
+Карта фактов для Stage 2 готова: состав (1.2), снимки SHA256 (1.3),
+механизм динамических входов (1.4), решение по пограничному методу (1.5),
+43 call sites (1.6), таблица зависимостей (1.7), состояние и его
+несериализуемость (1.8).
+
+════════════════════════════════════════════════════════════════
+СТАТУС РЕПОЗИТОРИЯ (подтверждение read-only)
+════════════════════════════════════════════════════════════════
+Ни одна строка кода не изменена: правок в Supervertaler.py, modules/** и любых
+других .py не производилось ни одним шагом Stage 1. Все измерения выполнены
+вспомогательными скриптами в
+D:\Temp\SupervertalerPortable\analysis\batch5-stage1\
+(inventory.py, bounds.py, callsites.py, owners.py; выводы — *_out.txt).
+Единственные добавленные файлы: этот отчёт (docs/refactoring/reports/) и
+снимок docs/refactoring/audits/not_moved_methods_batch5_snapshot.txt
+(разрешены промптом Stage 1).
+Дополнительно (по конвенции AGENTS.md «в конце каждого шага обновить
+PROJECT_STATUS.md») обновлён PROJECT_STATUS.md — только раздел «Что дальше»
+(фактические AST-границы), правок кода это не касается.
+
+НЕ требует правок save/load-путей .svproj (риск из гипотезы промпта не
+подтвердился). Но инициализация в __init__ (6212–6214) должна быть заменена
+на создание undo-менеджера/передачу состояния — это правка одной точки,
+не разбросанная.
+
+  - внешние duck-typed (другой класс монолита / modules/): 4
+    (4724, 4215, 4226, pseudo_translate_dialog.py:264)
+  - ВСЕГО: 43
+Отдельно: у undo_action_handler/redo_action_handler НЕТ ни одного
+внутреннего self-вызова — их единственные «внутренние» входы это menu-connect
+и внешний duck-typed вызов (см. 1.4).
+
+    266:     mw.log(f"... Undo recording failed ...")
+    → вызов НЕ через hasattr, а внутри try/except: при исчезновении атрибута
+    AttributeError будет пойман, undo псевдоперевода молча не запишется
+    (в лог уйдёт лишь предупреждение).
+ИТОГО 4 из 8 методов (record_undo_state, record_undo_states_batch,
+undo_action_handler, redo_action_handler) имеют динамические/внешние входы,
+требующие сохранения атрибута на экземпляре SupervertalerQt.
+
+  Состав окна ровно 22 метода = 8 MOVE + 14 NOT MOVE, как в гипотезе.
+- Соседи окна: create_menus заканчивается на 9371 (окно начинается ровно
+  со следующего метода); после окна — create_ribbon 9991–9997 (dead-candidate,
+  вне скоупа).

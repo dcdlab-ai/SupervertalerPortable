@@ -197,6 +197,11 @@ revert.
 ### Expected result
 −250 строк; тестопригодный undo.
 
+#### Статус Step 5 после Batch #5 Stage 1 (2026-09-15) — инвентаризация завершена, перенос не начат
+Режим Stage 1 — read-only: код не менялся. Отчёт — `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt`; снимок 14 NOT MOVE методов со SHA256 — `docs/refactoring/audits/not_moved_methods_batch5_snapshot.txt`.
+Диапазоны из блока Step 5 выше (12493–13066 + 12851–12886) устарели: фактические AST-границы окна — **9373–9989** (смещение −3120 из-за Batch #4). Заявленные «7 методов» — дефект текста плана: `update_undo_redo_actions` пропущен в строке Source. **Подтверждено 8 методов:** `record_undo_state` 9373–9401, `record_undo_states_batch` 9403–9447, `undo_action_handler` 9449–9463, `redo_action_handler` 9465–9478, `_apply_undo_redo_action` 9480–9515, `_push_structural_undo` 9731–9746, `_apply_structural_history` 9888–9939, `update_undo_redo_actions` 9941–9944. Состояние `undo_stack`/`redo_stack`/`max_undo_levels` — `__init__` 6212–6214, в `.svproj` не сериализуется. `_sync_after_structural` (9748–9764) остаётся в монолите (нулевая связность с undo-состоянием). Call sites: 43 (план ожидал 23+), из них 28 self.-стиль из методов, остающихся в монолите, 11 MOVE→MOVE, 4 внешних duck-typed (`EditableGridTextEditor.keyPressEvent` 4214–4226, `EditableGridTextEditor._copy_source_to_target` 4722–4724, `modules/pseudo_translate_dialog.py:264`). Рекомендация: 8 тонких делегатов-обёрток с сохранением имён + состояние в `modules/undo_manager.py`; полная замена call sites отклонена. Stage 2 (перенос) не начинать до решения владельца по вопросам В1–В4 отчёта.
+
+
 ## Step 6 — Grid: helpers/pagination/filters
 
 ### Goal

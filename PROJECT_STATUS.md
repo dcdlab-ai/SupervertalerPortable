@@ -4,7 +4,7 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-15 • **Текущий шаг:** Step 5 (следующий; Batch #5 запускать только после подтверждения владельца по отчёту Batch #4)
+**Обновлено:** 2026-09-15 (Batch #5 Stage 1) • **Текущий шаг:** Step 5 — Stage 1 (инвентаризация) выполнен, Stage 2 (перенос) ждёт подтверждения архитектуры владельцем
 
 ## Кратко: где мы находимся
 
@@ -23,7 +23,7 @@ Undo-менеджер**. Среда, тестирование и валидац�
 | 2 | DOCX tag-движок → `modules/tag_manager.py` | ✅ выполнен | Batch #2, коммит `1ac400d`; см. TECH-DEBT в конце `EXTRACTION_PLAN.md` |
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
-| 5 | Undo-менеджер | ⬜ **следующий** (ожидает GO владельца) | см. «Что дальше» |
+| 5 | Undo-менеджер | 🟨 Stage 1 (инвентаризация) выполнен; Stage 2 — после GO владельца | `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt`; снимок в `audits/` |
 | 6 | Grid: helpers/pagination/filters | ⬜ не начат | — |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
@@ -36,24 +36,33 @@ Undo-менеджер**. Среда, тестирование и валидац�
 
 ## Что дальше: Step 5 — Undo-менеджер
 
-Batch #5 НЕ запускать автоматически: по промпту Batch #4 после Этапа 4 нужна
-явная приёмка владельцем (GO по отчёту `docs/refactoring/reports/ОТЧЁТ Batch #4.txt`).
+Batch #5 разделён на два этапа-промпта. **Stage 1 выполнен** (15.09.2026):
+инвентаризация + рекомендация по архитектуре — отчёт
+`docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt`,
+снимки `docs/refactoring/audits/not_moved_methods_batch5_snapshot.txt`.
+Код не менялся. **Stage 2 (сам перенос) запускать только после подтверждения
+владельцем архитектуры** (4 открытых вопроса В1–В4 в отчёте Stage 1).
 
-Планируется вынос undo/redo-подсистемы в `modules/undo_manager.py` (по плану
-`EXTRACTION_PLAN.md` §Step 5: 7 методов + состояние `undo_stack`, `redo_stack`,
-`max_undo_levels`). Актуальные границы методов внутри `SupervertalerQt`
-(пересчитаны AST-ом сразу после Batch #4; **перед стартом Batch #5 пересчитать
-заново** — номера смещаются после каждого батча):
-
-- `record_undo_state` — 9373–9401
-- `record_undo_states_batch` — 9403–9447
-- `_apply_undo_redo_action` — 9480–9515
-- `undo_redo_action_handler` — местоположение уточнить при старте батча (в
-  перечне плана, отдельным методом SupervertalerQt не найден — возможно,
-  замыкание/другое имя)
-- `_push_structural_undo` — 9731–9746
-- `_apply_structural_history` — 9888–9939
-- `update_undo_redo_actions` — 9941–9944
+Ключевые факты Stage 1 (все — из AST, не из документов):
+- Подтверждён состав **8 методов** (не 7, как в `EXTRACTION_PLAN.md` §Step 5):
+  `record_undo_state`, `record_undo_states_batch`, `undo_action_handler`,
+  `redo_action_handler`, `_apply_undo_redo_action`, `_push_structural_undo`,
+  `_apply_structural_history`, `update_undo_redo_actions`.
+- Фактические AST-границы внутри `SupervertalerQt` (в рабочем дереве, HEAD 435b0c4):
+  `record_undo_state` 9373–9401, `record_undo_states_batch` 9403–9447,
+  `undo_action_handler` 9449–9463, `redo_action_handler` 9465–9478,
+  `_apply_undo_redo_action` 9480–9515, `_push_structural_undo` 9731–9746,
+  `_apply_structural_history` 9888–9939, `update_undo_redo_actions` 9941–9944.
+  Состояние `undo_stack`/`redo_stack`/`max_undo_levels` инициализируется в
+  `__init__` на 6212–6214; в `.svproj` НЕ сериализуется.
+- Прочие 14 методов окна 9373–9989 — NOT MOVE (снимок со SHA256 в audits/).
+  Пограничный `_sync_after_structural` (9748–9764) остаётся в монолите.
+- 43 call sites (план ожидал 23+): 28 self.-стиль из методов, остающихся в
+  монолите; 11 MOVE→MOVE; 4 внешних duck-typed (`EditableGridTextEditor`,
+  `modules/pseudo_translate_dialog.py:264`).
+- Рекомендация: 8 тонких делегатов-обёрток с теми же именами + состояние в
+  `modules/undo_manager.py`; полная замена call sites отклонена (не решает
+  hasattr/connect-входы, расширяет скоуп).
 
 Состояние `PreTranslationWorker` после Batch #4: перенесён в монолите на
 5337–6043, содержимое байт-в-байт без изменений (относится к Step 13).

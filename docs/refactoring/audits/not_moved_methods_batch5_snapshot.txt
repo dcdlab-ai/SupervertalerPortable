@@ -1,0 +1,438 @@
+Batch #5 Stage 1 - snapshot of NOT MOVE methods in the Step 5 window
+Source: Supervertaler.py @ HEAD 435b0c4 (working tree, unmodified)
+Window (actual AST bounds): record_undo_state 9373 .. create_quick_access_toolbar 9989
+Documented bounds in CODE_MAP_REFACTOR.md (12493-13109) are STALE; see report.
+
+Method | start-end | lines | bytes | SHA256
+----------------------------------------------------------------------------------------------------
+_segment_for_grid_row | 9518-9533 | 16 | 857 | 6d99bb2171310aaa7a36f32749495e72aeff200a1931eb6243b61e45e5b63fd8
+_split_segment_at_row | 9535-9576 | 42 | 2086 | 977427e6bd3d9e69252f3cd754247f8d395823101b67014185281d723d04753c
+_merge_segment_at_row | 9578-9612 | 35 | 1559 | 7b5d96298ca2959f5a0b81ddce17433ba0e93ddbfe3d5270e81ec2b6b7ff51a3
+_delete_segments_at_rows | 9614-9662 | 49 | 2519 | 79140b80be0a876f8986a3f35725ac3909b43e85874ff47a66181fa4ca23a75a
+delete_current_segments | 9664-9686 | 23 | 1246 | 52d01602d26a16350e7267dc7f831d762721a9437a2f3377705b1429da3e419e
+split_current_segment | 9689-9718 | 30 | 1787 | e2453f2a0ae6bb492ac7e256525aa4b16b29428b6509a04eec9f144e143ca509
+merge_current_segment | 9720-9729 | 10 | 504 | fc438c6a6c2545d9d8e115862bafdf026079951b36dbd0177cf773524db8ab29
+_sync_after_structural | 9748-9764 | 17 | 1114 | fd12fd6e6a19d44072b8f9c57cbca0aa0763ea0d99e63c1d2ab7e5a7203e06c2
+_recompute_list_numbers | 9766-9793 | 28 | 1483 | c6cd57630f3eff8dee0a3056a632f25312f611a10369ccbbd34484cd18a5415b
+_reindex_grid_rows_from | 9795-9816 | 22 | 1318 | 66e4af50e02e5af77a81748bbb76aaa1675c7658b3f9094bfb2fb6e1c5ff4d4d
+_select_grid_row_by_id | 9818-9839 | 22 | 1418 | ab96e0144175f371c9fb7b38918957c8f453dc8f21281f495ac2b9649a81a4c8
+_split_segment_grid_fast | 9841-9867 | 27 | 1895 | a42dd86aced7fb8ea0264ff0d37f5959475e8d04c7ae34df81739683907602ce
+_merge_segment_grid_fast | 9869-9886 | 18 | 1226 | 236ebec80d410d6ed36db1b9b6f6f88e84e362f6334d6e93d1b7b3feeac0dcbb
+create_quick_access_toolbar | 9946-9989 | 44 | 1562 | c8a53af7a293a740d446ef917a922b2d8f1c81b80295023d00c309cb2980a9a4
+
+Total bytes of NOT MOVE method blocks: 20574
+
+====================================================================================================
+VERBATIM BLOCKS (byte-exact, def line through last body line)
+====================================================================================================
+
+### _segment_for_grid_row (9518-9533)
+    def _segment_for_grid_row(self, row: int):
+        """Вернуть (segment, индекс_в_списке) для строки сетки — по id в колонке 0.
+        
+        Возвращает (None, -1), если строка или id не распознаны. Использование колонки
+        id (а не индекса строки) сохраняет корректность при пагинации."""
+        if not getattr(self, 'current_project', None):
+            return None, -1
+        try:
+            id_item = self.table.item(row, 0)
+            sid = int(id_item.text())
+        except (AttributeError, ValueError, TypeError):
+            return None, -1
+        for i, s in enumerate(self.current_project.segments):
+            if s.id == sid:
+                return s, i
+        return None, -1
+
+### _split_segment_at_row (9535-9576)
+    def _split_segment_at_row(self, row: int, offset: int):
+        """Разделить сегмент, показанный в строке ``row`` сетки, на позиции символа ``offset`` в исходнике."""
+        from modules import segment_split_merge as ssm
+        proj = getattr(self, 'current_project', None)
+        if proj is None or not ssm.structure_editable(proj):
+            return
+        # Only in document order — the live list must equal document order so the
+        # _original_segment_order sync (and thus saving) stays correct.
+        if getattr(self, 'current_sort', None) is not None:
+            return
+        seg, idx = self._segment_for_grid_row(row)
+        if seg is None:
+            return
+        try:
+            offset = int(offset)
+        except (TypeError, ValueError):
+            return
+        # can_split requires the offset to fall strictly inside the source.
+        if not ssm.can_split(seg, offset):
+            return
+
+        import copy
+        before = copy.deepcopy(proj.segments)
+        ssm.split_segment(proj.segments, idx, offset)
+        ssm.renumber_ids(proj.segments)
+        focus_id = proj.segments[idx].id  # keep focus on the (left) original part
+        self._push_structural_undo(before, proj.segments, focus_id, "split", row)
+        self._sync_after_structural()
+        # Fast incremental grid update when the grid row maps 1:1 to the list
+        # index (no pagination offset); otherwise fall back to a full reload.
+        if idx == row:
+            try:
+                self._split_segment_grid_fast(row, proj.segments[idx], proj.segments[idx + 1])
+                self._select_grid_row_by_id(focus_id)
+            except Exception as e:
+                self.log(f"Fast split refresh failed ({e}); full reload.")
+                self.load_segments_to_grid()
+                self._select_grid_row_by_id(focus_id)
+        else:
+            self.load_segments_to_grid()
+            self._select_grid_row_by_id(focus_id)
+        self.log(f"Split segment into two at character {offset}.")
+
+### _merge_segment_at_row (9578-9612)
+    def _merge_segment_at_row(self, row: int):
+        """Объединить сегмент из строки ``row`` сетки со следующим сегментом."""
+        from modules import segment_split_merge as ssm
+        proj = getattr(self, 'current_project', None)
+        if proj is None or not ssm.structure_editable(proj):
+            return
+        if getattr(self, 'current_sort', None) is not None:
+            return
+        seg, idx = self._segment_for_grid_row(row)
+        if seg is None:
+            return
+        ok, reason = ssm.can_merge(proj.segments, idx)
+        if not ok:
+            QMessageBox.information(self, self.tr("Merge segments"), reason)
+            return
+
+        import copy
+        before = copy.deepcopy(proj.segments)
+        ssm.merge_with_next(proj.segments, idx)
+        ssm.renumber_ids(proj.segments)
+        focus_id = proj.segments[idx].id
+        self._push_structural_undo(before, proj.segments, focus_id, "merge", row)
+        self._sync_after_structural()
+        if idx == row:
+            try:
+                self._merge_segment_grid_fast(row, proj.segments[idx])
+                self._select_grid_row_by_id(focus_id)
+            except Exception as e:
+                self.log(f"Fast merge refresh failed ({e}); full reload.")
+                self.load_segments_to_grid()
+                self._select_grid_row_by_id(focus_id)
+        else:
+            self.load_segments_to_grid()
+            self._select_grid_row_by_id(focus_id)
+        self.log("Merged segment with the next one.")
+
+### _delete_segments_at_rows (9614-9662)
+    def _delete_segments_at_rows(self, rows):
+        """Удалить сегменты, показанные в заданных строках ``rows`` сетки.
+        
+        Доступно только для проектов paste / plain-text / Start-Empty (см.
+        segment_split_merge.deletable) — удаление из проекта DOCX / Okapi / двуязычного
+        оставило бы дыру в объединяемом при экспорте. Отменяется тем же стеком
+        структурного undo, что и split/merge."""
+        from modules import segment_split_merge as ssm
+        proj = getattr(self, 'current_project', None)
+        if proj is None or not ssm.deletable(proj):
+            return
+        if getattr(self, 'current_sort', None) is not None:
+            QMessageBox.information(self, self.tr("Delete segments"),
+                self.tr("Switch to Document Order (Sort menu) to delete segments."))
+            return
+        # Map grid rows → segment indices (dedup, drop locked segments).
+        idxs = set()
+        for r in rows or []:
+            seg, idx = self._segment_for_grid_row(r)
+            if seg is not None and not getattr(seg, 'locked', False):
+                idxs.add(idx)
+        if not idxs:
+            return
+        n = len(idxs)
+        resp = QMessageBox.question(
+            self, self.tr("Delete segments"),
+            f"Delete {n} segment{'s' if n != 1 else ''}? You can undo this (Ctrl+Z).",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+        if resp != QMessageBox.StandardButton.Yes:
+            return
+        import copy
+        before = copy.deepcopy(proj.segments)
+        first = min(idxs)
+        removed = ssm.delete_segments(proj.segments, idxs)
+        if not removed:
+            return
+        ssm.renumber_ids(proj.segments)
+        # Focus the segment now sitting where the first deleted one was.
+        focus_id = None
+        if proj.segments:
+            focus_id = proj.segments[min(first, len(proj.segments) - 1)].id
+        self._push_structural_undo(before, proj.segments, focus_id, "delete",
+                                   min(rows) if rows else 0)
+        self._sync_after_structural()
+        self.load_segments_to_grid()
+        if focus_id is not None:
+            self._select_grid_row_by_id(focus_id)
+        self.log(f"Deleted {removed} segment{'s' if removed != 1 else ''}.")
+
+### delete_current_segments (9664-9686)
+    def delete_current_segments(self):
+        """Удалить выбранные строки сетки (пункт меню Edit). Действует на выделение, а при отсутствии множественного выделения — на текущую строку."""
+        proj = getattr(self, 'current_project', None)
+        from modules import segment_split_merge as ssm
+        if proj is None or not proj.segments:
+            return
+        if not ssm.deletable(proj):
+            QMessageBox.information(
+                self, self.tr("Delete segments"),
+                self.tr("Deleting segments is only available for pasted / "
+                        "plain-text / Start-Empty projects. Deleting from a DOCX, "
+                        "Okapi or bilingual-CAT project would leave a gap in the "
+                        "exported file."))
+            return
+        rows = []
+        if hasattr(self, 'table'):
+            rows = sorted({it.row() for it in self.table.selectedItems()})
+        if not rows:
+            cur = self.table.currentRow() if hasattr(self, 'table') else -1
+            if cur >= 0:
+                rows = [cur]
+        if rows:
+            self._delete_segments_at_rows(rows)
+
+### split_current_segment (9689-9718)
+    def split_current_segment(self):
+        """Разделить текущий сегмент в позиции каретки его исходной ячейки.
+        
+        Привязано к Ctrl+Alt+S. Используется каретка исходной ячейки (поставьте курсор
+        в исходнике туда, где нужен разрез). No-op, если каретка вне исходного текста
+        или пока теги сжаты / внешние теги скрыты (каретку нельзя сопоставить с реальным
+        исходником)."""
+        from PyQt6.QtWidgets import QApplication
+        fw = QApplication.focusWidget()
+        src_editor = None
+        row = -1
+        if isinstance(fw, ReadOnlyGridTextEditor) and getattr(fw, 'row', -1) >= 0:
+            src_editor, row = fw, fw.row
+        else:
+            row = self.table.currentRow()
+            if row >= 0:
+                w = self.table.cellWidget(row, 2)
+                if isinstance(w, ReadOnlyGridTextEditor):
+                    src_editor = w
+        if src_editor is None or row < 0:
+            return
+        # The caret→source mapping is only well-defined without compact/hidden tags.
+        if getattr(src_editor, '_compact_tag_map', None) or getattr(src_editor, '_stripped_outer_tag', None):
+            self.log("Split: switch to full tag view (no compact / hidden tags) to split here.")
+            return
+        caret = src_editor.textCursor().position()
+        prefix = src_editor.toPlainText()[:caret]
+        if hasattr(self, 'reverse_invisible_replacements'):
+            prefix = self.reverse_invisible_replacements(prefix)
+        self._split_segment_at_row(row, len(prefix))
+
+### merge_current_segment (9720-9729)
+    def merge_current_segment(self):
+        """Объединить текущий сегмент со следующим (Ctrl+Alt+M)."""
+        from PyQt6.QtWidgets import QApplication
+        fw = QApplication.focusWidget()
+        if isinstance(fw, (ReadOnlyGridTextEditor, EditableGridTextEditor)) and getattr(fw, 'row', -1) >= 0:
+            row = fw.row
+        else:
+            row = self.table.currentRow()
+        if row is not None and row >= 0:
+            self._merge_segment_at_row(row)
+
+### _sync_after_structural (9748-9764)
+    def _sync_after_structural(self):
+        """Лёгкая бухгалтерия, общая для быстрых путей split/merge.
+        
+        Держит _original_segment_order синхронизированным (путь сохранения читает из
+        него — устаревшая копия стала причиной потери данных при split), помечает проект
+        изменённым, обновляет статистику и превью (дёшево, если ничего не изменилось).
+        Сетку НЕ перестраивает — вызывающий код делает точечный апдейт."""
+        if getattr(self, 'current_project', None) is not None:
+            self._original_segment_order = self.current_project.segments.copy()
+        self.project_modified = True
+        self.update_window_title()
+        if hasattr(self, 'update_progress_stats'):
+            self.update_progress_stats()
+        try:
+            self.refresh_preview()
+        except Exception:
+            pass
+
+### _recompute_list_numbers (9766-9793)
+    def _recompute_list_numbers(self):
+        """Пересобрать self._list_numbers (индекс строки → номер в упорядоченном списке) после структурного изменения, зеркально предварительному проходу в load_segments_to_grid."""
+        import re
+        list_counter = 0
+        last_was_list = False
+        list_numbers = {}
+        for idx, segment in enumerate(self.current_project.segments):
+            source_text = (segment.source or "").strip()
+            is_list_item = source_text.startswith(('<li-o>', '<li-b>', '<li>'))
+            is_ordered = source_text.startswith('<li-o>') or (
+                source_text.startswith('<li>') and not source_text.startswith('<li-b>'))
+            if is_list_item and is_ordered:
+                m = re.match(r'^<li(?:-o)?>\s*(\d+)[.)\s]', source_text)
+                if m:
+                    list_counter = int(m.group(1))
+                    list_numbers[idx] = list_counter
+                    last_was_list = True
+                elif last_was_list:
+                    list_counter += 1
+                    list_numbers[idx] = list_counter
+                else:
+                    list_counter = 1
+                    list_numbers[idx] = list_counter
+                    last_was_list = True
+            else:
+                last_was_list = False
+                list_counter = 0
+        self._list_numbers = list_numbers
+
+### _reindex_grid_rows_from (9795-9816)
+    def _reindex_grid_rows_from(self, start_row: int):
+        """После вставки/удаления исправить текст ячейки # и поле .row виджетов ячеек для всех строк от start_row и далее (здесь строка сетки == индекс списка) и пересчитать множество заполненных строк. Дёшево: без пересоздания виджетов."""
+        segs = self.current_project.segments
+        n = self.table.rowCount()
+        for r in range(start_row, n):
+            if r >= len(segs):
+                break
+            seg = segs[r]
+            id_item = self.table.item(r, 0)
+            if id_item is None:
+                id_item = QTableWidgetItem()
+                id_item.setFlags(id_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.table.setItem(r, 0, id_item)
+            id_item.setText(str(seg.id))
+            for col in (2, 3, 4, 5):
+                w = self.table.cellWidget(r, col)
+                if w is not None and hasattr(w, 'row'):
+                    w.row = r
+        self._populated_rows = {
+            r for r in range(n) if self.table.cellWidget(r, 2) is not None
+        }
+
+### _select_grid_row_by_id (9818-9839)
+    def _select_grid_row_by_id(self, focus_id):
+        """Выбрать и прокрутить к строке сетки с сегментом focus_id и передать фокус таблице.
+        
+        Передача фокуса таблице важна после структурного изменения: если фокус остался
+        в QTextEdit ячейки, тот перехватит следующий Ctrl+Z (собственный текстовый undo)
+        вместо того, чтобы сработал app-уровневый структурный undo."""
+        if focus_id is None:
+            return
+        r = self._find_row_for_segment(focus_id)
+        if r >= 0:
+            self.table.selectRow(r)
+            self.table.setCurrentCell(r, 2)
+            it = self.table.item(r, 0)
+            if it is not None:
+                self.table.scrollToItem(it)
+        # Defer the focus move: when invoked from the right-click context menu,
+        # the menu restores focus to the source cell as it closes — which would
+        # override an immediate setFocus and let that cell swallow the next
+        # Ctrl+Z. Running on the next event-loop tick lands focus on the table
+        # after the menu has finished closing, so Ctrl+Z reaches structural undo.
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(0, self.table.setFocus)
+
+### _split_segment_grid_fast (9841-9867)
+    def _split_segment_grid_fast(self, row: int, left_seg, right_seg):
+        """Инкрементально обновить сетку при split: вставить одну строку, перезаполнить две затронутые, переиндексировать остальные. Бросает исключение при любой проблеме, чтобы вызывающий код откатился к полной перезагрузке."""
+        # Suppress target-change handlers while (re)building cell editors, exactly
+        # as load_segments_to_grid does — otherwise the new target editors emit
+        # textChanged and record a spurious undo entry on top of the structural
+        # one (which made Ctrl+Z need two presses to actually rejoin/split).
+        _prev_suppress = getattr(self, '_suppress_target_change_handlers', False)
+        self._suppress_target_change_handlers = True
+        try:
+            self._recompute_list_numbers()
+            self.table.insertRow(row + 1)
+            # Sanity: the grid must hold exactly one row per segment (no pagination
+            # slicing). If not, bail so the caller does a correct full reload.
+            if self.table.rowCount() != len(self.current_project.segments):
+                raise RuntimeError("grid/segment row-count mismatch")
+            self._populate_single_row(row, left_seg)
+            self._populate_single_row(row + 1, right_seg)
+            self._reindex_grid_rows_from(row + 2)
+            self._auto_resize_single_row(row)
+            self._auto_resize_single_row(row + 1)
+            for r, seg in ((row, left_seg), (row + 1, right_seg)):
+                try:
+                    self._apply_comment_anchors_to_cell(r, seg)
+                except Exception:
+                    pass
+        finally:
+            self._suppress_target_change_handlers = _prev_suppress
+
+### _merge_segment_grid_fast (9869-9886)
+    def _merge_segment_grid_fast(self, row: int, merged_seg):
+        """Инкрементально обновить сетку при merge: перезаполнить объединённую строку, удалить следующую, переиндексировать остальные. Бросает исключение при любой проблеме, чтобы вызывающий код откатился к полной перезагрузке."""
+        _prev_suppress = getattr(self, '_suppress_target_change_handlers', False)
+        self._suppress_target_change_handlers = True
+        try:
+            self._recompute_list_numbers()
+            self._populate_single_row(row, merged_seg)
+            self.table.removeRow(row + 1)
+            if self.table.rowCount() != len(self.current_project.segments):
+                raise RuntimeError("grid/segment row-count mismatch")
+            self._reindex_grid_rows_from(row + 1)
+            self._auto_resize_single_row(row)
+            try:
+                self._apply_comment_anchors_to_cell(row, merged_seg)
+            except Exception:
+                pass
+        finally:
+            self._suppress_target_change_handlers = _prev_suppress
+
+### create_quick_access_toolbar (9946-9989)
+    def create_quick_access_toolbar(self):
+        """Создать панель быстрого доступа над лентой."""
+        from PyQt6.QtWidgets import QToolBar, QWidget, QHBoxLayout
+        from PyQt6.QtCore import QSize
+        
+        qat = QToolBar("Quick Access")
+        qat.setMovable(False)
+        qat.setFloatable(False)
+        qat.setIconSize(QSize(20, 20))
+        qat.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        qat.setMaximumHeight(28)
+        qat.setMinimumWidth(170)  # Fixed width to align ribbon tabs
+        qat.setMaximumWidth(170)
+        
+        # Styling for compact appearance
+        qat.setStyleSheet("""
+            QToolBar {
+                background: transparent;
+                border: none;
+                spacing: 2px;
+                padding: 2px;
+            }
+            QToolButton {
+                background: transparent;
+                border: 1px solid transparent;
+                border-radius: 3px;
+                padding: 2px;
+                margin: 0px;
+                font-size: 14pt;
+            }
+            QToolButton:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            QToolButton:pressed {
+                background: rgba(0, 0, 0, 0.1);
+            }
+        """)
+        
+        # Empty toolbar - all buttons removed, minimize moved to ribbon
+        # Add empty separator just to maintain spacing
+        qat.addSeparator()
+        
+        return qat
