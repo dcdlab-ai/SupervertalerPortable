@@ -1,0 +1,63 @@
+SCC members: ['load_segments_to_grid']
+
+--- pagination ---
+  _maybe_auto_set_page_size                no direct cycle call; cycle does not touch
+  _get_total_pages                         no direct cycle call; cycle does not touch
+  _update_pagination_ui                    no direct cycle call; cycle does not touch
+  _apply_pagination_to_grid                no direct cycle call; cycle does not touch
+  go_to_first_page                         no direct cycle call; cycle does not touch
+  go_to_prev_page                          no direct cycle call; cycle does not touch
+  go_to_next_page                          no direct cycle call; cycle does not touch
+  select_range_page_up                     no direct cycle call; cycle does not touch
+  select_range_page_down                   no direct cycle call; cycle does not touch
+  go_to_last_page                          no direct cycle call; cycle does not touch
+  go_to_page                               no direct cycle call; cycle does not touch
+  on_page_size_changed                     no direct cycle call; cycle does not touch
+
+--- filters ---
+  _clear_filter_highlights_in_widget       no direct cycle call; cycle does not touch
+  apply_filters                            no direct cycle call; cycle does not touch
+  clear_filters                            no direct cycle call; cycle does not touch
+  _on_file_filter_changed                  no direct cycle call; cycle does not touch
+  _update_file_filter_combo                no direct cycle call; cycle does not touch
+  toggle_invisible_display                 no direct cycle call; cycle does not touch
+  toggle_all_invisibles                    no direct cycle call; cycle does not touch
+  refresh_grid_invisibles                  no direct cycle call; cycle does not touch
+  apply_invisible_replacements             no direct cycle call; cycle does not touch
+  reverse_invisible_replacements           no direct cycle call; cycle does not touch
+  filter_empty_segments                    no direct cycle call; cycle does not touch
+  _clear_all_filter_highlights             no direct cycle call; cycle does not touch
+  apply_quick_filter                       no direct cycle call; cycle does not touch
+  show_advanced_filters_dialog             no direct cycle call; cycle does not touch
+  apply_advanced_filters                   no direct cycle call; cycle does not touch
+  apply_sort                               TOUCHES CYCLE via: ['load_segments_to_grid']
+  filter_on_selected_text                  no direct cycle call; cycle does not touch
+  _ensure_shared_filter                    no direct cycle call; cycle does not touch
+  _ensure_primary_filters_ready            no direct cycle call; cycle does not touch
+
+--- helpers ---
+  _widget_is_alive                         no direct cycle call; cycle does not touch
+  _segment_for_grid_row                    no direct cycle call; cycle does not touch
+  _find_row_for_segment                    no direct cycle call; cycle does not touch
+  _find_row_for_segment_id                 no direct cycle call; cycle does not touch
+  _select_grid_row_by_id                   no direct cycle call; cycle does not touch
+  _recompute_list_numbers                  no direct cycle call; cycle does not touch
+  _reindex_grid_rows_from                  no direct cycle call; cycle does not touch
+  _get_line_edit_text                      no direct cycle call; cycle does not touch
+  _compute_initial_visible_rows            no direct cycle call; cycle does not touch
+  _resize_visible_rows                     no direct cycle call; cycle does not touch
+  _navigate_to_segment_in_grid             no direct cycle call; cycle does not touch
+  _get_selected_or_filtered_segments       no direct cycle call; cycle does not touch
+  get_selected_segments_from_grid          no direct cycle call; cycle does not touch
+  _get_filtered_segments_with_rows         no direct cycle call; cycle does not touch
+  _move_to_next_visible_row                no direct cycle call; cycle does not touch
+  _is_text_filter_active                   no direct cycle call; cycle does not touch
+
+--- populate-adjacent (NOT moved) ---
+  _start_background_populate               no direct cycle call; cycle does not touch
+  _background_populate_step                no direct cycle call; cycle does not touch
+
+--- selection micro (decision needed) ---
+  _select_range_between                    no direct cycle call; cycle does not touch
+  _clear_selection_anchor                  no direct cycle call; cycle does not touch
+

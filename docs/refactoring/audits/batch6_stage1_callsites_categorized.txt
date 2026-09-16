@@ -1,0 +1,282 @@
+##### pagination
+_maybe_auto_set_page_size                internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 41457 (in load_segments_to_grid): self._maybe_auto_set_page_size()
+_get_total_pages                         internal=  4 monolith-other=  0 bound-ref/other=  0 modules=  0
+_update_pagination_ui                    internal=  1 monolith-other=  2 bound-ref/other=  0 modules=  0
+      MONOLITH 57189 (in confirm_and_next_unconfirmed): self._update_pagination_ui()
+      MONOLITH 57237 (in confirm_and_next_unconfirmed): self._update_pagination_ui()
+_apply_pagination_to_grid                internal= 11 monolith-other=  4 bound-ref/other=  0 modules=  0
+      MONOLITH 41557 (in load_segments_to_grid): self._apply_pagination_to_grid()
+      MONOLITH 51305 (in clear_search_highlights): self._apply_pagination_to_grid()
+      MONOLITH 57190 (in confirm_and_next_unconfirmed): self._apply_pagination_to_grid()
+      MONOLITH 57238 (in confirm_and_next_unconfirmed): self._apply_pagination_to_grid()
+go_to_first_page                         internal=  0 monolith-other=  1 bound-ref/other=  1 modules=  0
+      MONOLITH 57099 (in go_to_first_segment): self.go_to_first_page()
+      REF monolith:create_grid_view_widget_for_home:27629: self.first_page_btn.clicked.connect(self.go_to_first_page)
+go_to_prev_page                          internal=  0 monolith-other=  0 bound-ref/other=  2 modules=  0
+      REF monolith:setup_global_shortcuts:7225: create_shortcut("page_prev", "PgUp", self.go_to_prev_page)
+      REF monolith:create_grid_view_widget_for_home:27637: self.prev_page_btn.clicked.connect(self.go_to_prev_page)
+go_to_next_page                          internal=  0 monolith-other=  0 bound-ref/other=  2 modules=  0
+      REF monolith:setup_global_shortcuts:7226: create_shortcut("page_next", "PgDown", self.go_to_next_page)
+      REF monolith:create_grid_view_widget_for_home:27661: self.next_page_btn.clicked.connect(self.go_to_next_page)
+select_range_page_up                     internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:setup_global_shortcuts:7229: create_shortcut("select_range_up", "Shift+PgUp", self.select_range_page_up)
+select_range_page_down                   internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:setup_global_shortcuts:7230: create_shortcut("select_range_down", "Shift+PgDown", self.select_range_page_down)
+go_to_last_page                          internal=  0 monolith-other=  1 bound-ref/other=  1 modules=  0
+      MONOLITH 57128 (in go_to_last_segment): self.go_to_last_page()
+      REF monolith:create_grid_view_widget_for_home:27669: self.last_page_btn.clicked.connect(self.go_to_last_page)
+go_to_page                               internal=  1 monolith-other=  2 bound-ref/other=  1 modules=  0
+      MONOLITH 51665 (in show_goto_dialog): self.go_to_page()
+      MONOLITH 54738 (in _navigate_to_segment_by_id): self.go_to_page()
+      REF monolith:create_grid_view_widget_for_home:27649: self.page_number_input.returnPressed.connect(self.go_to_page)
+on_page_size_changed                     internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:create_grid_view_widget_for_home:27685: self.page_size_combo.currentTextChanged.connect(self.on_page_size_changed)
+
+##### filters
+_clear_filter_highlights_in_widget       internal=  8 monolith-other=  0 bound-ref/other=  0 modules=  0
+apply_filters                            internal=  2 monolith-other=  1 bound-ref/other= 18 modules= 13
+      MONOLITH 57162 (in confirm_and_next_unconfirmed): self.apply_filters()
+      MODULES tmx_editor.py:501: self.filter_source_entry.bind('<Return>', lambda e: self.apply_filters())
+      MODULES tmx_editor.py:506: self.filter_target_entry.bind('<Return>', lambda e: self.apply_filters())
+      MODULES tmx_editor.py:836: self.apply_filters()  # Refresh view
+      MODULES tmx_editor.py:912: self.apply_filters()
+      MODULES tmx_editor.py:1076: self.apply_filters()
+      MODULES tmx_editor.py:1432: self.apply_filters()
+      MODULES tmx_editor_qt.py:1560: self.apply_filters()  # Refresh view
+      MODULES tmx_editor_qt.py:1577: self.apply_filters()  # Refresh view
+      MODULES tmx_editor_qt.py:1621: self.apply_filters()
+      MODULES tmx_editor_qt.py:1637: self.apply_filters()
+      MODULES tmx_editor_qt.py:1893: self.apply_filters()
+      MODULES tmx_editor_qt.py:2488: self.apply_filters()
+      MODULES tmx_editor_qt.py:2560: self.apply_filters()
+      REF monolith:create_grid_view_widget:27248: on_change=self.apply_filters,
+      REF monolith:create_grid_view_widget:27249: on_return=self.apply_filters,
+      REF monolith:create_grid_view_widget:27257: on_change=self.apply_filters,
+      REF monolith:create_grid_view_widget:27258: on_return=self.apply_filters,
+      REF monolith:create_grid_view_widget_for_home:27399: on_return=self.apply_filters,
+      REF monolith:create_grid_view_widget_for_home:27407: on_return=self.apply_filters,
+      REF monolith:create_grid_view_widget_for_home:27412: apply_filter_btn.clicked.connect(self.apply_filters)
+      REF monolith:_ensure_primary_filters_ready:28870: on_change=self.apply_filters,
+      REF monolith:_ensure_primary_filters_ready:28871: on_return=self.apply_filters,
+      REF monolith:_ensure_primary_filters_ready:28876: on_change=self.apply_filters,
+      REF monolith:_ensure_primary_filters_ready:28877: on_return=self.apply_filters,
+      REF tmx_editor.py:508: tk.Button(filter_frame, text="Apply Filter", command=self.apply_filters,
+      REF tmx_editor_qt.py:592: self.filter_source_entry.returnPressed.connect(self.apply_filters)
+      REF tmx_editor_qt.py:601: self.filter_target_entry.returnPressed.connect(self.apply_filters)
+      REF tmx_editor_qt.py:612: btn_apply.clicked.connect(self.apply_filters)
+      REF tmx_editor_qt.py:678: self.filter_source_entry.returnPressed.connect(self.apply_filters)
+      REF tmx_editor_qt.py:686: self.filter_target_entry.returnPressed.connect(self.apply_filters)
+      REF tmx_editor_qt.py:691: btn_apply.clicked.connect(self.apply_filters)
+clear_filters                            internal=  2 monolith-other=  0 bound-ref/other=  5 modules=  0
+      REF monolith:create_grid_view_widget:27263: clear_filters_btn.clicked.connect(self.clear_filters)
+      REF monolith:create_grid_view_widget_for_home:27418: clear_filters_btn.clicked.connect(self.clear_filters)
+      REF tmx_editor.py:510: tk.Button(filter_frame, text="Clear", command=self.clear_filters,
+      REF tmx_editor_qt.py:626: btn_clear.clicked.connect(self.clear_filters)
+      REF tmx_editor_qt.py:718: btn_clear.clicked.connect(self.clear_filters)
+_on_file_filter_changed                  internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:create_grid_view_widget_for_home:27507: self.file_filter_combo.currentIndexChanged.connect(self._on_file_filter_changed)
+_update_file_filter_combo                internal=  0 monolith-other=  7 bound-ref/other=  0 modules=  0
+      MONOLITH 30486 (in load_project): self._update_file_filter_combo()
+      MONOLITH 34961 (in _import_multifile_project): self._update_file_filter_combo()
+      MONOLITH 38321 (in import_sdlppx_package): self._update_file_filter_combo()
+      MONOLITH 38889 (in import_standalone_sdlxliff): self._update_file_filter_combo()
+      MONOLITH 39096 (in import_sdlxliff_folder): self._update_file_filter_combo()
+      MONOLITH 52680 (in show_manage_views_dialog): self._update_file_filter_combo()
+      MONOLITH 52744 (in show_manage_views_dialog): self._update_file_filter_combo()
+toggle_invisible_display                 internal=  0 monolith-other=  8 bound-ref/other=  0 modules=  0
+      MONOLITH 27277 (in create_grid_view_widget): self.show_spaces_action.triggered.connect(lambda: self.toggle_invisible_display('spaces'))
+      MONOLITH 27282 (in create_grid_view_widget): self.show_tabs_action.triggered.connect(lambda: self.toggle_invisible_display('tabs'))
+      MONOLITH 27287 (in create_grid_view_widget): self.show_nbsp_action.triggered.connect(lambda: self.toggle_invisible_display('nbsp'))
+      MONOLITH 27292 (in create_grid_view_widget): self.show_linebreaks_action.triggered.connect(lambda: self.toggle_invisible_display('linebreaks'))
+      MONOLITH 27523 (in create_grid_view_widget_for_home): self.show_spaces_action.triggered.connect(lambda: self.toggle_invisible_display('spaces'))
+      MONOLITH 27528 (in create_grid_view_widget_for_home): self.show_tabs_action.triggered.connect(lambda: self.toggle_invisible_display('tabs'))
+      MONOLITH 27533 (in create_grid_view_widget_for_home): self.show_nbsp_action.triggered.connect(lambda: self.toggle_invisible_display('nbsp'))
+      MONOLITH 27538 (in create_grid_view_widget_for_home): self.show_linebreaks_action.triggered.connect(lambda: self.toggle_invisible_display('linebreaks'))
+toggle_all_invisibles                    internal=  0 monolith-other=  0 bound-ref/other=  3 modules=  0
+      REF monolith:create_grid_view_widget:27298: toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+      REF monolith:create_grid_view_widget_for_home:27543: toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+      REF monolith:create_grid_view_widget_for_home:27552: toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+refresh_grid_invisibles                  internal=  2 monolith-other=  0 bound-ref/other=  0 modules=  0
+apply_invisible_replacements             internal=  2 monolith-other= 15 bound-ref/other=  3 modules=  1
+      MONOLITH 41137 (in _populate_single_row): source_display_text = self.apply_invisible_replacements(source_for_display)
+      MONOLITH 41202 (in _populate_single_row): target_display_text = self.apply_invisible_replacements(target_for_display)
+      MONOLITH 41322 (in _populate_single_row): display_text = self.apply_invisible_replacements(display_source)
+      MONOLITH 41337 (in _populate_single_row): new_display_before = self.apply_invisible_replacements(display_source[:clean_pos])
+      MONOLITH 41933 (in _update_match_panel_tm_display): tm_src_display = self.apply_invisible_replacements(tm_src_display)
+      MONOLITH 41943 (in _update_match_panel_tm_display): target_display = self.apply_invisible_replacements(target_display)
+      MONOLITH 42535 (in _update_compare_panel_tm_display): cp_src_display = self.apply_invisible_replacements(cp_src_display)
+      MONOLITH 42543 (in _update_compare_panel_tm_display): tm_target_text = self.apply_invisible_replacements(tm_target_text)
+      MONOLITH 47427 (in copy_source_to_target_bulk): target_display = self.apply_invisible_replacements(source_text) if hasattr(self, 'apply_invisible_replacements
+      MONOLITH 47549 (in copy_source_to_target_non_translatable_bulk): self.apply_invisible_replacements(transformed)
+      MONOLITH 47618 (in _copy_source_to_target_selected): target_display = self.apply_invisible_replacements(source_text) if hasattr(self, 'apply_invisible_replacements
+      MONOLITH 56308 (in copy_source_to_grid_target): display_text = self.apply_invisible_replacements(segment.source) if hasattr(self, 'apply_invisible_replacement
+      MONOLITH 58058 (in _refresh_grid_display_mode): source_for_display = self.apply_invisible_replacements(source_for_display)
+      MONOLITH 58059 (in _refresh_grid_display_mode): target_for_display = self.apply_invisible_replacements(target_for_display)
+      MONOLITH 60486 (in autotag_current_segment): display_target = self.apply_invisible_replacements(display_target)
+      MODULES undo_manager.py:215: display = (self.apply_invisible_replacements(target)
+      REF monolith:__init__:6230: apply_invisible_replacements=self.apply_invisible_replacements,
+      REF undo_manager.py:80: self.apply_invisible_replacements = apply_invisible_replacements
+      REF undo_manager.py:216: if self.apply_invisible_replacements is not None else target)
+reverse_invisible_replacements           internal=  1 monolith-other= 24 bound-ref/other=  0 modules=  0
+      MONOLITH 8052 (in show_mt_quick_popup): text_to_translate = self.reverse_invisible_replacements(text_to_translate)
+      MONOLITH 8104 (in show_mt_quick_popup): new_target = self.reverse_invisible_replacements(new_target)
+      MONOLITH 9614 (in split_current_segment): prefix = self.reverse_invisible_replacements(prefix)
+      MONOLITH 15500 (in _update_both_termlens): source_text = self.reverse_invisible_replacements(source_text)
+      MONOLITH 16522 (in _quick_add_term_with_priority): source_text = self.reverse_invisible_replacements(source_widget.textCursor().selectedText()).strip()
+      MONOLITH 16528 (in _quick_add_term_with_priority): target_text = self.reverse_invisible_replacements(target_widget.textCursor().selectedText()).strip()
+      MONOLITH 18524 (in _show_term_extraction_dialog): text = self.reverse_invisible_replacements(text)
+      MONOLITH 29431 (in on_match_inserted): new_target = self.reverse_invisible_replacements(new_target)
+      MONOLITH 31992 (in save_segment_to_activated_tms): source = self.reverse_invisible_replacements(source)
+      MONOLITH 31993 (in save_segment_to_activated_tms): target = self.reverse_invisible_replacements(target)
+      MONOLITH 38031 (in export_trados_bilingual): target_text = self.reverse_invisible_replacements(target_text).strip()
+      MONOLITH 41244 (in _populate_single_row): new_text = self.reverse_invisible_replacements(new_text)
+      MONOLITH 41333 (in _populate_single_row): clean_pos = len(self.reverse_invisible_replacements(old_before_cursor))
+      MONOLITH 41926 (in _update_match_panel_tm_display): clean_tm_source = self.reverse_invisible_replacements(clean_tm_source)
+      MONOLITH 41941 (in _update_match_panel_tm_display): target_display = self.reverse_invisible_replacements(target_display)
+      MONOLITH 42528 (in _update_compare_panel_tm_display): tm_source = self.reverse_invisible_replacements(tm_source)
+      MONOLITH 42541 (in _update_compare_panel_tm_display): tm_target_text = self.reverse_invisible_replacements(tm_target_text)
+      MONOLITH 44007 (in _insert_quicktrans_translation): new_target = self.reverse_invisible_replacements(new_target)
+      MONOLITH 45821 (in _make_source_changed_handler): new_text = self.reverse_invisible_replacements(new_text)
+      MONOLITH 48431 (in send_segments_to_tm_dialog): source_clean = self.reverse_invisible_replacements(source_clean)
+      MONOLITH 48432 (in send_segments_to_tm_dialog): target_clean = self.reverse_invisible_replacements(target_clean)
+      MONOLITH 49634 (in find_termbase_matches_in_source): source_text = self.reverse_invisible_replacements(source_text)
+      MONOLITH 57706 (in _sync_grid_targets_to_segments): text = self.reverse_invisible_replacements(text)
+      MONOLITH 60514 (in _quicklauncher_get_selection_text): text = self.reverse_invisible_replacements(text)
+filter_empty_segments                    internal=  0 monolith-other=  0 bound-ref/other=  0 modules=  0
+_clear_all_filter_highlights             internal=  3 monolith-other=  0 bound-ref/other=  0 modules=  0
+apply_quick_filter                       internal=  0 monolith-other=  6 bound-ref/other=  0 modules=  0
+      MONOLITH 27427 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("🔍 Empty segments", lambda: self.apply_quick_filter("empty"))
+      MONOLITH 27428 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("❌ Not started", lambda: self.apply_quick_filter("not_started"))
+      MONOLITH 27429 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("✓ Confirmed", lambda: self.apply_quick_filter("confirmed"))
+      MONOLITH 27430 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("🔒 Locked", lambda: self.apply_quick_filter("locked"))
+      MONOLITH 27431 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("🔓 Not locked", lambda: self.apply_quick_filter("not_locked"))
+      MONOLITH 27432 (in create_grid_view_widget_for_home): quick_filter_menu.addAction("💬 Commented", lambda: self.apply_quick_filter("commented"))
+show_advanced_filters_dialog             internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:create_grid_view_widget_for_home:27437: advanced_filter_btn.clicked.connect(self.show_advanced_filters_dialog)
+apply_advanced_filters                   internal=  1 monolith-other=  0 bound-ref/other=  0 modules=  0
+apply_sort                               internal=  0 monolith-other= 18 bound-ref/other=  0 modules=  0
+      MONOLITH 27452 (in create_grid_view_widget_for_home): sort_menu.addAction("📝 Source A → Z", lambda: self.apply_sort('source_asc'))
+      MONOLITH 27453 (in create_grid_view_widget_for_home): sort_menu.addAction("📝 Source Z → A", lambda: self.apply_sort('source_desc'))
+      MONOLITH 27458 (in create_grid_view_widget_for_home): sort_menu.addAction("📄 Target A → Z", lambda: self.apply_sort('target_asc'))
+      MONOLITH 27459 (in create_grid_view_widget_for_home): sort_menu.addAction("📄 Target Z → A", lambda: self.apply_sort('target_desc'))
+      MONOLITH 27464 (in create_grid_view_widget_for_home): sort_menu.addAction("📏 Source (longer first)", lambda: self.apply_sort('source_length_desc'))
+      MONOLITH 27465 (in create_grid_view_widget_for_home): sort_menu.addAction("📏 Source (shorter first)", lambda: self.apply_sort('source_length_asc'))
+      MONOLITH 27466 (in create_grid_view_widget_for_home): sort_menu.addAction("📏 Target (longer first)", lambda: self.apply_sort('target_length_desc'))
+      MONOLITH 27467 (in create_grid_view_widget_for_home): sort_menu.addAction("📏 Target (shorter first)", lambda: self.apply_sort('target_length_asc'))
+      MONOLITH 27472 (in create_grid_view_widget_for_home): sort_menu.addAction("🎯 Match Rate (higher first)", lambda: self.apply_sort('match_desc'))
+      MONOLITH 27473 (in create_grid_view_widget_for_home): sort_menu.addAction("🎯 Match Rate (lower first)", lambda: self.apply_sort('match_asc'))
+      MONOLITH 27478 (in create_grid_view_widget_for_home): sort_menu.addAction("📊 Source Frequency (higher first)", lambda: self.apply_sort('source_freq_desc'))
+      MONOLITH 27479 (in create_grid_view_widget_for_home): sort_menu.addAction("📊 Source Frequency (lower first)", lambda: self.apply_sort('source_freq_asc'))
+      MONOLITH 27480 (in create_grid_view_widget_for_home): sort_menu.addAction("📊 Target Frequency (higher first)", lambda: self.apply_sort('target_freq_desc'))
+      MONOLITH 27481 (in create_grid_view_widget_for_home): sort_menu.addAction("📊 Target Frequency (lower first)", lambda: self.apply_sort('target_freq_asc'))
+      MONOLITH 27486 (in create_grid_view_widget_for_home): sort_menu.addAction("🕒 Last Changed (newest first)", lambda: self.apply_sort('modified_desc'))
+      MONOLITH 27487 (in create_grid_view_widget_for_home): sort_menu.addAction("🕒 Last Changed (oldest first)", lambda: self.apply_sort('modified_asc'))
+      MONOLITH 27492 (in create_grid_view_widget_for_home): sort_menu.addAction("🚦 Row Status", lambda: self.apply_sort('status'))
+      MONOLITH 27497 (in create_grid_view_widget_for_home): sort_menu.addAction("↩️ Document Order (default)", lambda: self.apply_sort(None))
+filter_on_selected_text                  internal=  0 monolith-other=  0 bound-ref/other=  1 modules=  0
+      REF monolith:setup_global_shortcuts:7216: create_shortcut("filter_selected_text", "Ctrl+Shift+F", self.filter_on_selected_text)
+_ensure_shared_filter                    internal=  2 monolith-other=  4 bound-ref/other=  0 modules=  0
+      MONOLITH 27245 (in create_grid_view_widget): self.source_filter = self._ensure_shared_filter(
+      MONOLITH 27254 (in create_grid_view_widget): self.target_filter = self._ensure_shared_filter(
+      MONOLITH 27396 (in create_grid_view_widget_for_home): self.source_filter = self._ensure_shared_filter(
+      MONOLITH 27404 (in create_grid_view_widget_for_home): self.target_filter = self._ensure_shared_filter(
+_ensure_primary_filters_ready            internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 52159 (in search_segments): self._ensure_primary_filters_ready()
+
+##### helpers
+_widget_is_alive                         internal= 26 monolith-other= 28 bound-ref/other=  0 modules=  0
+      MONOLITH 27348 (in create_grid_view_widget): if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+      MONOLITH 27610 (in create_grid_view_widget_for_home): if not hasattr(self, 'pagination_label') or not self._widget_is_alive(self.pagination_label):
+      MONOLITH 27625 (in create_grid_view_widget_for_home): if not hasattr(self, 'first_page_btn') or not self._widget_is_alive(self.first_page_btn):
+      MONOLITH 27633 (in create_grid_view_widget_for_home): if not hasattr(self, 'prev_page_btn') or not self._widget_is_alive(self.prev_page_btn):
+      MONOLITH 27644 (in create_grid_view_widget_for_home): if not hasattr(self, 'page_number_input') or not self._widget_is_alive(self.page_number_input):
+      MONOLITH 27652 (in create_grid_view_widget_for_home): if not hasattr(self, 'total_pages_label') or not self._widget_is_alive(self.total_pages_label):
+      MONOLITH 27657 (in create_grid_view_widget_for_home): if not hasattr(self, 'next_page_btn') or not self._widget_is_alive(self.next_page_btn):
+      MONOLITH 27665 (in create_grid_view_widget_for_home): if not hasattr(self, 'last_page_btn') or not self._widget_is_alive(self.last_page_btn):
+      MONOLITH 27676 (in create_grid_view_widget_for_home): if not hasattr(self, 'page_size_combo') or not self._widget_is_alive(self.page_size_combo):
+      MONOLITH 27706 (in create_grid_view_widget_for_home): if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+      MONOLITH 28915 (in _get_warning_banner): if not self._widget_is_alive(banner):
+      MONOLITH 54462 (in _sync_segment_comments_to_active): if self._widget_is_alive(btn):
+      MONOLITH 54473 (in _sync_segment_comments_to_active): if self._widget_is_alive(btn):
+      MONOLITH 54488 (in _sync_segment_comments_to_active): if (scroll is not None and self._widget_is_alive(scroll)
+      MONOLITH 54489 (in _sync_segment_comments_to_active): and self._widget_is_alive(first)):
+      MONOLITH 54809 (in _open_comment_in_panel): if scroll is not None and self._widget_is_alive(scroll):
+      MONOLITH 54820 (in _flash_comment_header): if not self._widget_is_alive(btn):
+      MONOLITH 54830 (in _flash_comment_header): if self._widget_is_alive(btn):
+      MONOLITH 55081 (in _sync_proofreading_comments_to_active): if self._widget_is_alive(btn):
+      MONOLITH 55091 (in _sync_proofreading_comments_to_active): if self._widget_is_alive(btn):
+      MONOLITH 55103 (in _sync_proofreading_comments_to_active): if (scroll is not None and self._widget_is_alive(scroll)
+      MONOLITH 55104 (in _sync_proofreading_comments_to_active): and self._widget_is_alive(first)):
+      MONOLITH 56592 (in _get_active_match_shortcut_mode): if hasattr(self, 'right_tabs') and self._widget_is_alive(self.right_tabs):
+      MONOLITH 56634 (in _compare_panel_nav_active_box): if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+      MONOLITH 56657 (in _insert_compare_panel_current_match): if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+      MONOLITH 56974 (in _insert_compare_panel_match_by_number): if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+      MONOLITH 58620 (in update_warning_banner): if not self._widget_is_alive(banner):
+      MONOLITH 58646 (in update_grid_delegate): if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+_segment_for_grid_row                    internal=  0 monolith-other=  4 bound-ref/other=  0 modules=  0
+      MONOLITH 9442 (in _split_segment_at_row): seg, idx = self._segment_for_grid_row(row)
+      MONOLITH 9483 (in _merge_segment_at_row): seg, idx = self._segment_for_grid_row(row)
+      MONOLITH 9529 (in _delete_segments_at_rows): seg, idx = self._segment_for_grid_row(r)
+      MONOLITH 58034 (in _refresh_grid_display_mode): segment, _seg_idx = self._segment_for_grid_row(row)
+_find_row_for_segment                    internal=  1 monolith-other=  7 bound-ref/other=  2 modules=  1
+      MONOLITH 47412 (in copy_source_to_target_bulk): row = self._find_row_for_segment(segment.id)
+      MONOLITH 47533 (in copy_source_to_target_non_translatable_bulk): row = self._find_row_for_segment(segment.id)
+      MONOLITH 47604 (in _copy_source_to_target_selected): row = self._find_row_for_segment(segment.id)
+      MONOLITH 57503 (in _auto_propagate_to_identical): row = self._find_row_for_segment(other.id)
+      MONOLITH 57597 (in confirm_selected_segments): row = self._find_row_for_segment(segment.id)
+      MONOLITH 57678 (in change_status_selected): row = self._find_row_for_segment(segment.id)
+      MONOLITH 57700 (in _sync_grid_targets_to_segments): row = self._find_row_for_segment(segment.id)
+      MODULES undo_manager.py:210: row = self._find_row_for_segment(segment_id)
+      REF monolith:__init__:6223: _find_row_for_segment=self._find_row_for_segment,
+      REF undo_manager.py:73: self._find_row_for_segment = _find_row_for_segment
+_find_row_for_segment_id                 internal=  0 monolith-other=  2 bound-ref/other=  0 modules=  0
+      MONOLITH 54538 (in _comment_context_menu): affected_row = self._find_row_for_segment_id(segment.id)
+      MONOLITH 54635 (in _edit_comment_dialog): affected_row = self._find_row_for_segment_id(segment.id)
+_select_grid_row_by_id                   internal=  0 monolith-other=  7 bound-ref/other=  2 modules=  1
+      MONOLITH 9465 (in _split_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9469 (in _split_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9472 (in _split_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9501 (in _merge_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9505 (in _merge_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9508 (in _merge_segment_at_row): self._select_grid_row_by_id(focus_id)
+      MONOLITH 9558 (in _delete_segments_at_rows): self._select_grid_row_by_id(focus_id)
+      MODULES undo_manager.py:290: self._select_grid_row_by_id(focus_id)
+      REF monolith:__init__:6225: _select_grid_row_by_id=self._select_grid_row_by_id,
+      REF undo_manager.py:75: self._select_grid_row_by_id = _select_grid_row_by_id
+_recompute_list_numbers                  internal=  0 monolith-other=  2 bound-ref/other=  0 modules=  0
+      MONOLITH 9734 (in _split_segment_grid_fast): self._recompute_list_numbers()
+      MONOLITH 9758 (in _merge_segment_grid_fast): self._recompute_list_numbers()
+_reindex_grid_rows_from                  internal=  0 monolith-other=  2 bound-ref/other=  0 modules=  0
+      MONOLITH 9742 (in _split_segment_grid_fast): self._reindex_grid_rows_from(row + 2)
+      MONOLITH 9763 (in _merge_segment_grid_fast): self._reindex_grid_rows_from(row + 1)
+_get_line_edit_text                      internal=  6 monolith-other=  0 bound-ref/other=  0 modules=  0
+_compute_initial_visible_rows            internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 41510 (in load_segments_to_grid): _initial_visible = self._compute_initial_visible_rows(_total_rows)
+_resize_visible_rows                     internal=  1 monolith-other=  0 bound-ref/other=  3 modules=  0
+      REF monolith:_apply_pagination_to_grid:28486: QTimer.singleShot(50, self._resize_visible_rows)
+      REF monolith:load_segments_to_grid:41598: QTimer.singleShot(0, self._resize_visible_rows)
+      REF monolith:_on_column_resized:44179: self._column_resize_timer.timeout.connect(self._resize_visible_rows)
+_navigate_to_segment_in_grid             internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 42950 (in _on_preview_click): self._navigate_to_segment_in_grid(segment_id)
+_get_selected_or_filtered_segments       internal=  0 monolith-other=  5 bound-ref/other=  0 modules=  0
+      MONOLITH 47380 (in clear_selected_translations_from_menu): segments = self._get_selected_or_filtered_segments("Clear Translations")
+      MONOLITH 47392 (in copy_source_to_target_bulk): selected_segments = self._get_selected_or_filtered_segments("Copy Source to Target")
+      MONOLITH 47494 (in copy_source_to_target_non_translatable_bulk): selected_segments = self._get_selected_or_filtered_segments("Copy Source to Target (Non-Translatable)")
+      MONOLITH 57628 (in confirm_selected_segments_from_menu): segments = self._get_selected_or_filtered_segments("Confirm Segments")
+      MONOLITH 57656 (in change_status_selected): selected_segments = self._get_selected_or_filtered_segments(f"Change Status to '{status_def.label}'")
+get_selected_segments_from_grid          internal=  1 monolith-other=  6 bound-ref/other=  0 modules=  0
+      MONOLITH 47279 (in show_grid_context_menu): selected_segments = self.get_selected_segments_from_grid()
+      MONOLITH 48233 (in send_segments_to_tm_dialog): selected_segments = self.get_selected_segments_from_grid() if hasattr(self, 'get_selected_segments_from_grid')
+      MONOLITH 57353 (in confirm_selected_or_next): selected_segments = self.get_selected_segments_from_grid()
+      MONOLITH 57575 (in confirm_selected_segments): selected_segments = segments or self.get_selected_segments_from_grid()
+      MONOLITH 57658 (in change_status_selected): selected_segments = self.get_selected_segments_from_grid()
+      MONOLITH 60951 (in _get_selected_segments_with_rows): for seg in self.get_selected_segments_from_grid():
+_get_filtered_segments_with_rows         internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 60920 (in translate_multiple_segments): segments_with_rows = self._get_filtered_segments_with_rows()
+_move_to_next_visible_row                internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 57163 (in confirm_and_next_unconfirmed): self._move_to_next_visible_row(current_row)
+_is_text_filter_active                   internal=  0 monolith-other=  1 bound-ref/other=  0 modules=  0
+      MONOLITH 57159 (in confirm_and_next_unconfirmed): if self._is_text_filter_active():
+
+TOTALS internal=75 monolith-other=163 bound-ref/other=49 modules=16

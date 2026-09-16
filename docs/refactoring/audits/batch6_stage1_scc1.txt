@@ -1,0 +1,5 @@
+SCC around load_segments_to_grid: 1 methods (mutually reachable via self-calls)
+  load_segments_to_grid                         41428-41598
+
+forward-reachable from centre: 82
+can reach centre: 60

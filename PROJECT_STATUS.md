@@ -4,14 +4,15 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-16 (Batch #5 Stage 2) • **Текущий шаг:** Step 5 выполнен полностью (Stage 1 + Stage 2); следующий — Step 6 (Grid: helpers/pagination/filters), ждать GO владельца
+**Обновлено:** 2026-09-16 (Batch #6 Stage 1) • **Текущий шаг:** Step 6 Stage 1 выполнен (read-only инвентаризация); ждать GO владельца на состав/архитектуру/разбивку → Stage 2 (helpers.py)
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
 сейчас **69 696**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
-Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5). Следующий — **Step 6:
-Grid helpers/pagination/filters**. Среда, тестирование и валидация — по `AGENTS.md`
+Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5). **Step 6 (Batch #6):
+Stage 1 (инвентаризация) выполнен**, Stage 2+ (перенос helpers/pagination/filters)
+ждут GO владельца. Среда, тестирование и валидация — по `AGENTS.md`
 (обязательно к прочтению перед любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
@@ -23,8 +24,8 @@ Grid helpers/pagination/filters**. Среда, тестирование и ва�
 | 2 | DOCX tag-движок → `modules/tag_manager.py` | ✅ выполнен | Batch #2, коммит `1ac400d`; см. TECH-DEBT в конце `EXTRACTION_PLAN.md` |
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
-| 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (этот коммит; `modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
-| 6 | Grid: helpers/pagination/filters | ⬜ не начат | — |
+| 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
+| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1 выполнен (инвентаризация, read-only) | Batch #6 Stage 1 (этот коммит); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 1.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt` |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
@@ -36,20 +37,30 @@ Grid helpers/pagination/filters**. Среда, тестирование и ва�
 
 ## Что дальше: Step 6 — Grid: helpers/pagination/filters (Batch #6)
 
-**Step 5 выполнен полностью** (Stage 2, 16.09.2026): 8 методов перенесены в
-`modules/undo_manager.py` (класс `UndoManager`, 302 строки), состояние
-`undo_stack`/`redo_stack`/`max_undo_levels` — в менеджере, в монолите — 8 тонких
-делегатов с теми же именами (все 43 call sites не тронуты), инициализация в
-`__init__` заменена созданием `self._undo_manager = UndoManager(<колбэки>)`.
-Зависимости — только именованные колбэки (геттеры `get_current_project`,
-`get_table`, `get_current_sort`, `get_undo_action`, `get_redo_action`; сеттер
-`set_original_segment_order`; действие `mark_project_modified`; статические
-bound-method ссылки с именами оригинальных методов). Отчёт:
-`docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 2.txt` (GO; валидация 38/38
-функциональных сценариев, 14/14 NOT MOVE byte-identity, метрики/манифест чистые).
-Открытый вопрос для владельца — семантика batch-undo (см. «Непокрытые» в отчёте
-Stage 2): фактическое поведение оригинала — N записей стека с одним trim/UI-проходом,
-undo по одной записи (LIFO); сохранено дословно.
+**Stage 1 выполнен** (16.09.2026, read-only, код не тронут). Главная находка:
+документированные окна Step 6 в EXTRACTION_PLAN.md устарели сильнее, чем
+ожидалось (сдвиг ~−3300, а не −531) и почти целиком указывают на посторонний
+код (termbase/TM-поиск, proofreading, voice). Реальные кластеры найдены по
+содержимому (AST): пагинация 28266–28878, фильтры/невидимые 52186–53901 +
+56218–56280 + 28850–28878. Итоговый состав на перенос — **48 методов, ~1780
+строк**: pagination.py 12 (367), filters.py 20 (1097), helpers.py 16 (316);
+на решение ещё 3 метода (selection-micro, _navigate_to_segment_by_id,
+show_manage_views_dialog). Цикл SCC#1: центр подтверждён
+`load_segments_to_grid` 41428–41598; на уровне self-вызовов строгого цикла
+нет (SCC=1; fwd=82/bwd=60) — цикл замыкается через populate-механику и
+UI-сигналы; из кандидатов его касается ТОЛЬКО `apply_sort` (2 прямых вызова,
+разрыв — reload_callback параметром). DYNAMIC_ENTRY_POINT: 9 методов
+(go_to_prev/next_page, select_range_page_up/down, on_page_size_changed,
+_on_file_filter_changed, toggle_all_invisibles, show_advanced_filters_dialog,
+filter_on_selected_text) — обязательны делегаты. Реальные внешние связи — 3
+bound-метода в modules/undo_manager.py (переживают перенос при сохранении
+делегатов). Рекомендация: helpers.py — функции; pagination.py/filters.py —
+классы-контейнеры; под-батчи Stage 2=helpers → 3=pagination → 4=filters.
+Полный отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 1.txt`;
+аудиты: `docs/refactoring/audits/batch6_stage1_{windows_ast,cluster_layout,
+named_helpers_ast,scc1,cycle_intersections,callsites_categorized,
+dependencies}.txt`. Ожидание решения владельца (6 открытых вопросов в §8
+отчёта) → Stage 2.
 
 Фактические AST-границы окна бывшего Step 5 в монолите (HEAD после Stage 2,
 пересчитаны AST — документированные номера в CODE_MAP_REFACTOR.md устарели):

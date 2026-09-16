@@ -1,0 +1,88 @@
+Monolith lines: 69696; class SupervertalerQt: 6051-63768; methods total: 819
+
+=== WINDOW A (pagination) (window 30893-31719) : 8 methods ===
+_build_termbase_index                          30870- 31153  lines= 284 args=1
+_search_termbase_in_memory                     31155- 31304  lines= 150 args=2
+_start_termbase_batch_worker                   31306- 31340  lines=  35 args=1
+_termbase_batch_worker_run                     31342- 31398  lines=  57 args=2
+_search_termbases_thread_safe                  31400- 31589  lines= 190 args=6
+_trigger_idle_prefetch                         31591- 31637  lines=  47 args=2
+_start_prefetch_worker                         31639- 31664  lines=  26 args=2
+_prefetch_worker_run                           31666- 31774  lines= 109 args=2
+
+=== WINDOW B (filters) (window 31469-31807) : 5 methods ===
+_search_termbases_thread_safe                  31400- 31589  lines= 190 args=6
+_trigger_idle_prefetch                         31591- 31637  lines=  47 args=2
+_start_prefetch_worker                         31639- 31664  lines=  26 args=2
+_prefetch_worker_run                           31666- 31774  lines= 109 args=2
+_fetch_all_matches_for_segment                 31776- 31945  lines= 170 args=4
+
+=== WINDOW C (filters cont.) (window 54763-56869) : 67 methods ===
+_navigate_to_segment_by_id                     54700- 54769  lines=  70 args=2
+_open_comment_in_panel                         54771- 54816  lines=  46 args=2
+_flash_comment_header                          54818- 54833  lines=  16 args=2
+_on_bottom_notes_changed                       54835- 54881  lines=  47 args=1
+_on_scratchpad_changed                         54883- 54891  lines=   9 args=1
+_update_scratchpad_for_project                 54893- 54903  lines=  11 args=1
+_update_bottom_notes_for_segment               54905- 54943  lines=  39 args=2
+_update_proofreading_notes_for_segment         54945- 54953  lines=   9 args=2
+_refresh_proofreading_comments_list            54955- 55073  lines= 119 args=1
+_sync_proofreading_comments_to_active          55075- 55109  lines=  35 args=3
+_delete_proofreading_comment                   55111- 55129  lines=  19 args=3
+delete_all_proofreading_comments               55131- 55164  lines=  34 args=1
+copy_source_to_tab_target                      55167- 55176  lines=  10 args=1
+clear_tab_target                               55178- 55186  lines=   9 args=1
+_get_voice_release_poller                      55188- 55224  lines=  37 args=1
+_get_command_ptt_release_poller                55226- 55263  lines=  38 args=1
+_register_voice_pushtotalk_deferred            55265- 55280  lines=  16 args=2
+_register_voice_command_ptt_deferred           55284- 55305  lines=  22 args=2
+_on_voice_command_ptt_press                    55307- 55375  lines=  69 args=1
+_on_voice_command_ptt_release                  55377- 55437  lines=  61 args=1
+_do_voice_command_ptt_stop                     55439- 55476  lines=  38 args=1
+_get_voice_hotkey_listener                     55478- 55532  lines=  55 args=1
+_voice_pause_mode                              55541- 55545  lines=   5 args=1
+_pause_alwayson_external                       55547- 55556  lines=  10 args=1
+_resume_alwayson_external                      55558- 55569  lines=  12 args=1
+_ensure_voice_pause_hotkey_armed               55571- 55602  lines=  32 args=1
+_on_voice_pause_press                          55604- 55611  lines=   8 args=1
+_on_voice_pause_release                        55613- 55615  lines=   3 args=1
+_set_voice_pause_setting                       55617- 55624  lines=   8 args=1
+_begin_voice_pause_capture                     55626- 55637  lines=  12 args=1
+_on_voice_pause_key_captured                   55639- 55659  lines=  21 args=2
+_clear_voice_pause_hotkey                      55661- 55674  lines=  14 args=1
+stop_voice_dictation_if_recording              55676- 55713  lines=  38 args=1
+start_voice_dictation                          55715- 55933  lines= 219 args=1
+on_dictation_complete                          55935- 55950  lines=  16 args=2
+_insert_dictated_text                          55952- 56025  lines=  74 args=2
+on_dictation_status                            56027- 56030  lines=   4 args=2
+on_dictation_error                             56032- 56049  lines=  18 args=2
+on_dictation_finished                          56051- 56064  lines=  14 args=1
+_resume_alwayson_after_dictation               56066- 56084  lines=  19 args=1
+on_model_loading_started                       56086- 56119  lines=  34 args=2
+on_model_loading_finished                      56121- 56127  lines=   7 args=1
+_dictation_shortcut_label                      56129- 56151  lines=  23 args=1
+_set_dictation_button_recording                56153- 56180  lines=  28 args=2
+save_tab_segment                               56182- 56202  lines=  21 args=1
+save_tab_segment_and_next                      56204- 56212  lines=   9 args=1
+filter_on_selected_text                        56218- 56280  lines=  63 args=1
+copy_source_to_grid_target                     56282- 56312  lines=  31 args=1
+clear_grid_target                              56314- 56342  lines=  29 args=1
+save_grid_segment                              56344- 56363  lines=  20 args=1
+save_grid_segment_and_next                     56365- 56383  lines=  19 args=1
+select_previous_match                          56389- 56410  lines=  22 args=1
+select_next_match                              56412- 56433  lines=  22 args=1
+insert_match_by_number                         56435- 56470  lines=  36 args=2
+_handle_termlens_shortcut                      56472- 56511  lines=  40 args=2
+_get_current_target_widget                     56513- 56519  lines=   7 args=1
+insert_termlens_term_by_number                 56521- 56557  lines=  37 args=2
+insert_selected_match                          56559- 56583  lines=  25 args=1
+_get_active_match_shortcut_mode                56585- 56602  lines=  18 args=1
+_active_quicktrans_panel                       56604- 56617  lines=  14 args=1
+_iter_visible_results_panels                   56619- 56628  lines=  10 args=1
+_compare_panel_nav_active_box                  56630- 56651  lines=  22 args=2
+_insert_compare_panel_current_match            56653- 56673  lines=  21 args=1
+_handle_compare_panel_alt0_shortcut            56675- 56720  lines=  46 args=1
+_replace_current_target_segment_text           56722- 56798  lines=  77 args=3
+_play_sound_effect                             56800- 56866  lines=  67 args=2
+_queue_tm_save_log                             56868- 56916  lines=  49 args=2
+

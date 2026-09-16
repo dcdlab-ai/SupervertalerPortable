@@ -1,0 +1,349 @@
+ОТЧЁТ Batch #6 Stage 1 — Step 6 (Grid: helpers/pagination/filters)
+Инвентаризация, карта цикла SCC#1, план под-батчей
+════════════════════════════════════════════════════════════════
+Дата: 2026-09-16. База: HEAD 559eb06 (Batch #5 Stage 2), ветка main.
+Режим: READ-ONLY ANALYSIS. Ни одна строка кода не изменена
+(git status чистый, кроме новых файлов docs/refactoring/* и PROJECT_STATUS.md).
+Артефакты измерений: docs/refactoring/audits/batch6_stage1_*.txt
+(исходные скрипты: D:\Temp\SupervertalerPortable\refactoring\batch6_stage1\).
+
+Монолит: 69 696 строк (без изменений с Batch #5 Stage 2).
+Класс SupervertalerQt: строки 6051–63768, 819 методов (AST).
+
+════════════════════════════════════════════════════════════════
+0. ГЛАВНАЯ НАХОДКА: ДОКУМЕНТИРОВАННЫЕ ОКНА ПЛАНА УСТАРЕЛИ СИЛЬНЕЕ, ЧЕМ ОЖИДАЛОСЬ
+════════════════════════════════════════════════════════════════
+Промпт предполагал сдвиг ~−531 строка. Фактические сдвиги (AST, не доверял
+ни одному документированному числу):
+- Окно A плана (31574–32100, «пагинация») фактически указывает на
+  TERMBASE/TM-ПОИСК: _build_termbase_index 30870–31153,
+  _search_termbase_in_memory 31155–31304, _start_termbase_batch_worker,
+  _termbase_batch_worker_run, _search_termbases_thread_safe 31400–31589,
+  _trigger_idle_prefetch, _start_prefetch_worker, _prefetch_worker_run,
+  _fetch_all_matches_for_segment 31776–31945. Из ~8–10 методов окна НИ ОДИН
+  не относится к Step 6.
+- Окно B плана (32150–32188) — тот же termbase/prefetch-код. Ни одного
+  метода Step 6.
+- Окно C плана (55494–57100) — proofreading-комментарии, voice/PTT,
+  диктовка, quicktrans-панели, play_sound_effect и т.п. (~67 методов).
+  К Step 6 относится ТОЛЬКО filter_on_selected_text 56218–56280.
+- РЕАЛЬНЫЙ сдвиг для кластеров пагинации/фильтров: ~−3308 (окно A) и
+  ~−3267 (окно C). Вероятная причина: номера в плане считались до
+  удаления ~2700 строк кода ВЫШЕ этих кластеров в ранних батчах, а не
+  только −531 от батчей #4/#5.
+
+РЕАЛЬНЫЕ кластеры Step 6 (AST):
+- Пагинация: 28266–28878 (внутри/сразу после create_grid_view_widget_for_home
+  27365–28248). Полная раскладка: _maybe_auto_set_page_size 28266–28301,
+  _get_total_pages 28303–28310, _update_pagination_ui 28312–28372,
+  _apply_pagination_to_grid 28374–28495, _start_background_populate 28517–28567,
+  _background_populate_step 28569–28611, go_to_first_page 28613–28619,
+  go_to_prev_page 28621–28627, go_to_next_page 28629–28636,
+  select_range_page_up 28638–28670, select_range_page_down 28672–28705,
+  _select_range_between 28707–28726, _clear_selection_anchor 28728–28731,
+  go_to_last_page 28733–28740, go_to_page 28742–28761,
+  on_page_size_changed 28763–28785, _widget_is_alive 28787–28794,
+  _get_line_edit_text 28842–28848, _ensure_shared_filter 28850–28863,
+  _ensure_primary_filters_ready 28865–28878.
+- Фильтры/невидимые: 52186–53036 (_highlight_text_in_widget 52186–52225,
+  _clear_filter_highlights_in_widget 52227–52265, apply_filters 52267–52359,
+  clear_filters 52361–52484, _on_file_filter_changed 52486–52549,
+  _update_file_filter_combo 52551–52592, show_manage_views_dialog 52594–52761,
+  toggle_invisible_display 52763–52791, toggle_all_invisibles 52793–52832,
+  refresh_grid_invisibles 52834–52945, _refresh_source_column_display
+  52947–52960, apply_invisible_replacements 52962–52995,
+  reverse_invisible_replacements 52997–53036), затем
+  filter_empty_segments 53520–53562, _clear_all_filter_highlights
+  53564–53574, apply_quick_filter 53576–53637, show_advanced_filters_dialog
+  53667–53676, apply_advanced_filters 53678–53754, apply_sort 53756–53901;
+  отдельно filter_on_selected_text 56218–56280.
+- Хелперы разбросаны: _segment_for_grid_row 9415–9430,
+  _recompute_list_numbers 9650–9677, _reindex_grid_rows_from 9679–9700,
+  _select_grid_row_by_id 9702–9723, _compute_initial_visible_rows
+  40950–40969, _navigate_to_segment_in_grid 42956–42999,
+  _update_file_boundary_labels 44014 (см. ниже), _resize_visible_rows
+  44153–44160, _find_row_for_segment_id 54238–54252, _find_row_for_segment
+  57714–57727, _get_selected_or_filtered_segments 46936–46969,
+  get_selected_segments_from_grid 46920–46934,
+  _get_filtered_segments_with_rows 60974–60994,
+  _move_to_next_visible_row 57524–57560, _is_text_filter_active 57363–57367.
+  Все 8 именованных в плане хелперов найдены; подтверждены координатские
+  догадки: 6 из 8 действительно вне трёх основных окон (рядом с бывшей
+  undo-зоной ~9400–9800, 28787/28842, 40950/44153, 54238, 57714).
+
+Посторонние методы, обнаруженные рядом с кластерами (НЕ Step 6):
+- _start_background_populate, _background_populate_step, _populate_single_row
+  (40971), _compute_initial_visible_rows — populate/render-механика (Step 8);
+  на этом шаге НЕ переносятся (граница SCC).
+- _update_file_boundary_labels 44014, auto_resize_rows 44070,
+  _update_match_panel_tm_display, _refresh_grid_display_mode 58015 —
+  render/match-panel (Step 8).
+- show_manage_views_dialog 52594–52761 — UI-диалог сохранённых view
+  (исключён из состава, см. открытые вопросы).
+- _refresh_source_column_display 52947–52960 — настройка
+  hide_outer_wrapping_tags (теги → Step 8); вызывает load_segments_to_grid,
+  в монолите и остаётся.
+- search_segments 52150, clear_search_highlights, _highlight_text_in_widget —
+  ВНИМАНИЕ: _highlight_text_in_widget используется ТОЛЬКО apply_filters
+  (2 вызова) — поэтому отнесён к filters.py, а не к поиску (Step 10).
+
+════════════════════════════════════════════════════════════════
+1. ИТОГОВЫЙ СОСТАВ НА ПЕРЕНОС (1.1 + 1.2)
+════════════════════════════════════════════════════════════════
+ИТОГО: 48 методов, ~1780 строк (вербатим-тело). Плюс 2 метода «на решение»
+(selection-micro, +24 строки) и 1 кандидат-спорный (_navigate_to_segment_by_id,
+70 строк). Ожидание плана «~45» — сходится (48 ≈ 45; расхождение +3 объясняется
+тем, что фактический состав собран по содержимому, а не по устаревшим окнам).
+Ожидание плана «−2500 строк» — НЕ подтверждается: вербатим-перенос даёт ~1780
+строк минус ~150 строк возвратных делегатов = чистыми ~−1630. В окна плана
+попадало ~80+ методов, из которых к Step 6 относились меньше половины —
+видимо, −2500 считали по целым окнам.
+
+--- modules/grid/pagination.py — 12 методов, 367 строк ---
+_maybe_auto_set_page_size      28266–28301   36
+_get_total_pages               28303–28310    8
+_update_pagination_ui          28312–28372   61
+_apply_pagination_to_grid      28374–28495  122
+go_to_first_page               28613–28619    7
+go_to_prev_page                28621–28627    7
+go_to_next_page                28629–28636    8
+select_range_page_up           28638–28670   33
+select_range_page_down         28672–28705   34
+go_to_last_page                28733–28740    8
+go_to_page                     28742–28761   20
+on_page_size_changed           28763–28785   23
+
+--- modules/grid/filters.py — 20 методов, 1097 строк ---
+_highlight_text_in_widget      52186–52225   40  (только apply_filters вызывает)
+_clear_filter_highlights_in_widget 52227–52265 39
+apply_filters                  52267–52359   93
+clear_filters                  52361–52484  124
+_on_file_filter_changed        52486–52549   64
+_update_file_filter_combo      52551–52592   42
+toggle_invisible_display       52763–52791   29
+toggle_all_invisibles          52793–52832   40
+refresh_grid_invisibles        52834–52945  112
+apply_invisible_replacements   52962–52995   34
+reverse_invisible_replacements 52997–53036   40
+filter_empty_segments          53520–53562   43
+_clear_all_filter_highlights   53564–53574   11
+apply_quick_filter             53576–53637   62
+show_advanced_filters_dialog   53667–53676   10
+apply_advanced_filters         53678–53754   77
+apply_sort                     53756–53901  146  (сортировка — по Validation плана)
+filter_on_selected_text        56218–56280   63
+_ensure_shared_filter          28850–28863   14
+_ensure_primary_filters_ready  28865–28878   14
+
+--- modules/grid/helpers.py — 16 методов, 316 строк ---
+_widget_is_alive               28787–28794    8
+_get_line_edit_text            28842–28848    7
+_segment_for_grid_row           9415– 9430   16
+_recompute_list_numbers         9650– 9677   28
+_reindex_grid_rows_from         9679– 9700   22
+_select_grid_row_by_id          9702– 9723   22
+_compute_initial_visible_rows  40950–40969   20
+_navigate_to_segment_in_grid   42956–42999   44
+get_selected_segments_from_grid 46920–46934  15
+_get_selected_or_filtered_segments 46936–46969 34
+_resize_visible_rows           44153–44160    8
+_find_row_for_segment_id       54238–54252   15
+_find_row_for_segment          57714–57727   14
+_move_to_next_visible_row      57524–57560   37
+_is_text_filter_active         57363–57367    5
+_get_filtered_segments_with_rows 60974–60994 21
+
+════════════════════════════════════════════════════════════════
+2. КАРТА ЦИКЛА SCC#1 НА ГРАНИЦЕ STEP 6 (1.3)
+════════════════════════════════════════════════════════════════
+Центральный метод ПОДТВЕРЖДЁН: load_segments_to_grid 41428–41598 (171 строка).
+Он же — колбэк-зависимость UndoManager (modules/undo_manager.py:288 вызывает
+self.load_segments_to_grid() через bound-метод — см. Batch #5).
+
+ФАКТ О СТРУКТУРЕ ЦИКЛА (важно): на уровне self-вызовов внутри класса СТРОГОГО
+цикла нет — взаимная достижимость (fwd∩bwd) даёт SCC = {load_segments_to_grid}
+(fwd = 82 метода достижимы ИЗ него, bwd = 60 методов могут ДОСТИЧЬ его).
+Цикл SCC#1 из CODE_MAP замыкается НЕ прямым вызовом, а через:
+- populate-механику: _apply_pagination_to_grid (Step 6!) →
+  _start_background_populate → _background_populate_step →
+  _populate_single_row (Step 8, не переносится);
+- UI-сигналы: load_segments_to_grid → _update_pagination_ui → состояние
+  кнопок → пользовательский клик → go_to_next_page → _apply_pagination_to_grid.
+
+ПЕРЕСЕЧЕНИЯ кандидатов Step 6 с циклом:
+1) apply_sort — ЕДИНСТВЕННЫЙ кандидат с ПРЯМЫМ вызовом load_segments_to_grid
+   (2 вызова: строки 53801 и 53892 — ветка «полная перезагрузка»).
+   Разрыв со стороны переносимого метода: делегат apply_sort в монолите
+   передаёт populate-колбэк параметром (apply_sort(key, reload_callback=...));
+   тело вызывает reload_callback() вместо self.load_segments_to_grid().
+   Сам load_segments_to_grid НЕ трогается — соответствует запрету плана.
+2) _refresh_source_column_display (52947–52960) тоже вызывает
+   load_segments_to_grid, но НЕ входит в Step 6 (теги → Step 8) — остаётся
+   в монолите, цикл не разрывается.
+3) Обратная грань цикла: load_segments_to_grid ВЫЗЫВАЕТ будущих перенесённых
+   (_maybe_auto_set_page_size на 41457, _apply_pagination_to_grid на 41557) —
+   после переноса эти вызовы пойдут через тонкие делегаты в монолите
+   (паттерн Batch #5: имена/сигнатуры сохранены, call sites не тронуты).
+4) Все ОСТАЛЬНЫЕ 45 кандидатов: ЦИКЛ НЕ КАСАЕТСЯ (AST: ни одного вызова
+   load_segments_to_grid и ни одного 2-го шага к нему; полный список —
+   docs/refactoring/audits/batch6_stage1_cycle_intersections.txt).
+5) populate-механика (_start_background_populate 28517, _background_populate_step
+   28569) вызывается ИЗ _apply_pagination_to_grid (строка 28495). Варианты
+   (решение владельца): (а) колбэки populate передавать параметрами — populate
+   остаётся в монолите до Step 8; (б) перенести populate-пару тоже (не
+
+════════════════════════════════════════════════════════════════
+3. CALL SITES (1.4) — полное сканирование репозитория (Python-scan)
+════════════════════════════════════════════════════════════════
+Категории по 48 рекомендованным (+2 micro):
+- internal (вызов из переносимого метода — переживёт вербатим-перенос
+  при связывании внутри пакета modules/grid/): 77
+- monolith-other (вызов из методов, ОСТАЮЩИХСЯ в монолите — потребуют
+  делегатов-обёрток): 163
+- bound-ref/connect (ссылки без скобок: clicked.connect, create_shortcut,
+  on_change=, lambda-замыкания меню сортировки): 49
+- modules/ (внешние файлы): 16, из них РЕАЛЬНО внешних только 3 —
+  modules/undo_manager.py:210 (_find_row_for_segment), :215
+  (apply_invisible_replacements), :290 (_select_grid_row_by_id): это
+  bound-методы-колбэки, инжектируемые при конструировании UndoManager;
+  продолжат работать, если делегаты в монолите сохранят имена.
+  Остальные 13 — self.apply_filters внутри классов TMX-редакторов
+  (tmx_editor.py / tmx_editor_qt.py) — СОБСТВЕННЫЕ методы других классов,
+  ложные срабатывания pattern-скана, к монолиту отношения не имеют.
+Самые нагруженные: _widget_is_alive 54, reverse_invisible_replacements 25,
+apply_invisible_replacements 18+3ref, apply_sort 18 (все 18 — lambda-меню
+сортировки в create_grid_view_widget_for_home), _apply_pagination_to_grid 15.
+Полная разбивка: docs/refactoring/audits/batch6_stage1_callsites_categorized.txt
+Специфика шага — UI-обработчики подключаются сигнально: 27629
+first_page_btn.clicked.connect(self.go_to_first_page), 27637/27661/27669
+prev/next/last, 27649 page_number_input.returnPressed, 27685
+page_size_combo.currentTextChanged, 27248–27258 и 27399–27412 фильтры
+on_change/on_return/connect, 27507 file_filter_combo.currentIndexChanged,
+27277–27298 и 27523–27538 меню невидимых, 7216/7225/7226/7229/7230
+create_shortcut PgUp/PgDown/Shift+PgUp/Shift+PgDown/Ctrl+Shift+F —
+все ссылки переживают перенос при сохранении делегатов с теми же именами.
+
+════════════════════════════════════════════════════════════════
+4. ЗАВИСИМОСТИ / КОЛБЭКИ (1.5)
+════════════════════════════════════════════════════════════════
+Агрегаты self.*-атрибутов на группу — полный список в
+docs/refactoring/audits/batch6_stage1_dependencies.txt.
+ОБЩИЕ для всех трёх файлов назначения: table, current_project, log,
+_widget_is_alive, grid_current_page, page_size_combo, _apply_pagination_to_grid.
+helpers ∩ pagination: + page_number_input, main_tabs.
+helpers ∩ filters: + _get_line_edit_text.
+pagination ∩ filters: + grid_page_size, _suppress_target_change_handlers, tr.
+Зависимости от НЕпереносимого (кроме table/project/log/tr):
+- populate/render: _populate_single_row, _start_background_populate,
+  _background_populate_step, auto_resize_rows, _update_match_panel_tm_display,
+  _suppress_target_change_handlers, _update_file_boundary_labels,
+  _refresh_grid_display_mode — колбэки/параметры.
+- UI-виджеты: first/prev/next/last_page_btn, pagination_label,
+  total_pages_label, page_number_input, page_size_combo, file_filter_combo,
+  source_filter, target_filter, main_tabs.
+- Состояние: grid_current_page, grid_page_size, _page_size_decided_for,
+  PAGE_AUTO_ALL_THRESHOLD, PAGE_FALLBACK_SIZE, _selection_anchor_row,
+  _active_text_filter_rows, filtering_active, _original_segment_order,
+  current_sort, _list_numbers, _populated_rows, invisible_display_settings,
+  showing_invisible_spaces, hide_outer_wrapping_tags.
+ВЫВОД 1.5: зависимости в основном ОБЩИЕ и НАПРАВЛЕННЫЕ:
+filters → (pagination + helpers); pagination → (helpers + populate-механика);
+helpers → pagination всего 2 обратных вызова (go_to_page в
+_navigate_to_segment_in_grid; _apply_pagination_to_grid в
+
+════════════════════════════════════════════════════════════════
+5. DYNAMIC_ENTRY_POINT / СТРОКОВЫЕ ССЫЛКИ (1.6)
+════════════════════════════════════════════════════════════════
+Пересечение итогового списка с разделом DYNAMIC_ENTRY_POINT
+DEAD_CODE_REPORT.md — 9 методов; имена/сигнатуры менять нельзя, для них
+обязательны делегаты-обёртки в монолите (аналог undo_action_handler в #5):
+- go_to_prev_page   (стр. 71; SIGNAL_SLOT, create_shortcut:7225,
+  create_grid_view_widget_for_home:27637)
+- go_to_next_page   (стр. 72; 27661, create_shortcut:7226)
+- select_range_page_up   (стр. 73; create_shortcut:7229)
+- select_range_page_down (стр. 74; create_shortcut:7230)
+- on_page_size_changed   (стр. 75; 27685 currentTextChanged.connect)
+- _on_file_filter_changed (стр. 158; 27507 currentIndexChanged.connect)
+- toggle_all_invisibles  (стр. 159; MENU_ACTION, connect 27298/27546)
+- show_advanced_filters_dialog (стр. 165; SIGNAL_SLOT)
+- filter_on_selected_text (стр. 184; create_shortcut:7216 Ctrl+Shift+F)
+Дополнительно связываются сигнально (не в DEAD_CODE_REPORT, но ссылки
+без скобок): go_to_first_page, go_to_last_page, go_to_page, apply_filters,
+clear_filters, toggle_invisible_display (через lambda), apply_sort (18
+lambda), _maybe_auto_set_page_size и др. — все требуют сохранения имён.
+
+════════════════════════════════════════════════════════════════
+6. РЕКОМЕНДАЦИЯ ПО АРХИТЕКТУРЕ (1.7) — НЕ решение, обоснование для владельца
+════════════════════════════════════════════════════════════════
+Шаблон Step 5 (один класс-менеджер с именованными колбэками) сюда ЦЕЛИКОМ
+не переносится: 3 файла, ~1800 строк, 16 UI-виджетов и ~20 атрибутов
+состояния — конструктор с 30+ колбэками стал бы хуже монолита.
+Рекомендация (по фактам 1.5 — зависимости общие и слоистые):
+- modules/grid/helpers.py — МОДУЛЬ чистых функций с явными параметрами
+  (table, segments/current_project, ...): почти все 16 методов — утилиты
+  над table/project без собственного состояния (_list_numbers/
+  _populated_rows передавать параметрами). Функции, а не класс.
+- modules/grid/pagination.py и modules/grid/filters.py — по КЛАССУ-
+  КОНТЕЙНЕРУ с явным набором зависимостей при создании (table, project-
+  геттер, словарь UI-виджетов, колбэки populate/соседнего слоя, состояние
+  пагинации). Состояние grid_current_page/grid_page_size/фильтров живёт в
+  контейнерах, монолит читает через свойства/делегаты.
+- Перекрёстные вызовы: filters → pagination и helpers — через ссылки на
+  контейнеры (PaginationController, функции helpers); pagination →
+  populate — через колбэки (populate остаётся в монолите до Step 8).
+- Альтернатива «всё в один класс GridController» отклоняется: один класс
+  на 1800 строк воссоздаёт мини-монолит; три адресата в плане не случайно.
+ОКОНЧАТЕЛЬНОЕ РЕШЕНИЕ — за владельцем.
+
+════════════════════════════════════════════════════════════════
+7. РЕКОМЕНДАЦИЯ ПО РАЗБИВКЕ STAGE 2+ НА ПОД-БАТЧИ (1.8)
+════════════════════════════════════════════════════════════════
+Порядок — по направлению зависимостей 1.5 (снизу вверх: helpers →
+pagination → filters). Масштаб: Batch #5 переносил 8 методов / 43 call
+sites и уже был непростым; 48 методов одним коммитом недопустимо.
+
+- STAGE 2 = helpers.py: 16 методов, ~316 строк. Внешние вызовы: ~30
+  monolith-other + 3 ссылки из undo_manager (закрываются делегатами).
+  Обратные зависимости от пагинации — ровно 2 (go_to_page,
+  _apply_pagination_to_grid) — решаются параметрами-колбэками: делегаты
+  в монолите уже существуют и продолжат работать. Валидация: Ctrl+Z-
+  сценарии Batch #5 остаются зелёными (колбэки undo_manager), выбор/навигация.
+- STAGE 3 = pagination.py: 12 методов (+2 selection-micro на решение),
+  ~367–391 строк. Это ГРАНИЦА цикла SCC#1: здесь впервые применяется
+  паттерн «populate через колбэки» (_populate_single_row,
+  _start_background_populate). Батч сознательно небольшой, чтобы проверить
+  паттерн на живой пагинации: кнопки, PgUp/PgDown, Go To, смена page size,
+  _update_pagination_ui. ~19 monolith callsites + 9 сигнальных привязок.
+- STAGE 4 = filters.py: 20 методов, ~1097 строк — самый крупный, но к этому
+  моменту обе его зависимости уже в modules/grid/ (helpers, pagination).
+  Включает единственное пересечение с циклом: apply_sort + reload_callback.
+  Валидация: быстрый/продвинутый/файловый фильтры, невидимые, сортировка,
+  Ctrl+Shift+F, авто-размер страниц (по Validation плана).
+Альтернативный порядок (pagination → helpers → filters) возможен, если
+владелец предпочтёт сначала закрыть границу цикла; выбранное «helpers
+первым» опирается на то, что helpers — нижний слой без собственной
+состоянийости и с минимальным риском, а его 2 обратных вызова уже покрыты
+делегатами.
+
+════════════════════════════════════════════════════════════════
+8. ВЫВОД: ГОТОВ К STAGE 2 — при решении владельцем открытых вопросов
+════════════════════════════════════════════════════════════════
+Открытые вопросы (требуют решения владельца, не агента):
+1. Архитектура: функции helpers + классы-контейнеры pagination/filters
+   (рекомендация п.6) — подтвердить или выбрать иной вариант.
+2. Состав: включать ли _navigate_to_segment_by_id (70 строк) в helpers.py;
+   _select_range_between/_clear_selection_anchor — в pagination.py?
+3. show_manage_views_dialog (52594–52761, 168 строк) — исключён из состава
+   как UI-диалог; подтвердить (или перенести в filters.py вместе с
+   _update_file_filter_combo, которую он вызывает).
+4. populate-пара: подтвердить «остаётся в монолите, колбэки параметрами»
+   (вариант (а) п.2.5).
+5. Подтвердить порядок под-батчей: Stage 2=helpers → 3=pagination → 4=filters.
+6. Для Stage 4: способ передачи populate-колбэка в apply_sort
+   (reload_callback параметром делегата — рекомендация п.2.1).
+Блокеров НЕТ. После подтверждения каждый под-батч Stage 2+ получит
+отдельный самодостаточный промпт.
+
+Подтверждение: ни одна строка кода Supervertaler.py и modules/ не изменена;
+git status до коммита содержал только новые файлы docs/refactoring/* и
+обновление PROJECT_STATUS.md.
