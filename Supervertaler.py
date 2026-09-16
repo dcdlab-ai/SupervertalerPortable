@@ -414,6 +414,7 @@ from modules.tag_manager import (
 from modules.event_filters import _QuitEventFilter, _WheelGuard, _LoneCtrlEventFilter, GridTableEventFilter  # Qt event-фильтры (Batch #3a)
 from modules.dialogs import (ThemeEditorDialog, DetachedLogWindow, AdvancedFiltersDialog, ScratchpadDialog, LiveProgressDialog, _ImportProgressDialog)  # Диалоги (Batch #3b)
 from modules.workers import (TMSearchWorker, ProofreadWorker, GlossaryExtractionWorker)  # QThread-воркеры (Batch #4)
+from modules.undo_manager import UndoManager  # Undo/redo-менеджер сетки (Batch #5)
 
 
 # ============================================================================
@@ -6208,10 +6209,30 @@ class SupervertalerQt(QMainWindow):
         # When True, all caches are bypassed - direct lookups every time
         self.disable_all_caches = False  # v1.9.183: Default to False (caches ENABLED)
         
-        # Undo/Redo stack for grid edits
-        self.undo_stack = []  # List of (segment_id, old_target, new_target, old_status, new_status)
-        self.redo_stack = []  # List of undone actions that can be redone
-        self.max_undo_levels = 100  # Maximum number of undo levels to keep
+        # Undo/Redo manager for grid edits (Batch #5 Stage 2: extracted to
+        # modules/undo_manager.py; the stacks and the 8 methods live there,
+        # the window keeps 8 same-named thin delegates for all call sites)
+        self._undo_manager = UndoManager(
+            get_current_project=lambda: getattr(self, 'current_project', None),
+            get_table=lambda: self.table,
+            get_current_sort=lambda: getattr(self, 'current_sort', None),
+            get_undo_action=lambda: self.undo_action,
+            get_redo_action=lambda: self.redo_action,
+            set_original_segment_order=lambda order: setattr(self, '_original_segment_order', order),
+            mark_project_modified=lambda: setattr(self, 'project_modified', True),
+            _find_row_for_segment=self._find_row_for_segment,
+            _update_status_cell=self._update_status_cell,
+            _select_grid_row_by_id=self._select_grid_row_by_id,
+            _split_segment_grid_fast=self._split_segment_grid_fast,
+            _merge_segment_grid_fast=self._merge_segment_grid_fast,
+            update_window_title=self.update_window_title,
+            update_progress_stats=self.update_progress_stats,
+            apply_invisible_replacements=self.apply_invisible_replacements,
+            load_segments_to_grid=self.load_segments_to_grid,
+            refresh_preview=self.refresh_preview,
+            log=self.log,
+            max_undo_levels=100,
+        )
         
         # Global language settings (defaults)
         self.source_language = "English"
@@ -9371,148 +9392,24 @@ class SupervertalerQt(QMainWindow):
         help_menu.addAction(about_action)
     
     def record_undo_state(self, segment_id, old_target, new_target, old_status, new_status):
-        """Записать состояние отмены при редактировании ячеек сетки.
-        
-        Для массовых операций (Copy Source to Target, AI batch, TM auto-fill,
-        пред-перевод и т.п.) предпочтительна ``record_undo_states_batch`` — она делает
-        один проход UI/обрезки в конце вместо одного на сегмент."""
-        # Don't record if nothing actually changed
-        if old_target == new_target and old_status == new_status:
-            return
-
-        # Add to undo stack
-        undo_entry = {
-            "segment_id": segment_id,
-            "old_target": old_target,
-            "new_target": new_target,
-            "old_status": old_status,
-            "new_status": new_status
-        }
-        self.undo_stack.append(undo_entry)
-
-        # Trim undo stack to max levels
-        if len(self.undo_stack) > self.max_undo_levels:
-            self.undo_stack.pop(0)
-
-        # Clear redo stack (can't redo after new edit)
-        self.redo_stack.clear()
-
-        # Update menu actions
-        self.update_undo_redo_actions()
+        """Делегат -> UndoManager.record_undo_state (Batch #5 Stage 2)."""
+        self._undo_manager.record_undo_state(segment_id, old_target, new_target, old_status, new_status)
 
     def record_undo_states_batch(self, entries):
-        """Записать много записей отмены за один раз с одним проходом UI/обрезки в конце.
-        
-        ``entries`` — итерируемое объектов в виде словарей
-        ``{"segment_id", "old_target", "new_target", "old_status", "new_status"}``
-        ИЛИ кортежей ``(segment_id, old_target, new_target, old_status, new_status)``.
-        
-        Записи, где не изменились ни цель, ни статус, молча пропускаются. Используется
-        массовыми операциями, чтобы избежать накладных расходов N×обновление Qt-действий
-        и N×list.pop(0), когда батч больше max_undo_levels."""
-        appended = 0
-        for entry in entries:
-            if isinstance(entry, dict):
-                old_target = entry.get("old_target", "")
-                new_target = entry.get("new_target", "")
-                old_status = entry.get("old_status", "")
-                new_status = entry.get("new_status", "")
-                segment_id = entry.get("segment_id")
-            else:
-                # Tuple form
-                segment_id, old_target, new_target, old_status, new_status = entry
-
-            if old_target == new_target and old_status == new_status:
-                continue
-
-            self.undo_stack.append({
-                "segment_id": segment_id,
-                "old_target": old_target,
-                "new_target": new_target,
-                "old_status": old_status,
-                "new_status": new_status,
-            })
-            appended += 1
-
-        if appended == 0:
-            return
-
-        # Trim once at the end – avoids N pop(0) operations for huge batches
-        overflow = len(self.undo_stack) - self.max_undo_levels
-        if overflow > 0:
-            del self.undo_stack[:overflow]
-
-        # Clear redo stack (can't redo after new edits) and refresh menu once
-        self.redo_stack.clear()
-        self.update_undo_redo_actions()
+        """Делегат -> UndoManager.record_undo_states_batch (Batch #5 Stage 2)."""
+        self._undo_manager.record_undo_states_batch(entries)
     
     def undo_action_handler(self):
-        """Обработка Undo (Ctrl+Z) — откат последней записанной замены цели/статуса."""
-        if not self.undo_stack:
-            return
-
-        action = self.undo_stack.pop()
-        # Structural edits (split / merge) carry full before/after snapshots.
-        if action.get("type") == "structural":
-            self._apply_structural_history(action, redo=False)
-            self.redo_stack.append(action)
-            self.update_undo_redo_actions()
-            return
-        if self._apply_undo_redo_action(action, action["old_target"], action["old_status"]):
-            self.redo_stack.append(action)
-        self.update_undo_redo_actions()
+        """Делегат -> UndoManager.undo_action_handler (Batch #5 Stage 2)."""
+        self._undo_manager.undo_action_handler()
 
     def redo_action_handler(self):
-        """Обработка Redo (Ctrl+Shift+Z / Ctrl+Y) — повтор последней отменённой замены."""
-        if not self.redo_stack:
-            return
-
-        action = self.redo_stack.pop()
-        if action.get("type") == "structural":
-            self._apply_structural_history(action, redo=True)
-            self.undo_stack.append(action)
-            self.update_undo_redo_actions()
-            return
-        if self._apply_undo_redo_action(action, action["new_target"], action["new_status"]):
-            self.undo_stack.append(action)
-        self.update_undo_redo_actions()
+        """Делегат -> UndoManager.redo_action_handler (Batch #5 Stage 2)."""
+        self._undo_manager.redo_action_handler()
 
     def _apply_undo_redo_action(self, action, target, status) -> bool:
-        """Установить заданную цель/статус на сегменте действия и обновить его строку. Общая для undo и redo. Возвращает True, если сегмент найден и обновлён, иначе False (тогда вызывающий код отбрасывает действие).
-        
-        NB: модель сегмента использует поля ``id`` / ``target`` (не ``segment_id`` /
-        ``target_text``), сетка — ``self.table`` (не ``self.grid``), а ячейка Target —
-        редактируемый виджет в колонке 3 (Status — колонка 4). Прежняя реализация
-        использовала все старые имена и молча выбрасывала исключения."""
-        if not self.current_project:
-            return False
-
-        segment_id = action["segment_id"]
-        segment = next((s for s in self.current_project.segments if s.id == segment_id), None)
-        if segment is None:
-            return False
-
-        segment.target = target
-        segment.status = status
-
-        row = self._find_row_for_segment(segment_id)
-        if row >= 0:
-            # Target column (3) is an editable QTextEdit cell widget.
-            target_widget = self.table.cellWidget(row, 3)
-            if target_widget is not None and hasattr(target_widget, 'setPlainText'):
-                display = (self.apply_invisible_replacements(target)
-                           if hasattr(self, 'apply_invisible_replacements') else target)
-                target_widget.blockSignals(True)
-                target_widget.setPlainText(display)
-                target_widget.blockSignals(False)
-            # Status column (4) is refreshed via its dedicated helper.
-            self._update_status_cell(row, segment)
-
-        self.project_modified = True
-        self.update_window_title()
-        if hasattr(self, 'update_progress_stats'):
-            self.update_progress_stats()
-        return True
+        """Делегат -> UndoManager._apply_undo_redo_action (Batch #5 Stage 2)."""
+        return self._undo_manager._apply_undo_redo_action(action, target, status)
 
     # ── Segment split / merge (Trados / memoQ style) ──────────────────────
     def _segment_for_grid_row(self, row: int):
@@ -9729,21 +9626,8 @@ class SupervertalerQt(QMainWindow):
             self._merge_segment_at_row(row)
 
     def _push_structural_undo(self, before, after, focus_id, op, row):
-        """Записать обратимое структурное изменение (split / merge) как снимки «до/после» всего списка сегментов. ``op`` ('split'/'merge') и ``row`` позволяют undo/redo применять тот же быстрый инкрементальный апдейт сетки."""
-        import copy
-        self.undo_stack.append({
-            "type": "structural",
-            "op": op,
-            "row": row,
-            "before": before,                 # already a snapshot from the caller
-            "after": copy.deepcopy(after),     # snapshot the post-edit list
-            "focus_id": focus_id,
-        })
-        if len(self.undo_stack) > self.max_undo_levels:
-            self.undo_stack.pop(0)
-        self.redo_stack.clear()
-        self.update_undo_redo_actions()
-        self.project_modified = True
+        """Делегат -> UndoManager._push_structural_undo (Batch #5 Stage 2)."""
+        self._undo_manager._push_structural_undo(before, after, focus_id, op, row)
 
     def _sync_after_structural(self):
         """Лёгкая бухгалтерия, общая для быстрых путей split/merge.
@@ -9886,62 +9770,12 @@ class SupervertalerQt(QMainWindow):
             self._suppress_target_change_handlers = _prev_suppress
 
     def _apply_structural_history(self, action, redo: bool):
-        """Undo или redo структурного (split/merge) изменения.
-        
-        Восстанавливает соответствующий полный снимок списка (корректность данных
-        в этом случае не под вопросом), затем применяет тот же быстрый инкрементальный
-        дельта-апдейт сетки, что и исходное изменение, — undo/redo так же быстры, как
-        само изменение, а не полная перестройка. При любом несоответствии — откат
-        к полной перезагрузке."""
-        import copy
-        if not getattr(self, 'current_project', None):
-            return
-        snap = action["after"] if redo else action["before"]
-        self.current_project.segments = copy.deepcopy(snap)
-        # Keep the save-order list in sync (the data-loss fix) on every history step.
-        self._original_segment_order = self.current_project.segments.copy()
-        self.project_modified = True
-
-        op = action.get("op")
-        row = action.get("row")
-        focus_id = action.get("focus_id")
-        segs = self.current_project.segments
-
-        did_fast = False
-        if (op in ("split", "merge") and isinstance(row, int)
-                and getattr(self, "current_sort", None) is None):
-            # After restoring the snapshot, is the segment at `row` currently in
-            # its split (two rows) or merged (one row) form?
-            split_state = (op == "split" and redo) or (op == "merge" and not redo)
-            try:
-                if split_state and row + 1 < len(segs):
-                    # Grid currently shows ONE row here; expand to two.
-                    self._split_segment_grid_fast(row, segs[row], segs[row + 1])
-                    did_fast = True
-                elif not split_state:
-                    # Grid currently shows TWO rows here; collapse to one.
-                    self._merge_segment_grid_fast(row, segs[row])
-                    did_fast = True
-            except Exception as e:
-                self.log(f"Fast undo/redo refresh failed ({e}); full reload.")
-                did_fast = False
-
-        if not did_fast:
-            self.load_segments_to_grid()
-
-        self._select_grid_row_by_id(focus_id)
-        if hasattr(self, 'update_progress_stats'):
-            self.update_progress_stats()
-        self.update_window_title()
-        try:
-            self.refresh_preview()
-        except Exception:
-            pass
+        """Делегат -> UndoManager._apply_structural_history (Batch #5 Stage 2)."""
+        self._undo_manager._apply_structural_history(action, redo)
 
     def update_undo_redo_actions(self):
-        """Обновить состояние включённости пунктов меню undo/redo."""
-        self.undo_action.setEnabled(len(self.undo_stack) > 0)
-        self.redo_action.setEnabled(len(self.redo_stack) > 0)
+        """Делегат -> UndoManager.update_undo_redo_actions (Batch #5 Stage 2)."""
+        self._undo_manager.update_undo_redo_actions()
 
     def create_quick_access_toolbar(self):
         """Создать панель быстрого доступа над лентой."""

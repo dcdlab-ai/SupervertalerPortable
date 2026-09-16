@@ -1,0 +1,176 @@
+ОТЧЁТ Batch #5, STAGE 2 — перенос Undo-менеджера в modules/undo_manager.py
+Проект: SupervertalerPortable, база — коммит c11e1bc («Batch #5 Stage 1: Step 5 inventory
+and architecture recommendation»). Дата: 16.09.2026. Режим: ACTIVE REFACTOR.
+Промпт: docs/refactoring/prompts/Promt - EXTRACTION BATCH #5 STAGE 2 (extraction).txt
+Все 4 открытых вопроса Stage 1 (В1–В4) закрыты владельцем: согласие по всем, в редакции,
+рекомендованной агентом Stage 1 (8 делегатов + колбэки, состав 8 методов, внешние входы
+не трогаем, modules/undo_manager.py / класс UndoManager).
+
+════════════════════════════════════════════════════════════════
+ЭТАП 0 — БАЗОВАЯ ЛИНИЯ И СПОТ-ПРОВЕРКА — ВСЁ PASS, GO
+════════════════════════════════════════════════════════════════
+0.1 git status чист (только untracked-промпт Stage 2 — сам файл задания); HEAD = c11e1bc.
+0.2 AST-спот-проверка: границы всех 8 MOVE-методов совпали с §1.2 отчёта Stage 1
+    до строки (9373–9401, 9403–9447, 9449–9463, 9465–9478, 9480–9515, 9731–9746,
+    9888–9939, 9941–9944); состав окна — ровно 22 метода, как в Stage 1. PASS.
+0.3 Все 14 NOT MOVE методов — SHA256 совпали со снапшотом
+    not_moved_methods_batch5_snapshot.txt. PASS (14/14).
+0.4 docs/refactoring/audits/manifest_before_batch5stage2.txt — 146 .py файлов.
+0.5 py_compile всех .py — CLEAN.
+0.6 docs/refactoring/audits/baseline_counts_batch5stage2.txt — 8 метрик,
+    TOTAL: 1211/18/35/24/24/0/87/2 (= baseline Batch #4, дрейфа с Stage 1 нет).
+
+════════════════════════════════════════════════════════════════
+ЭТАП 1 — ФОКУС-PREFLIGHT (таблица 1.4 — итоговая архитектура)
+════════════════════════════════════════════════════════════════
+Характер доступа определён по телам методов (факт, не предположение):
+
+| Зависимость (§1.7)    | Доступ   | Решение                                   | Передача в __init__ окна
+|-----------------------|----------|-------------------------------------------|--------------------------------------------------
+| undo_stack/redo_stack | чт+зап   | состояние → экземпляр UndoManager          | (переезжает, бывшие строки 6212–6214)
+| max_undo_levels       | чтение   | параметр конструктора, default=100         | max_undo_levels=100
+| update_undo_redo_actions, _apply_undo_redo_action, _apply_structural_history | callable | MOVE→MOVE, внутренние методы класса | —
+| current_project       | чтение   | ГЕТТЕР (18 мест присваивания в окне)       | get_current_project=lambda: getattr(self,'current_project',None)
+| table                 | чтение   | ГЕТТЕР (пересоздаётся: create_translation_grid вызывается из 2 мест) | get_table=lambda: self.table
+| current_sort          | чтение   | ГЕТТЕР (ленивый hasattr-паттерн)           | get_current_sort=lambda: getattr(self,'current_sort',None)
+| undo_action/redo_action | чтение (.setEnabled) | ГЕТТЕРЫ (создаются в create_menus на 8808/8814, вызов create_menus — строка 6972, ПОЗЖЕ точки создания менеджера; статическая ссылка невозможна) | get_undo_action/get_redo_action=lambda: self.<attr>
+| _original_segment_order | ЗАПИСЬ (9902; в 8 методах чтений нет) | СЕТТЕР | set_original_segment_order=lambda order: setattr(...)
+| project_modified      | запись ровно `= True` в 3 телах (9511, 9746, 9903) | действие | mark_project_modified=lambda: setattr(self,'project_modified',True)
+| _find_row_for_segment, _update_status_cell, _select_grid_row_by_id, _split_segment_grid_fast, _merge_segment_grid_fast, update_window_title, update_progress_stats, apply_invisible_replacements, load_segments_to_grid, refresh_preview, log | callable | статические bound-method ссылки (методы окна не переназначаются); имена колбэков = имена методов → тела перенесены почти дословно | self.<method>
+
+ОТКЛОНЕНИЕ ОТ §1.7 STAGE 1 (обнаружено префлайтом, задокументировано):
+- current_sort (чтение через getattr(self,"current_sort",None) в _apply_structural_history:
+9912) отсутствовал в таблице §1.7 — скан Stage 1 не учёл getattr-строковые ссылки.
+Добавлен геттер get_current_sort с той же getattr-семантикой. Других пропусков нет:
+полный AST-обход 8 тел против таблицы 1.4 сошёлся.
+
+hasattr-защиты оригинала (hasattr(self,'update_progress_stats'), hasattr(self,
+'apply_invisible_replacements')) заменены на проверки колбэков «is not None»:
+в живом приложении оба метода всегда существуют (def 8321, 53128), колбэки передаются
+всегда → семантика ветвления идентична (ветка всегда истинна).
+
+════════════════════════════════════════════════════════════════
+ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════
+Создан modules/undo_manager.py (302 строки): класс UndoManager, keyword-only конструктор
+по таблице 1.4 + max_undo_levels=100; состояние undo_stack/redo_stack/max_undo_levels —
+экземплярные атрибуты менеджера. Тела всех 8 методов перенесены ДОСЛОВНО; полная
+сверка каждого тела со снапшотами блоков из git HEAD (кластеры 9373–9515,
+9731–9746, 9888–9944, SHA256 a36bb9c0…/4b374980…/7910a24d…) — PASS 8/8 с точно
+следующими задокументированными подстановками (и никакими другими):
+  self.current_project / getattr(self,'current_project',None) → self.get_current_project()
+  self.table → self.get_table();  getattr(self,"current_sort",None) → self.get_current_sort()
+  self.undo_action/redo_action → self.get_undo_action()/get_redo_action()
+  self._original_segment_order = X → self.set_original_segment_order(X)
+  self.project_modified = True → self.mark_project_modified()
+  hasattr(self,'update_progress_stats') → self.update_progress_stats is not None
+  hasattr(self,'apply_invisible_replacements') → … is not None
+MOVE→MOVE вызовы (11) остались self.<имя>(...) без изменений.
+
+В монолите:
+- строки 6211–6214 заменены созданием self._undo_manager = UndoManager(<колбэки по 1.4>);
+- на месте бывших тел — 8 делегатов с ТОЧНО теми же именами и сигнатурами
+  (включая аннотацию -> bool у _apply_undo_redo_action и redo: bool у
+  _apply_structural_history), тело — однострочный проброс в self._undo_manager;
+- добавлен импорт: from modules.undo_manager import UndoManager (после строки 416).
+Ни один из 43 call sites не отредактирован (проверено: menu-connect 8810/8816,
+EGTE keyPressEvent 4214–4226, EGTE _copy_source_to_target 4722–4731,
+pseudo_translate_dialog.py:264 — без изменений).
+
+════════════════════════════════════════════════════════════════
+ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════
+3.1 py_compile Supervertaler.py + modules/undo_manager.py + всех 147 .py — CLEAN.
+3.2 Метрики (counts_after_batch5stage2.txt): TOTAL 1211/18/35/24/24/0/87/2 —
+    ИДЕНТИЧНЫ baseline (ни одного нового connect/shortcut/timer).
+3.3 Манифест (manifest_after_batch5stage2.txt): изменён ровно 1 файл
+    (Supervertaler.py), добавлен ровно 1 (modules/undo_manager.py), удалённых нет.
+3.4 14×NOT MOVE byte-identity после переноса — PASS 14/14 (SHA256 по снапшоту
+    Stage 1; границы сдвинулись на −42…−166 строк, содержимое байт-в-байт).
+    Дополнительно: в монолите не осталось ни одного обращения к
+    self.undo_stack/redo_stack/max_undo_levels.
+3.5 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, живое приложение; харнес
+    D:\Temp\SupervertalerPortable\refactoring\batch5-stage2\undo_scenarios.py;
+    итог 38/38 PASS):
+    ✅ S0: _undo_manager — экземпляр UndoManager; стеки живут в менеджере
+       (max=100); все 8 duck-typed имён есть на окне; менеджер НЕ держит ссылку
+       на окно (ни один атрибут менеджера не is window).
+    ✅ S1 Обычное редактирование: record_undo_state → undo_action_handler
+       восстанавливает target И текст ячейки сетки (путь get_table); redo
+       повторяет; повторный undo работает; enable/disable меню корректны.
+    ✅ S2 Пакетная операция: ВАЖНОЕ УТОЧНЕНИЕ СЕМАНТИКИ — фактическое поведение
+       оригинала (и переноса): record_undo_states_batch пишет N ОТДЕЛЬНЫХ записей
+       стека, но делает ОДИН проход обрезки и ОДНО обновление меню в конце
+       (замерено: +3 записи, 1 вызов update_undo_redo_actions, single end-trim
+       при переполнении; Ctrl+Z откатывает по одной записи, LIFO). Формулировка
+       промпта «один Undo откатывает весь пакет целиком» соответствовала
+       EXTRACTION_PLAN, а не коду; ПОВЕДЕНИЕ СОХРАНЕНО ДОСЛОВНО (вербатим-сверка
+       тел), ничего не менял. → см. «Непокрытые/открытые» ниже.
+    ✅ S3 Split: _split_segment_at_row → 7 сегментов → Ctrl+Z → 6 сегментов,
+       исходный текст восстановлен (быстрый путь _merge_segment_grid_fast
+       из перенесённого _apply_structural_history — колбэки к не-перенесённым
+       grid-хелперам работают).
+    ✅ S4 Merge: 6 → 5 → undo → 6, текст восстановлен.
+    ✅ S5 Delete: _delete_segments_at_rows (QMessageBox.question запатчен на Yes)
+       → 5 → undo → 6, удалённый сегмент восстановлен.
+    ✅ S6 Кнопки/пункты меню: на пустых стеках оба QAction disabled; после
+       record undo enabled/redo disabled; после undo redo enabled (S1/S6a).
+    ✅ S7 Ctrl+Shift+S поверх заполненного перевода (EditableGridTextEditor.
+       _copy_source_to_target, duck-typed вызов record_undo_state): перевод
+       перезаписан источником, undo-запись записана, Ctrl+Z восстанавливает
+       прежний перевод. Самый рискованный сценарий — ПРОЙДЕН.
+    ✅ S8 Псевдоперевод (modules/pseudo_translate_dialog.run_pseudo_translation,
+       duck-typed mw.record_undo_states_batch на строке 264): цели заполнены,
+       одна batch-запись, undo восстанавливает все исходные цели.
+    ✅ S9 Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z при фокусе в ячейке грида
+       (EditableGridTextEditor.keyPressEvent, fallthrough через hasattr по
+       строке): все три пути попадают в делегаты окна.
+    ✅ S10 Переполнение: 20 записей при max_undo_levels=5 → стек ровно 5,
+       старые отброшены (первая — «old15»), undo после переполнения работает,
+       приложение не падает.
+3.6 Smoke-тест (tools/batch_validation/smoke_project.py, два процесса):
+    SAVE_OK 3199 байт → LOAD_OK smoke-b5s2 3 сегмента, «Segment 1 source» — PASS
+    (путь save/load .svproj не затронут — ожидаемо, состояние undo не
+    сериализуется, §1.8 Stage 1).
+
+════════════════════════════════════════════════════════════════
+ЧИСЛА
+════════════════════════════════════════════════════════════════
+diff stat: Supervertaler.py | 41 insertions(+), 207 deletions(-); новый файл
+modules/undo_manager.py (302 строки).
+Монолит: 69 862 → 69 696 строк (−166).
+counts: идентичны baseline (8/8 метрик).
+manifest: 1 изменён + 1 добавлен, 0 удалено, 144 неизменны.
+SHA256 снапшотов перенесённых кластеров: a36bb9c0…, 4b374980…, 7910a24d… (до) —
+тела после переноса совпали с ними modulo 10 задокументированных подстановок (8/8 PASS).
+
+════════════════════════════════════════════════════════════════
+НЕПОКРЫТЫЕ ПРОВЕРКИ / ОТКРЫТОЕ (для VALIDATION_BACKLOG.md)
+════════════════════════════════════════════════════════════════
+1. Семантика batch-undo: промпт/план ожидали «один Undo откатывает весь пакет»,
+   фактическое (и сохранённое) поведение — N записей, undo по одной (LIFO) с
+   одним trim/UI-проходом на запись батча. Владельцу: если желаемое поведение —
+   «одним действием», это ОТДЕЛЬНАЯ функциональная задача (не рефакторинг),
+   сейчас поведение оригинала сохранено байт-в-байт.
+2. Ночные/ручные прогоны undo на реальных двуязычных импортах (bilingual CAT,
+   где structure_editable=False) — в offscreen-харнесе использован программный
+   Start-Empty-подобный проект; ветка «fast path недоступен → load_segments_to_grid»
+   покрыта косвенно (S3–S5 при op="delete"), но не на DOCX/Okapi-проекте.
+3. Smoke-тест load завершается кодом выхода 1 после успешного LOAD_OK (шум
+   teardown pynput/hotkeys; SAVE_OK выходит с кодом 0) — унаследовано с
+   предыдущих батчей, к Stage 2 отношения не имеет.
+
+════════════════════════════════════════════════════════════════
+ВЕРДИКТ: GO
+════════════════════════════════════════════════════════════════
+Все проверки Этапов 0 и 3 пройдены: 8/8 вербатим-тел, 14/14 NOT MOVE byte-identity,
+метрики идентичны, 38/38 функциональных сценариев, smoke PASS. Стоп-условия 1–3
+промпта не сработали. Один коммит:
+«Extract undo/redo manager into modules/undo_manager.py (Batch #5 Stage 2, Step 5
+of EXTRACTION_PLAN.md)».
+Дальше — СТОП до подтверждения владельца (Step 6: Grid helpers/pagination/filters,
+будущий Batch #6).
+
+Вспомогательные скрипты прогона: D:\Temp\SupervertalerPortable\refactoring\batch5-stage2\
+(stage2_check.py, stage2_baseline.py, snapshot_move_blocks.py, apply_transfer.py,
+verify_transfer.py, after_counts.py, manifest_diff.py, undo_scenarios.py + выводы).
