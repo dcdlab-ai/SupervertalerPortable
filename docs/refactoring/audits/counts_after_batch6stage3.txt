@@ -1,0 +1,9 @@
+# files scanned: 150
+\.connect\(: 1211
+QShortcut\(: 18
+create_shortcut\(: 35
+QTimer\(: 24
+timeout\.connect: 24
+QTimer\.timeout: 0
+singleShot: 87
+QMetaObject\.invokeMethod: 2

@@ -416,6 +416,7 @@ from modules.dialogs import (ThemeEditorDialog, DetachedLogWindow, AdvancedFilte
 from modules.workers import (TMSearchWorker, ProofreadWorker, GlossaryExtractionWorker)  # QThread-воркеры (Batch #4)
 from modules.undo_manager import UndoManager  # Undo/redo-менеджер сетки (Batch #5)
 from modules.grid import helpers as grid_helpers  # Grid-хелперы: чистые функции (Batch #6 Stage 2)
+from modules.grid import pagination as grid_pagination  # Grid-пагинация: чистые функции (Batch #6 Stage 3)
 
 
 # ============================================================================
@@ -28180,251 +28181,86 @@ class SupervertalerQt(QMainWindow):
         return widget
     
     # Pagination methods
-    # Documents at or below this segment count open with every segment shown
-    # ("All"); larger ones fall back to PAGE_FALLBACK_SIZE per page so the
-    # initial widget-construction cost stays bounded. As of v1.10.147 the
-    # grid is page-aware and only builds full QTextEdit widgets for rows on
-    # the current page (off-page rows get cheap placeholders and are
-    # populated lazily on navigation), so this also controls how many heavy
-    # widgets get constructed at load time — not just how many rows are
-    # visible. Lowered in v1.10.148 from 2000/500 → 1000/200 after profiling
-    # showed that "All" mode on a 479-segment SDLXLIFF spent ~27 s in the
-    # per-row widget-creation loop and another ~9 s re-applying fonts. Users
-    # who prefer the single-page UX on bigger projects can still switch via
-    # the "Per page" selector.
-    PAGE_AUTO_ALL_THRESHOLD = 1000
-    PAGE_FALLBACK_SIZE = 200
+    # Делегаты: modules/grid/pagination.py (Batch #6 Stage 3). Константы
+    # PAGE_AUTO_ALL_THRESHOLD / PAGE_FALLBACK_SIZE и их документирующий
+    # комментарий (v1.10.147–v1.10.148) перенесены туда как module-level —
+    # использовались только внутри _maybe_auto_set_page_size (Этап 0.4).
 
     def _maybe_auto_set_page_size(self):
-        """Выбирает размер страницы сетки один раз для каждого заново открытого
-                проекта.
-        
-                По умолчанию — «All» (показывать все сегменты); для очень больших
-                документов (> PAGE_AUTO_ALL_THRESHOLD сегментов) откатывается
-                к PAGE_FALLBACK_SIZE на страницу. Выполняется один раз на объект
-                проекта — с ключом по идентификатору проекта, — поэтому перерисовки
-                (сортировка, фильтр, смена страницы) и любой сделанный пользователем
-                в этой сессии ручной выбор «Per page» не перезаписываются."""
-        if not self.current_project or not self.current_project.segments:
-            return
-        key = id(self.current_project)
-        if getattr(self, '_page_size_decided_for', None) == key:
-            return
-        self._page_size_decided_for = key
-
-        total = len(self.current_project.segments)
-        if total > self.PAGE_AUTO_ALL_THRESHOLD:
-            self.grid_page_size = self.PAGE_FALLBACK_SIZE
-            self.log(
-                f"📄 Large project ({total} segments) — paginating at "
-                f"{self.PAGE_FALLBACK_SIZE}/page. Switch to 'All' via the "
-                f"Per-page selector if you prefer one page.")
-        else:
-            self.grid_page_size = 999999  # All
-        self.grid_current_page = 0
-
-        # Reflect the decision in the combo without retriggering the handler.
-        if (hasattr(self, 'page_size_combo')
-                and self._widget_is_alive(self.page_size_combo)):
-            self.page_size_combo.blockSignals(True)
-            self.page_size_combo.setCurrentText(
-                "All" if self.grid_page_size >= 999999
-                else str(self.grid_page_size))
-            self.page_size_combo.blockSignals(False)
+        """Делегат: modules/grid/pagination.maybe_auto_set_page_size
+        (Batch #6 Stage 3). Запись решения — ключ memoization
+        (_page_size_decided_for), grid_page_size, grid_current_page —
+        self-специфична и остаётся здесь (пункты Б/В промпта); обновление
+        комбобокса выполняет pure-функция.
+        """
+        new_page_size = grid_pagination.maybe_auto_set_page_size(
+            self.current_project,
+            getattr(self, '_page_size_decided_for', None),
+            getattr(self, 'page_size_combo', None),
+            log_callback=self.log)
+        if new_page_size is not None:
+            self._page_size_decided_for = id(self.current_project)
+            self.grid_page_size = new_page_size
+            self.grid_current_page = 0
 
     def _get_total_pages(self) -> int:
-        """Вычисляет общее число страниц по количеству сегментов и размеру страницы."""
-        if not self.current_project or not self.current_project.segments:
-            return 1
-        total_segments = len(self.current_project.segments)
-        if not hasattr(self, 'grid_page_size') or self.grid_page_size >= 999999:
-            return 1  # "All" selected
-        return max(1, (total_segments + self.grid_page_size - 1) // self.grid_page_size)
-    
+        """Делегат: modules/grid/pagination.get_total_pages (Batch #6 Stage 3)."""
+        return grid_pagination.get_total_pages(
+            self.current_project,
+            getattr(self, 'grid_page_size', None))
+
     def _update_pagination_ui(self):
-        """Обновляет подписи пагинации и состояния кнопок."""
-        if not self.current_project or not self.current_project.segments:
-            if hasattr(self, 'pagination_label') and self._widget_is_alive(self.pagination_label):
-                self.pagination_label.setText(self.tr("Segments 0-0 of 0"))
-            if hasattr(self, 'total_pages_label') and self._widget_is_alive(self.total_pages_label):
-                self.total_pages_label.setText(self.tr("of 1"))
-            if hasattr(self, 'page_number_input') and self._widget_is_alive(self.page_number_input):
-                self.page_number_input.setText("1")
-            return
-
-        total_segments = len(self.current_project.segments)
-        total_pages = self._get_total_pages()
-
+        """Делегат: modules/grid/pagination.update_pagination_ui
+        (Batch #6 Stage 3). hasattr-дефолты grid_current_page → 0 /
+        grid_page_size → 50 — self-специфичная setattr-починка, остаётся здесь
+        (пункт Б); self.tr передаётся колбэком tr_callback (пункт Г,
+        вариант (i)).
+        """
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
         if not hasattr(self, 'grid_page_size'):
             self.grid_page_size = 50
+        self.grid_current_page = grid_pagination.update_pagination_ui(
+            self.current_project,
+            pagination_label=getattr(self, 'pagination_label', None),
+            total_pages_label=getattr(self, 'total_pages_label', None),
+            page_number_input=getattr(self, 'page_number_input', None),
+            first_page_btn=getattr(self, 'first_page_btn', None),
+            prev_page_btn=getattr(self, 'prev_page_btn', None),
+            next_page_btn=getattr(self, 'next_page_btn', None),
+            last_page_btn=getattr(self, 'last_page_btn', None),
+            grid_current_page=self.grid_current_page,
+            grid_page_size=self.grid_page_size,
+            filter_allowlist=getattr(self, '_active_text_filter_rows', None),
+            tr_callback=self.tr,
+            widget_is_alive_callback=grid_helpers.widget_is_alive)
 
-        # Clamp current page to valid range
-        self.grid_current_page = max(0, min(self.grid_current_page, total_pages - 1))
-
-        # Check if a filter is active (text filter or quick filter)
-        filter_allowlist = getattr(self, '_active_text_filter_rows', None)
-        is_filtered = filter_allowlist is not None
-
-        # Calculate segment range for current page
-        if self.grid_page_size >= 999999:
-            # "All" mode - show all segments
-            start_seg = 1
-            end_seg = total_segments
-        else:
-            start_seg = self.grid_current_page * self.grid_page_size + 1
-            end_seg = min((self.grid_current_page + 1) * self.grid_page_size, total_segments)
-
-        # Update pagination label - show filtered count when filter is active
-        if hasattr(self, 'pagination_label') and self._widget_is_alive(self.pagination_label):
-            if is_filtered:
-                filtered_count = len(filter_allowlist)
-                self.pagination_label.setText(f"Showing {filtered_count} of {total_segments} segments")
-            else:
-                self.pagination_label.setText(f"Segments {start_seg}-{end_seg} of {total_segments}")
-        
-        if hasattr(self, 'total_pages_label') and self._widget_is_alive(self.total_pages_label):
-            self.total_pages_label.setText(f"of {total_pages}")
-        
-        if hasattr(self, 'page_number_input') and self._widget_is_alive(self.page_number_input):
-            self.page_number_input.setText(str(self.grid_current_page + 1))
-        
-        # Enable/disable navigation buttons
-        is_first_page = self.grid_current_page == 0
-        is_last_page = self.grid_current_page >= total_pages - 1
-        
-        if hasattr(self, 'first_page_btn') and self._widget_is_alive(self.first_page_btn):
-            self.first_page_btn.setEnabled(not is_first_page)
-        if hasattr(self, 'prev_page_btn') and self._widget_is_alive(self.prev_page_btn):
-            self.prev_page_btn.setEnabled(not is_first_page)
-        if hasattr(self, 'next_page_btn') and self._widget_is_alive(self.next_page_btn):
-            self.next_page_btn.setEnabled(not is_last_page)
-        if hasattr(self, 'last_page_btn') and self._widget_is_alive(self.last_page_btn):
-            self.last_page_btn.setEnabled(not is_last_page)
-    
     def _apply_pagination_to_grid(self):
-        """Показывает/скрывает строки по текущей странице, опционально
-                ограниченной активными фильтрами.
-        
-                ВАЖНО: при активном текстовом фильтре (поля Filter Source/Target)
-                показываются ВСЕ совпадающие строки по всему документу, без учёта
-                пагинации. Это гарантирует, что пользователь найдёт контент
-                независимо от того, на какой странице он находится.
-        
-                Когда фильтр не активен, применяется обычная пагинация."""
-        if not self.current_project or not self.current_project.segments:
-            return
-        
-        total_segments = len(self.current_project.segments)
-        
+        """Делегат: modules/grid/pagination.apply_pagination_to_grid
+        (Batch #6 Stage 3). hasattr-дефолты (0/50) и чтение/запись флага
+        _suppress_target_change_handlers — self-специфичные, остаются здесь
+        (пункт Б); отложенный вызов ресайза резолвит таблицу в момент
+        срабатывания через self._resize_visible_rows (bound-метод делегата).
+        """
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
         if not hasattr(self, 'grid_page_size'):
             self.grid_page_size = 50
-        
-        # If a text filter (Filter Source/Target) is active, it will populate an allowlist
-        # of row indices that are allowed to be visible.
-        filter_allowlist = getattr(self, '_active_text_filter_rows', None)
-
-        # Build set of empty structural segments (always hidden regardless of pagination/filter)
-        segments = self.current_project.segments
-        empty_rows = {i for i in range(total_segments) if not segments[i].source.strip()}
-
-        # Compute the set of rows that will be visible. We do this first (rather
-        # than iterating + flipping setRowHidden) so the lazy-populate pass
-        # below knows exactly which rows it needs to install widgets for.
-        if filter_allowlist is not None:
-            # Filter mode: show all matching rows across the entire document.
-            rows_to_show = {r for r in filter_allowlist if r not in empty_rows}
-        else:
-            # Normal pagination mode.
-            if self.grid_page_size >= 999999:
-                # "All" mode - show everything.
-                start_row = 0
-                end_row = total_segments
-            else:
-                start_row = self.grid_current_page * self.grid_page_size
-                end_row = min(start_row + self.grid_page_size, total_segments)
-            rows_to_show = {r for r in range(start_row, end_row) if r not in empty_rows}
-
-        # v1.10.147 (page-aware grid loading – based on Hans Lenting's
-        # Simpelvertaler fork): rows that haven't yet had their full editor
-        # widgets installed get them now, just-in-time, so the user only ever
-        # pays the widget-construction cost for rows that are about to be
-        # visible. Untouched rows continue to use their cheap placeholder.
-        #
-        # v1.10.151: when a single pagination change brings a large number
-        # of un-populated rows into view at once (typically switching from
-        # 100/200/page to "All" on a multi-thousand-segment project), wrap
-        # the populate loop in the shared _ImportProgressDialog so the user
-        # sees activity instead of a "Not Responding" freeze. Threshold
-        # chosen so small page flips stay invisible.
-        populated = getattr(self, '_populated_rows', None)
-        if populated is not None:
-            seg_count = len(segments)
-            rows_to_populate = [r for r in rows_to_show
-                                if r not in populated and r < seg_count]
-
-            def _do_populate(progress_callback=None):
-                old_suppress = getattr(self, '_suppress_target_change_handlers', False)
-                self._suppress_target_change_handlers = True
-                try:
-                    for i, row in enumerate(rows_to_populate):
-                        self._populate_single_row(row, segments[row])
-                        # The newly-installed target editor inherits the
-                        # suppression flag we just set; unblock its signals
-                        # so user edits will reach the change handler.
-                        w = self.table.cellWidget(row, 3)
-                        if w:
-                            w.blockSignals(False)
-                        # Every ~25 rows, give the progress dialog a chance
-                        # to repaint and the event loop a chance to keep the
-                        # OS from marking the window unresponsive.
-                        if progress_callback is not None and i % 25 == 0:
-                            progress_callback(i, len(rows_to_populate))
-                finally:
-                    self._suppress_target_change_handlers = old_suppress
-
-            if len(rows_to_populate) >= 200:
-                # Substantial batch — show a progress dialog. 200 was chosen
-                # because that's where the per-row widget-construction cost
-                # starts being perceptible (~5 s on a typical SDLXLIFF).
-                with _ImportProgressDialog(
-                    self, title="Loading more segments",
-                    initial_label=(
-                        f"Loading {len(rows_to_populate):,} additional "
-                        "segments into grid…"
-                    ),
-                    initial_total=len(rows_to_populate),
-                ) as _prog:
-                    _do_populate(progress_callback=_prog.grid_callback)
-            elif rows_to_populate:
-                # Small batch — populate inline, no dialog flash.
-                _do_populate()
-
-        # Now hide/show in a single batched pass.
-        self.table.setUpdatesEnabled(False)
-        try:
-            for row in range(total_segments):
-                self.table.setRowHidden(row, row not in rows_to_show)
-        finally:
-            self.table.setUpdatesEnabled(True)
-
-        # Recalculate heights for visible rows to prevent layout corruption.
-        # Call synchronously first, then schedule a deferred resize to catch any
-        # layout issues that Qt processes asynchronously.
-        self._resize_visible_rows()
-        QTimer.singleShot(50, self._resize_visible_rows)
-
-        # Update pagination UI
-        self._update_pagination_ui()
-
-        # v1.10.152: kick off background prefetch of the NEXT page in idle
-        # time so the next "Next page" click (or Ctrl+Enter on the last
-        # segment of this page) is instantaneous instead of triggering a
-        # 200-row populate-and-progress-dialog cycle.
-        self._start_background_populate()
+        grid_pagination.apply_pagination_to_grid(
+            self.current_project,
+            getattr(self, 'table', None),
+            self,
+            self.grid_current_page,
+            self.grid_page_size,
+            getattr(self, '_active_text_filter_rows', None),
+            getattr(self, '_populated_rows', None),
+            getattr(self, '_suppress_target_change_handlers', False),
+            lambda value: setattr(self, '_suppress_target_change_handlers', value),
+            self._populate_single_row,
+            self._auto_resize_single_row,
+            self._resize_visible_rows,
+            self._update_pagination_ui,
+            self._start_background_populate)
 
     # ------------------------------------------------------------------
     # v1.10.152: idle-time next-page prefetch
@@ -28543,177 +28379,104 @@ class SupervertalerQt(QMainWindow):
             )
 
     def go_to_first_page(self):
-        """Переход на первую страницу."""
+        """Делегат: modules/grid/pagination.go_to_first_page (Batch #6 Stage 3).
+        hasattr-дефолт grid_current_page → 0 остаётся self-специфичным (п.Б)."""
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
-        if self.grid_current_page != 0:
-            self.grid_current_page = 0
+        new_page = grid_pagination.go_to_first_page(self.grid_current_page)
+        if new_page is not None:
+            self.grid_current_page = new_page
             self._apply_pagination_to_grid()
-    
+
     def go_to_prev_page(self):
-        """Переход на предыдущую страницу."""
+        """Делегат: modules/grid/pagination.go_to_prev_page (Batch #6 Stage 3)."""
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
-        if self.grid_current_page > 0:
-            self.grid_current_page -= 1
+        new_page = grid_pagination.go_to_prev_page(
+            self.current_project,
+            self.grid_current_page,
+            getattr(self, 'grid_page_size', None))
+        if new_page is not None:
+            self.grid_current_page = new_page
             self._apply_pagination_to_grid()
-    
+
     def go_to_next_page(self):
-        """Переход на следующую страницу."""
+        """Делегат: modules/grid/pagination.go_to_next_page (Batch #6 Stage 3)."""
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
-        total_pages = self._get_total_pages()
-        if self.grid_current_page < total_pages - 1:
-            self.grid_current_page += 1
+        new_page = grid_pagination.go_to_next_page(
+            self.current_project,
+            self.grid_current_page,
+            getattr(self, 'grid_page_size', None))
+        if new_page is not None:
+            self.grid_current_page = new_page
             self._apply_pagination_to_grid()
-    
+
     def select_range_page_up(self):
-        """Выделяет диапазон сегментов вверх (Shift+Page Up).
-        
-                Расширяет выделение от текущей строки вверх на одну страницу
-                сегментов. Если якорь выделения отсутствует, отсчёт идёт
-                от текущей строки."""
-        if not hasattr(self, 'table') or not self.table or not self.current_project:
-            return
-        
-        current_row = self.table.currentRow()
-        if current_row < 0:
-            return
-        
-        # Calculate page size (number of segments to select). When "All" is
-        # active (sentinel 999999) fall back to a screenful so Shift+PgUp
-        # doesn't select to the top of the document.
-        page_size = getattr(self, 'grid_page_size', 50)
-        if not isinstance(page_size, int) or page_size >= 999999 or page_size <= 0:
-            page_size = 50
+        """Делегат: modules/grid/pagination.select_range_page_up
+        (Batch #6 Stage 3). Чтение/запись якоря _selection_anchor_row —
+        self-специфичные, остаются здесь (пункт Б)."""
+        anchor = grid_pagination.select_range_page_up(
+            self.current_project,
+            getattr(self, 'table', None),
+            getattr(self, 'grid_page_size', 50),
+            getattr(self, '_selection_anchor_row', None))
+        if anchor is not None:
+            setattr(self, '_selection_anchor_row', anchor)
 
-        # Get or set the selection anchor (starting point for range selection)
-        if not hasattr(self, '_selection_anchor_row'):
-            self._selection_anchor_row = current_row
-
-        # Calculate target row (one page up from current, but not below 0)
-        target_row = max(0, current_row - page_size)
-        
-        # Select range from anchor to target
-        self._select_range_between(self._selection_anchor_row, target_row)
-        
-        # Move focus to the target row
-        self.table.setCurrentCell(target_row, 3)  # Column 3 is target cell
-        self.table.scrollToItem(self.table.item(target_row, 0))
-    
     def select_range_page_down(self):
-        """Выделяет диапазон сегментов вниз (Shift+Page Down).
-        
-                Расширяет выделение от текущей строки вниз на одну страницу
-                сегментов. Если якорь выделения отсутствует, отсчёт идёт
-                от текущей строки."""
-        if not hasattr(self, 'table') or not self.table or not self.current_project:
-            return
-        
-        current_row = self.table.currentRow()
-        if current_row < 0:
-            return
-        
-        # Calculate page size (number of segments to select). When "All" is
-        # active (sentinel 999999) fall back to a screenful so Shift+PgDn
-        # doesn't select to the bottom of the document.
-        page_size = getattr(self, 'grid_page_size', 50)
-        if not isinstance(page_size, int) or page_size >= 999999 or page_size <= 0:
-            page_size = 50
+        """Делегат: modules/grid/pagination.select_range_page_down
+        (Batch #6 Stage 3). См. select_range_page_up."""
+        anchor = grid_pagination.select_range_page_down(
+            self.current_project,
+            getattr(self, 'table', None),
+            getattr(self, 'grid_page_size', 50),
+            getattr(self, '_selection_anchor_row', None))
+        if anchor is not None:
+            setattr(self, '_selection_anchor_row', anchor)
 
-        # Get or set the selection anchor (starting point for range selection)
-        if not hasattr(self, '_selection_anchor_row'):
-            self._selection_anchor_row = current_row
-
-        # Calculate target row (one page down from current, but not beyond last segment)
-        max_row = len(self.current_project.segments) - 1
-        target_row = min(max_row, current_row + page_size)
-        
-        # Select range from anchor to target
-        self._select_range_between(self._selection_anchor_row, target_row)
-        
-        # Move focus to the target row
-        self.table.setCurrentCell(target_row, 3)  # Column 3 is target cell
-        self.table.scrollToItem(self.table.item(target_row, 0))
-    
     def _select_range_between(self, start_row: int, end_row: int):
-        """Выделяет все строки между start_row и end_row (включительно).
-        
-                Аргументы:
-                    start_row: строка-якорь выделения
-                    end_row: целевая строка, до которой расширяется выделение"""
-        if not hasattr(self, 'table') or not self.table:
-            return
-        
-        # Determine actual start and end (handle both directions)
-        min_row = min(start_row, end_row)
-        max_row = max(start_row, end_row)
-        
-        # Clear existing selection
-        self.table.clearSelection()
-        
-        # Select the range using QTableWidgetSelectionRange
-        col_count = self.table.columnCount()
-        selection_range = QTableWidgetSelectionRange(min_row, 0, max_row, col_count - 1)
-        self.table.setRangeSelected(selection_range, True)
-    
+        """Делегат: modules/grid/pagination.select_range_between
+        (Batch #6 Stage 3)."""
+        grid_pagination.select_range_between(
+            getattr(self, 'table', None), start_row, end_row)
+
     def _clear_selection_anchor(self):
-        """Сбрасывает якорь выделения при щелчке без Shift."""
-        if hasattr(self, '_selection_anchor_row'):
+        """Делегат: modules/grid/pagination.clear_selection_anchor
+        (Batch #6 Stage 3; мёртвый код, перенесён как есть — пункт А)."""
+        if grid_pagination.clear_selection_anchor(
+                getattr(self, '_selection_anchor_row', None)):
             del self._selection_anchor_row
 
     def go_to_last_page(self):
-        """Переход на последнюю страницу."""
+        """Делегат: modules/grid/pagination.go_to_last_page (Batch #6 Stage 3)."""
         if not hasattr(self, 'grid_current_page'):
             self.grid_current_page = 0
-        total_pages = self._get_total_pages()
-        if self.grid_current_page != total_pages - 1:
-            self.grid_current_page = total_pages - 1
+        new_page = grid_pagination.go_to_last_page(
+            self.current_project,
+            self.grid_current_page,
+            getattr(self, 'grid_page_size', None))
+        if new_page is not None:
+            self.grid_current_page = new_page
             self._apply_pagination_to_grid()
-    
+
     def go_to_page(self):
-        """Переход на указанную страницу из поля ввода."""
-        if not hasattr(self, 'page_number_input') or not self._widget_is_alive(self.page_number_input):
-            return
-        try:
-            page_num = int(self.page_number_input.text())
-            total_pages = self._get_total_pages()
-            if not hasattr(self, 'grid_current_page'):
-                self.grid_current_page = 0
-            new_page = max(0, min(page_num - 1, total_pages - 1))  # Convert to 0-indexed and clamp
-            if new_page != self.grid_current_page:
-                self.grid_current_page = new_page
-                self._apply_pagination_to_grid()
-            else:
-                # Even if same page, update the input to show clamped value
-                self.page_number_input.setText(str(self.grid_current_page + 1))
-        except ValueError:
-            # Invalid input, reset to current page
-            if hasattr(self, 'grid_current_page'):
-                self.page_number_input.setText(str(self.grid_current_page + 1))
-    
+        """Делегат: modules/grid/pagination.go_to_page (Batch #6 Stage 3)."""
+        new_page = grid_pagination.go_to_page(
+            self.current_project,
+            getattr(self, 'grid_page_size', None),
+            getattr(self, 'grid_current_page', None),
+            getattr(self, 'page_number_input', None))
+        if new_page is not None:
+            self.grid_current_page = new_page
+            self._apply_pagination_to_grid()
+
     def on_page_size_changed(self, text: str):
-        """Обрабатывает изменение размера страницы."""
-        if not hasattr(self, 'grid_page_size'):
-            self.grid_page_size = 50
-        
-        old_page_size = self.grid_page_size
-        
-        if text == "All":
-            self.grid_page_size = 999999
-        else:
-            try:
-                self.grid_page_size = int(text)
-            except ValueError:
-                self.grid_page_size = 50
-        
-        # Reset to first page when page size changes
-        if not hasattr(self, 'grid_current_page'):
-            self.grid_current_page = 0
-        else:
-            self.grid_current_page = 0
-        
-        # Apply the new pagination
+        """Делегат: modules/grid/pagination.on_page_size_changed
+        (Batch #6 Stage 3)."""
+        page_size, current_page = grid_pagination.on_page_size_changed(text)
+        self.grid_page_size = page_size
+        self.grid_current_page = current_page
         self._apply_pagination_to_grid()
     
     def _widget_is_alive(self, widget: Optional[QWidget]) -> bool:

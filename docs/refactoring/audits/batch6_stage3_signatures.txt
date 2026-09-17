@@ -1,0 +1,56 @@
+BATCH #6 STAGE 3 — Таблица сигнатур (Этап 1.1–1.4), метод → pure-функция → делегат
+База: HEAD 4ace504 (Batch #6 Stage 2). pagination.py = modules/grid/pagination.py.
+Все делегаты сохранили точные исходные имена и сигнатуры параметров.
+════════════════════════════════════════════════════════════════════════════════
+
+AST-границы (пересчитаны Этапом 0.2, сдвиг −434 от чисел Stage 1; монолит
+69 696 → 69 428 до батча): совпали с таблицей промпта Stage 3 БАЙТ-В-БАЙТ, все 16
+— прямые методы SupervertalerQt, дубликатов нет:
+  PAGE_AUTO_ALL_THRESHOLD/PAGE_FALLBACK_SIZE 28195–28196 (class-level),
+  _maybe_auto_set_page_size 28198–28233, _get_total_pages 28235–28242,
+  _update_pagination_ui 28244–28304, _apply_pagination_to_grid 28306–28427,
+  [НЕ ПЕРЕНОСИТСЯ: 3 константы BACKGROUND_POPULATE_* 28445–28447,
+  _start_background_populate 28449–28499, _background_populate_step 28501–28543],
+  go_to_first_page 28545–28551, go_to_prev_page 28553–28559,
+  go_to_next_page 28561–28568, select_range_page_up 28570–28602,
+  select_range_page_down 28604–28637, _select_range_between 28639–28658,
+  _clear_selection_anchor 28660–28663, go_to_last_page 28665–28672,
+  go_to_page 28674–28693, on_page_size_changed 28695–28717.
+Единственное дополнение к промпту: в «пропуске» 28429–28447, помимо заявленного,
+находятся 3 class-level константы populate-кластера (BACKGROUND_POPULATE_*,
+28445–28447) — НЕ перенесены (populate-кластер, Step 8), остались в монолите.
+
+| # | Метод SupervertalerQt (оригинал) | Pure-функция в pagination.py | Что делегат передаёт / делает |
+|---|---|---|---|
+| 1 | _maybe_auto_set_page_size(self) | maybe_auto_set_page_size(current_project, page_size_decided_for=None, page_size_combo=None, log_callback=None, threshold=PAGE_AUTO_ALL_THRESHOLD, fallback_size=PAGE_FALLBACK_SIZE, all_sentinel=999999) -> Optional[int] | self.current_project, getattr(self,'_page_size_decided_for',None), getattr(self,'page_size_combo',None), log_callback=self.log. Делегат: result None → return; иначе пишет _page_size_decided_for=id(self.current_project) (ключ memoization, п.В), grid_page_size, grid_current_page=0 (п.Б). Обновление комбобокса (blockSignals+setCurrentText) — в pure-функции, живость через helpers.widget_is_alive |
+| 2 | _get_total_pages(self) -> int | get_total_pages(current_project, grid_page_size=50, all_sentinel=999999) -> int | self.current_project, getattr(self,'grid_page_size',None) |
+| 3 | _update_pagination_ui(self) | update_pagination_ui(current_project, pagination_label=None, total_pages_label=None, page_number_input=None, first_page_btn=None, prev_page_btn=None, next_page_btn=None, last_page_btn=None, grid_current_page=0, grid_page_size=50, filter_allowlist=None, tr_callback=None, widget_is_alive_callback=None, all_sentinel=999999) -> int | hasattr-дефолты (grid_current_page→0, grid_page_size→50) — setattr-починка в делегате (п.Б); виджеты через getattr(...,None); tr_callback=self.tr (п.Г, вариант (i) — единообразие с остальными колбэками; нужен для 2 lit-строк пустого проекта, f-строки-метки без tr); widget_is_alive_callback=grid_helpers.widget_is_alive. Делегат записывает clamped результат в self.grid_current_page |
+| 4 | _apply_pagination_to_grid(self) | apply_pagination_to_grid(current_project, table, parent, grid_current_page, grid_page_size, active_text_filter_rows, populated_rows, suppress_target_change_handlers, set_suppress_target_change_handlers, populate_single_row_callback, auto_resize_callback, deferred_resize_callback, update_pagination_ui_callback, start_background_populate_callback, import_progress_dialog=_ImportProgressDialog, all_sentinel=999999) -> None | hasattr-дефолты (0/50) в делегате (п.Б); parent=self (родитель _ImportProgressDialog — импортируется напрямую из modules.dialogs, Этап 1.3); _active_text_filter_rows/_populated_rows через getattr(...,None); suppress-флаг: getattr(...,False) + lambda v: setattr(...) (п.Б, порядок исходного тела: True перед циклом, восстановление в finally); populate_single_row_callback=self._populate_single_row (Step 8, в монолите); auto_resize_callback=self._auto_resize_single_row; deferred_resize_callback=self._resize_visible_rows (bound-метод — отложенный вызов должен резолвить таблицу В МОМЕНТ СРАБАТЫВАНИЯ); update_pagination_ui_callback=self._update_pagination_ui; start_background_populate_callback=self._start_background_populate (Step 8). СИНХРОННЫЙ resize — helpers.resize_visible_rows напрямую (п.Д) |
+| 5 | go_to_first_page(self) | go_to_first_page(grid_current_page) -> Optional[int] | hasattr-дефолт в делегате; int-результат → self.grid_current_page = new; self._apply_pagination_to_grid() (порядок исходного тела: записать, затем применить) |
+| 6 | go_to_prev_page(self) | go_to_prev_page(current_project, grid_current_page, grid_page_size) -> Optional[int] | self.current_project, self.grid_current_page (после hasattr-дефолта), getattr(self,'grid_page_size',None); total_pages считается pure-функцией get_total_pages этого же модуля (pagination→pagination, не колбэк) |
+| 7 | go_to_next_page(self) | go_to_next_page(current_project, grid_current_page, grid_page_size) -> Optional[int] | см. №6 |
+| 8 | select_range_page_up(self) | select_range_page_up(current_project, table, grid_page_size, selection_anchor) -> Optional[int] | self.current_project, getattr(self,'table',None), getattr(self,'grid_page_size',50), getattr(self,'_selection_anchor_row',None) (п.Б). None-возврат = guard (якорь не трогается); int-возврат = эффективный якорь → setattr(self,'_selection_anchor_row',anchor). Внутренний вызов _select_range_between → select_range_between того же модуля |
+| 9 | select_range_page_down(self) | select_range_page_down(current_project, table, grid_page_size, selection_anchor) -> Optional[int] | см. №8 |
+| 10 | _select_range_between(self, start_row: int, end_row: int) | select_range_between(table, start_row, end_row) -> None | getattr(self,'table',None); QTableWidgetSelectionRange импортирован в pagination.py |
+| 11 | _clear_selection_anchor(self) | clear_selection_anchor(selection_anchor) -> bool | МЁРТВЫЙ КОД (п.А): 0 call sites (callsites_before_batch6stage3.txt), перенесён как есть. getattr(self,'_selection_anchor_row',None); True → del self._selection_anchor_row (del self-специфичен, п.Б) |
+| 12 | go_to_last_page(self) | go_to_last_page(current_project, grid_current_page, grid_page_size) -> Optional[int] | см. №6 |
+| 13 | go_to_page(self) | go_to_page(current_project, grid_page_size, grid_current_page, page_number_input) -> Optional[int] | self.current_project, getattr(self,'grid_page_size',None), getattr(self,'grid_current_page',None), getattr(self,'page_number_input',None). Живость input — helpers.widget_is_alive напрямую (п.Д). None-возврат = нет перехода (input.setText уже сделан в pure-функции: same-page ветка и ValueError-ветка с hasattr-эквивалентностью «grid_current_page is not None»); int-возврат → записать + применить |
+| 14 | on_page_size_changed(self, text: str) | on_page_size_changed(text, all_sentinel=999999) -> tuple (page_size, current_page=0) | Делегат: распаковка → self.grid_page_size, self.grid_current_page, self._apply_pagination_to_grid(). Отклонение (задокументировано): hasattr-дефолты оригинала не переносятся — grid_page_size перезаписывается безусловно (ValueError→50), grid_current_page в ОБОИХ ветках оригинала получает 0; read-only локальная old_page_size была мёртвой (ни разу не читается) и опущена |
+
+Решения Этапа 1:
+- П.Г (tr): вариант (i) — tr_callback=self.tr в update_pagination_ui (2 вызова
+  self.tr в пустой ветке оригинала: "Segments 0-0 of 0", "of 1").
+- П.Д (helpers вместо колбэков): resize_visible_rows (синхронный вызов) и
+  widget_is_alive импортированы напрямую; других зависимостей 14 методов в
+  helpers.py нет (сверка с modules/grid/__init__.py).
+- Эквивалентность hasattr → getattr-None / is not None — та же принятая в
+  Stage 2 модель: различие только в патологическом случае «атрибут существует
+  и равен None» (якорь _selection_anchor_row — всегда int, остальные — виджеты
+  или int-состояние; setattr-починка делегатов создаёт атрибуты там же, где
+  исходные hasattr-ветки).
+- П.Е (DYNAMIC_ENTRY_POINT): фактически подтверждено для 5+ методов
+  (go_to_prev_page/go_to_next_page/on_page_size_changed — .connect-сигналы
+  page_size_combo.currentTextChanged и кнопок; select_range_page_up/down —
+  вызовы из keyPressEvent-путей; go_to_page — из page_number_input
+  returnPressed; go_to_first/last — кнопки). Делегаты — для ВСЕХ 14
+  единообразно (решение по умолчанию, как в Stage 2).

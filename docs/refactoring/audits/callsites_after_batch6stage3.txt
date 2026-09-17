@@ -1,0 +1,160 @@
+
+=== _maybe_auto_set_page_size ===
+  call Supervertaler.py:27612: # Default to showing every segment ("All"). _maybe_auto_set_page_size()
+  call Supervertaler.py:28187: # использовались только внутри _maybe_auto_set_page_size (Этап 0.4).
+  call Supervertaler.py:28189: def _maybe_auto_set_page_size(self):
+  call Supervertaler.py:41140: self._maybe_auto_set_page_size()
+  TOTAL 4
+
+=== _get_total_pages ===
+  call Supervertaler.py:28206: def _get_total_pages(self) -> int:
+  TOTAL 1
+
+=== _update_pagination_ui ===
+  call Supervertaler.py:28212: def _update_pagination_ui(self):
+  call Supervertaler.py:56730: self._update_pagination_ui()
+  call Supervertaler.py:56778: self._update_pagination_ui()
+  TOTAL 3
+
+=== _apply_pagination_to_grid ===
+  call Supervertaler.py:28238: def _apply_pagination_to_grid(self):
+  call Supervertaler.py:28389: self._apply_pagination_to_grid()
+  call Supervertaler.py:28401: self._apply_pagination_to_grid()
+  call Supervertaler.py:28413: self._apply_pagination_to_grid()
+  call Supervertaler.py:28461: self._apply_pagination_to_grid()
+  call Supervertaler.py:28472: self._apply_pagination_to_grid()
+  call Supervertaler.py:28480: self._apply_pagination_to_grid()
+  call Supervertaler.py:41240: self._apply_pagination_to_grid()
+  call Supervertaler.py:50913: self._apply_pagination_to_grid()
+  str  Supervertaler.py:51962: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:51963: self._apply_pagination_to_grid()
+  str  Supervertaler.py:52073: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:52074: self._apply_pagination_to_grid()
+  str  Supervertaler.py:52112: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:52113: self._apply_pagination_to_grid()
+  str  Supervertaler.py:53234: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:53235: self._apply_pagination_to_grid()
+  call Supervertaler.py:56731: self._apply_pagination_to_grid()
+  call Supervertaler.py:56779: self._apply_pagination_to_grid()
+  call modules\grid\helpers.py:439: apply_pagination_callback()         -> self._apply_pagination_to_grid()"""
+  TOTAL 20
+
+=== go_to_first_page ===
+  str  Supervertaler.py:27561: if hasattr(self, 'go_to_first_page'):
+  call Supervertaler.py:28381: def go_to_first_page(self):
+  call Supervertaler.py:28382: """Делегат: modules/grid/pagination.go_to_first_page (Batch #6 Stage 3).
+  call Supervertaler.py:28386: new_page = grid_pagination.go_to_first_page(self.grid_current_page)
+  str  Supervertaler.py:56639: if hasattr(self, 'go_to_first_page'):
+  call Supervertaler.py:56640: self.go_to_first_page()
+  str  modules\grid\__init__.py:71: "go_to_first_page",
+  str  modules\grid\pagination.py:51: "go_to_first_page",
+  call modules\grid\pagination.py:369: def go_to_first_page(grid_current_page) -> Optional[int]:
+  TOTAL 9
+
+=== go_to_prev_page ===
+  str  Supervertaler.py:27569: if hasattr(self, 'go_to_prev_page'):
+  call Supervertaler.py:28391: def go_to_prev_page(self):
+  call Supervertaler.py:28392: """Делегат: modules/grid/pagination.go_to_prev_page (Batch #6 Stage 3)."""
+  call Supervertaler.py:28395: new_page = grid_pagination.go_to_prev_page(
+  str  modules\grid\__init__.py:72: "go_to_prev_page",
+  str  modules\grid\pagination.py:52: "go_to_prev_page",
+  call modules\grid\pagination.py:381: def go_to_prev_page(current_project, grid_current_page,
+  str  modules\shortcut_manager.py:463: "action": "go_to_prev_page"
+  TOTAL 8
+
+=== go_to_next_page ===
+  str  Supervertaler.py:27593: if hasattr(self, 'go_to_next_page'):
+  call Supervertaler.py:28403: def go_to_next_page(self):
+  call Supervertaler.py:28404: """Делегат: modules/grid/pagination.go_to_next_page (Batch #6 Stage 3)."""
+  call Supervertaler.py:28407: new_page = grid_pagination.go_to_next_page(
+  str  modules\grid\__init__.py:73: "go_to_next_page",
+  str  modules\grid\pagination.py:53: "go_to_next_page",
+  call modules\grid\pagination.py:395: def go_to_next_page(current_project, grid_current_page,
+  str  modules\shortcut_manager.py:469: "action": "go_to_next_page"
+  TOTAL 8
+
+=== select_range_page_up ===
+  call Supervertaler.py:28415: def select_range_page_up(self):
+  call Supervertaler.py:28419: anchor = grid_pagination.select_range_page_up(
+  str  modules\grid\__init__.py:74: "select_range_page_up",
+  str  modules\grid\pagination.py:54: "select_range_page_up",
+  call modules\grid\pagination.py:413: def select_range_page_up(current_project, table, grid_page_size,
+  str  modules\shortcut_manager.py:475: "action": "select_range_page_up"
+  TOTAL 6
+
+=== select_range_page_down ===
+  call Supervertaler.py:28427: def select_range_page_down(self):
+  call Supervertaler.py:28430: anchor = grid_pagination.select_range_page_down(
+  str  modules\grid\__init__.py:75: "select_range_page_down",
+  str  modules\grid\pagination.py:55: "select_range_page_down",
+  call modules\grid\pagination.py:457: def select_range_page_down(current_project, table, grid_page_size,
+  str  modules\shortcut_manager.py:481: "action": "select_range_page_down"
+  TOTAL 6
+
+=== _select_range_between ===
+  call Supervertaler.py:28438: def _select_range_between(self, start_row: int, end_row: int):
+  TOTAL 1
+
+=== _clear_selection_anchor ===
+  call Supervertaler.py:28444: def _clear_selection_anchor(self):
+  TOTAL 1
+
+=== go_to_last_page ===
+  str  Supervertaler.py:27601: if hasattr(self, 'go_to_last_page'):
+  call Supervertaler.py:28451: def go_to_last_page(self):
+  call Supervertaler.py:28452: """Делегат: modules/grid/pagination.go_to_last_page (Batch #6 Stage 3)."""
+  call Supervertaler.py:28455: new_page = grid_pagination.go_to_last_page(
+  str  Supervertaler.py:56668: if hasattr(self, 'go_to_last_page'):
+  call Supervertaler.py:56669: self.go_to_last_page()
+  str  modules\grid\__init__.py:78: "go_to_last_page",
+  str  modules\grid\pagination.py:58: "go_to_last_page",
+  call modules\grid\pagination.py:404: def go_to_last_page(current_project, grid_current_page,
+  TOTAL 9
+
+=== go_to_page ===
+  call Supervertaler.py:6909: def go_to_page(page_index):
+  call Supervertaler.py:6940: go_to_page(1)
+  call Supervertaler.py:6943: go_to_page(0)
+  call Supervertaler.py:6963: go_to_page(0)
+  call Supervertaler.py:6966: go_to_page(1)
+  str  Supervertaler.py:27581: if hasattr(self, 'go_to_page'):
+  call Supervertaler.py:28463: def go_to_page(self):
+  call Supervertaler.py:28464: """Делегат: modules/grid/pagination.go_to_page (Batch #6 Stage 3)."""
+  call Supervertaler.py:28465: new_page = grid_pagination.go_to_page(
+  call Supervertaler.py:51273: self.go_to_page()
+  str  modules\grid\__init__.py:79: "go_to_page",
+  str  modules\grid\pagination.py:59: "go_to_page",
+  call modules\grid\pagination.py:529: def go_to_page(current_project, grid_page_size, grid_current_page,
+  TOTAL 13
+
+=== on_page_size_changed ===
+  call Supervertaler.py:17626: def on_page_size_changed(text):
+  str  Supervertaler.py:27617: if hasattr(self, 'on_page_size_changed'):
+  call Supervertaler.py:28474: def on_page_size_changed(self, text: str):
+  call Supervertaler.py:28477: page_size, current_page = grid_pagination.on_page_size_changed(text)
+  str  modules\grid\__init__.py:80: "on_page_size_changed",
+  str  modules\grid\pagination.py:60: "on_page_size_changed",
+  call modules\grid\pagination.py:560: def on_page_size_changed(text: str,
+  TOTAL 7
+
+=== PAGE_AUTO_ALL_THRESHOLD ===
+  str  modules\grid\__init__.py:81: "PAGE_AUTO_ALL_THRESHOLD",
+  str  modules\grid\pagination.py:61: "PAGE_AUTO_ALL_THRESHOLD",
+  TOTAL 2
+
+=== PAGE_FALLBACK_SIZE ===
+  str  modules\grid\__init__.py:82: "PAGE_FALLBACK_SIZE",
+  str  modules\grid\pagination.py:62: "PAGE_FALLBACK_SIZE",
+  TOTAL 2
+
+=== _page_size_decided_for ===
+  str  Supervertaler.py:28198: getattr(self, '_page_size_decided_for', None),
+  TOTAL 1
+
+=== _selection_anchor_row ===
+  str  Supervertaler.py:28423: getattr(self, '_selection_anchor_row', None))
+  str  Supervertaler.py:28425: setattr(self, '_selection_anchor_row', anchor)
+  str  Supervertaler.py:28434: getattr(self, '_selection_anchor_row', None))
+  str  Supervertaler.py:28436: setattr(self, '_selection_anchor_row', anchor)
+  str  Supervertaler.py:28448: getattr(self, '_selection_anchor_row', None)):
+  TOTAL 5

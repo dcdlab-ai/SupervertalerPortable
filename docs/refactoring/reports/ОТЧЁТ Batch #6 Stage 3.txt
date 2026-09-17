@@ -1,0 +1,325 @@
+ОТЧЁТ Batch #6 Stage 3 — Step 6: grid-пагинация → modules/grid/pagination.py
+═══════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-17. База: HEAD 4ace504 (Batch #6 Stage 2), ветка main.
+Режим: ACTIVE REFACTOR. Один коммит: перенос 14 методов пагинации в
+modules/grid/pagination.py (МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ, тот же принцип, что helpers.py)
++ 14 тонких делегатов в монолите с точными исходными именами/сигнатурами
++ 2 module-level константы, снятые с класса. Артефакты измерений:
+docs/refactoring/audits/*batch6stage3*.txt; скрипты и прогоны:
+D:\Temp\SupervertalerPortable\refactoring\batch6_stage3\ (run-001\).
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
+═══════════════════════════════════════════════════════════════════════════════
+- git status: чист, кроме нового промпта Stage 3 в docs/refactoring/prompts/.
+- AST-границы (только ПРЯМЫЕ методы класса SupervertalerQt, node.body — как
+  требует предупреждение промпта): 16/16 совпали с таблицей промпта
+  БАЙТ-В-БАЙТ. Монолит 69 428 строк; сдвиг −434 от чисел Stage 1 подтверждён.
+  Класс SupervertalerQt: 6052–63500 (было 6051–63768). Дубликатов определений
+  нет (DUPES []). Ложные вложенные функции (go_to_page визарда ~6908,
+  on_page_size_changed диалога терминологии ~17625) в выборку не попали —
+  проверка шла строго по узлам класса.
+  Границы: _maybe_auto_set_page_size 28198–28233, _get_total_pages 28235–28242,
+  _update_pagination_ui 28244–28304, _apply_pagination_to_grid 28306–28427,
+  _start_background_populate 28449–28499, _background_populate_step 28501–28543,
+  go_to_first_page 28545–28551, go_to_prev_page 28553–28559,
+  go_to_next_page 28561–28568, select_range_page_up 28570–28602,
+  select_range_page_down 28604–28637, _select_range_between 28639–28658,
+  _clear_selection_anchor 28660–28663, go_to_last_page 28665–28672,
+  go_to_page 28674–28693, on_page_size_changed 28695–28717.
+- ПОЛНАЯ перепись окна 28190–28725 (Этап 0.2, «нет ли чего-то ещё») — прямые
+  члены класса по порядку: PAGE_AUTO_ALL_THRESHOLD 28195,
+  PAGE_FALLBACK_SIZE 28196, 14 методов скоупа, затем 3 константы populate-
+  кластера BACKGROUND_POPULATE_BATCH_SIZE/BATCH_DELAY_MS/INITIAL_DELAY_MS
+  28445–28447, _start_background_populate, _background_populate_step,
+  _widget_is_alive 28719. Дополнение к промпту (единственное): 3 константы
+  populate-кластера физически лежат в «пропуске» 28429–28447 — НЕ переносились,
+  остались в монолите (Step 8).
+- Снимки: snapshot_index.txt + 16 файлов тел в
+  D:\Temp\SupervertalerPortable\refactoring\batch6_stage3\snapshot\ с sha256;
+  снимок 2 NOT-MOVE методов → docs/refactoring/audits/
+  not_moved_methods_batch6stage3_snapshot.txt
+  (_start_background_populate sha256 729b187ad0799eab0e6dd6d3d172902ae3cbd7ea6915416bdc58396468057411,
+  _background_populate_step sha256 e582fa98464b39970cf553cf7f239230a63188c2ec425bf4d4a15a6aa741f29f).
+- Манифест SHA256 всех .py (без __pycache__): manifest_before_batch6stage3.txt
+  (149 файлов). py_compile чисто.
+- 8 метрик baseline: baseline_counts_batch6stage3.txt (149 py-файлов).
+- Call sites всех 14 методов + landmine-имён (repo-wide):
+  callsites_before_batch6stage3.txt.
+- Этап 0.4 (фактическая проверка): PAGE_AUTO_ALL_THRESHOLD/PAGE_FALLBACK_SIZE —
+  только внутри _maybe_auto_set_page_size (иначе только комментарий 28184);
+  _page_size_decided_for — только в _maybe_auto_set_page_size (2 строки);
+  _selection_anchor_row — 3 метода скоупа + on_cell_clicked (48553, строка
+  `self._selection_anchor_row = row`) + своё определение.
+
+═══════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 1 — PREFLIGHT (таблица сигнатур: audits/batch6_stage3_signatures.txt)
+═══════════════════════════════════════════════════════════════════════════════
+- П.А (_clear_selection_anchor — мёртвый код): подтверждено 0 call sites
+  (в callsites-файле единственное совпадение — собственный def). Перенесён как
+  есть, без пометок и удаления (стандартная политика проекта); делегат
+  сохранён, поведение (del атрибута) проверено сценарием P12.
+- П.Б/В (self-специфичные getattr/setattr): стратегия — pure-функции получают
+  уже разрешённые значения, а чтение/запись состояния окна и hasattr-починки
+  остаются в делегатах. Конкретно:
+    * _maybe_auto_set_page_size: делегат передаёт memo-ключ и combo, получает
+      новый размер страницы и пишет _page_size_decided_for = id(current_project),
+      grid_page_size, grid_current_page = 0;
+    * _apply_pagination_to_grid: делегат делает hasattr-дефолты 0/50, читает
+      _suppress_target_change_handlers через getattr(..., False) и передаёт
+      колбэк-запись lambda v: setattr(...) (вложенный _do_populate ставит True
+      перед циклом и восстанавливает старое значение в finally — порядок как в
+      исходном теле);
+    * select_range_page_up/down и _clear_selection_anchor: делегаты читают якорь
+      getattr(..., None) и пишут/удаляют его сами (setattr/del); pure-функции
+      возвращают «эффективный якорь»/None-на-guard и bool-решение.
+- П.Г (self.tr): выбран вариант (i) — tr_callback=self.tr в update_pagination_ui
+  (2 вызова self.tr в ветке пустого проекта: "Segments 0-0 of 0", "of 1");
+  f-строки-метки пагинации в оригинале tr не использовали и сохранены как есть.
+  Единообразие с остальными колбэками батча соблюдено.
+- П.Д (import из helpers вместо колбэков): resize_visible_rows (синхронный
+  вызов) и widget_is_alive — импортируются напрямую. Сверка полного списка
+  экспортов modules/grid/__init__.py дала ровно эти 2 зависимости и ничего
+  больше (перебор всех вызовов 14 тел).
+- П.Е (DYNAMIC_ENTRY_POINT): делегаты сделаны для ВСЕХ 14 единообразно (решение
+  по умолчанию). Фактические точки входа подтверждены: go_to_prev_page/
+  go_to_next_page/on_page_size_changed (сигналы кнопок и page_size_combo),
+  select_range_page_up/down (Shift+Page в keyPressEvent), go_to_page
+  (page_number_input), go_to_first/last_page (кнопки), _apply_pagination_to_grid
+  (20 вызовов по всему монолиту, включая undo/структурные операции).
+- Этап 1.3, дополнительно: _apply_pagination_to_grid создаёт
+  _ImportProgressDialog(self, title=..., initial_label=..., initial_total=...) —
+  диалог импортирован напрямую `from modules.dialogs import
+  _ImportProgressDialog` (класс уже живёт в modules/dialogs/import_progress.py;
+  modules.dialogs не импортирует modules.grid → цикла нет). Параметр parent
+  передаётся позиционно первым.
+- Отклонение, задокументированное: в on_page_size_changed исходного тела
+  локальная переменная old_page_size присваивалась и НИ РАЗУ не читалась, а
+  hasattr-ветки для grid_page_size/grid_current_page в обеих ветках всё равно
+  перезаписываются — в pure-функции эти артефакты опущены, поведение идентично.
+- Отложенный ресайз: исходный `QTimer.singleShot(50, self._resize_visible_rows)`
+  сохранён семантически точно — pure-функция получает bound-метод делегата
+  (deferred_resize_callback), т.к. отложенный вызов должен резолвить таблицу В
+  МОМЕНТ СРАБАТЫВАНИЯ (таблица может быть пересоздана); синхронный resize идёт
+  через импортированный helpers.resize_visible_rows с колбэком
+  auto_resize_callback = self._auto_resize_single_row. Обе ветки измерены
+  сценарием P15 (sync: обход видимых строк; deferred: вызов после прокачки
+  event loop).
+
+═══════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 2 — ПЕРЕНОС (что именно сделано)
+═══════════════════════════════════════════════════════════════════════════════
+1. Создан modules/grid/pagination.py — 584 строки: 14 чистых функций + 2
+   module-level константы (PAGE_AUTO_ALL_THRESHOLD = 1000,
+   PAGE_FALLBACK_SIZE = 200) + внутренний сентинел PAGE_ALL_SENTINEL = 999999
+   (параметр all_sentinel для отладки/тестов; в делегатах — дефолт) + __all__.
+   Ни класса, ни ссылок на окно.
+2. modules/grid/__init__.py расширен (41 → 83 строки): `from . import
+   pagination` + реэкспорт 14 функций и 2 констант; экспорт helpers.py сохранён
+   без изменений (добавлены только новые имена, ничего не перезаписано).
+3. В Supervertaler.py добавлен импорт строкой 419:
+   `from modules.grid import pagination as grid_pagination  # Grid-пагинация:
+   чистые функции (Batch #6 Stage 3)`.
+4. Из класса SupervertalerQt удалены 2 class-level константы (28195–28196)
+   вместе с 13-строчным комментарием v1.10.147–v1.10.148 (перенесён в
+   константы pagination.py); в классе остались только BACKGROUND_POPULATE_*
+   (populate-кластер, Step 8).
+5. 14 делегатов вставлены на месте бывших тел (точные исходные имена и
+   сигнатуры), 2 NOT-MOVE метода и 3 константы populate-кластера не тронуты.
+6. Перепроверено: on_cell_clicked не редактировался (единственная строка с
+   якорем — `self._selection_anchor_row = row`, теперь 48553), код вне 14
+   методов не менялся, call sites НЕ переписывались — diff
+   callsites_before/after_batch6stage3 показал только: удаления = строки внутри
+   перенесённых тел (self._get_total_pages(), self._select_range_between(...),
+   hasattr-ветки якоря); добавления = тела делегатов, новый модуль и
+   реэкспорты __init__.py.
+
+═══════════════════════════════════════════════════════════════════════════════
+4. ЭТАП 3 — ВАЛИДАЦИЯ
+═══════════════════════════════════════════════════════════════════════════════
+4.1 py_compile: Supervertaler.py + modules/grid/*.py чисто
+    (tools/batch_validation/py_compile_all.py → COMPILE_OK; плюс отдельный
+    py_compile по каждому файлу).
+4.2 8 метрик (одинаковая команда до/после, __pycache__ исключён, 149 py-файлов):
+      \.connect\(             1211 → 1211  OK
+      QShortcut\(               18 →   18  OK
+      create_shortcut\(         35 →   35  OK
+      QTimer\(                  24 →   24  OK
+      timeout\.connect          24 →   24  OK
+      QTimer\.timeout            0 →    0  OK
+      singleShot                87 →   87  OK
+      QMetaObject\.invokeMethod  2 →    2  OK
+    METRICS_ALL_EQUAL True. Первый прогон дал singleShot 87 → 88/89: два ложных
+    совпадения от упоминаний «QTimer.singleShot» в НОВЫХ докстрингах;
+    формулировки перефразированы, метрика восстановлена; методологическая
+    заметка внесена в PROJECT_STATUS.md.
+4.3 SHA256-манифест после
+    (docs/refactoring/audits/manifest_after_batch6stage3.txt): изменены только
+      Supervertaler.py         a01e0f3d7dbc01abe7df7a1940e893c010bcd63b9f702d1b5125198413252bfa
+      modules/grid/__init__.py a1e19eb6e5839860cbe0d146352955a91ff3486de7e3c0d3718d196364d3cb90
+    добавлен
+      modules/grid/pagination.py 814e0daca056471bfab5cfbbfc909743c4524fed7d0e0358a3d6a9a6d22f39d5
+    Остальные 146 файлов — байт-идентичны manifest_before; missing = 0.
+4.4 NOT-MOVE байт-в-байт после всех правок: BYTE-IDENTICAL по обоим методам,
+    sha256 совпадают со снимками Этапа 0.3 (см. §1). PASS — СТОП-условие 2 не
+    сработало.
+4.5 Функциональные сценарии
+    (D:\Temp\...\batch6_stage3\run-001\stage3_scenarios.py — полное приложение
+    offscreen, реальные виджеты пагинации; переключение страниц шло через сигнал
+    page_size_combo.setCurrentText и делегатов): 56/56 PASS, SCENARIOS_DONE OK.
+      P0  авто-размер страницы на 120 сегментах → All; combo «25» → сигнал
+          on_page_size_changed → размер 25, страница 0, 5 страниц (pure == delegate);
+      P1  метки «Segments 1-25 of 120», «of 5», поле «1»; кнопки first/prev
+          disabled, next/last enabled;
+      P2  go_to_next_page → метка «Segments 26-50 of 120», поле «2»;
+      P3  ещё 2× next → page 3; go_to_prev_page → page 2, метка 51-75;
+      P4  go_to_last_page → page 4, метка «Segments 101-120 of 120», next/last disabled;
+      P5  go_to_first_page → page 0, first disabled;
+      P6  go_to_page: «3» → page 2; «999» → clamp page 4, поле «5»; «abc» →
+          ValueError-ветка, поле сброшено в «5», страница не менялась;
+      P7  «All» → 999999, page 0, метка «Segments 1-120 of 120», «of 1»;
+          обратно «100» → 2 страницы;
+      P8  смена размера «25» → «50» через сигнал;
+      P9  select_range_page_down от строки 3: якорь 3, выделен диапазон 3-103;
+      P10 повторный page_down: якорь сохраняется (3), диапазон 3-119 (clamp);
+      P11 select_range_page_up от 103: диапазон 3-3 (цель 3);
+      P12 связка с on_cell_clicked: анкер 60 (эмуляция строки
+          `self._selection_anchor_row = row` без правок самого обработчика) →
+          диапазон 60-119; _clear_selection_anchor удаляет атрибут; page_up без
+          якоря берёт текущую строку;
+      P13 большой проект 1100 сегментов: _maybe_auto_set_page_size →
+          PAGE_FALLBACK_SIZE 200, страница 0, combo=«200» (signals-blocked),
+          лог «Large project (1100 segments)», memo-ключ поставлен, второй вызов
+          — no-op;
+      P14 малый проект 120 → All, combo=«All», memo-ключ;
+      P15 внутренности _apply_pagination_to_grid: lazy-populate вызван ровно по
+          видимым незаполненным строкам 25-49, suppress-флаг восстановлен,
+          _start_background_populate вызван 1 раз, синхронный resize обошёл
+          видимые строки через helpers.resize_visible_rows, отложенный вызов
+          сработал через делегата после прокачки event loop, скрытие строк вне
+          страницы корректно, метка страницы корректна;
+      P16 эквивалентность pure↔делегат: get_total_pages, go_to_first_page(0)=None,
+          go_to_next_page на последней странице=None, on_page_size_changed
+          ('All')=(999999,0), ('junk')=(50,0), clear_selection_anchor(None)=False.
+    Найдено и исправлено сценарием P13/P14 (а не рассуждением): в первой сборке
+    делегат _maybe_auto_set_page_size передавал memo-ключ во второй позиционный
+    параметр, оказавшийся мёртвым grid_page_size, из-за чего combo молча не
+    обновлялся. Параметр удалён, все делегаты вызывают pure-функции с ключевыми
+    аргументами.
+    Квирк окружения (не код батча): на непоказанном offscreen-виджете
+    table.setCurrentCell(...) НЕ меняет currentRow (пробы probe_p9.py и
+    before/after probe_head_vs_work.py на worktree HEAD — на HEAD тот же
+    результат, вплоть до пустого выделения, т.к. guard current_row < 0 выходит
+    раньше). Поэтому фокус-сдвиги select_range_page_* проверялись по
+    selectedRanges(), а текущая строка ставилась харнессом
+    (setCurrentCell + резервный selectionModel().setCurrentIndex).
+4.6 Undo/Redo регрессия (Batch #5, ПОВТОРНО — обязательный пункт промпта и
+    СТОП-условие 3): run-001\undo_scenarios.py целиком из Stage 2, без правок —
+    38/38 PASS, SCENARIOS_DONE OK, включая split/merge → Undo, EGTE
+    Ctrl+Shift+S, batch pseudo-translate + single undo, Ctrl+Z/Y/Shift+Z в
+    ячейке, overflow стека. Регрессии нет; СТОП-условие 3 не сработало.
+    (Дополнительный смысл: _apply_pagination_to_grid — центральный узел,
+    20 call sites, среди них undo-восстановление и структурные операции.)
+4.7 Smoke-тест (tools/batch_validation/smoke_project.py, 2 процесса):
+    SAVE_OK 3200 → LOAD_OK smoke-b6s3 3 «Segment 1 source».
+
+═══════════════════════════════════════════════════════════════════════════════
+5. ЧИСЛА (воспроизведены измерениями, не по памяти)
+═══════════════════════════════════════════════════════════════════════════════
+- git diff --numstat: Supervertaler.py 139 вставок / 376 удалений;
+  modules/grid/__init__.py 39 / 0; PROJECT_STATUS.md 36 / 6 (на момент отчёта).
+- Монолит: 69 428 → 69 191 строк (len(splitlines())), net −237.
+- Удалённые регионы: 28182–28427 (246 строк, вместе с заголовком раздела
+  «# Pagination methods» и комментарием констант) и 28545–28717 (173 строки) —
+  итого 419 строк. Вставлено 181 строка делегатов (delegates_A.py 81 +
+  delegates_B.py 100) + 1 строка импорта; diff показывает 139 вставок, потому
+  что 43 вставленные строки текстуально совпали с удаляемым контекстом
+  (заголовок раздела, пустые строки, повторяющиеся вызовы
+  self._apply_pagination_to_grid()). Тела 14 методов по AST-спанам занимают
+  391 строку (36+8+61+122+7+7+8+33+34+20+4+8+20+23).
+- pagination.py: 584 строки; helpers.py: 507 (не менялся); __init__.py: 83
+  (было 41).
+- Модульные константы pagination.py: PAGE_AUTO_ALL_THRESHOLD = 1000,
+  PAGE_FALLBACK_SIZE = 200, PAGE_ALL_SENTINEL = 999999.
+- Аудиты Stage 3 (все — в docs/refactoring/audits/):
+  baseline_counts_batch6stage3.txt, counts_after_batch6stage3.txt,
+  manifest_before_batch6stage3.txt, manifest_after_batch6stage3.txt,
+  callsites_before_batch6stage3.txt, callsites_after_batch6stage3.txt,
+  not_moved_methods_batch6stage3_snapshot.txt, batch6_stage3_signatures.txt.
+
+Уточнение «таблицы 1.4» (итоговые сигнатуры — документация для Stage 4/filters.py;
+полная таблица с обоснованиями — docs/refactoring/audits/batch6_stage3_signatures.txt):
+    1  _maybe_auto_set_page_size → maybe_auto_set_page_size(current_project,
+       page_size_decided_for=None, page_size_combo=None, log_callback=None,
+       threshold=PAGE_AUTO_ALL_THRESHOLD, fallback_size=PAGE_FALLBACK_SIZE,
+       all_sentinel=999999) -> Optional[int]
+    2  _get_total_pages → get_total_pages(current_project, grid_page_size=50,
+       all_sentinel=999999) -> int
+    3  _update_pagination_ui → update_pagination_ui(current_project,
+       pagination_label=None, total_pages_label=None, page_number_input=None,
+       first_page_btn=None, prev_page_btn=None, next_page_btn=None,
+       last_page_btn=None, grid_current_page=0, grid_page_size=50,
+       filter_allowlist=None, tr_callback=None, widget_is_alive_callback=None,
+       all_sentinel=999999) -> int
+    4  _apply_pagination_to_grid → apply_pagination_to_grid(current_project,
+       table, parent, grid_current_page, grid_page_size, active_text_filter_rows,
+       populated_rows, suppress_target_change_handlers,
+       set_suppress_target_change_handlers, populate_single_row_callback,
+       auto_resize_callback, deferred_resize_callback,
+       update_pagination_ui_callback, start_background_populate_callback,
+       import_progress_dialog=_ImportProgressDialog, all_sentinel=999999) -> None
+    5  go_to_first_page → go_to_first_page(grid_current_page) -> Optional[int]
+    6  go_to_prev_page → go_to_prev_page(current_project, grid_current_page,
+       grid_page_size) -> Optional[int]
+    7  go_to_next_page → go_to_next_page(current_project, grid_current_page,
+       grid_page_size) -> Optional[int]
+    8  select_range_page_up → select_range_page_up(current_project, table,
+       grid_page_size, selection_anchor) -> Optional[int]
+    9  select_range_page_down → select_range_page_down(current_project, table,
+       grid_page_size, selection_anchor) -> Optional[int]
+    10 _select_range_between → select_range_between(table, start_row, end_row) -> None
+    11 _clear_selection_anchor → clear_selection_anchor(selection_anchor) -> bool
+    12 go_to_last_page → go_to_last_page(current_project, grid_current_page,
+       grid_page_size) -> Optional[int]
+    13 go_to_page → go_to_page(current_project, grid_page_size,
+       grid_current_page, page_number_input) -> Optional[int]
+    14 on_page_size_changed → on_page_size_changed(text, all_sentinel=999999) -> tuple
+
+═══════════════════════════════════════════════════════════════════════════════
+6. НЕПОКРЫТЫЕ ПРОВЕРКИ
+═══════════════════════════════════════════════════════════════════════════════
+- Реальный ввод с клавиатуры (Shift+PageUp/PageDown) и настоящий клик по кнопкам
+  пагинации в видимом окне не эмулировались: сценарии шли через те же делегаты и
+  сигнальные пути (page_size_combo.currentTextChanged), но не через Qt-события
+  клавиатуры. Фокус-сдвиг select_range_page_* в offscreen ненаблюдаем (квирк
+  setCurrentCell, идентичный на HEAD) — проверены выделение и логика цели/якоря,
+  но не реальный перенос курсора.
+- on_cell_clicked (не переносился) целиком не вызывался: проверена только его
+  строка установки якоря (эмуляцией) и отсутствие правок в самом обработчике.
+- Ветка _ImportProgressDialog при rows_to_populate >= 200 (реальное открытие
+  диалога) в сценарии не достигалась (в P15 — 25 строк); вызов перенесён 1:1 и
+  импортирован из modules.dialogs, но сам путь «много строк за один переход» не
+  гонялся.
+- Ветка активного текстового фильтра (filter_allowlist → метка «Showing X of Y
+  segments» в _update_pagination_ui, режим «фильтр показывает все совпадения»
+  в _apply_pagination_to_grid) не гонялась: фильтры — Stage 4, код перенесён 1:1.
+- Пиксельное сравнение рендеров не проводилось (методы не рисуют UI сами; их
+  эффекты — тексты меток, состояния кнопок, скрытие строк — проверены по
+  значениям).
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ВЫВОД: GO
+═══════════════════════════════════════════════════════════════════════════════
+Все СТОП-условия не сработали:
+  1. границы подтверждены AST (16/16 байт-в-байт, ложные вложенные функции
+     исключены методологией «только node.body класса»);
+  2. _start_background_populate/_background_populate_step — BYTE-IDENTICAL
+     (sha256 совпадают со снимком Этапа 0.3);
+  3. Undo/Redo-сценарий Batch #5 — 38/38 PASS (повторно, без правок скрипта);
+плюс: 8 метрик ровные; манифест — только монолит + __init__.py + новый
+pagination.py; сценарии пагинации 56/56 PASS; smoke save/load OK; py_compile
+чисто. Один коммит:
+"Extract grid pagination into modules/grid/pagination.py (Batch #6 Stage 3,
+Step 6 of EXTRACTION_PLAN.md)".
+Дальше — СТОП: ждать подтверждения владельца перед Stage 4 (filters.py,
+отдельный промпт). Не продолжать автоматически.

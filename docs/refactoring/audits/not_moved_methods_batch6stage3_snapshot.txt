@@ -1,0 +1,101 @@
+# Batch #6 Stage 3 NOT-MOVE snapshot (must stay byte-identical)
+# 729b187ad0799eab0e6dd6d3d172902ae3cbd7ea6915416bdc58396468057411  _start_background_populate 28449-28499
+# e582fa98464b39970cf553cf7f239230a63188c2ec425bf4d4a15a6aa741f29f  _background_populate_step 28501-28543
+
+### _start_background_populate ###
+    def _start_background_populate(self):
+        """Планирует заполнение следующей страницы в простаивающее время.
+        
+                Пропускается, когда предзаполнение бесполезно: режим «All» (все
+                строки всё равно заполнятся foreground-путём), режим фильтра
+                (пагинация не применяется), текущая страница уже последняя,
+                или следующая страница уже имеет установленные виджеты."""
+        # Always bump the generation, which cancels any in-flight prefetch
+        # — this is what makes navigating-while-prefetching safe.
+        self._background_populate_generation = getattr(
+            self, '_background_populate_generation', 0
+        ) + 1
+
+        if not self.current_project or not self.current_project.segments:
+            return
+
+        populated = getattr(self, '_populated_rows', None)
+        if populated is None:
+            return
+
+        # Filter mode shows results across the whole document, not paged.
+        if getattr(self, '_active_text_filter_rows', None) is not None:
+            return
+
+        page_size = getattr(self, 'grid_page_size', 50)
+        if (not isinstance(page_size, int)
+                or page_size <= 0
+                or page_size >= 999999):
+            return
+
+        current_page = getattr(self, 'grid_current_page', 0)
+        total = len(self.current_project.segments)
+        next_start = (current_page + 1) * page_size
+        if next_start >= total:
+            return  # already on the last page
+
+        next_end = min(next_start + page_size, total)
+        rows_to_prefetch = [r for r in range(next_start, next_end)
+                            if r not in populated]
+        if not rows_to_prefetch:
+            return  # next page is already populated (e.g. backwards nav)
+
+        self._background_populate_queue = rows_to_prefetch
+        my_gen = self._background_populate_generation
+        # Give the freshly-loaded current page a moment to settle and the
+        # user a moment to start interacting before we steal main-thread
+        # time for the prefetch.
+        QTimer.singleShot(
+            self.BACKGROUND_POPULATE_INITIAL_DELAY_MS,
+            lambda gen=my_gen: self._background_populate_step(gen),
+        )
+
+### _background_populate_step ###
+    def _background_populate_step(self, generation: int):
+        """Заполняет небольшую порцию и перепланирует себя, пока очередь не опустеет."""
+        # Generation mismatch: a newer prefetch (or project change) has
+        # superseded us. Drop our queue and exit silently.
+        if generation != getattr(self, '_background_populate_generation', 0):
+            return
+        queue = getattr(self, '_background_populate_queue', None)
+        if not queue:
+            return
+        if not self.current_project or not self.current_project.segments:
+            return
+
+        segments = self.current_project.segments
+        seg_count = len(segments)
+        populated = getattr(self, '_populated_rows', None)
+        if populated is None:
+            return
+
+        batch = queue[:self.BACKGROUND_POPULATE_BATCH_SIZE]
+        self._background_populate_queue = queue[self.BACKGROUND_POPULATE_BATCH_SIZE:]
+
+        old_suppress = getattr(self, '_suppress_target_change_handlers', False)
+        self._suppress_target_change_handlers = True
+        try:
+            for row in batch:
+                # Re-check membership each iteration — a foreground populate
+                # (e.g. user clicked Next while we were mid-batch) may have
+                # already populated this row.
+                if row in populated or row >= seg_count:
+                    continue
+                self._populate_single_row(row, segments[row])
+                w = self.table.cellWidget(row, 3)
+                if w:
+                    w.blockSignals(False)
+        finally:
+            self._suppress_target_change_handlers = old_suppress
+
+        # If there's more to do, hop to the event loop and come back.
+        if self._background_populate_queue:
+            QTimer.singleShot(
+                self.BACKGROUND_POPULATE_BATCH_DELAY_MS,
+                lambda gen=generation: self._background_populate_step(gen),
+            )

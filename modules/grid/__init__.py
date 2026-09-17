@@ -23,8 +23,31 @@ from .helpers import (
     get_filtered_segments_with_rows,
 )
 
+# Stage 3 (Batch #6): pagination.py — модуль чистых функций пагинации
+# (тот же принцип, что и helpers.py; делегаты сохранены в SupervertalerQt).
+from . import pagination
+from .pagination import (
+    maybe_auto_set_page_size,
+    get_total_pages,
+    update_pagination_ui,
+    apply_pagination_to_grid,
+    go_to_first_page,
+    go_to_prev_page,
+    go_to_next_page,
+    select_range_page_up,
+    select_range_page_down,
+    select_range_between,
+    clear_selection_anchor,
+    go_to_last_page,
+    go_to_page,
+    on_page_size_changed,
+    PAGE_AUTO_ALL_THRESHOLD,
+    PAGE_FALLBACK_SIZE,
+)
+
 __all__ = [
     "helpers",
+    "pagination",
     "widget_is_alive",
     "segment_for_grid_row",
     "recompute_list_numbers",
@@ -41,4 +64,20 @@ __all__ = [
     "move_to_next_visible_row",
     "is_text_filter_active",
     "get_filtered_segments_with_rows",
+    "maybe_auto_set_page_size",
+    "get_total_pages",
+    "update_pagination_ui",
+    "apply_pagination_to_grid",
+    "go_to_first_page",
+    "go_to_prev_page",
+    "go_to_next_page",
+    "select_range_page_up",
+    "select_range_page_down",
+    "select_range_between",
+    "clear_selection_anchor",
+    "go_to_last_page",
+    "go_to_page",
+    "on_page_size_changed",
+    "PAGE_AUTO_ALL_THRESHOLD",
+    "PAGE_FALLBACK_SIZE",
 ]

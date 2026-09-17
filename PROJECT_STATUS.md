@@ -4,16 +4,17 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-17 (Batch #6 Stage 2) • **Текущий шаг:** Step 6 Stage 2 выполнен (helpers.py); СТОП — ждать GO владельца → Stage 3 (pagination.py)
+**Обновлено:** 2026-09-17 (Batch #6 Stage 3) • **Текущий шаг:** Step 6 Stage 3 выполнен (pagination.py); СТОП — ждать GO владельца → Stage 4 (filters.py)
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **69 428**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **69 191**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5). **Step 6 (Batch #6):
-Stage 1 (инвентаризация) и Stage 2 (helpers.py → modules/grid/) выполнены**;
-Stage 3 (pagination.py) ждёт GO владельца. Среда, тестирование и валидация — по
-`AGENTS.md` (обязательно к прочтению перед любой работой).
+Stage 1 (инвентаризация), Stage 2 (helpers.py) и Stage 3 (pagination.py →
+modules/grid/) выполнены**; Stage 4 (filters.py) ждёт GO владельца. Среда,
+тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед любой
+работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
 
@@ -25,7 +26,7 @@ Stage 3 (pagination.py) ждёт GO владельца. Среда, тестир
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
-| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1–2 выполнены; Stage 3 (pagination) ждёт GO | Stage 1 (этот коммит c5a5da1); Stage 2 — `modules/grid/helpers.py` (чистые функции, 16 функций + 17 делегатов; `modules/grid/__init__.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage2*.txt` |
+| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1–3 выполнены; Stage 4 (filters) ждёт GO | Stage 1 `c5a5da1`; Stage 2 — `modules/grid/helpers.py` (16 функций + 17 делегатов); Stage 3 — `modules/grid/pagination.py` (14 функций + 14 делегатов, 2 module-level константы; `modules/grid/__init__.py` расширен); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage2*.txt`, `*batch6stage3*` |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
@@ -36,6 +37,24 @@ Stage 3 (pagination.py) ждёт GO владельца. Среда, тестир
 | 14 | SuperLookup + Voice + финальный cleanup | ⬜ не начат | — |
 
 ## Что дальше: Step 6 — Grid: helpers/pagination/filters (Batch #6)
+
+**Stage 3 выполнен** (17.09.2026, pagination.py). Состав переноса: 14 методов
+(14 pure-функций) в `modules/grid/pagination.py` + 2 module-level константы
+`PAGE_AUTO_ALL_THRESHOLD`/`PAGE_FALLBACK_SIZE` (сняты с класса SupervertalerQt;
+в классе остались только константы populate-кластера `BACKGROUND_POPULATE_*`).
+AST-границы Stage 3: блок 28198–28717 (сдвиг −434 от чисел Stage 1; координаторская
+таблица Stage 3 подтверждена БАЙТ-в-БАЙТ), внутри блока НЕ переносились
+`_start_background_populate`/`_background_populate_step` (Step 8, populate-кластер).
+Стоп-условия не сработали: 8 метрик ровные; манифест — только монолит +
+`modules/grid/__init__.py` + новый `pagination.py`; SHA256 двух NOT-MOVE методов —
+BYTE-IDENTICAL до/после; Undo/Redo-сценарий Batch #5 — 38/38 PASS;
+stage3-сценарий 56/56 PASS; smoke save/load — OK. Монолит 69 428 → **69 191**
+(net −237; diff stat: +178 / −376 по двум файлам). Отчёт:
+`docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 3.txt`; сигнатуры:
+`docs/refactoring/audits/batch6_stage3_signatures.txt`.
+**Дальше: Stage 4 = filters.py** — отдельный промпт после GO владельца. Границы
+для Stage 4 надо пересчитать AST заново (Stage 1 давал 52186–53901 + 56218–56280 +
+28850–28878 — сдвиг после Stage 2/3 уже −434 и станет больше).
 
 **Stage 2 выполнен** (17.09.2026, helpers.py). Состав переноса: 16 pure-функций
 в `modules/grid/helpers.py` (модуль чистых функций — решение владельца §6 Stage 1;
@@ -108,6 +127,17 @@ dependencies}.txt`. Ожидание решения владельца (6 отк
   callsites. Детали: «TECH-DEBT» в конце `EXTRACTION_PLAN.md`.
 - **Документированные диапазоны строк в плане устаревают после каждого батча** —
   границы классов пересчитывать через AST (`ast.parse`, `lineno`/`end_lineno`).
+- **Метрика `singleShot` ловит упоминания в докстрингах/комментариях** (Stage 3: один
+  «лишний» singleShot дал ложный DIFF, пока упоминание не перефразировали). Формулировки
+  в перенесённых докстрингах не должны содержать самих метрик-паттернов.
+- **Позиционные аргументы pure-функций**: у Stage 3 при первой сборке делегат передавал
+  `_page_size_decided_for` в мёртвый второй параметр (`grid_page_size`) — combo молча не
+  обновлялся. Все новые pure-функции вызывать с явными ключевыми аргументами, а
+  неиспользуемые параметры не заводить (найдено функциональным сценарием P13/P14).
+- **Offscreen-квирк фокуса таблицы**: на непоказанном виджете `table.setCurrentCell()`
+  не меняет `currentRow` (было и на HEAD — проба `probe_head_vs_work.py`); в тест-харнессах
+  резервный путь — `selectionModel().setCurrentIndex(...)`, а фокус-сдвиги
+  `select_range_page_*` проверять по `selectedRanges()`.
 - **Пользовательские данные** не следуют за cwd: `get_user_data_path()` резолвится от
   глобального `~/.supervertaler_config.json` — read-only пробы безопасны везде, smoke-тесты
   пишут в продакшн-данные.

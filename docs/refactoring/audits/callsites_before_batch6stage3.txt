@@ -1,0 +1,123 @@
+
+=== _maybe_auto_set_page_size ===
+  call Supervertaler.py:27611: # Default to showing every segment ("All"). _maybe_auto_set_page_size()
+  call Supervertaler.py:28198: def _maybe_auto_set_page_size(self):
+  call Supervertaler.py:41377: self._maybe_auto_set_page_size()
+  TOTAL 3
+
+=== _get_total_pages ===
+  call Supervertaler.py:28235: def _get_total_pages(self) -> int:
+  call Supervertaler.py:28256: total_pages = self._get_total_pages()
+  call Supervertaler.py:28565: total_pages = self._get_total_pages()
+  call Supervertaler.py:28669: total_pages = self._get_total_pages()
+  call Supervertaler.py:28680: total_pages = self._get_total_pages()
+  TOTAL 5
+
+=== _update_pagination_ui ===
+  call Supervertaler.py:28244: def _update_pagination_ui(self):
+  call Supervertaler.py:28421: self._update_pagination_ui()
+  call Supervertaler.py:56967: self._update_pagination_ui()
+  call Supervertaler.py:57015: self._update_pagination_ui()
+  TOTAL 4
+
+=== _apply_pagination_to_grid ===
+  call Supervertaler.py:28306: def _apply_pagination_to_grid(self):
+  call Supervertaler.py:28551: self._apply_pagination_to_grid()
+  call Supervertaler.py:28559: self._apply_pagination_to_grid()
+  call Supervertaler.py:28568: self._apply_pagination_to_grid()
+  call Supervertaler.py:28672: self._apply_pagination_to_grid()
+  call Supervertaler.py:28686: self._apply_pagination_to_grid()
+  call Supervertaler.py:28717: self._apply_pagination_to_grid()
+  call Supervertaler.py:41477: self._apply_pagination_to_grid()
+  call Supervertaler.py:51150: self._apply_pagination_to_grid()
+  str  Supervertaler.py:52199: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:52200: self._apply_pagination_to_grid()
+  str  Supervertaler.py:52310: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:52311: self._apply_pagination_to_grid()
+  str  Supervertaler.py:52349: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:52350: self._apply_pagination_to_grid()
+  str  Supervertaler.py:53471: if hasattr(self, '_apply_pagination_to_grid'):
+  call Supervertaler.py:53472: self._apply_pagination_to_grid()
+  call Supervertaler.py:56968: self._apply_pagination_to_grid()
+  call Supervertaler.py:57016: self._apply_pagination_to_grid()
+  call modules\grid\helpers.py:439: apply_pagination_callback()         -> self._apply_pagination_to_grid()"""
+  TOTAL 20
+
+=== go_to_first_page ===
+  str  Supervertaler.py:27560: if hasattr(self, 'go_to_first_page'):
+  call Supervertaler.py:28545: def go_to_first_page(self):
+  str  Supervertaler.py:56876: if hasattr(self, 'go_to_first_page'):
+  call Supervertaler.py:56877: self.go_to_first_page()
+  TOTAL 4
+
+=== go_to_prev_page ===
+  str  Supervertaler.py:27568: if hasattr(self, 'go_to_prev_page'):
+  call Supervertaler.py:28553: def go_to_prev_page(self):
+  str  modules\shortcut_manager.py:463: "action": "go_to_prev_page"
+  TOTAL 3
+
+=== go_to_next_page ===
+  str  Supervertaler.py:27592: if hasattr(self, 'go_to_next_page'):
+  call Supervertaler.py:28561: def go_to_next_page(self):
+  str  modules\shortcut_manager.py:469: "action": "go_to_next_page"
+  TOTAL 3
+
+=== select_range_page_up ===
+  call Supervertaler.py:28570: def select_range_page_up(self):
+  str  modules\shortcut_manager.py:475: "action": "select_range_page_up"
+  TOTAL 2
+
+=== select_range_page_down ===
+  call Supervertaler.py:28604: def select_range_page_down(self):
+  str  modules\shortcut_manager.py:481: "action": "select_range_page_down"
+  TOTAL 2
+
+=== _select_range_between ===
+  call Supervertaler.py:28598: self._select_range_between(self._selection_anchor_row, target_row)
+  call Supervertaler.py:28633: self._select_range_between(self._selection_anchor_row, target_row)
+  call Supervertaler.py:28639: def _select_range_between(self, start_row: int, end_row: int):
+  TOTAL 3
+
+=== _clear_selection_anchor ===
+  call Supervertaler.py:28660: def _clear_selection_anchor(self):
+  TOTAL 1
+
+=== go_to_last_page ===
+  str  Supervertaler.py:27600: if hasattr(self, 'go_to_last_page'):
+  call Supervertaler.py:28665: def go_to_last_page(self):
+  str  Supervertaler.py:56905: if hasattr(self, 'go_to_last_page'):
+  call Supervertaler.py:56906: self.go_to_last_page()
+  TOTAL 4
+
+=== go_to_page ===
+  call Supervertaler.py:6908: def go_to_page(page_index):
+  call Supervertaler.py:6939: go_to_page(1)
+  call Supervertaler.py:6942: go_to_page(0)
+  call Supervertaler.py:6962: go_to_page(0)
+  call Supervertaler.py:6965: go_to_page(1)
+  str  Supervertaler.py:27580: if hasattr(self, 'go_to_page'):
+  call Supervertaler.py:28674: def go_to_page(self):
+  call Supervertaler.py:51510: self.go_to_page()
+  TOTAL 8
+
+=== on_page_size_changed ===
+  call Supervertaler.py:17625: def on_page_size_changed(text):
+  str  Supervertaler.py:27616: if hasattr(self, 'on_page_size_changed'):
+  call Supervertaler.py:28695: def on_page_size_changed(self, text: str):
+  TOTAL 3
+
+=== PAGE_AUTO_ALL_THRESHOLD ===
+  TOTAL 0
+
+=== PAGE_FALLBACK_SIZE ===
+  TOTAL 0
+
+=== _page_size_decided_for ===
+  str  Supervertaler.py:28211: if getattr(self, '_page_size_decided_for', None) == key:
+  TOTAL 1
+
+=== _selection_anchor_row ===
+  str  Supervertaler.py:28591: if not hasattr(self, '_selection_anchor_row'):
+  str  Supervertaler.py:28625: if not hasattr(self, '_selection_anchor_row'):
+  str  Supervertaler.py:28662: if hasattr(self, '_selection_anchor_row'):
+  TOTAL 3
