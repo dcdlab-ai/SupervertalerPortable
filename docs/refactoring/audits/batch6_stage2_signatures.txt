@@ -1,0 +1,46 @@
+BATCH #6 STAGE 2 — Таблица сигнатур (Этап 1.1/1.2), метод → pure-функция → делегат
+База: HEAD c5a5da1 (Batch #6 Stage 1). helpers.py = modules/grid/helpers.py.
+Все делегаты сохранили точные исходные имена и сигнатуры параметров.
+═══════════════════════════════════════════════════════════════════════════════
+
+| # | Метод SupervertalerQt (оригинал, AST @HEAD) | Pure-функция в helpers.py | Что делегат передаёт |
+|---|---|---|---|
+| 1 | _widget_is_alive(self, widget: Optional[QWidget]) -> bool (28787–28794) | widget_is_alive(widget: Optional[QWidget]) -> bool | widget |
+| 2 | _get_line_edit_text(self, attr_name: str) -> str (28842–28848) | НЕТ pure-функции (п.Г: getattr/setattr-логика self-специфична; после проверки живости — тривиальный widget.text()). Тело целиком в делегате; живость — через делегата №1 | — |
+| 3 | _segment_for_grid_row(self, row: int) (9415–9430) | segment_for_grid_row(current_project, table, row) | getattr(self,'current_project',None), getattr(self,'table',None), row |
+| 4 | _recompute_list_numbers(self) (9650–9677) | recompute_list_numbers(current_project) -> Dict[int, int] | self.current_project; делегат: self._list_numbers = результат (п.В: новый dict, реассайн) |
+| 5 | _reindex_grid_rows_from(self, start_row: int) (9679–9700) | reindex_grid_rows_from(current_project, table, start_row) -> set | self.current_project, self.table, start_row; делегат: self._populated_rows = результат (п.В: новый set) |
+| 6 | _select_grid_row_by_id(self, focus_id) (9702–9723) | select_grid_row_by_id(table, focus_id) -> None | getattr(self,'table',None), focus_id; внутренний вызов helpers.find_row_for_segment |
+| 7 | _compute_initial_visible_rows(self, total: int) -> set (40950–40969) | compute_initial_visible_rows(total, filter_allowlist=None, page_size=50, current_page=0) -> set | getattr(self,'_active_text_filter_rows',None), getattr(self,'grid_page_size',50), getattr(self,'grid_current_page',0) — те же дефолты, что в исходном теле |
+| 8 | _navigate_to_segment_in_grid(self, segment_id: int) (42956–42999) | navigate_to_segment_in_grid(current_project, table, main_tabs, page_size_combo, page_number_input, segment_id, go_to_page_callback, log_callback) -> None | self.current_project, getattr-виджеты (None по умолчанию), self.go_to_page, self.log |
+
+| 9 | get_selected_segments_from_grid(self) (46920–46934) | get_selected_segments_from_grid(current_project, table) -> list | self.current_project, getattr(self,'table',None) |
+| 10 | _get_selected_or_filtered_segments(self, operation_name: str) -> list (46936–46969) | get_selected_or_filtered_segments(current_project, table, parent_widget, operation_name) -> list | self.current_project, self.table, self (родитель QMessageBox), operation_name; внутренний вызов helpers.get_selected_segments_from_grid |
+| 11 | _resize_visible_rows(self) (44153–44160) | resize_visible_rows(table, auto_resize_callback) -> None | getattr(self,'table',None), self._auto_resize_single_row (render-кластер, остаётся в монолите) |
+| 12 | _find_row_for_segment_id(self, segment_id: int) -> int (54238–54252) | find_row_for_segment_id(table, segment_id) -> int | getattr(self,'table',None), segment_id |
+| 13 | _find_row_for_segment(self, segment_id: int) -> int (57714–57727) | find_row_for_segment(table, segment_id) -> int | getattr(self,'table',None), segment_id. ОБЯЗАТЕЛЬНЫЙ делегат — bound-метод захвачен modules/undo_manager.py (п.Д) |
+| 14 | _move_to_next_visible_row(self, current_row: int) -> None (57524–57560) | move_to_next_visible_row(current_project, table, current_row, grid_page_size=50, grid_current_page=0, set_grid_page_callback, apply_pagination_callback, log_callback) -> None | self.current_project, getattr(self,'table',None), current_row, getattr-состояние пагинации (50/0), lambda tp: setattr(self,'grid_current_page',tp), self._apply_pagination_to_grid, self.log. Два колбэка вместо одного — запись self.grid_current_page и _apply_pagination_to_grid в порядке исходного тела |
+| 15 | _is_text_filter_active(self) -> bool (57363–57367) | is_text_filter_active(source_text: str, target_text: str) -> bool | тексты через self._get_line_edit_text('source_filter'/'target_filter'). Отклонение от п.А (внутренний вызов): callee п.Г остаётся в монолите, поэтому pure-функция получает уже извлечённые тексты |
+| 16 | _get_filtered_segments_with_rows(self) -> List[Tuple[int, Segment]] (60974–60994) | get_filtered_segments_with_rows(current_project, table) -> List[Tuple[int, Segment]] | self.current_project, getattr(self,'table',None) |
+| 17 | _navigate_to_segment_by_id(self, segment_id: int) (54700–54769*) | navigate_to_segment_by_id(current_project, table, main_tabs, page_size_combo, page_number_input, grid_current_page, segment_id, go_to_page_callback, log_callback) -> None | self.current_project, getattr-виджеты, getattr(self,'grid_current_page',0), segment_id, self.go_to_page, self.log |
+
+* Граница 54700–54770 из промпта (координаторская, неподтверждённая) уточнена AST:
+  фактический end_lineno = 54769 (строка 54770 пустая, следующий метод на 54771).
+
+Эквивалентность hasattr → is not None (методы 8, 17): делегат резолвит атрибуты
+через getattr(self, X, None); в оригинале hasattr-защиты. Различие только в
+патологическом случае «атрибут существует и равен None» (в оригинале —
+AttributeError внутри защищаемого блока; реально атрибуты либо не созданы,
+либо живые виджеты). Аналогично для guard'ов `not self.table` — оригинальный
+краш-путь AttributeError сохранён как AttributeError.
+
+Этап 1.4 (DYNAMIC_ENTRY_POINT): ни один из 17 методов не упомянут в
+DEAD_CODE_REPORT.md вообще (проверка Select-String по всем именам) — в списке
+DYNAMIC_ENTRY_POINT их нет; 17-й (_navigate_to_segment_by_id) проверен отдельно,
+т.к. Stage 1 его не сканировал. Реальный размер списка в отчёте — 219 методов
+(«9 методов» в §5 Stage 1 — фильтр по кластеру Step 6), ни один из 17 не входит.
+
+Этап 0.6 (call sites): 144 вхождения до (включая 2 lambda-вызова
+_navigate_to_segment_by_id на 54377/55040 — точно как предсказывал промпт);
+после переноса все содержательные строки call sites вне 17 тел байт-в-байт
+совпадают (сдвиги только по номерам строк). modules/undo_manager.py не изменён.

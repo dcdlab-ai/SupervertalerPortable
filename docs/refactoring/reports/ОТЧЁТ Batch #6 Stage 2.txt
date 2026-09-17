@@ -1,0 +1,171 @@
+ОТЧЁТ Batch #6 Stage 2 — Step 6: grid-хелперы → modules/grid/helpers.py
+═══════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-17. База: HEAD c5a5da1 (Batch #6 Stage 1), ветка main.
+Режим: ACTIVE REFACTOR. Один коммит: перенос 17 методов в НОВЫЙ пакет
+modules/grid/ (helpers.py — МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ, решение владельца по
+Stage 1 §6) + 17 тонких делегатов в монолите с точными исходными
+именами/сигнатурами. Артефакты измерений:
+docs/refactoring/audits/*batch6stage2*.txt; скрипты и прогоны:
+D:\Temp\SupervertalerPortable\refactoring\batch6_stage2\
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
+═══════════════════════════════════════════════════════════════════════════════
+- git status чист (только новый промпт Stage 2 в docs/refactoring/prompts/).
+- AST-границы: 16/17 совпали с таблицей промпта байт-в-байт. Один уточнён:
+  _navigate_to_segment_by_id = 54700–54769 (координаторская оценка 54700–54770
+  была неподтверждённой; фактический end_lineno 54769, строка 54770 пустая,
+  следующий метод _open_comment_in_panel на 54771). Дубликатов определений нет.
+- Манифест SHA256 всех .py (без __pycache__): manifest_before_batch6stage2.txt
+  (147 файлов). py_compile чисто.
+- 8 метрик baseline: baseline_counts_batch6stage2.txt (139 py-файлов).
+- Call sites: callsites_before_batch6stage2.txt — 144 вхождения, включая ровно
+  2 lambda-вызова _navigate_to_segment_by_id (54377, 55040), как предсказывал
+  промпт. Для 16 методов цифры согласуются с
+  batch6_stage1_callsites_categorized.txt.
+
+═══════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 1 — PREFLIGHT (таблица сигнатур: audits/batch6_stage2_signatures.txt)
+═══════════════════════════════════════════════════════════════════════════════
+- 16 pure-функций создано; _get_line_edit_text оставлен в монолите ЦЕЛИКОМ
+  (п.Г): getattr/setattr-починка self-специфична, логика после проверки живости
+  — тривиальный widget.text(). Проверка живости в нём идёт через делегата
+  _widget_is_alive → helpers.widget_is_alive.
+- П.В подтверждён чтением тел: recompute_list_numbers строит НОВЫЙ dict
+  (старый _list_numbers не читается) → делегат self._list_numbers = результат;
+  reindex_grid_rows_from возвращает НОВЫЙ set → self._populated_rows = результат.
+- П.Б (колбэки): navigate_to_*: go_to_page_callback + log_callback;
+  _move_to_next_visible_row: set_grid_page_callback (запись
+  self.grid_current_page) + apply_pagination_callback (_apply_pagination_to_grid)
+  — два колбэка в порядке исходного тела (записать, затем применить), т.к.
+  состояние пагинации пока живёт на окне; _resize_visible_rows:
+  auto_resize_callback (self._auto_resize_single_row).
+- Внутренние вызовы helpers → helpers: select_grid_row_by_id →
+  find_row_for_segment(table, focus_id); get_selected_or_filtered_segments →
+  get_selected_segments_from_grid(current_project, table).
+- Отклонение от п.А, задокументированное: _is_text_filter_active →
+  _get_line_edit_text не может быть «простым вызовом внутри модуля», т.к. callee
+  по п.Г остался в монолите; pure-функция is_text_filter_active(source_text,
+  target_text) получает уже извлечённые тексты; делегат извлекает их через
+  self._get_line_edit_text. Поведение идентично.
+- Эквивалентность hasattr → is not None: делегаты навигации резолвят
+  main_tabs/page_size_combo/page_number_input через getattr(..., None).
+  Отличие только в патологическом случае «атрибут существует и равен None»
+  (оригинал падал бы с AttributeError внутри защищаемого блока). Задокументировано.
+- Этап 1.4 DYNAMIC_ENTRY_POINT: ни один из 17 методов не упомянут в
+  DEAD_CODE_REPORT.md (в т.ч. 17-й, который Stage 1 не сканировал).
+  Попутная находка: полный список в отчёте — 219 методов; «9 методов» §5
+  Stage 1 — это фильтр по кластеру Step 6, ни один из 17 не входит и туда.
+
+═══════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 2 — ПЕРЕНОС
+═══════════════════════════════════════════════════════════════════════════════
+Новые файлы:
+- modules/grid/__init__.py (42 строки): реэкспорт всех 16 функций
+  (по образцу modules/dialogs/__init__.py, но функции, не классы).
+- modules/grid/helpers.py (507 строк): 16 чистых функций; без класса, без
+  ссылок на окно; контекст — явные параметры, зависимости монолита — колбэки.
+Монолит:
+- Импорт после блока modules.*: `from modules.grid import helpers as
+  grid_helpers  # Grid-хелперы: чистые функции (Batch #6 Stage 2)`.
+- 17 делегатов на месте бывших тел. Итоговые AST-границы делегатов:
+  _segment_for_grid_row 9416–9420, _recompute_list_numbers 9640–9643,
+  _reindex_grid_rows_from 9645–9648, _select_grid_row_by_id 9650–9655,
+  _widget_is_alive 28719–28722, _get_line_edit_text 28770–28779,
+  _compute_initial_visible_rows 40881–40889, _navigate_to_segment_in_grid
+  42876–42888, _resize_visible_rows 44042–44045, get_selected_segments_from_grid
+  46805–46808, _get_selected_or_filtered_segments 46810–46814,
+  _find_row_for_segment_id 54083–54086, _navigate_to_segment_by_id 54534–54547,
+  _is_text_filter_active 57141–57148, _move_to_next_visible_row 57305–57317,
+  _find_row_for_segment 57471–57476, _get_filtered_segments_with_rows
+  60723–60726.
+- show_manage_views_dialog, populate/render-методы, go_to_page,
+  _apply_pagination_to_grid — НЕ перенесены (запреты соблюдены).
+
+═══════════════════════════════════════════════════════════════════════════════
+4. ЭТАП 3 — ВАЛИДАЦИЯ
+═══════════════════════════════════════════════════════════════════════════════
+4.1 py_compile: Supervertaler.py + modules/grid/*.py + modules/undo_manager.py — чисто.
+4.2 8 метрик после: counts_after_batch6stage2.txt — ВСЕ РОВНЫ:
+    .connect\( 1211, QShortcut\( 18, create_shortcut\( 35, QTimer\( 24,
+    timeout.connect 24, QTimer.timeout 0, singleShot 85,
+    QMetaObject.invokeMethod 2 — байт-в-байт равны baseline (139→141 py-файлов:
+    +2 новых файла grid-пакета).
+4.3 SHA256-манифест после: manifest_after_batch6stage2.txt. Дифф против before:
+    ТОЛЬКО Supervertaler.py и 2 новых файла modules/grid/*. Остальные 144 .py
+    файла — байт-в-байт совпадают. СТОП-условие 2 не сработало.
+4.4 Call sites: содержательное сравнение callsites_before/after (без номеров
+    строк): удалённые строки — только внутри 17 перенесённых тел; добавленные —
+    только делегаты/реэкспорты/helpers. НИ ОДИН внешний call site не
+    отредактирован, включая modules/undo_manager.py (bound-методы
+    _find_row_for_segment/_select_grid_row_by_id по-прежнему передаются из
+    __init__ монолита, строки 6224/6226).
+
+4.5 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, run-001/):
+    а) Undo/Redo (критический п.Д): полный прогон undo_scenarios.py Batch #5 —
+       TOTAL 38 PASS / 0 FAIL. Split → undo → исходный сегмент; Merge → undo →
+       6 сегментов; Delete → undo → восстановление текста; batch-undo,
+       Ctrl+Z/Ctrl+Y/Ctrl+Shift+Z в ячейке, overflow-trim. Делегаты
+       _find_row_for_segment/_select_grid_row_by_id работают как bound-методы.
+    б) Сценарий Stage 2 (stage2_scenarios.py): TOTAL 35 / PASS 34 / FAIL 1.
+       Прове́рены: выделение (одиночное + двухстрочное через selection model,
+       _get_selected_or_filtered_segments: selection → fallback отфильтрованные
+       → пусто), _navigate_to_segment_by_id через смену страницы (page size 2,
+       сегмент 5 найден на своей странице), _get_line_edit_text-цепочка
+       (текст → active → очистка → inactive; None-виджет → "" + setattr-починка),
+       _recompute_list_numbers (упорядоченная нумерация <li-o> продолжается:
+       idx 3 → 2), _reindex_grid_rows_from (реассайн _populated_rows),
+       _compute_initial_visible_rows (allowlist > страница > All),
+       _resize_visible_rows (обошла все видимые строки через колбэк),
+       _move_to_next_visible_row за концом (log-ветка без крэша),
+       _get_filtered_segments_with_rows (скрытая строка исключена),
+       _segment_for_grid_row, _widget_is_alive, чистые функции ==
+       результатам делегатов.
+       Единственный FAIL — «S4: navigate_in_grid selects row (row=-1)»:
+       НЕ регрессия. before/after-проба (git worktree от HEAD, одинаковый
+       nav_probe.py в обоих деревьях): navigate_in_grid → currentRow=-1,
+       navigate_by_id → currentRow=-1, даже прямой table.setCurrentCell(2,3) →
+       currentRow=-1 — ИДЕНТИЧНО в обоих деревьях. Это предсуществующее
+       поведение приложения в offscreen-прогоне (в v1-прогоне того же
+       сценария на замусоренном состоянии currentRow был 4), а не изменение
+       Stage 2. row_for_5=4 после смены страницы — корректно в обоих деревьях.
+    в) Smoke-тест (smoke_project.py, 2 процесса): SAVE_OK 3200 → LOAD_OK
+       smoke-b6s2 3 «Segment 1 source».
+4.6 Остатки процессов после прогонов убиты (python/java).
+
+═══════════════════════════════════════════════════════════════════════════════
+5. ЧИСЛА (воспроизведены измерениями, не по памяти)
+═══════════════════════════════════════════════════════════════════════════════
+- git diff --stat (Supervertaler.py): 93 вставки, 361 удаления (net −268).
+- Монолит: 69 696 → 69 428 строк (len(splitlines()) по файлу).
+- helpers.py: 507 строк; __init__.py: 42 строки. Суммарный объём перенесённой
+  логики ≈ 316 строк тел (Stage 1) + докстринги/колбэк-обвязка.
+- Замечание: Stage 1 оценивал helpers.py в ~316 строк «тел»; фактический
+  модуль 507 строк за счёт модульного докстринга, аннотаций типов и
+  документирующих докстрингов pure-функций (тела перенесены 1:1 с
+  self→параметры).
+
+═══════════════════════════════════════════════════════════════════════════════
+6. НЕПОКРЫТЫЕ ПРОВЕРКИ
+═══════════════════════════════════════════════════════════════════════════════
+- Пиксельное сравнение рендеров не проводилось (методы не рисуют UI сами).
+- _navigate_to_segment_in_grid / _navigate_to_segment_by_id вызывались
+  программно (UI-путь «панель ошибок/QA → клик по превью» не эмулировался);
+  эквивалентность подтверждена before/after-пробой, но реальный клик-путь в
+  GUI не гонялся.
+- «Двойной клик по границе строки» (реальный триггер _resize_visible_rows) не
+  эмулировался — проверен прямой вызов делегата + колбэк-обход всех строк.
+- quick-filter apply_filters/clear_filters (Stage 4) НЕ переносились; их
+  внутренние вызовы _get_line_edit_text работают через неизменённого делегата
+  (цепочка подтверждена сценарием S2: 6 caller-строк 52287/52288/56227/56228/
+  57365/57366 продолжают звать тот же метод).
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ВЫВОД: GO
+═══════════════════════════════════════════════════════════════════════════════
+Все СТОП-условия не сработали: границы подтверждены AST (1 уточнён), манифест —
+только монолит + 2 новых файла, Undo/Redo-сценарий Batch #5 — 38/38 PASS,
+smoke — OK, метрики — ровные. Один коммит:
+"Extract grid helpers into modules/grid/helpers.py (Batch #6 Stage 2, Step 6
+of EXTRACTION_PLAN.md)". Дальше — СТОП: ждать подтверждения владельца перед
+Stage 3 (pagination.py, отдельный промпт).

@@ -4,16 +4,16 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-16 (Batch #6 Stage 1) • **Текущий шаг:** Step 6 Stage 1 выполнен (read-only инвентаризация); ждать GO владельца на состав/архитектуру/разбивку → Stage 2 (helpers.py)
+**Обновлено:** 2026-09-17 (Batch #6 Stage 2) • **Текущий шаг:** Step 6 Stage 2 выполнен (helpers.py); СТОП — ждать GO владельца → Stage 3 (pagination.py)
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **69 696**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **69 428**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5). **Step 6 (Batch #6):
-Stage 1 (инвентаризация) выполнен**, Stage 2+ (перенос helpers/pagination/filters)
-ждут GO владельца. Среда, тестирование и валидация — по `AGENTS.md`
-(обязательно к прочтению перед любой работой).
+Stage 1 (инвентаризация) и Stage 2 (helpers.py → modules/grid/) выполнены**;
+Stage 3 (pagination.py) ждёт GO владельца. Среда, тестирование и валидация — по
+`AGENTS.md` (обязательно к прочтению перед любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
 
@@ -25,7 +25,7 @@ Stage 1 (инвентаризация) выполнен**, Stage 2+ (перен�
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
-| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1 выполнен (инвентаризация, read-only) | Batch #6 Stage 1 (этот коммит); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 1.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt` |
+| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1–2 выполнены; Stage 3 (pagination) ждёт GO | Stage 1 (этот коммит c5a5da1); Stage 2 — `modules/grid/helpers.py` (чистые функции, 16 функций + 17 делегатов; `modules/grid/__init__.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage2*.txt` |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
@@ -36,6 +36,21 @@ Stage 1 (инвентаризация) выполнен**, Stage 2+ (перен�
 | 14 | SuperLookup + Voice + финальный cleanup | ⬜ не начат | — |
 
 ## Что дальше: Step 6 — Grid: helpers/pagination/filters (Batch #6)
+
+**Stage 2 выполнен** (17.09.2026, helpers.py). Состав переноса: 16 pure-функций
+в `modules/grid/helpers.py` (модуль чистых функций — решение владельца §6 Stage 1;
+без класса и ссылок на окно) + `_get_line_edit_text` оставлен в монолите целиком
+(п.Г: getattr/setattr-логика self-специфична) + 17 тонких делегатов с исходными
+именами/сигнатурами. Граница `_navigate_to_segment_by_id` уточнена AST:
+54700–**54769** (не 54770). Валидация: 8 метрик ровные; SHA256-манифест — только
+монолит + 2 новых файла; Undo/Redo-сценарий Batch #5 — 38/38 PASS (делегаты
+_find_row_for_segment/_select_grid_row_by_id остались bound-методами);
+stage2-сценарий 34/35 (единственный FAIL — предсуществующее поведение навигации
+в offscreen, подтверждено идентичным before/after-пробой из worktree HEAD);
+smoke save/load — OK. Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 2.txt`;
+сигнатуры: `docs/refactoring/audits/batch6_stage2_signatures.txt`.
+**Дальше: Stage 3 = pagination.py (12 методов + 2 selection-micro, ~367–391
+строк) — отдельный промпт после GO владельца; затем Stage 4 = filters.py.**
 
 **Stage 1 выполнен** (16.09.2026, read-only, код не тронут). Главная находка:
 документированные окна Step 6 в EXTRACTION_PLAN.md устарели сильнее, чем
@@ -64,18 +79,19 @@ dependencies}.txt`. Ожидание решения владельца (6 отк
 
 Фактические AST-границы окна бывшего Step 5 в монолите (HEAD после Stage 2,
 пересчитаны AST — документированные номера в CODE_MAP_REFACTOR.md устарели):
-- Делегаты UndoManager: `record_undo_state` 9394–9396, `record_undo_states_batch`
-  9398–9400, `undo_action_handler` 9402–9404, `redo_action_handler` 9406–9408,
-  `_apply_undo_redo_action` 9410–9412, `_push_structural_undo` 9628–9630,
-  `_apply_structural_history` 9772–9774, `update_undo_redo_actions` 9776–9778.
-- NOT MOVE (кандидаты Step 6 / grid-хелперы): `_segment_for_grid_row` 9415–9430,
-  `_split_segment_at_row` 9432–9473, `_merge_segment_at_row` 9475–9509,
-  `_delete_segments_at_rows` 9511–9559, `delete_current_segments` 9561–9583,
-  `split_current_segment` 9586–9615, `merge_current_segment` 9617–9626,
-  `_sync_after_structural` 9632–9648, `_recompute_list_numbers` 9650–9677,
-  `_reindex_grid_rows_from` 9679–9700, `_select_grid_row_by_id` 9702–9723,
-  `_split_segment_grid_fast` 9725–9751, `_merge_segment_grid_fast` 9753–9770,
-  `create_quick_access_toolbar` 9780–9823.
+- Делегаты UndoManager: `record_undo_state` 9395–9397, `record_undo_states_batch`
+  9399–9401, `undo_action_handler` 9403–9405, `redo_action_handler` 9407–9409,
+  `_apply_undo_redo_action` 9411–9413, `_push_structural_undo` 9618–9620,
+  `_apply_structural_history` 9704–9706, `update_undo_redo_actions` 9708–9710.
+- Перенесены в Stage 2 (теперь делегаты modules/grid/helpers.py):
+  `_segment_for_grid_row` 9416–9420, `_recompute_list_numbers` 9640–9643,
+  `_reindex_grid_rows_from` 9645–9648, `_select_grid_row_by_id` 9650–9655.
+- Остаток окна (кандидаты пагинации Stage 3 / монолит): `_split_segment_at_row`
+  9422–9463, `_merge_segment_at_row` 9465–9499, `_delete_segments_at_rows`
+  9501–9549, `delete_current_segments` 9551–9573, `split_current_segment`
+  9576–9605, `merge_current_segment` 9607–9616, `_sync_after_structural`
+  9622–9638, `_split_segment_grid_fast` 9657–9683, `_merge_segment_grid_fast`
+  9685–9702, `create_quick_access_toolbar` 9712–9755.
 
 Состояние `PreTranslationWorker` после Batch #4: перенесён в монолите на
 5337–6043, содержимое байт-в-байт без изменений (относится к Step 13).

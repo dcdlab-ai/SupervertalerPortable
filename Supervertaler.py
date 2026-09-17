@@ -415,6 +415,7 @@ from modules.event_filters import _QuitEventFilter, _WheelGuard, _LoneCtrlEventF
 from modules.dialogs import (ThemeEditorDialog, DetachedLogWindow, AdvancedFiltersDialog, ScratchpadDialog, LiveProgressDialog, _ImportProgressDialog)  # Диалоги (Batch #3b)
 from modules.workers import (TMSearchWorker, ProofreadWorker, GlossaryExtractionWorker)  # QThread-воркеры (Batch #4)
 from modules.undo_manager import UndoManager  # Undo/redo-менеджер сетки (Batch #5)
+from modules.grid import helpers as grid_helpers  # Grid-хелперы: чистые функции (Batch #6 Stage 2)
 
 
 # ============================================================================
@@ -9414,20 +9415,9 @@ class SupervertalerQt(QMainWindow):
     # ── Segment split / merge (Trados / memoQ style) ──────────────────────
     def _segment_for_grid_row(self, row: int):
         """Вернуть (segment, индекс_в_списке) для строки сетки — по id в колонке 0.
-        
-        Возвращает (None, -1), если строка или id не распознаны. Использование колонки
-        id (а не индекса строки) сохраняет корректность при пагинации."""
-        if not getattr(self, 'current_project', None):
-            return None, -1
-        try:
-            id_item = self.table.item(row, 0)
-            sid = int(id_item.text())
-        except (AttributeError, ValueError, TypeError):
-            return None, -1
-        for i, s in enumerate(self.current_project.segments):
-            if s.id == sid:
-                return s, i
-        return None, -1
+        (Тонкий делегат: helpers.segment_for_grid_row, Batch #6 Stage 2)"""
+        return grid_helpers.segment_for_grid_row(
+            getattr(self, 'current_project', None), getattr(self, 'table', None), row)
 
     def _split_segment_at_row(self, row: int, offset: int):
         """Разделить сегмент, показанный в строке ``row`` сетки, на позиции символа ``offset`` в исходнике."""
@@ -9648,79 +9638,21 @@ class SupervertalerQt(QMainWindow):
             pass
 
     def _recompute_list_numbers(self):
-        """Пересобрать self._list_numbers (индекс строки → номер в упорядоченном списке) после структурного изменения, зеркально предварительному проходу в load_segments_to_grid."""
-        import re
-        list_counter = 0
-        last_was_list = False
-        list_numbers = {}
-        for idx, segment in enumerate(self.current_project.segments):
-            source_text = (segment.source or "").strip()
-            is_list_item = source_text.startswith(('<li-o>', '<li-b>', '<li>'))
-            is_ordered = source_text.startswith('<li-o>') or (
-                source_text.startswith('<li>') and not source_text.startswith('<li-b>'))
-            if is_list_item and is_ordered:
-                m = re.match(r'^<li(?:-o)?>\s*(\d+)[.)\s]', source_text)
-                if m:
-                    list_counter = int(m.group(1))
-                    list_numbers[idx] = list_counter
-                    last_was_list = True
-                elif last_was_list:
-                    list_counter += 1
-                    list_numbers[idx] = list_counter
-                else:
-                    list_counter = 1
-                    list_numbers[idx] = list_counter
-                    last_was_list = True
-            else:
-                last_was_list = False
-                list_counter = 0
-        self._list_numbers = list_numbers
+        """Пересобрать self._list_numbers (индекс строки → номер в упорядоченном списке) после структурного изменения, зеркально предварительному проходу в load_segments_to_grid.
+        (Тонкий делегат: helpers.recompute_list_numbers, Batch #6 Stage 2)"""
+        self._list_numbers = grid_helpers.recompute_list_numbers(self.current_project)
 
     def _reindex_grid_rows_from(self, start_row: int):
-        """После вставки/удаления исправить текст ячейки # и поле .row виджетов ячеек для всех строк от start_row и далее (здесь строка сетки == индекс списка) и пересчитать множество заполненных строк. Дёшево: без пересоздания виджетов."""
-        segs = self.current_project.segments
-        n = self.table.rowCount()
-        for r in range(start_row, n):
-            if r >= len(segs):
-                break
-            seg = segs[r]
-            id_item = self.table.item(r, 0)
-            if id_item is None:
-                id_item = QTableWidgetItem()
-                id_item.setFlags(id_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                id_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.table.setItem(r, 0, id_item)
-            id_item.setText(str(seg.id))
-            for col in (2, 3, 4, 5):
-                w = self.table.cellWidget(r, col)
-                if w is not None and hasattr(w, 'row'):
-                    w.row = r
-        self._populated_rows = {
-            r for r in range(n) if self.table.cellWidget(r, 2) is not None
-        }
+        """После вставки/удаления исправить текст ячейки # и поле .row виджетов ячеек для всех строк от start_row и далее и пересчитать множество заполненных строк.
+        (Тонкий делегат: helpers.reindex_grid_rows_from, Batch #6 Stage 2)"""
+        self._populated_rows = grid_helpers.reindex_grid_rows_from(self.current_project, self.table, start_row)
 
     def _select_grid_row_by_id(self, focus_id):
         """Выбрать и прокрутить к строке сетки с сегментом focus_id и передать фокус таблице.
-        
-        Передача фокуса таблице важна после структурного изменения: если фокус остался
-        в QTextEdit ячейки, тот перехватит следующий Ctrl+Z (собственный текстовый undo)
-        вместо того, чтобы сработал app-уровневый структурный undo."""
-        if focus_id is None:
-            return
-        r = self._find_row_for_segment(focus_id)
-        if r >= 0:
-            self.table.selectRow(r)
-            self.table.setCurrentCell(r, 2)
-            it = self.table.item(r, 0)
-            if it is not None:
-                self.table.scrollToItem(it)
-        # Defer the focus move: when invoked from the right-click context menu,
-        # the menu restores focus to the source cell as it closes — which would
-        # override an immediate setFocus and let that cell swallow the next
-        # Ctrl+Z. Running on the next event-loop tick lands focus on the table
-        # after the menu has finished closing, so Ctrl+Z reaches structural undo.
-        from PyQt6.QtCore import QTimer
-        QTimer.singleShot(0, self.table.setFocus)
+        (Тонкий делегат: helpers.select_grid_row_by_id, Batch #6 Stage 2.
+        ОБЯЗАН остаться bound-методом SupervertalerQt — его колбэк захвачен
+        modules/undo_manager.py, п.Д промпта Stage 2.)"""
+        grid_helpers.select_grid_row_by_id(getattr(self, 'table', None), focus_id)
 
     def _split_segment_grid_fast(self, row: int, left_seg, right_seg):
         """Инкрементально обновить сетку при split: вставить одну строку, перезаполнить две затронутые, переиндексировать остальные. Бросает исключение при любой проблеме, чтобы вызывающий код откатился к полной перезагрузке."""
@@ -28785,13 +28717,9 @@ class SupervertalerQt(QMainWindow):
         self._apply_pagination_to_grid()
     
     def _widget_is_alive(self, widget: Optional[QWidget]) -> bool:
-        """Возвращает True, если базовый Qt-объект ещё существует."""
-        if widget is None:
-            return False
-        try:
-            return not sip.isdeleted(widget)
-        except RuntimeError:
-            return False
+        """Возвращает True, если базовый Qt-объект ещё существует.
+        (Тонкий делегат: helpers.widget_is_alive, Batch #6 Stage 2)"""
+        return grid_helpers.widget_is_alive(widget)
 
     # --------------------------------------------------------------------
     # v1.10.161: label-based tab lookup
@@ -28840,7 +28768,10 @@ class SupervertalerQt(QMainWindow):
         return False
 
     def _get_line_edit_text(self, attr_name: str) -> str:
-        """Безопасно получает текст из общего QLineEdit, обрабатывая удалённые виджеты."""
+        """Безопасно получает текст из общего QLineEdit, обрабатывая удалённые виджеты.
+        (П.Г промпта Stage 2: getattr/setattr-логика разрешения атрибута ПО ИМЕНИ
+        self-специфична и остаётся в монолите; проверка живости — через делегат
+        _widget_is_alive → helpers.widget_is_alive.)"""
         widget = getattr(self, attr_name, None)
         if not self._widget_is_alive(widget):
             setattr(self, attr_name, None)
@@ -40948,25 +40879,14 @@ class SupervertalerQt(QMainWindow):
     # ---------------------------------------------------------------------
 
     def _compute_initial_visible_rows(self, total: int) -> set:
-        """Возвращает множество индексов строк, которые должны получить полные
-                виджеты-редакторы при начальной загрузке сетки (только текущая
-                страница).
-        
-                Часть оптимизации загрузки сетки с учётом страниц в v1.10.147
-                (на основе форка Simpelvertaler Ханса Лентинга). Вне-страничные
-                строки получают дешёвую заглушку QTableWidgetItem и лениво
-                заполняются обработчиком пагинации, когда становятся видимыми."""
-        filter_allowlist = getattr(self, '_active_text_filter_rows', None)
-        if filter_allowlist is not None:
-            return set(filter_allowlist)
-        page_size = getattr(self, 'grid_page_size', 50)
-        if not isinstance(page_size, int) or page_size <= 0 or page_size >= 999999:
-            # "All" mode (or unset) — populate every row.
-            return set(range(total))
-        current_page = getattr(self, 'grid_current_page', 0)
-        start_row = current_page * page_size
-        end_row = min(start_row + page_size, total)
-        return set(range(start_row, end_row))
+        """Возвращает множество индексов строк, которые должны получить полные виджеты-редакторы при начальной загрузке сетки (только текущая страница).
+        (Тонкий делегат: helpers.compute_initial_visible_rows, Batch #6 Stage 2)"""
+        return grid_helpers.compute_initial_visible_rows(
+            total,
+            filter_allowlist=getattr(self, '_active_text_filter_rows', None),
+            page_size=getattr(self, 'grid_page_size', 50),
+            current_page=getattr(self, 'grid_current_page', 0),
+        )
 
     def _populate_single_row(self, row, segment):
         """Устанавливает полные виджеты-редакторы исходника/перевода и метаданные
@@ -42954,49 +42874,18 @@ class SupervertalerQt(QMainWindow):
         QTextEdit.mousePressEvent(preview_text, event)
 
     def _navigate_to_segment_in_grid(self, segment_id: int):
-        """Переходит к сегменту с заданным ID в сетке."""
-        if not self.current_project or not hasattr(self, 'table') or not self.table:
-            return
-
-        # Find the row for this segment ID
-        for row in range(self.table.rowCount()):
-            id_item = self.table.item(row, 0)
-            if id_item:
-                try:
-                    row_segment_id = int(id_item.text())
-                    if row_segment_id == segment_id:
-                        # Switch to Grid tab first
-                        if hasattr(self, 'main_tabs'):
-                            self.main_tabs.setCurrentIndex(0)  # Grid tab
-                        
-                        # Handle pagination - switch to correct page if needed
-                        if hasattr(self, 'page_size_combo') and self.page_size_combo.currentText() != "All":
-                            try:
-                                page_size = int(self.page_size_combo.currentText())
-                                target_page = (row // page_size) + 1
-                                if hasattr(self, 'page_number_input'):
-                                    self.page_number_input.setText(str(target_page))
-                                    self.go_to_page()
-                            except ValueError:
-                                pass
-
-                        # Select this row and focus the target cell
-                        self.table.setCurrentCell(row, 3)  # Column 3 = Target
-                        self.table.scrollToItem(self.table.item(row, 0), QTableWidget.ScrollHint.PositionAtCenter)
-                        
-                        target_widget = self.table.cellWidget(row, 3)
-                        if target_widget:
-                            target_widget.setFocus()
-                            # Place cursor at end of text
-                            if isinstance(target_widget, QTextEdit):
-                                cursor = target_widget.textCursor()
-                                cursor.movePosition(cursor.MoveOperation.End)
-                                target_widget.setTextCursor(cursor)
-
-                        self.log(f"📄 Preview: Navigated to segment {segment_id}")
-                        return
-                except (ValueError, AttributeError):
-                    continue
+        """Переходит к сегменту с заданным ID в сетке.
+        (Тонкий делегат: helpers.navigate_to_segment_in_grid, Batch #6 Stage 2)"""
+        grid_helpers.navigate_to_segment_in_grid(
+            self.current_project,
+            getattr(self, 'table', None),
+            getattr(self, 'main_tabs', None),
+            getattr(self, 'page_size_combo', None),
+            getattr(self, 'page_number_input', None),
+            segment_id,
+            go_to_page_callback=self.go_to_page,
+            log_callback=self.log,
+        )
 
     def _get_current_segment_id(self) -> Optional[int]:
         """Возвращает ID выбранного сейчас сегмента в сетке."""
@@ -44151,13 +44040,9 @@ class SupervertalerQt(QMainWindow):
         self.table.setRowHeight(row, compact_height)
 
     def _resize_visible_rows(self):
-        """Меняет размер только видимых (не скрытых) строк для эффективности после изменений пагинации/фильтра."""
-        if not hasattr(self, 'table') or not self.table:
-            return
-        row_count = self.table.rowCount()
-        for row in range(row_count):
-            if not self.table.isRowHidden(row):
-                self._auto_resize_single_row(row)
+        """Меняет размер только видимых (не скрытых) строк для эффективности после изменений пагинации/фильтра.
+        (Тонкий делегат: helpers.resize_visible_rows, Batch #6 Stage 2)"""
+        grid_helpers.resize_visible_rows(getattr(self, 'table', None), self._auto_resize_single_row)
 
     def _on_column_resized(self, logical_index: int, old_size: int, new_size: int):
         """Обрабатывает изменение ширины колонки — пересчёт высот строк для
@@ -46918,55 +46803,15 @@ class SupervertalerQt(QMainWindow):
             self.log("🧪 TEST: No rows available for testing")
     
     def get_selected_segments_from_grid(self):
-        """Возвращает список выбранных сегментов из сетки."""
-        if not self.current_project or not hasattr(self, 'table'):
-            return []
-        
-        selected_rows = set()
-        for item in self.table.selectedItems():
-            selected_rows.add(item.row())
-        
-        segments = []
-        for row in sorted(selected_rows):
-            if 0 <= row < len(self.current_project.segments):
-                segments.append(self.current_project.segments[row])
-        
-        return segments
+        """Возвращает список выбранных сегментов из сетки.
+        (Тонкий делегат: helpers.get_selected_segments_from_grid, Batch #6 Stage 2)"""
+        return grid_helpers.get_selected_segments_from_grid(self.current_project, getattr(self, 'table', None))
 
     def _get_selected_or_filtered_segments(self, operation_name: str) -> list:
-        """Возвращает сегменты для массовой операции: сначала выбранные строки,
-                затем, как откат, отфильтрованные строки.
-        
-                Аргументы:
-                    operation_name: человекочитаемое имя для диалога подтверждения
-                                    (например, «Confirm Segments»)
-        
-                Возвращает:
-                    Список объектов Segment или пустой список, если пользователь
-                    отменил или ничего недоступно."""
-        selected = self.get_selected_segments_from_grid()
-        if selected:
-            return selected
-
-        # No selection – check for filtered (visible) rows
-        visible_rows = [row for row in range(self.table.rowCount())
-                        if not self.table.isRowHidden(row)]
-        total_rows = self.table.rowCount()
-
-        if len(visible_rows) < total_rows and len(visible_rows) > 0:
-            reply = QMessageBox.question(
-                self, operation_name,
-                f"No segments selected.\n\n"
-                f"Apply '{operation_name}' to all {len(visible_rows)} filtered (visible) segments?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-            if reply == QMessageBox.StandardButton.Yes:
-                return [self.current_project.segments[row] for row in visible_rows
-                        if row < len(self.current_project.segments)]
-            return []
-
-        QMessageBox.information(self, "No Selection",
-            "Please select one or more segments, or apply a filter first.")
-        return []
+        """Возвращает сегменты для массовой операции: сначала выбранные строки, затем, как откат, отфильтрованные строки.
+        (Тонкий делегат: helpers.get_selected_or_filtered_segments, Batch #6 Stage 2)"""
+        return grid_helpers.get_selected_or_filtered_segments(
+            self.current_project, self.table, self, operation_name)
 
     def _preview_combined_prompt_from_grid(self):
         """Предпросмотр объединённого промпта с текущим выбранным сегментом из сетки."""
@@ -54236,20 +54081,9 @@ class SupervertalerQt(QMainWindow):
                 editor.blockSignals(False)
 
     def _find_row_for_segment_id(self, segment_id: int) -> int:
-        """Возвращает индекс строки для ID сегмента в видимой таблице или -1,
-                если сегмента нет на текущей странице. Хелпер для адресного
-                обновления якорей после создания/правки одного комментария."""
-        if not hasattr(self, 'table') or not self.table:
-            return -1
-        for row in range(self.table.rowCount()):
-            id_item = self.table.item(row, 0)
-            if id_item:
-                try:
-                    if int(id_item.text()) == segment_id:
-                        return row
-                except (ValueError, AttributeError):
-                    continue
-        return -1
+        """Возвращает индекс строки для ID сегмента в видимой таблице или -1, если сегмента нет на текущей странице.
+        (Тонкий делегат: helpers.find_row_for_segment_id, Batch #6 Stage 2)"""
+        return grid_helpers.find_row_for_segment_id(getattr(self, 'table', None), segment_id)
 
     def _reset_comment_ui_state(self):
         """Очищает по-сегментные редакторы комментариев/заметок и отслеживание
@@ -54698,74 +54532,18 @@ class SupervertalerQt(QMainWindow):
             self.bottom_notes_edit.setStyleSheet("font-size: 10pt;")
 
     def _navigate_to_segment_by_id(self, segment_id: int):
-        """Переходит к сегменту по ID, при необходимости сначала переключая
-                страницу.
-        
-                В отличие от :py:meth:`_navigate_to_segment_in_grid` (который
-                ищет сегмент по индексу строки в *видимой сейчас* таблице),
-                эта версия находит индекс сегмента в полном списке сегментов
-                проекта, вычисляет нужную страницу, переключается на неё, если
-                мы ещё не там, и только затем выбирает строку. Корректно
-                работает через границы пагинации."""
-        if not self.current_project or not self.current_project.segments:
-            return
-        if not hasattr(self, 'table') or not self.table:
-            return
-
-        # Locate the target segment in the full project list.
-        segments = self.current_project.segments
-        target_idx = None
-        for i, seg in enumerate(segments):
-            if seg.id == segment_id:
-                target_idx = i
-                break
-        if target_idx is None:
-            self.log(f"⚠ Segment #{segment_id} not found in project")
-            return
-
-        # If pagination is active and the segment is on a different page,
-        # switch to that page first. The grid rebuilds synchronously
-        # inside go_to_page, so by the time it returns the target row
-        # is visible.
-        if (hasattr(self, 'page_size_combo')
-                and self.page_size_combo.currentText() != "All"):
-            try:
-                page_size = int(self.page_size_combo.currentText())
-                target_page = (target_idx // page_size) + 1
-                current_page = getattr(self, 'grid_current_page', 0) + 1
-                if current_page != target_page and hasattr(self, 'page_number_input'):
-                    self.page_number_input.setText(str(target_page))
-                    self.go_to_page()
-            except (ValueError, AttributeError):
-                pass
-
-        # Switch to the Grid (Editor) tab if we're elsewhere.
-        if hasattr(self, 'main_tabs'):
-            self.main_tabs.setCurrentIndex(0)
-
-        # Find the row in the (possibly newly-rebuilt) table and select it.
-        for row in range(self.table.rowCount()):
-            id_item = self.table.item(row, 0)
-            if id_item:
-                try:
-                    if int(id_item.text()) == segment_id:
-                        self.table.setCurrentCell(row, 3)  # Column 3 = Target
-                        self.table.scrollToItem(
-                            self.table.item(row, 0),
-                            QTableWidget.ScrollHint.PositionAtCenter,
-                        )
-                        target_widget = self.table.cellWidget(row, 3)
-                        if target_widget:
-                            target_widget.setFocus()
-                        return
-                except (ValueError, AttributeError):
-                    continue
-
-        # Reaching here means the page-switch logic didn't put the
-        # segment on the current page — shouldn't happen but log it.
-        self.log(
-            f"⚠ Segment #{segment_id} not on current grid page after "
-            f"page-switch attempt (unexpected)"
+        """Переходит к сегменту по ID, при необходимости сначала переключая страницу.
+        (Тонкий делегат: helpers.navigate_to_segment_by_id, Batch #6 Stage 2)"""
+        grid_helpers.navigate_to_segment_by_id(
+            self.current_project,
+            getattr(self, 'table', None),
+            getattr(self, 'main_tabs', None),
+            getattr(self, 'page_size_combo', None),
+            getattr(self, 'page_number_input', None),
+            getattr(self, 'grid_current_page', 0),
+            segment_id,
+            go_to_page_callback=self.go_to_page,
+            log_callback=self.log,
         )
 
     def _open_comment_in_panel(self, comment_id: str):
@@ -57361,10 +57139,13 @@ class SupervertalerQt(QMainWindow):
             self.confirm_and_next_unconfirmed()
 
     def _is_text_filter_active(self) -> bool:
-        """Возвращает True, если в полях Filter Source/Target сейчас есть текст."""
-        source_text = self._get_line_edit_text('source_filter').strip()
-        target_text = self._get_line_edit_text('target_filter').strip()
-        return bool(source_text or target_text)
+        """Возвращает True, если в полях Filter Source/Target сейчас есть текст.
+        (Тонкий делегат: helpers.is_text_filter_active, Batch #6 Stage 2; извлечение
+        текстов — через self-специфичный делегат _get_line_edit_text, п.Г промпта.)"""
+        return grid_helpers.is_text_filter_active(
+            self._get_line_edit_text('source_filter'),
+            self._get_line_edit_text('target_filter'),
+        )
 
     def _confirm_current_row_segment(self) -> Optional[int]:
         """Подтверждает сегмент текущей строки и синхронизирует текст перевода
@@ -57522,42 +57303,18 @@ class SupervertalerQt(QMainWindow):
             self.log(f"⚠️ Auto-propagate to identical segments failed: {e}")
 
     def _move_to_next_visible_row(self, current_row: int) -> None:
-        """Переводит фокус на следующую видимую строку после current_row (учитывает фильтры + пагинацию)."""
-        if not hasattr(self, 'table') or not self.table or not self.current_project:
-            return
-
-        row_count = self.table.rowCount()
-        if row_count <= 0:
-            return
-
-        page_size = getattr(self, 'grid_page_size', 50)
-        has_pagination = isinstance(page_size, int) and page_size < 999999 and page_size > 0
-
-        last_page_applied = getattr(self, 'grid_current_page', 0)
-
-        for row in range(current_row + 1, row_count):
-            if has_pagination:
-                target_page = row // page_size
-                if target_page != last_page_applied:
-                    self.grid_current_page = target_page
-                    last_page_applied = target_page
-                    self._apply_pagination_to_grid()
-
-            if not self.table.isRowHidden(row):
-                self.table.clearSelection()
-                self.table.setCurrentCell(row, 3)
-                id_item = self.table.item(row, 0)
-                if id_item is not None:
-                    self.table.scrollToItem(id_item)
-
-                target_widget = self.table.cellWidget(row, 3)
-                if target_widget:
-                    target_widget.setFocus()
-                    target_widget.moveCursor(QTextCursor.MoveOperation.End)
-                return
-
-        # No more visible rows
-        self.log("✅ No more filtered segments")
+        """Переводит фокус на следующую видимую строку после current_row (учитывает фильтры + пагинацию).
+        (Тонкий делегат: helpers.move_to_next_visible_row, Batch #6 Stage 2)"""
+        grid_helpers.move_to_next_visible_row(
+            self.current_project,
+            getattr(self, 'table', None),
+            current_row,
+            grid_page_size=getattr(self, 'grid_page_size', 50),
+            grid_current_page=getattr(self, 'grid_current_page', 0),
+            set_grid_page_callback=lambda target_page: setattr(self, 'grid_current_page', target_page),
+            apply_pagination_callback=self._apply_pagination_to_grid,
+            log_callback=self.log,
+        )
     
     def confirm_selected_segments(self, segments=None):
         """Подтверждает все выбранные сегменты в сетке.
@@ -57712,19 +57469,11 @@ class SupervertalerQt(QMainWindow):
                     segment.target = text
     
     def _find_row_for_segment(self, segment_id: int) -> int:
-        """Находит индекс строки сетки для сегмента по ID."""
-        if not hasattr(self, 'table') or not self.table:
-            return -1
-        
-        for row in range(self.table.rowCount()):
-            id_item = self.table.item(row, 0)
-            if id_item:
-                try:
-                    if int(id_item.text()) == segment_id:
-                        return row
-                except (ValueError, AttributeError):
-                    continue
-        return -1
+        """Находит индекс строки сетки для сегмента по ID.
+        (Тонкий делегат: helpers.find_row_for_segment, Batch #6 Stage 2.
+        ОБЯЗАН остаться bound-методом SupervertalerQt — его колбэк захвачен
+        modules/undo_manager.py, п.Д промпта Stage 2.)"""
+        return grid_helpers.find_row_for_segment(getattr(self, 'table', None), segment_id)
 
     def insert_termlens_text(self, text: str):
         """Вставляет текст из TermLens в активное сейчас целевое поле."""
@@ -60972,26 +60721,9 @@ class SupervertalerQt(QMainWindow):
         return segments_with_rows
 
     def _get_filtered_segments_with_rows(self) -> List[Tuple[int, Segment]]:
-        """Возвращает видимые/отфильтрованные сейчас сегменты как (row_index, segment)."""
-        if not self.current_project:
-            return []
-
-        # Check if table is currently filtered
-        if not hasattr(self, 'table') or self.table.rowCount() == 0:
-            return []
-
-        visible_segments: List[Tuple[int, Segment]] = []
-        
-        # Iterate through visible rows in the table
-        for visual_row in range(self.table.rowCount()):
-            if not self.table.isRowHidden(visual_row):
-                # Get the segment from this row
-                # The visual row index corresponds to the segment index in the project
-                if visual_row < len(self.current_project.segments):
-                    seg = self.current_project.segments[visual_row]
-                    visible_segments.append((visual_row, seg))
-
-        return visible_segments
+        """Возвращает видимые/отфильтрованные сейчас сегменты как (row_index, segment).
+        (Тонкий делегат: helpers.get_filtered_segments_with_rows, Batch #6 Stage 2)"""
+        return grid_helpers.get_filtered_segments_with_rows(self.current_project, getattr(self, 'table', None))
 
     def autotag_segments_bulk(self):
         """Bulk Operations: (пере)расставляет инлайн-теги на уже переведённых

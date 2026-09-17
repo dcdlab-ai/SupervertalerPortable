@@ -1,0 +1,154 @@
+Supervertaler.py:774:             if (hasattr(mw, 'get_selected_segments_from_grid')
+Supervertaler.py:786:                     selected = mw.get_selected_segments_from_grid()
+Supervertaler.py:2519:                     _seg_sm, _idx_sm = _mw_sm._segment_for_grid_row(self.row)
+Supervertaler.py:2648:                     _segs_for_menu = _at_mw.get_selected_segments_from_grid()
+Supervertaler.py:3798:                     _segs_for_menu = _at_mw.get_selected_segments_from_grid()
+Supervertaler.py:4709:         if hasattr(main_window, 'get_selected_segments_from_grid'):
+Supervertaler.py:4710:             selected = main_window.get_selected_segments_from_grid()
+Supervertaler.py:6224:             _find_row_for_segment=self._find_row_for_segment,
+Supervertaler.py:6226:             _select_grid_row_by_id=self._select_grid_row_by_id,
+Supervertaler.py:9416:     def _segment_for_grid_row(self, row: int):
+Supervertaler.py:9432:         seg, idx = self._segment_for_grid_row(row)
+Supervertaler.py:9455:                 self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9459:                 self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9462:             self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9473:         seg, idx = self._segment_for_grid_row(row)
+Supervertaler.py:9491:                 self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9495:                 self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9498:             self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9519:             seg, idx = self._segment_for_grid_row(r)
+Supervertaler.py:9548:             self._select_grid_row_by_id(focus_id)
+Supervertaler.py:9640:     def _recompute_list_numbers(self):
+Supervertaler.py:9645:     def _reindex_grid_rows_from(self, start_row: int):
+Supervertaler.py:9650:     def _select_grid_row_by_id(self, focus_id):
+Supervertaler.py:9666:             self._recompute_list_numbers()
+Supervertaler.py:9674:             self._reindex_grid_rows_from(row + 2)
+Supervertaler.py:9690:             self._recompute_list_numbers()
+Supervertaler.py:9695:             self._reindex_grid_rows_from(row + 1)
+Supervertaler.py:27280:         if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+Supervertaler.py:27542:         if not hasattr(self, 'pagination_label') or not self._widget_is_alive(self.pagination_label):
+Supervertaler.py:27557:         if not hasattr(self, 'first_page_btn') or not self._widget_is_alive(self.first_page_btn):
+Supervertaler.py:27565:         if not hasattr(self, 'prev_page_btn') or not self._widget_is_alive(self.prev_page_btn):
+Supervertaler.py:27576:         if not hasattr(self, 'page_number_input') or not self._widget_is_alive(self.page_number_input):
+Supervertaler.py:27584:         if not hasattr(self, 'total_pages_label') or not self._widget_is_alive(self.total_pages_label):
+Supervertaler.py:27589:         if not hasattr(self, 'next_page_btn') or not self._widget_is_alive(self.next_page_btn):
+Supervertaler.py:27597:         if not hasattr(self, 'last_page_btn') or not self._widget_is_alive(self.last_page_btn):
+Supervertaler.py:27608:         if not hasattr(self, 'page_size_combo') or not self._widget_is_alive(self.page_size_combo):
+Supervertaler.py:27638:         if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+Supervertaler.py:28228:                 and self._widget_is_alive(self.page_size_combo)):
+Supervertaler.py:28247:             if hasattr(self, 'pagination_label') and self._widget_is_alive(self.pagination_label):
+Supervertaler.py:28249:             if hasattr(self, 'total_pages_label') and self._widget_is_alive(self.total_pages_label):
+Supervertaler.py:28251:             if hasattr(self, 'page_number_input') and self._widget_is_alive(self.page_number_input):
+Supervertaler.py:28280:         if hasattr(self, 'pagination_label') and self._widget_is_alive(self.pagination_label):
+Supervertaler.py:28287:         if hasattr(self, 'total_pages_label') and self._widget_is_alive(self.total_pages_label):
+Supervertaler.py:28290:         if hasattr(self, 'page_number_input') and self._widget_is_alive(self.page_number_input):
+Supervertaler.py:28297:         if hasattr(self, 'first_page_btn') and self._widget_is_alive(self.first_page_btn):
+Supervertaler.py:28299:         if hasattr(self, 'prev_page_btn') and self._widget_is_alive(self.prev_page_btn):
+Supervertaler.py:28301:         if hasattr(self, 'next_page_btn') and self._widget_is_alive(self.next_page_btn):
+Supervertaler.py:28303:         if hasattr(self, 'last_page_btn') and self._widget_is_alive(self.last_page_btn):
+Supervertaler.py:28417:         self._resize_visible_rows()
+Supervertaler.py:28418:         QTimer.singleShot(50, self._resize_visible_rows)
+Supervertaler.py:28676:         if not hasattr(self, 'page_number_input') or not self._widget_is_alive(self.page_number_input):
+Supervertaler.py:28719:     def _widget_is_alive(self, widget: Optional[QWidget]) -> bool:
+Supervertaler.py:28770:     def _get_line_edit_text(self, attr_name: str) -> str:
+Supervertaler.py:28774:         _widget_is_alive → helpers.widget_is_alive.)"""
+Supervertaler.py:28776:         if not self._widget_is_alive(widget):
+Supervertaler.py:28786:         if not self._widget_is_alive(widget):
+Supervertaler.py:28846:         if not self._widget_is_alive(banner):
+Supervertaler.py:40881:     def _compute_initial_visible_rows(self, total: int) -> set:
+Supervertaler.py:41430:             _initial_visible = self._compute_initial_visible_rows(_total_rows)
+Supervertaler.py:41518:             QTimer.singleShot(0, self._resize_visible_rows)
+Supervertaler.py:42870:                 self._navigate_to_segment_in_grid(segment_id)
+Supervertaler.py:42876:     def _navigate_to_segment_in_grid(self, segment_id: int):
+Supervertaler.py:44042:     def _resize_visible_rows(self):
+Supervertaler.py:44064:         self._column_resize_timer.timeout.connect(self._resize_visible_rows)
+Supervertaler.py:46805:     def get_selected_segments_from_grid(self):
+Supervertaler.py:46807:         (Тонкий делегат: helpers.get_selected_segments_from_grid, Batch #6 Stage 2)"""
+Supervertaler.py:46808:         return grid_helpers.get_selected_segments_from_grid(self.current_project, getattr(self, 'table', None))
+Supervertaler.py:46810:     def _get_selected_or_filtered_segments(self, operation_name: str) -> list:
+Supervertaler.py:47124:         selected_segments = self.get_selected_segments_from_grid()
+Supervertaler.py:47225:             segments = self._get_selected_or_filtered_segments("Clear Translations")
+Supervertaler.py:47237:         selected_segments = self._get_selected_or_filtered_segments("Copy Source to Target")
+Supervertaler.py:47257:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:47339:         selected_segments = self._get_selected_or_filtered_segments("Copy Source to Target (Non-Translatable)")
+Supervertaler.py:47378:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:47449:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:48078:         selected_segments = self.get_selected_segments_from_grid() if hasattr(self, 'get_selected_segments_from_grid') else []
+Supervertaler.py:52127:         has_source = self._widget_is_alive(getattr(self, 'source_filter', None))
+Supervertaler.py:52128:         has_target = self._widget_is_alive(getattr(self, 'target_filter', None))
+Supervertaler.py:52132:         source_filter_text = self._get_line_edit_text('source_filter').strip()
+Supervertaler.py:52133:         target_filter_text = self._get_line_edit_text('target_filter').strip()
+Supervertaler.py:52216:         has_source = self._widget_is_alive(source_widget)
+Supervertaler.py:52217:         has_target = self._widget_is_alive(target_widget)
+Supervertaler.py:53377:         if self._widget_is_alive(source_widget):
+Supervertaler.py:53381:         if self._widget_is_alive(target_widget):
+Supervertaler.py:53432:         if self._widget_is_alive(source_widget):
+Supervertaler.py:53436:         if self._widget_is_alive(target_widget):
+Supervertaler.py:53531:         if self._widget_is_alive(source_widget):
+Supervertaler.py:53535:         if self._widget_is_alive(target_widget):
+Supervertaler.py:53638:                 if hasattr(self, 'page_size_combo') and self._widget_is_alive(self.page_size_combo):
+Supervertaler.py:53728:             if hasattr(self, 'page_size_combo') and self._widget_is_alive(self.page_size_combo):
+Supervertaler.py:54083:     def _find_row_for_segment_id(self, segment_id: int) -> int:
+Supervertaler.py:54211:                 lambda _checked, sid=seg_id: self._navigate_to_segment_by_id(sid)
+Supervertaler.py:54296:             if self._widget_is_alive(btn):
+Supervertaler.py:54307:             if self._widget_is_alive(btn):
+Supervertaler.py:54322:                     if (scroll is not None and self._widget_is_alive(scroll)
+Supervertaler.py:54323:                             and self._widget_is_alive(first)):
+Supervertaler.py:54372:                 affected_row = self._find_row_for_segment_id(segment.id)
+Supervertaler.py:54469:         affected_row = self._find_row_for_segment_id(segment.id)
+Supervertaler.py:54534:     def _navigate_to_segment_by_id(self, segment_id: int):
+Supervertaler.py:54587:                 if scroll is not None and self._widget_is_alive(scroll):
+Supervertaler.py:54598:         if not self._widget_is_alive(btn):
+Supervertaler.py:54608:             if self._widget_is_alive(btn):
+Supervertaler.py:54818:                 lambda _c, sid=seg_id: self._navigate_to_segment_by_id(sid))
+Supervertaler.py:54859:             if self._widget_is_alive(btn):
+Supervertaler.py:54869:             if self._widget_is_alive(btn):
+Supervertaler.py:54881:                     if (scroll is not None and self._widget_is_alive(scroll)
+Supervertaler.py:54882:                             and self._widget_is_alive(first)):
+Supervertaler.py:56005:         source_filter_text = self._get_line_edit_text('source_filter').strip() if hasattr(self, 'source_filter') else ""
+Supervertaler.py:56006:         target_filter_text = self._get_line_edit_text('target_filter').strip() if hasattr(self, 'target_filter') else ""
+Supervertaler.py:56370:         if hasattr(self, 'right_tabs') and self._widget_is_alive(self.right_tabs):
+Supervertaler.py:56412:         if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+Supervertaler.py:56435:         if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+Supervertaler.py:56752:         if not hasattr(self, 'right_tabs') or not self._widget_is_alive(self.right_tabs):
+Supervertaler.py:56937:         if self._is_text_filter_active():
+Supervertaler.py:56941:             self._move_to_next_visible_row(current_row)
+Supervertaler.py:57131:         selected_segments = self.get_selected_segments_from_grid()
+Supervertaler.py:57141:     def _is_text_filter_active(self) -> bool:
+Supervertaler.py:57144:         текстов — через self-специфичный делегат _get_line_edit_text, п.Г промпта.)"""
+Supervertaler.py:57146:             self._get_line_edit_text('source_filter'),
+Supervertaler.py:57147:             self._get_line_edit_text('target_filter'),
+Supervertaler.py:57284:                     row = self._find_row_for_segment(other.id)
+Supervertaler.py:57305:     def _move_to_next_visible_row(self, current_row: int) -> None:
+Supervertaler.py:57332:         selected_segments = segments or self.get_selected_segments_from_grid()
+Supervertaler.py:57354:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:57385:         segments = self._get_selected_or_filtered_segments("Confirm Segments")
+Supervertaler.py:57413:             selected_segments = self._get_selected_or_filtered_segments(f"Change Status to '{status_def.label}'")
+Supervertaler.py:57415:             selected_segments = self.get_selected_segments_from_grid()
+Supervertaler.py:57435:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:57457:             row = self._find_row_for_segment(segment.id)
+Supervertaler.py:57471:     def _find_row_for_segment(self, segment_id: int) -> int:
+Supervertaler.py:57783:             segment, _seg_idx = self._segment_for_grid_row(row)
+Supervertaler.py:58369:             if not self._widget_is_alive(banner):
+Supervertaler.py:58395:         if not hasattr(self, 'table') or not self._widget_is_alive(self.table):
+Supervertaler.py:60669:             segments_with_rows = self._get_filtered_segments_with_rows()
+Supervertaler.py:60700:             for seg in self.get_selected_segments_from_grid():
+Supervertaler.py:60723:     def _get_filtered_segments_with_rows(self) -> List[Tuple[int, Segment]]:
+modules/pseudo_translate_dialog.py:163:         selected = list(main_window.get_selected_segments_from_grid() or [])
+modules/pseudo_translate_dialog.py:245:         row = mw._find_row_for_segment(segment.id)
+modules/undo_manager.py:34:       _find_row_for_segment, _update_status_cell, _select_grid_row_by_id,
+modules/undo_manager.py:48:                  _find_row_for_segment: Callable[[int], int],
+modules/undo_manager.py:50:                  _select_grid_row_by_id: Callable[[int], None],
+modules/undo_manager.py:73:         self._find_row_for_segment = _find_row_for_segment
+modules/undo_manager.py:75:         self._select_grid_row_by_id = _select_grid_row_by_id
+modules/undo_manager.py:210:         row = self._find_row_for_segment(segment_id)
+modules/undo_manager.py:290:         self._select_grid_row_by_id(focus_id)
+modules/grid/helpers.py:12: этого модуля; _get_line_edit_text остаётся в монолите целиком — его
+modules/grid/helpers.py:16: (_find_row_for_segment, _select_grid_row_by_id — критично для Undo/Redo).
+modules/grid/helpers.py:20: get_selected_segments_from_grid) — простые вызовы функций одного модуля.
+modules/grid/helpers.py:45:     "get_selected_segments_from_grid",
+modules/grid/helpers.py:357: def get_selected_segments_from_grid(current_project, table) -> list:
+modules/grid/helpers.py:388:     selected = get_selected_segments_from_grid(current_project, table)
+modules/grid/helpers.py:481:     — self-специфичная логика и остаётся в делегате _get_line_edit_text
+modules/grid/__init__.py:18:     get_selected_segments_from_grid,
+modules/grid/__init__.py:38:     "get_selected_segments_from_grid",
