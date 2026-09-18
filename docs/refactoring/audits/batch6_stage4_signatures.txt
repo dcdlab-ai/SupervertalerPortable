@@ -1,0 +1,34 @@
+BATCH #6 STAGE 4 — Итоговая таблица сигнатур (Этап 4): метод-делегат SupervertalerQt
+-> pure-функция modules/grid/filters.py. База: HEAD 26b998c (Batch #6 Stage 3).
+Все 20 делегатов сохранили точные исходные имена и сигнатуры параметров
+(7 делегатов монолита имеют ведущий '_' в имени, одноимённая pure-функция — без него:
+_highlight_text_in_widget, _clear_filter_highlights_in_widget, _on_file_filter_changed,
+_update_file_filter_combo, _clear_all_filter_highlights, _ensure_shared_filter,
+_ensure_primary_filters_ready). Состав 20 функций + 1 внутренней
+(_refresh_grid_invisibles_cells) закрывает документацию всего пакета modules/grid/
+(helpers.py 16 функций + pagination.py 14 функций + константы + filters.py 20+1).
+===============================================================================
+
+| # | Метод-делегат в монолите | Строки монолита | pure-функция | Строки | Сигнатура |
+|---|---|---|---|---|---|
+| 1 | _highlight_text_in_widget | 51785-51787 | highlight_text_in_widget | 74-113 | highlight_text_in_widget(table, row: int, col: int, search_term: str) |
+| 2 | _clear_filter_highlights_in_widget | 51789-51791 | clear_filter_highlights_in_widget | 116-154 | clear_filter_highlights_in_widget(table, row: int, col: int) |
+| 3 | apply_filters | 51793-51818 | apply_filters | 157-246 | apply_filters(current_project, table, source_filter_text: str, target_filter_text: str, clear_filters_callback, set_filtering_active_callback, set_active_text_filter_rows_callback, apply_pagination_callback, log_callback) |
+| 4 | clear_filters | 51820-51857 | clear_filters | 249-371 | clear_filters(current_project, table, source_widget, target_widget, set_active_text_filter_rows_callback, set_filtering_active_callback, apply_pagination_callback, set_grid_page_callback, set_file_filter_callback, log_callback, grid_page_size=50, grid_current_page=0) |
+| 5 | _on_file_filter_changed | 51859-51873 | on_file_filter_changed | 374-442 | on_file_filter_changed(current_project, table, file_filter_combo, apply_pagination_callback, update_file_boundary_callback, show_manage_views_callback, log_callback) |
+| 6 | _update_file_filter_combo | 51875-51880 | update_file_filter_combo | 445-484 | update_file_filter_combo(current_project, file_filter_combo) |
+| 7 | toggle_invisible_display | 52051-52073 | toggle_invisible_display | 487-522 | toggle_invisible_display(invisible_display_settings: Dict[str, bool], char_type: str, set_show_nbsp_callback, refresh_callback, log_callback, write_settings_callback=None) -> Dict[str, bool] |
+| 8 | toggle_all_invisibles | 52075-52100 | toggle_all_invisibles | 525-571 | toggle_all_invisibles(invisible_display_settings: Dict[str, bool], menu_actions, set_show_nbsp_callback, refresh_callback, log_callback, write_settings_callback=None) -> Dict[str, bool] |
+| 9 | refresh_grid_invisibles | 52102-52126 | refresh_grid_invisibles | 574-636 | refresh_grid_invisibles(current_project, table, invisible_display_settings: Dict[str, bool], hide_outer_wrapping_tags: bool, tag_view_mode: str, old_suppress, set_suppress_callback, set_show_nbsp_callback, auto_resize_callback, update_match_panel_callback, update_match_panel_available: bool) |
+| 10 | apply_invisible_replacements | 52143-52150 | apply_invisible_replacements | 701-742 | apply_invisible_replacements(text: str, invisible_display_settings: Optional[Dict[str, bool]]=None) -> str |
+| 11 | reverse_invisible_replacements | 52152-52155 | reverse_invisible_replacements | 745-785 | reverse_invisible_replacements(text: str) -> str |
+| 12 | filter_empty_segments | 52639-52651 | filter_empty_segments | 798-838 | filter_empty_segments(current_project, table, source_widget, target_widget, log_callback) |
+| 13 | _clear_all_filter_highlights | 52653-52658 | clear_all_filter_highlights | 788-795 | clear_all_filter_highlights(table) |
+| 14 | apply_quick_filter | 52660-52677 | apply_quick_filter | 841-904 | apply_quick_filter(current_project, table, filter_type: str, source_widget, target_widget, set_active_text_filter_rows_callback, set_filtering_active_callback, apply_pagination_callback, log_callback) |
+| 15 | show_advanced_filters_dialog | 52707-52713 | show_advanced_filters_dialog | 907-922 | show_advanced_filters_dialog(current_project, parent, apply_advanced_filters_callback) |
+| 16 | apply_advanced_filters | 52715-52725 | apply_advanced_filters | 925-1001 | apply_advanced_filters(current_project, table, filters: dict, source_widget, target_widget, log_callback) |
+| 17 | apply_sort | 52727-52748 | apply_sort | 1004-1158 | apply_sort(current_project, parent, sort_type: Optional[str], original_segment_order, set_original_segment_order_callback, set_current_sort_callback, page_size_combo, set_grid_page_size_callback, tr_callback, log_callback, reload_callback) |
+| 18 | filter_on_selected_text | 54998-55016 | filter_on_selected_text | 1161-1233 | filter_on_selected_text(table, source_filter_text: str, target_filter_text: str, source_widget, target_widget, clear_filters_callback, apply_filters_callback, reverse_replacements_callback, editor_classes, log_callback) |
+| 19 | _ensure_shared_filter | 28545-28557 | ensure_shared_filter | 1236-1257 | ensure_shared_filter(existing_widget, placeholder: str, on_change=None, on_return=None) -> Tuple[object, bool] |
+| 20 | _ensure_primary_filters_ready | 28559-28563 | ensure_primary_filters_ready | 1260-1277 | ensure_primary_filters_ready(ensure_shared_filter_callback, apply_filters_callback) -> Tuple[object, object] |
+| — | (внутренняя) | — | _refresh_grid_invisibles_cells | 639-698 | _refresh_grid_invisibles_cells(table, segments, row_count, invisible_display_settings, hide_outer_wrapping_tags, tag_view_mode) |

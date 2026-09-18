@@ -1,0 +1,436 @@
+ОТЧЁТ Batch #6 Stage 4 — Step 6: grid-фильтры → modules/grid/filters.py
+═══════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-18. База: HEAD 26b998c (Batch #6 Stage 3), ветка main.
+Режим: ACTIVE REFACTOR. Один коммит: перенос 20 методов фильтров источника/
+перевода, файлового фильтра, невидимых символов и сортировки в
+modules/grid/filters.py (МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ — тот же принцип, что
+helpers.py/pagination.py) + 20 тонких делегатов в монолите с точными исходными
+именами/сигнатурами. Артефакты измерений: docs/refactoring/audits/
+*batch6stage4*; скрипты и прогоны: D:\Temp\SupervertalerPortable\refactoring\
+batch6_stage4\ (run-001 — перенос и первичная валидация, run-002/run-003 —
+финальные измерения на итоговом дереве).
+
+ЭТОТ КОММИТ ЗАКРЫВАЕТ Step 6 EXTRACTION_PLAN.md ЦЕЛИКОМ: все три под-батча
+(Stage 2 = helpers.py, Stage 3 = pagination.py, Stage 4 = filters.py) выполнены.
+
+═══════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0 — БАЗОВАЯ ЛИНИЯ И СПОТ-ПРОВЕРКА
+═══════════════════════════════════════════════════════════════════════════════
+- git status: чист, кроме нового промпта Stage 4 (docs/refactoring/prompts/).
+- МЕТОДОЛОГИЯ (отличается от Stage 3, как и предупреждал промпт): кластер
+  filters.py — НЕ непрерывный блок. Окно 51794–55821 (~4030 строк), из которых
+  filters.py принадлежит только 1097 строк. Перенос выполнялся строго по
+  20 ИМЕНАМ как ПРЯМЫЕ методы класса SupervertalerQt (node.body, не ast.walk);
+  диапазоны «с такой-то по такую-то строку» здесь неприменимы.
+- AST-преflight: 22/22 совпали с координаторской таблицей промпта БАЙТ-В-БАЙТ
+  (20 методов скоупа + 2 метода `_ensure_shared_filter`/`_ensure_primary_
+  filters_ready`, лежащих отдельно, рядом с бывшим блоком пагинации);
+  run-001\ast_check_out.txt. Монолит на HEAD: 69 191 строка (splitlines).
+  Класс SupervertalerQt: 6053–63263, 20 методов — 1097 строк (день-в-день с
+  оценкой Stage 1 §1). DUPES: ['closeEvent', 'show_about'] (предсуществующие,
+  не связаны с батчем). Ложные вложенные функции не попадали в выборку —
+  проверка шла строго по узлам класса.
+- ПОЛНАЯ перепись окна 51780–55830 (Этап 0.2) подтвердила: ровно эти 20 плюс
+  ровно эти исключения (а)–(г) из промпта; ничего не пропущено и не включено
+  лишнего. Дополнительно найдено и снято снимком: `_update_bulk_menu_label`
+  53247–53273 (27 строк) — физически ВНУТРИ окна, между `apply_quick_filter` и
+  `show_advanced_filters_dialog`, но в состав не входит (обновление подписи меню
+  Bulk Operations по числу видимых строк). Итого NOT-MOVE блоков — 3.
+- Снимки: 20 тел из git HEAD + sha256 в run-001\snapshot\ (snapshot_index.txt);
+  снимок 3 NOT-MOVE методов со SHA256 →
+  docs/refactoring/audits/not_moved_methods_batch6stage4_snapshot.txt:
+    show_manage_views_dialog          b3d00f39… (168 строк)
+    _refresh_source_column_display    90d2bf1b… (14 строк)
+    _update_bulk_menu_label           1d971a9a… (27 строк)
+- Контрольные SHA256 блоков (Этап 0.4): spellcheck/словари 52645–53126 (482
+  строки) 9ac157cd…; комментарии сегментов + voice dictation 53510–55753 (2244
+  строки) 6496a472… — сняты из git HEAD и после переноса проверялись на
+  вхождение в рабочую копию как единые текстовые диапазоны.
+- Манифест SHA256 всех .py: manifest_before_batch6stage4.txt — 142 файла
+  (промпт Этапа 0.6 ожидал 150: число взято из Stage 3, где tools/
+  batch_validation ещё входил в обход; текущий tools/batch_validation/manifest.py
+  исключает свой каталог, поэтому обе стороны сравнения сняты ОДНИМ скриптом и
+  сопоставимы между собой — см. §5, п. «манифест»). py_compile — чисто.
+- 8 метрик baseline: baseline_counts_batch6stage4.txt =
+  1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2.
+- Call sites всех 20 имён + landmine-имён по всему репозиторию:
+═══════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 1 — ФОКУС-PREFLIGHT (таблица сигнатур: audits/batch6_stage4_signatures.txt)
+═══════════════════════════════════════════════════════════════════════════════
+- П.А (apply_sort — ЕДИНСТВЕННОЕ пересечение с циклом SCC#1 в этом батче):
+  решение промпта выполнено буквально. Делегат передаёт
+  reload_callback=self.load_segments_to_grid; pure-функция вызывает
+  reload_callback() в обеих ветках «полной перезагрузки»; сам
+  load_segments_to_grid НЕ тронут (SHA256 модулей-владельцев не менялись).
+  Дополнительно: tr_callback=self.tr (1 использование), page_size_combo +
+  set_grid_page_size_callback (запись grid_page_size и текста combo — порядок
+  исходного тела), set_original_segment_order_callback/set_current_sort_callback.
+  Проверено сценарием F11 (9 проверок), в т.ч. 3 проверки того, что перезагрузка
+  реально идёт через reload_callback.
+- П.Б (apply_invisible_replacements — внешние вызыватели): имя и сигнатура
+  «один позиционный аргумент (текст) → строка» сохранены, проверены оба пути:
+  bound-метод в modules/undo_manager.py (инжектируется при конструировании) и
+  hasattr-guarded вызов modules/pseudo_translate_dialog.py:250. Оба модуля-
+  вызывателя побайтово не менялись (манифест: их SHA256 идентичны before/after)
+  → 0 правок call sites вне монолита.
+- П.В (filter_on_selected_text — DYNAMIC_ENTRY_POINT): имя метода сохранено —
+  это часть строкового контракта modules/shortcut_manager.py (записи
+  "filter_selected_text" и скрытый дубликат "clear_filter" с
+  "action": "filter_on_selected_text", Ctrl+Shift+F). shortcut_manager не
+  менялся; toggle-поведение (наложить/снять фильтр по выделенному тексту)
+  проверено сценарием F12.
+- П.Г (_highlight_text_in_widget): 0 внешних call sites (используется только
+  внутри apply_filters, 2 вызова) — оформлен обычной функцией модуля
+  filters.py, отдельным колбэком не передаётся.
+- П.Д (refresh_grid_invisibles и _suppress_target_change_handlers): старое и
+  новое значения — параметрами (old_suppress, set_suppress_callback); чтение/
+  запись атрибута остались в делегате (тот же паттерн, что в Stage 3 для
+  apply_pagination_to_grid).
+- П.Е (прямой импорт вместо колбэков): проверен полный список экспортов
+  modules/grid/__init__.py; из зависимостей 20 тел в нижнем слое нашлась ровно
+  одна — widget_is_alive (импортируется напрямую из modules.grid.helpers, как
+  resize_visible_rows в pagination.py). `_get_line_edit_text` по решению
+  Stage 2 остался в монолите (self-специфичная getattr-логика) и вызывается в
+  делегатах apply_filters/clear_filters.
+- П.Ж (4 метода вызывают self._apply_pagination_to_grid): передаётся колббэком
+  apply_pagination_callback=self._apply_pagination_to_grid без аргументов — как
+  в существующих call sites; повторной сборки ~15 параметров внутри filters.py
+  нет.
+- П.З (clear_filters): grid_current_page/grid_page_size передаются
+  getattr-дефолтами (0/50), запись страницы — set_grid_page_callback ДО
+  повторного применения пагинации (порядок исходного тела),
+  set_file_filter_callback (blockSignals + setCurrentIndex(0)). Проверено
+  сценарием F4 (5 проверок: страница восстановлена под выбранный сегмент
+  55//50=1, allowlist очищен, filtering_active False, file filter → All Files).
+- Этап 1.5 (DYNAMIC_ENTRY_POINT): делегаты сделаны для ВСЕХ 20 единообразно;
+  фактические точки входа подтверждены (file_filter_combo.currentIndexChanged,
+  чекбоксы меню невидимых символов, AdvancedFiltersDialog, shortcut-диспетчер
+  Ctrl+Shift+F, кнопки Apply/Quick filter, структурные операции для
+  apply_invisible_replacements).
+- Этап 1.6 (оговорка про dataclass/NamedTuple): НЕ применялась. Максимальные
+  сигнатуры (clear_filters — 12 параметров, apply_sort — 11, filter_on_
+  selected_text — 10) остались в «разумных пределах» Stage 3 (~15 параметров у
+  apply_pagination_to_grid), все параметры — явные значения или именованные
+  колбэки. В filters.py нет ни одного класса, ни NamedTuple/dataclass (проверено
+  grep) — файл остаётся модулем чистых функций.
+
+2б. ДВЕ НАХОДКИ, ОБНАРУЖЕННЫЕ ПРИ ПЕРЕНОСЕ (обе — ВНЕ «механического» скоупа)
+-------------------------------------------------------------------------------
+(1) ПРЕДСУЩЕСТВУЮЩИЙ ДЕФЕКТ — НЕ регрессия Stage 4:
+    `clear_filter_highlights_in_widget` при наложении и снятии подсветки в ОДНОМ
+    И ТОМ ЖЕ диапазоне уходит в бесконечный цикл. Воспроизведено на HEAD
+    (run-001\probe_double.py: cycle2 на HEAD зависает); код work-дерева байт-в-
+    байт равен HEAD-версии этого метода, т.е. перенос дефект не создал и не
+    изменил. Доказательства: probe_double.py, probe_hang2.py (run-001).
+    Отдельного решения владельца по этому дефекту не требуется для приёмки
+    батча, но его следует занести в трекинг (см. §6).
+(2) ОТКЛОНЕНИЕ ОТ ВЕРБАТИМ-ПЕРЕНОСА (исправлено в этом же коммите): порядок
+    записи настроек невидимых символов. В HEAD запись настроек идёт ДО refresh
+    сетки; в первой сборке pure-функции TagHighlighter._show_nbsp обновлялся
+    позже и отставал на один цикл (визуально — подсветка NBSP переключалась «со
+    второго раза»). Исправление: в `toggle_invisible_display` и
+    `toggle_all_invisibles` добавлен необязательный параметр
+    write_settings_callback, который вызывается ДО refresh_callback — точно
+    воспроизводя порядок исходного тела (запись настроек → флаг NBSP → refresh
+    → log); делегаты передают lambda, пишущую self.invisible_display_settings.
+    Проверено сценарием F9 (15 проверок, включая TagHighlighter._show_nbsp после
+    каждого переключения и после toggle_all). Оба файла (filters.py и делегаты
+    в монолите) содержат это исправление; других отклонений от тел HEAD нет.
+
+  callsites_before_batch6stage4.txt (379 строк).
+- Этап 0.4, фактические проверки: `filter_empty_segments` — 0 call sites
+  (мёртвый код; перенесён как есть, без удаления — политика проекта);
+  `apply_sort` — реального ЧТЕНИЯ grid_page_size в теле нет (два hasattr-lookup
+  и записи), поэтому в сигнатуру pure-функции grid_page_size не попал;
+  `ensure_shared_filter`/`ensure_primary_filters_ready` — 2 и 1 call sites,
+  оба внутри `create_grid_view_widget_for_home`.
+═══════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 2 — ПЕРЕНОС
+═══════════════════════════════════════════════════════════════════════════════
+- Создан modules/grid/filters.py — 1277 строк, 21 top-level функция: 20
+  публичных (ровно состав скоупа) + 1 внутренняя `_refresh_grid_invisibles_cells`
+  (выделена из тела refresh_grid_invisibles; вызывается только из него).
+  `__all__` модуля содержит 20 публичных имён ровно в порядке скоупа (проверено
+  AST). Классов/NamedTuple/dataclass в файле нет.
+- Семь делегатов монолита сохранили ведущий `_` в имени, одноимённые
+  pure-функции — без него: _highlight_text_in_widget, _clear_filter_highlights_
+  in_widget, _on_file_filter_changed, _update_file_filter_combo, _clear_all_
+  filter_highlights, _ensure_shared_filter, _ensure_primary_filters_ready.
+  Остальные 13 имён совпадают 1:1. Это единственная «косметическая» асимметрия,
+  зафиксирована в таблице сигнатур.
+- modules/grid/__init__.py расширен: добавлен `from . import filters` и 20
+  реэкспортов; `__all__` = 3 имени модулей + 16 helpers + 16 pagination (14
+  функций + 2 константы) + 20 filters = 55; формат `__all__` Stage 3
+  (конкатенация списков через `+`) сохранён. Файл: 83 → 134 строки.
+- Supervertaler.py: 1 строка импорта `from modules.grid import filters as
+  grid_filters` (по образцу Stage 2/3) + 20 делегатов на месте бывших тел.
+  Замена выполнялась строго по AST-спанам снизу вверх (run-001/
+  apply_transfer.py); NOT-MOVE методы и посторонние блоки в замену не входили.
+- Делегаты занимают 291 строку против 1097 строк исходных тел (по-методные
+  спаны — run-002\spans_out.txt, см. §5).
+
+3б. ПОСТ-ВАЛИДАЦИОННАЯ КОСМЕТИЧЕСКАЯ ПРАВКА (дубликат строки импорта)
+----------------------------------------------------------------------
+Причина: run-001\apply_transfer.py вставляет строку импорта БЕЗУСЛОВНО после
+импорта pagination (строки 62–66 скрипта). Повторный прогон замены (ре-миграция
+делегатов после исправления (2) из §2б) вставил её второй раз — в дереве
+оказались две идентичные строки импорта grid_filters (420 и 421).
+Правка: удалён дубликат (run-003\dedup_import.py; жёсткая проверка — было ровно
+2 вхождения строки, они были подряд, стало 1; вывод: dedup_out.txt).
+Это единственная правка кода после первоначальных прогонов валидации. Она
+семантически нейтральна (повторное связывание того же объекта модуля), но чтобы
+отчёт не опирался на измерения, снятые до правки, ВСЕ измерения (counts,
+
+═══════════════════════════════════════════════════════════════════════════════
+4. ЭТАП 3 — ВАЛИДАЦИЯ (все прогоны — на итоговом дереве, run-003)
+═══════════════════════════════════════════════════════════════════════════════
+4.1 AST-проверка (run-003\final_check_out.txt): 22/22 — все 20 методов скоупа
+    плюс 2 ensure-метода найдены как ПРЯМЫЕ методы класса SupervertalerQt,
+    каждый ровно в одном определении, каждое тело делегата ссылается на
+    modules/grid/filters; делегатов OK 20/20. Класс: 6054–62458, методов 819,
+    членов 838 (19 Assign) — как и на HEAD (6053–63263 / 819 / 838), т.е.
+    «20 методов ушло, 20 делегатов пришло» — баланс сходится. DUPES:
+    ['closeEvent', 'show_about'] — предсуществующие, новых нет.
+    filters.py: 21 функция, состав скоупа 20/20, `__all__` совпадает с порядком
+    скоупа, единственная внутренняя — _refresh_grid_invisibles_cells.
+4.2 py_compile_all.py: COMPILE_OK (143 py-файла, включая filters.py).
+4.3 8 метрик: 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 — ровно baseline
+    (counts_after_batch6stage4.txt идентичен baseline_counts_batch6stage4.txt).
+4.4 Манифест (manifest_cmp.py, before vs after): changed = 2
+    (Supervertaler.py, modules/grid/__init__.py), B-ONLY = 1
+    (modules/grid/filters.py), A-ONLY = 0 → ровно как ожидалось.
+    СЛЕДСТВИЕ: SHA256 modules/undo_manager.py, modules/pseudo_translate_
+    dialog.py, modules/shortcut_manager.py, modules/dialogs/*, modules/
+    tag_manager.py и всех остальных файлов НЕ менялись → 0 правок внешних
+    call sites подтверждено манифестом, а не только диффом callsites.
+4.5 NOT-MOVE (3/3 PASS, два независимых теста на каждый блок): (а) sha256
+    текста из снимка, пересчитанный по рабочей копии, совпадает с записанным;
+    (б) блок встречается РОВНО 1 раз и в рабочей копии, и в git HEAD.
+    Контрольные блоки, посторонние для скоупа: spellcheck 52645–53126
+    (9ac157cd…) и comments/dictation 53510–55753 (6496a472…) — по 1 вхождению
+    в рабочей копии (run-003\final_check_out.txt; ранее run-001\control_check.py
+    — PASS/PASS, HEAD-версия файла 69 191 строка).
+4.6 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (run-003\scen_out_final.txt): 65/65 PASS,
+    «SCENARIOS_DONE OK». Группы: F0 загрузка (2), F1 quick filter через
+    apply_filters (3), F2 пустые поля → clear_filters (2), F3 подсветка/снятие
+    в виджете, delegate + pure, текст не портится (5), F3b 3 фрагмента
+    подсветки + пустая ячейка = no-op (2), F4 clear_filters: восстановление
+    страницы/allowlist/file filter (5), F5 apply_quick_filter по статусам (6),
+    F6 filter_empty_segments (1), F7 apply_advanced_filters с 2 условиями +
+    show_advanced_filters_dialog (2), F8 файловый фильтр и представления,
+    включая маршрутизацию manage_views на NOT-MOVE диалог (5), F9 невидимые
+    символы — полный цикл показать/скрыть, TagHighlighter._show_nbsp, тексты
+    сегментов не портятся (15), F10 ensure_shared_filter/ensure_primary_filters_
+    ready, живые/мёртвые виджеты и rebinding атрибута (4), F11 apply_sort (9),
+    F12 filter_on_selected_text toggle (4).
+    ОСОБО ПО СТОП-УСЛОВИЯМ: F11 подтверждает, что apply_sort('status') и
+    apply_sort(None) реально проходят через reload_callback (полная перезагрузка
+    грида), что grid_page_size переключается на All (999999) и combo показывает
+    'All', что порядок восстанавливается к документному, что
+    _original_segment_order/current_sort записываются и что неизвестный тип
+    сортировки не вызывает перезагрузку — СТОП-условие 4 не сработало.
+4.7 UNDO/REDO РЕГРЕССИЯ (Batch #5), ПОВТОР В ТРЕТИЙ РАЗ, скрипт run-001\
+    undo_scenarios.py без правок: 38/38 PASS, «SCENARIOS_DONE OK»
+    (run-003\undo_out_final.txt) — S0 состояние/менеджер, S1 undo/redo,
+    S2 batch, S3 split, S4 merge, S5 delete, S6 disabled-состояния, S7 EGTE
+    copy source, S8 pseudo-translate + один undo, S9 Ctrl+Z/Y/Shift+Z в ячейке,
+    S10 overflow стека. СТОП-условие 3 не сработало.
+4.8 SMOKE (tools/batch_validation/smoke_project.py, 2 процесса, 3 сегмента):
+    SAVE_OK 3206 → LOAD_OK stage4-smoke-final 3 «Segment 1 source»
+
+═══════════════════════════════════════════════════════════════════════════════
+5. ЧИСЛА (все воспроизведены измерениями на итоговом дереве, не по памяти)
+═══════════════════════════════════════════════════════════════════════════════
+- git diff --numstat (untracked filters.py в numstat не попадает):
+    Supervertaler.py           222 вставки / 1027 удалений
+    modules/grid/__init__.py    54 вставки /    3 удаления
+    modules/grid/filters.py    новый файл, 1277 строк
+- МОНОЛИТ: 69 191 → 68 386 строк (len(splitlines())), net −805.
+  Арифметика диффа сходится точно: 20 тел = 1097 строк по AST-спанам (HEAD),
+  делегаты = 291 строка + 1 строка импорта = 292 вставки; 70 строк текстуально
+  совпали (пустые строки и повторяющиеся вызовы вроде
+  `self._apply_pagination_to_grid()`), поэтому git показал
+  1097 − 70 = 1027 удалений и 292 − 70 = 222 вставки; 222 − 1027 = −805.
+- Класс SupervertalerQt: 6053–63263 → 6054–62458; методов 819 → 819,
+  членов 838 → 838 (баланс «20 ушло / 20 пришло»).
+- По-методные спаны (HEAD → делегат, строк): _highlight_text_in_widget 40→3,
+  _clear_filter_highlights_in_widget 39→3, apply_filters 93→26, clear_filters
+  124→38, _on_file_filter_changed 64→15, _update_file_filter_combo 42→6,
+  toggle_invisible_display 29→23, toggle_all_invisibles 40→26,
+  refresh_grid_invisibles 112→25, apply_invisible_replacements 34→8,
+  reverse_invisible_replacements 40→4, filter_empty_segments 43→13,
+  _clear_all_filter_highlights 11→6, apply_quick_filter 62→18,
+  show_advanced_filters_dialog 10→7, apply_advanced_filters 77→11,
+  apply_sort 146→22, filter_on_selected_text 63→19, _ensure_shared_filter 14→13,
+  _ensure_primary_filters_ready 14→5. Итого 1097 → 291.
+- Файлы пакета: helpers.py 507 (не менялся), pagination.py 584 (не менялся),
+  __init__.py 83 → 134, filters.py 1277 (новый).
+- Аудиты Stage 4 (все — в docs/refactoring/audits/):
+  baseline_counts_batch6stage4.txt, counts_after_batch6stage4.txt,
+  manifest_before_batch6stage4.txt, manifest_after_batch6stage4.txt,
+  callsites_before_batch6stage4.txt (379 строк), callsites_after_batch6stage4.txt,
+  not_moved_methods_batch6stage4_snapshot.txt, batch6_stage4_signatures.txt.
+- Примечание к сопоставимости 8 метрик между батчами: в Stage 3 baseline снимался
+  скриптом, который ещё обходил tools/batch_validation; сейчас counts.py/
+  manifest.py исключают собственный каталог (иначе скрипты находят собственные
+  литералы паттернов). Поэтому абсолютные значения singleShot в Stage 3 (87) и
+  Stage 4 (85) отличаются ровно на 2 совпадения из counts.py (строки 4 и 18) —
+  это дефект сопоставимости СКРИПТА, а не кода. Baseline и after Stage 4 сняты
+  одним и тем же скриптом → diff по метрикам достоверен и равен нулю.
+    (run-003\smoke_final_{save,load}_out.txt).
+4.9 ПАГИНАЦИЯ (Stage 3) после переноса filters.py: переход по страницам и смена
+    page size проверены в F11 (grid_page_size → All 999999, page_size_combo text
+    'All') и F4 (страница восстановлена под выбранный сегмент, 55//50=1, строки
+    предыдущих страниц скрыты) — требование промпта «минимум переход по
+    страницам + смена page size» выполнено на делегатах
+    _apply_pagination_to_grid/_maybe_auto_set_page_size.
+manifest, callsites, AST-границы, таблица сигнатур) и ВСЕ функциональные прогоны
+(сценарии, Undo/Redo, smoke) выполнены заново уже ПОСЛЕ неё — прогоны run-003.
+Номера строк в этом отчёте и в артефактах audits/ соответствуют итоговому дереву.
+ИТОГОВАЯ ТАБЛИЦА СИГНАТУР (20 методов; полная версия с номерами строк —
+docs/refactoring/audits/batch6_stage4_signatures.txt; эта таблица де-факто
+закрывает документацию всего пакета modules/grid/):
+     1 _highlight_text_in_widget → highlight_text_in_widget(table, row, col,
+       search_term)
+     2 _clear_filter_highlights_in_widget → clear_filter_highlights_in_widget(
+       table, row, col)
+     3 apply_filters → apply_filters(current_project, table, source_filter_text,
+       target_filter_text, clear_filters_callback, set_filtering_active_callback,
+       set_active_text_filter_rows_callback, apply_pagination_callback,
+       log_callback)
+     4 clear_filters → clear_filters(current_project, table, source_widget,
+       target_widget, set_active_text_filter_rows_callback,
+       set_filtering_active_callback, apply_pagination_callback,
+       set_grid_page_callback, set_file_filter_callback, log_callback,
+       grid_page_size=50, grid_current_page=0)
+     5 _on_file_filter_changed → on_file_filter_changed(current_project, table,
+       file_filter_combo, apply_pagination_callback,
+       update_file_boundary_callback, show_manage_views_callback, log_callback)
+     6 _update_file_filter_combo → update_file_filter_combo(current_project,
+       file_filter_combo)
+     7 toggle_invisible_display → toggle_invisible_display(
+       invisible_display_settings, char_type, set_show_nbsp_callback,
+       refresh_callback, log_callback, write_settings_callback=None) -> dict
+     8 toggle_all_invisibles → toggle_all_invisibles(invisible_display_settings,
+       menu_actions, set_show_nbsp_callback, refresh_callback, log_callback,
+       write_settings_callback=None) -> dict
+     9 refresh_grid_invisibles → refresh_grid_invisibles(current_project, table,
+       invisible_display_settings, hide_outer_wrapping_tags, tag_view_mode,
+       old_suppress, set_suppress_callback, set_show_nbsp_callback,
+       auto_resize_callback, update_match_panel_callback,
+       update_match_panel_available)
+    10 apply_invisible_replacements → apply_invisible_replacements(text,
+       invisible_display_settings=None) -> str
+    11 reverse_invisible_replacements → reverse_invisible_replacements(text) -> str
+    12 filter_empty_segments → filter_empty_segments(current_project, table,
+       source_widget, target_widget, log_callback)
+    13 _clear_all_filter_highlights → clear_all_filter_highlights(table)
+    14 apply_quick_filter → apply_quick_filter(current_project, table, filter_type,
+       source_widget, target_widget, set_active_text_filter_rows_callback,
+       set_filtering_active_callback, apply_pagination_callback, log_callback)
+    15 show_advanced_filters_dialog → show_advanced_filters_dialog(current_project,
+       parent, apply_advanced_filters_callback)
+    16 apply_advanced_filters → apply_advanced_filters(current_project, table,
+       filters, source_widget, target_widget, log_callback)
+    17 apply_sort → apply_sort(current_project, parent, sort_type,
+       original_segment_order, set_original_segment_order_callback,
+       set_current_sort_callback, page_size_combo, set_grid_page_size_callback,
+       tr_callback, log_callback, reload_callback)
+    18 filter_on_selected_text → filter_on_selected_text(table, source_filter_text,
+       target_filter_text, source_widget, target_widget, clear_filters_callback,
+       apply_filters_callback, reverse_replacements_callback, editor_classes,
+       log_callback)
+    19 _ensure_shared_filter → ensure_shared_filter(existing_widget, placeholder,
+       on_change=None, on_return=None) -> (widget, created)
+    20 _ensure_primary_filters_ready → ensure_primary_filters_ready(
+       ensure_shared_filter_callback, apply_filters_callback) -> (source, target)
+    (внутренняя) _refresh_grid_invisibles_cells(table, segments, row_count,
+       invisible_display_settings, hide_outer_wrapping_tags, tag_view_mode)
+
+═══════════════════════════════════════════════════════════════════════════════
+6. НЕПОКРЫТЫЕ ПРОВЕРКИ (что / почему / риск / как проверить вручную)
+═══════════════════════════════════════════════════════════════════════════════
+1. Smoke с 25 сегментами: второй процесс (load) зависает. Проверено с 3
+   сегментами — SAVE_OK/LOAD_OK (run-003). Против HEAD этот вариант smoke НЕ
+   сверялся, в Stage 2/3 smoke тоже был 3-сегментным, поэтому атрибуция к
+   Stage 4 не доказана (путь загрузки .svproj переносом не затрагивался:
+   манифест показывает изменение только монолита и modules/grid/*).
+   Риск: LOW. Как проверить: открыть в живом приложении проект с 25+
+   сегментами, сохранить и переоткрыть; отдельно прогнать тот же smoke на HEAD
+   (в Stage 3-батче smoke был 3-сегментным, путь не покрывался).
+2. Реальный ввод с клавиатуры/мышью: клики по кнопкам Quick filter / Advanced
+   Filters, выделение текста мышью под Ctrl+Shift+F, реальные чекбоксы меню
+   невидимых символов не эмулировались. Сценарии F1–F12 шли через те же
+   делегаты и чистые функции и через сигнальные пути (on_change/on_return,
+   clicked-контракты), но не через Qt-события. Риск: LOW.
+3. Модальные диалоги: QDialog.exec замокан (auto-accept). AdvancedFiltersDialog
+   проверен только как маршрутизация (show_advanced_filters_dialog → диалог →
+   apply_advanced_filters с 2 условиями), Manage Views — только факт
+   маршрутизации manage_views → show_manage_views_dialog (сам диалог NOT-MOVE).
+   Риск: LOW (оба диалога вне скоупа переноса).
+4. Пункт (1) из §2б — предсуществующий бесконечный цикл при наложении и снятии
+   подсветки в одном диапазоне. Сценарии F3/F3b покрывают подсветку/снятие, но
+   не повторный цикл «наложить → снять → наложить» по одному и тому же
+   диапазону, поэтому в батче он не воспроизводился (отдельные пробы
+   probe_double.py/probe_hang2.py воспроизводят его и на HEAD). Риск: MEDIUM
+   для пользовательского пути «поиск/фильтр по выделенному тексту», но это НЕ
+   регрессия Stage 4 — требует отдельного решения владельца.
+5. `filter_empty_segments` — мёртвый код (0 call sites по всему репозиторию):
+   настоящего входа через UI нет, функция вызывалась напрямую из сценария F6.
+   Риск: нулевой по определению; сохранён по политике проекта (не удалять в
+   extraction-батче).
+6. Внешние пути `apply_invisible_replacements` (modules/undo_manager.py,
+   modules/pseudo_translate_dialog.py:250) подтверждены манифестом (SHA256 этих
+   файлов не менялись) и сценариями S8/F9, но не живым прогоном pseudo-translate
+   через GUI. Риск: LOW (имя и строковый контракт сигнатуры сохранены).
+7. Пиксельное сравнение рендеров не проводилось: методы не рисуют UI сами, их
+   эффекты (тексты меток, скрытие строк, подсветка) проверены по значениям и по
+   числу фрагментов подсветки (F3b). Риск: LOW.
+8. Ветка «активного текстового фильтра» в пагинации (из «непокрытых» Stage 3)
+   здесь косвенно закрыта F1/F5 (allowlist + _apply_pagination_to_grid при
+   активном фильтре), но метка «Showing X of Y» визуально не сверялась.
+   Риск: LOW.
+
+Правило VALIDATION_BACKLOG.md: пункты этого раздела переносятся в backlog ПОСЛЕ
+приёмки батча владельцем. Отдельно от них — находка (1) §2б (предсуществующий
+дефект): её рекомендуется завести в раздел «Находки вне скоупа батчей» (как
+пункты #6/#7 Batch #3c), поскольку она не относится к корректности переноса.
+
+═══════════════════════════════════════════════════════════════════════════════
+7. ВЫВОД: GO
+═══════════════════════════════════════════════════════════════════════════════
+Все пять СТОП-условий промпта не сработали:
+  1. Границы 20 методов подтверждены AST как прямые методы класса (22/22,
+     совпадение с таблицей координатора байт-в-байт); состав подтверждён
+     переписью всего окна 51780–55830.
+  2. NOT-MOVE блоки — BYTE-IDENTICAL: show_manage_views_dialog b3d00f39…,
+     _refresh_source_column_display 90d2bf1b…, _update_bulk_menu_label
+     1d971a9a… (sha256 + containment 1/1 в work и HEAD); контрольные блоки
+     spellcheck 9ac157cd… и comments/dictation 6496a472… — по 1 вхождению.
+  3. Undo/Redo регрессия Batch #5 — 38/38 PASS (третий прогон, скрипт без
+     правок) → кросс-батчевой регрессии (#5, #6 Stage 2, #6 Stage 3) нет.
+  4. Сценарий apply_sort/reload_callback (полная перезагрузка через сортировку) —
+     F11 9/9 PASS, единственное пересечение с циклом SCC#1 в этом батче.
+  5. После Этапа 4 — СТОП: работа не продолжается, ждём решения владельца.
+Дополнительно: 8 метрик ровные (1211/18/35/24/24/0/85/2); манифест — только
+монолит + __init__.py + новый filters.py; py_compile чисто; сценарии 65/65;
+smoke save/load OK. Один коммит:
+"Extract grid filters into modules/grid/filters.py (Batch #6 Stage 4, Step 6
+of EXTRACTION_PLAN.md — closes Step 6)", вместе с ним — этот отчёт, промпт
+Stage 4 и все аудиты docs/refactoring/audits/*batch6stage4*.
+
+═══════════════════════════════════════════════════════════════════════════════
+8. STEP 6 EXTRACTION_PLAN.md — ЗАКРЫТ ЦЕЛИКОМ
+═══════════════════════════════════════════════════════════════════════════════
+- Stage 2 (helpers.py, коммит 4ace504): 16 функций + 17 делегатов.
+- Stage 3 (pagination.py, коммит 26b998c): 14 функций + 14 делегатов + 2
+  module-level константы.
+- Stage 4 (filters.py, этот коммит): 20 функций + 1 внутренняя + 20 делегатов.
+- Итого пакет modules/grid/: helpers.py 507, pagination.py 584, filters.py 1277,
+  __init__.py 134; 50 публичных функций + 51 делегат в монолите.
+- Обновлены PROJECT_STATUS.md (таблица прогресса, счётчик строк монолита,
+  раздел «Что дальше» с пересчитанными AST-границами следующего шага) и
+  EXTRACTION_PLAN.md (секция «Статус Step 6 после Batch #6 Stage 4 —
+  Step 6 ЗАВЕРШЁН»).
+- Следующий шаг по плану — Step 7 (Settings service, IO-слой): НЕ начинать до
+  решения владельца.

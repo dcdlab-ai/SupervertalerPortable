@@ -1,0 +1,444 @@
+=== _highlight_text_in_widget ===
+  call Supervertaler.py:51785:     def _highlight_text_in_widget(self, row: int, col: int, search_term: str):
+  TOTAL 1
+
+=== _clear_filter_highlights_in_widget ===
+  call Supervertaler.py:51789:     def _clear_filter_highlights_in_widget(self, row: int, col: int):
+  TOTAL 1
+
+=== apply_filters ===
+  str  Supervertaler.py:27182:             on_change=self.apply_filters,
+  str  Supervertaler.py:27183:             on_return=self.apply_filters,
+  str  Supervertaler.py:27191:             on_change=self.apply_filters,
+  str  Supervertaler.py:27192:             on_return=self.apply_filters,
+  str  Supervertaler.py:27333:             on_return=self.apply_filters,
+  str  Supervertaler.py:27341:             on_return=self.apply_filters,
+  str  Supervertaler.py:27346:         apply_filter_btn.clicked.connect(self.apply_filters)
+  str  Supervertaler.py:28563:             apply_filters_callback=self.apply_filters)
+  call Supervertaler.py:51771:         # The filter boxes will trigger apply_filters() automatically
+  call Supervertaler.py:51793:     def apply_filters(self):
+  call Supervertaler.py:51794:         """Делегат: modules/grid/filters.apply_filters (Batch #6 Stage 4).
+  call Supervertaler.py:51809:         grid_filters.apply_filters(
+  str  Supervertaler.py:55013:             apply_filters_callback=self.apply_filters,
+  call Supervertaler.py:55898:             self.apply_filters()
+  str  modules/grid/__init__.py:54:     apply_filters,
+  str  modules/grid/__init__.py:115:     "apply_filters",
+  str  modules/grid/filters.py:53:     "apply_filters",
+  call modules/grid/filters.py:157: def apply_filters(current_project, table, source_filter_text: str,
+  call modules/tmx_editor.py:501:         self.filter_source_entry.bind('<Return>', lambda e: self.apply_filters())
+  call modules/tmx_editor.py:506:         self.filter_target_entry.bind('<Return>', lambda e: self.apply_filters())
+  str  modules/tmx_editor.py:508:         tk.Button(filter_frame, text="Apply Filter", command=self.apply_filters,
+  call modules/tmx_editor.py:836:         self.apply_filters()  # Refresh view
+  call modules/tmx_editor.py:912:         self.apply_filters()
+  call modules/tmx_editor.py:1042:     def apply_filters(self):
+  call modules/tmx_editor.py:1076:         self.apply_filters()
+  call modules/tmx_editor.py:1432:         self.apply_filters()
+  str  modules/tmx_editor_qt.py:592:         self.filter_source_entry.returnPressed.connect(self.apply_filters)
+  str  modules/tmx_editor_qt.py:601:         self.filter_target_entry.returnPressed.connect(self.apply_filters)
+  str  modules/tmx_editor_qt.py:612:         btn_apply.clicked.connect(self.apply_filters)
+  str  modules/tmx_editor_qt.py:678:         self.filter_source_entry.returnPressed.connect(self.apply_filters)
+  str  modules/tmx_editor_qt.py:686:         self.filter_target_entry.returnPressed.connect(self.apply_filters)
+  str  modules/tmx_editor_qt.py:691:         btn_apply.clicked.connect(self.apply_filters)
+  call modules/tmx_editor_qt.py:1560:             self.apply_filters()  # Refresh view
+  call modules/tmx_editor_qt.py:1577:         self.apply_filters()  # Refresh view
+  call modules/tmx_editor_qt.py:1621:             self.apply_filters()
+  call modules/tmx_editor_qt.py:1637:         self.apply_filters()
+  call modules/tmx_editor_qt.py:1841:     def apply_filters(self):
+  call modules/tmx_editor_qt.py:1893:         self.apply_filters()
+  call modules/tmx_editor_qt.py:2488:         self.apply_filters()
+  call modules/tmx_editor_qt.py:2560:         self.apply_filters()
+  TOTAL 40
+
+=== clear_filters ===
+  str  Supervertaler.py:27197:         clear_filters_btn.clicked.connect(self.clear_filters)
+  str  Supervertaler.py:27352:         clear_filters_btn.clicked.connect(self.clear_filters)
+  str  Supervertaler.py:51814:             clear_filters_callback=self.clear_filters,
+  call Supervertaler.py:51820:     def clear_filters(self):
+  call Supervertaler.py:51821:         """Делегат: modules/grid/filters.clear_filters (Batch #6 Stage 4).
+  call Supervertaler.py:51845:         grid_filters.clear_filters(
+  str  Supervertaler.py:55012:             clear_filters_callback=self.clear_filters,
+  str  modules/grid/__init__.py:55:     clear_filters,
+  str  modules/grid/__init__.py:116:     "clear_filters",
+  str  modules/grid/filters.py:54:     "clear_filters",
+  call modules/grid/filters.py:249: def clear_filters(current_project, table, source_widget, target_widget,
+  str  modules/tmx_editor.py:510:         tk.Button(filter_frame, text="Clear", command=self.clear_filters,
+  call modules/tmx_editor.py:1070:     def clear_filters(self):
+  str  modules/tmx_editor_qt.py:626:         btn_clear.clicked.connect(self.clear_filters)
+  str  modules/tmx_editor_qt.py:718:         btn_clear.clicked.connect(self.clear_filters)
+  call modules/tmx_editor_qt.py:1887:     def clear_filters(self):
+  TOTAL 16
+
+=== _on_file_filter_changed ===
+  str  Supervertaler.py:27441:         self.file_filter_combo.currentIndexChanged.connect(self._on_file_filter_changed)
+  call Supervertaler.py:51859:     def _on_file_filter_changed(self, index):
+  TOTAL 2
+
+=== _update_file_filter_combo ===
+  str  Supervertaler.py:30170:             if hasattr(self, '_update_file_filter_combo'):
+  call Supervertaler.py:30171:                 self._update_file_filter_combo()
+  str  Supervertaler.py:34645:         if hasattr(self, '_update_file_filter_combo'):
+  call Supervertaler.py:34646:             self._update_file_filter_combo()
+  call Supervertaler.py:38006:                 self._update_file_filter_combo()
+  call Supervertaler.py:38574:                 self._update_file_filter_combo()
+  call Supervertaler.py:38781:                 self._update_file_filter_combo()
+  call Supervertaler.py:51875:     def _update_file_filter_combo(self):
+  call Supervertaler.py:51968:                 self._update_file_filter_combo()
+  call Supervertaler.py:52032:             self._update_file_filter_combo()
+  TOTAL 10
+
+=== toggle_invisible_display ===
+  call Supervertaler.py:27211:         self.show_spaces_action.triggered.connect(lambda: self.toggle_invisible_display('spaces'))
+  call Supervertaler.py:27216:         self.show_tabs_action.triggered.connect(lambda: self.toggle_invisible_display('tabs'))
+  call Supervertaler.py:27221:         self.show_nbsp_action.triggered.connect(lambda: self.toggle_invisible_display('nbsp'))
+  call Supervertaler.py:27226:         self.show_linebreaks_action.triggered.connect(lambda: self.toggle_invisible_display('linebreaks'))
+  call Supervertaler.py:27457:             self.show_spaces_action.triggered.connect(lambda: self.toggle_invisible_display('spaces'))
+  call Supervertaler.py:27462:             self.show_tabs_action.triggered.connect(lambda: self.toggle_invisible_display('tabs'))
+  call Supervertaler.py:27467:             self.show_nbsp_action.triggered.connect(lambda: self.toggle_invisible_display('nbsp'))
+  call Supervertaler.py:27472:             self.show_linebreaks_action.triggered.connect(lambda: self.toggle_invisible_display('linebreaks'))
+  call Supervertaler.py:52051:     def toggle_invisible_display(self, char_type):
+  call Supervertaler.py:52052:         """Делегат: modules/grid/filters.toggle_invisible_display (Batch #6 Stage 4).
+  call Supervertaler.py:52067:         self.invisible_display_settings = grid_filters.toggle_invisible_display(
+  str  modules/grid/__init__.py:58:     toggle_invisible_display,
+  str  modules/grid/__init__.py:119:     "toggle_invisible_display",
+  str  modules/grid/filters.py:57:     "toggle_invisible_display",
+  call modules/grid/filters.py:487: def toggle_invisible_display(invisible_display_settings: Dict[str, bool],
+  TOTAL 15
+
+=== toggle_all_invisibles ===
+  str  Supervertaler.py:27232:         toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+  str  Supervertaler.py:27477:             toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+  str  Supervertaler.py:27486:             toggle_all_action.triggered.connect(self.toggle_all_invisibles)
+  call Supervertaler.py:52075:     def toggle_all_invisibles(self):
+  call Supervertaler.py:52076:         """Делегат: modules/grid/filters.toggle_all_invisibles (Batch #6 Stage 4).
+  call Supervertaler.py:52092:         self.invisible_display_settings = grid_filters.toggle_all_invisibles(
+  str  modules/grid/__init__.py:59:     toggle_all_invisibles,
+  str  modules/grid/__init__.py:120:     "toggle_all_invisibles",
+  str  modules/grid/filters.py:58:     "toggle_all_invisibles",
+  call modules/grid/filters.py:525: def toggle_all_invisibles(invisible_display_settings: Dict[str, bool],
+  TOTAL 10
+
+=== refresh_grid_invisibles ===
+  str  Supervertaler.py:52071:             refresh_callback=self.refresh_grid_invisibles,
+  str  Supervertaler.py:52082:         refresh_grid_invisibles)."""
+  str  Supervertaler.py:52098:             refresh_callback=self.refresh_grid_invisibles,
+  call Supervertaler.py:52102:     def refresh_grid_invisibles(self):
+  call Supervertaler.py:52103:         """Делегат: modules/grid/filters.refresh_grid_invisibles (Batch #6 Stage 4).
+  call Supervertaler.py:52115:         grid_filters.refresh_grid_invisibles(
+  str  modules/grid/__init__.py:60:     refresh_grid_invisibles,
+  str  modules/grid/__init__.py:121:     "refresh_grid_invisibles",
+  str  modules/grid/filters.py:59:     "refresh_grid_invisibles",
+  call modules/grid/filters.py:574: def refresh_grid_invisibles(current_project, table,
+  call modules/grid/filters.py:642:     """Внутренний обход ячеек для refresh_grid_invisibles (тело цикла
+  TOTAL 11
+
+=== apply_invisible_replacements ===
+  str  Supervertaler.py:6233:             apply_invisible_replacements=self.apply_invisible_replacements,
+  call Supervertaler.py:40811:         source_display_text = self.apply_invisible_replacements(source_for_display)
+  call Supervertaler.py:40876:         target_display_text = self.apply_invisible_replacements(target_for_display)
+  call Supervertaler.py:40996:                     display_text = self.apply_invisible_replacements(display_source)
+  str  Supervertaler.py:41009:                         # apply_invisible_replacements inserts markers before each
+  call Supervertaler.py:41011:                         new_display_before = self.apply_invisible_replacements(display_source[:clean_pos])
+  str  Supervertaler.py:41606:             if clean_tm_source and hasattr(self, 'apply_invisible_replacements'):
+  call Supervertaler.py:41607:                 tm_src_display = self.apply_invisible_replacements(tm_src_display)
+  str  Supervertaler.py:41616:         if target_display and hasattr(self, 'apply_invisible_replacements'):
+  call Supervertaler.py:41617:             target_display = self.apply_invisible_replacements(target_display)
+  str  Supervertaler.py:42208:             if tm_source and hasattr(self, 'apply_invisible_replacements'):
+  call Supervertaler.py:42209:                 cp_src_display = self.apply_invisible_replacements(cp_src_display)
+  str  Supervertaler.py:42216:         if tm_target_text and hasattr(self, 'apply_invisible_replacements'):
+  call Supervertaler.py:42217:             tm_target_text = self.apply_invisible_replacements(tm_target_text)
+  call Supervertaler.py:47026:                     target_display = self.apply_invisible_replacements(source_text) if hasattr(self, 'apply_invisible_replacements') else source_text
+  call Supervertaler.py:47148:                     self.apply_invisible_replacements(transformed)
+  str  Supervertaler.py:47149:                     if hasattr(self, 'apply_invisible_replacements')
+  call Supervertaler.py:47217:                     target_display = self.apply_invisible_replacements(source_text) if hasattr(self, 'apply_invisible_replacements') else source_text
+  call Supervertaler.py:52143:     def apply_invisible_replacements(self, text):
+  call Supervertaler.py:52144:         """Делегат: modules/grid/filters.apply_invisible_replacements (Batch #6 Stage 4).
+  call Supervertaler.py:52149:         return grid_filters.apply_invisible_replacements(
+  call Supervertaler.py:55044:             display_text = self.apply_invisible_replacements(segment.source) if hasattr(self, 'apply_invisible_replacements') else segment.source
+  call Supervertaler.py:56765:             source_for_display = self.apply_invisible_replacements(source_for_display)
+  call Supervertaler.py:56766:             target_for_display = self.apply_invisible_replacements(target_for_display)
+  str  Supervertaler.py:59183:         # target cells through compact_tags + apply_invisible_replacements at load
+  call Supervertaler.py:59193:             display_target = self.apply_invisible_replacements(display_target)
+  str  modules/grid/__init__.py:61:     apply_invisible_replacements,
+  str  modules/grid/__init__.py:122:     "apply_invisible_replacements",
+  str  modules/grid/filters.py:12: - modules/undo_manager.py:215 — bound-метод apply_invisible_replacements,
+  call modules/grid/filters.py:15:   mw.apply_invisible_replacements(new_target) (имя метода и сигнатура
+  str  modules/grid/filters.py:60:     "apply_invisible_replacements",
+  call modules/grid/filters.py:612:     apply_invisible_replacements(text, invisible_display_settings=...)
+  call modules/grid/filters.py:658:             new_source_text = apply_invisible_replacements(
+  call modules/grid/filters.py:686:             new_target_text = apply_invisible_replacements(
+  call modules/grid/filters.py:701: def apply_invisible_replacements(text: str,
+  str  modules/grid/filters.py:707:     имя apply_invisible_replacements; на этот метод опираются
+  call modules/models.py:20:     Эти маркеры вставляются apply_invisible_replacements() только для
+  call modules/pseudo_translate_dialog.py:250:                     mw.apply_invisible_replacements(new_target)
+  str  modules/pseudo_translate_dialog.py:251:                     if hasattr(mw, "apply_invisible_replacements")
+  str  modules/undo_manager.py:36:       update_progress_stats, apply_invisible_replacements, load_segments_to_grid,
+  str  modules/undo_manager.py:55:                  apply_invisible_replacements: Optional[Callable[[str], str]],
+  str  modules/undo_manager.py:80:         self.apply_invisible_replacements = apply_invisible_replacements
+  call modules/undo_manager.py:215:                 display = (self.apply_invisible_replacements(target)
+  str  modules/undo_manager.py:216:                            if self.apply_invisible_replacements is not None else target)
+  TOTAL 44
+
+=== reverse_invisible_replacements ===
+  str  Supervertaler.py:1524:                 if main_window and hasattr(main_window, 'reverse_invisible_replacements'):
+  call Supervertaler.py:1525:                     clean_text = main_window.reverse_invisible_replacements(selected_text)
+  str  Supervertaler.py:2538:                             if hasattr(_mw_sm, 'reverse_invisible_replacements'):
+  call Supervertaler.py:2539:                                 _prefix = _mw_sm.reverse_invisible_replacements(_prefix)
+  str  Supervertaler.py:4241:                 if main_window and hasattr(main_window, 'reverse_invisible_replacements'):
+  call Supervertaler.py:4242:                     clean_text = main_window.reverse_invisible_replacements(selected_text)
+  str  Supervertaler.py:8054:             if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:8055:                 text_to_translate = self.reverse_invisible_replacements(text_to_translate)
+  str  Supervertaler.py:8106:                     if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:8107:                         new_target = self.reverse_invisible_replacements(new_target)
+  str  Supervertaler.py:9605:         if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:9606:             prefix = self.reverse_invisible_replacements(prefix)
+  str  Supervertaler.py:15433:         if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:15434:             source_text = self.reverse_invisible_replacements(source_text)
+  call Supervertaler.py:16456:             source_text = self.reverse_invisible_replacements(source_widget.textCursor().selectedText()).strip()
+  call Supervertaler.py:16462:             target_text = self.reverse_invisible_replacements(target_widget.textCursor().selectedText()).strip()
+  str  Supervertaler.py:18457:                     if text and hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:18458:                         text = self.reverse_invisible_replacements(text)
+  str  Supervertaler.py:29115:                     if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:29116:                         new_target = self.reverse_invisible_replacements(new_target)
+  str  Supervertaler.py:31676:         if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:31677:             source = self.reverse_invisible_replacements(source)
+  call Supervertaler.py:31678:             target = self.reverse_invisible_replacements(target)
+  str  Supervertaler.py:37715:                     if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:37716:                         target_text = self.reverse_invisible_replacements(target_text).strip()
+  call Supervertaler.py:40918:                 new_text = self.reverse_invisible_replacements(new_text)
+  call Supervertaler.py:41007:                         clean_pos = len(self.reverse_invisible_replacements(old_before_cursor))
+  str  Supervertaler.py:41599:         if clean_tm_source and hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:41600:             clean_tm_source = self.reverse_invisible_replacements(clean_tm_source)
+  str  Supervertaler.py:41614:         if target_display and hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:41615:             target_display = self.reverse_invisible_replacements(target_display)
+  str  Supervertaler.py:42201:         if tm_source and hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:42202:             tm_source = self.reverse_invisible_replacements(tm_source)
+  str  Supervertaler.py:42214:         if tm_target_text and hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:42215:             tm_target_text = self.reverse_invisible_replacements(tm_target_text)
+  str  Supervertaler.py:43649:                 if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:43650:                     new_target = self.reverse_invisible_replacements(new_target)
+  call Supervertaler.py:45460:             new_text = self.reverse_invisible_replacements(new_text)
+  str  Supervertaler.py:48029:             if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:48030:                 source_clean = self.reverse_invisible_replacements(source_clean)
+  call Supervertaler.py:48031:                 target_clean = self.reverse_invisible_replacements(target_clean)
+  str  Supervertaler.py:49232:         if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:49233:             source_text = self.reverse_invisible_replacements(source_text)
+  call Supervertaler.py:52152:     def reverse_invisible_replacements(self, text):
+  call Supervertaler.py:52153:         """Делегат: modules/grid/filters.reverse_invisible_replacements (Batch #6 Stage 4).
+  call Supervertaler.py:52155:         return grid_filters.reverse_invisible_replacements(text)
+  str  Supervertaler.py:55014:             reverse_replacements_callback=self.reverse_invisible_replacements,
+  call Supervertaler.py:56421:                     text = self.reverse_invisible_replacements(text)
+  str  Supervertaler.py:59220:             if hasattr(self, 'reverse_invisible_replacements'):
+  call Supervertaler.py:59221:                 text = self.reverse_invisible_replacements(text)
+  str  modules/grid/__init__.py:62:     reverse_invisible_replacements,
+  str  modules/grid/__init__.py:123:     "reverse_invisible_replacements",
+  str  modules/grid/filters.py:61:     "reverse_invisible_replacements",
+  str  modules/grid/filters.py:714:     reverse_invisible_replacements, so saved text is unaffected. Applies
+  call modules/grid/filters.py:745: def reverse_invisible_replacements(text: str) -> str:
+  str  modules/grid/filters.py:1177:     передаёт self.reverse_invisible_replacements; исходная
+  str  modules/tag_manager.py:1144: # Снимается при обратном чтении reverse_invisible_replacements, поэтому в
+  str  modules/tag_manager.py:1165:     reverse_invisible_replacements снимает присоединённые символы перед
+  TOTAL 58
+
+=== filter_empty_segments ===
+  call Supervertaler.py:52639:     def filter_empty_segments(self):
+  call Supervertaler.py:52640:         """Делегат: modules/grid/filters.filter_empty_segments (Batch #6 Stage 4)."""
+  call Supervertaler.py:52646:         grid_filters.filter_empty_segments(
+  str  modules/grid/__init__.py:63:     filter_empty_segments,
+  str  modules/grid/__init__.py:124:     "filter_empty_segments",
+  str  modules/grid/filters.py:62:     "filter_empty_segments",
+  call modules/grid/filters.py:798: def filter_empty_segments(current_project, table, source_widget,
+  TOTAL 7
+
+=== _clear_all_filter_highlights ===
+  call Supervertaler.py:52653:     def _clear_all_filter_highlights(self):
+  TOTAL 1
+
+=== apply_quick_filter ===
+  call Supervertaler.py:27361:         quick_filter_menu.addAction("🔍 Empty segments", lambda: self.apply_quick_filter("empty"))
+  call Supervertaler.py:27362:         quick_filter_menu.addAction("❌ Not started", lambda: self.apply_quick_filter("not_started"))
+  call Supervertaler.py:27363:         quick_filter_menu.addAction("✓ Confirmed", lambda: self.apply_quick_filter("confirmed"))
+  call Supervertaler.py:27364:         quick_filter_menu.addAction("🔒 Locked", lambda: self.apply_quick_filter("locked"))
+  call Supervertaler.py:27365:         quick_filter_menu.addAction("🔓 Not locked", lambda: self.apply_quick_filter("not_locked"))
+  call Supervertaler.py:27366:         quick_filter_menu.addAction("💬 Commented", lambda: self.apply_quick_filter("commented"))
+  call Supervertaler.py:52660:     def apply_quick_filter(self, filter_type: str):
+  call Supervertaler.py:52661:         """Делегат: modules/grid/filters.apply_quick_filter (Batch #6 Stage 4).
+  call Supervertaler.py:52668:         grid_filters.apply_quick_filter(
+  str  modules/grid/__init__.py:65:     apply_quick_filter,
+  str  modules/grid/__init__.py:126:     "apply_quick_filter",
+  str  modules/grid/filters.py:64:     "apply_quick_filter",
+  call modules/grid/filters.py:841: def apply_quick_filter(current_project, table, filter_type: str,
+  TOTAL 13
+
+=== show_advanced_filters_dialog ===
+  str  Supervertaler.py:27371:         advanced_filter_btn.clicked.connect(self.show_advanced_filters_dialog)
+  call Supervertaler.py:52707:     def show_advanced_filters_dialog(self):
+  call Supervertaler.py:52708:         """Делегат: modules/grid/filters.show_advanced_filters_dialog (Batch #6 Stage 4).
+  call Supervertaler.py:52710:         grid_filters.show_advanced_filters_dialog(
+  str  modules/grid/__init__.py:66:     show_advanced_filters_dialog,
+  str  modules/grid/__init__.py:127:     "show_advanced_filters_dialog",
+  str  modules/grid/filters.py:65:     "show_advanced_filters_dialog",
+  call modules/grid/filters.py:907: def show_advanced_filters_dialog(current_project, parent,
+  TOTAL 8
+
+=== apply_advanced_filters ===
+  str  Supervertaler.py:52713:             apply_advanced_filters_callback=self.apply_advanced_filters)
+  call Supervertaler.py:52715:     def apply_advanced_filters(self, filters: dict):
+  call Supervertaler.py:52716:         """Делегат: modules/grid/filters.apply_advanced_filters (Batch #6 Stage 4)."""
+  call Supervertaler.py:52719:         grid_filters.apply_advanced_filters(
+  str  modules/grid/__init__.py:67:     apply_advanced_filters,
+  str  modules/grid/__init__.py:128:     "apply_advanced_filters",
+  str  modules/grid/filters.py:66:     "apply_advanced_filters",
+  str  modules/grid/filters.py:914:     (делегат передаёт self.apply_advanced_filters)."""
+  call modules/grid/filters.py:925: def apply_advanced_filters(current_project, table, filters: dict,
+  TOTAL 9
+
+=== apply_sort ===
+  call Supervertaler.py:27386:         sort_menu.addAction("📝 Source A → Z", lambda: self.apply_sort('source_asc'))
+  call Supervertaler.py:27387:         sort_menu.addAction("📝 Source Z → A", lambda: self.apply_sort('source_desc'))
+  call Supervertaler.py:27392:         sort_menu.addAction("📄 Target A → Z", lambda: self.apply_sort('target_asc'))
+  call Supervertaler.py:27393:         sort_menu.addAction("📄 Target Z → A", lambda: self.apply_sort('target_desc'))
+  call Supervertaler.py:27398:         sort_menu.addAction("📏 Source (longer first)", lambda: self.apply_sort('source_length_desc'))
+  call Supervertaler.py:27399:         sort_menu.addAction("📏 Source (shorter first)", lambda: self.apply_sort('source_length_asc'))
+  call Supervertaler.py:27400:         sort_menu.addAction("📏 Target (longer first)", lambda: self.apply_sort('target_length_desc'))
+  call Supervertaler.py:27401:         sort_menu.addAction("📏 Target (shorter first)", lambda: self.apply_sort('target_length_asc'))
+  call Supervertaler.py:27406:         sort_menu.addAction("🎯 Match Rate (higher first)", lambda: self.apply_sort('match_desc'))
+  call Supervertaler.py:27407:         sort_menu.addAction("🎯 Match Rate (lower first)", lambda: self.apply_sort('match_asc'))
+  call Supervertaler.py:27412:         sort_menu.addAction("📊 Source Frequency (higher first)", lambda: self.apply_sort('source_freq_desc'))
+  call Supervertaler.py:27413:         sort_menu.addAction("📊 Source Frequency (lower first)", lambda: self.apply_sort('source_freq_asc'))
+  call Supervertaler.py:27414:         sort_menu.addAction("📊 Target Frequency (higher first)", lambda: self.apply_sort('target_freq_desc'))
+  call Supervertaler.py:27415:         sort_menu.addAction("📊 Target Frequency (lower first)", lambda: self.apply_sort('target_freq_asc'))
+  call Supervertaler.py:27420:         sort_menu.addAction("🕒 Last Changed (newest first)", lambda: self.apply_sort('modified_desc'))
+  call Supervertaler.py:27421:         sort_menu.addAction("🕒 Last Changed (oldest first)", lambda: self.apply_sort('modified_asc'))
+  call Supervertaler.py:27426:         sort_menu.addAction("🚦 Row Status", lambda: self.apply_sort('status'))
+  call Supervertaler.py:27431:         sort_menu.addAction("↩️ Document Order (default)", lambda: self.apply_sort(None))
+  call Supervertaler.py:52727:     def apply_sort(self, sort_type: str = None):
+  call Supervertaler.py:52728:         """Делегат: modules/grid/filters.apply_sort (Batch #6 Stage 4).
+  call Supervertaler.py:52736:         grid_filters.apply_sort(
+  str  modules/grid/__init__.py:68:     apply_sort,
+  str  modules/grid/__init__.py:129:     "apply_sort",
+  str  modules/grid/filters.py:31: Единственная точка пересечения с циклом SCC#1 — apply_sort: полная
+  str  modules/grid/filters.py:67:     "apply_sort",
+  call modules/grid/filters.py:1004: def apply_sort(current_project, parent, sort_type: Optional[str],
+  TOTAL 26
+
+=== filter_on_selected_text ===
+  str  Supervertaler.py:7219:         create_shortcut("filter_selected_text", "Ctrl+Shift+F", self.filter_on_selected_text)
+  call Supervertaler.py:54998:     def filter_on_selected_text(self):
+  call Supervertaler.py:54999:         """Делегат: modules/grid/filters.filter_on_selected_text (Batch #6 Stage 4).
+  str  Supervertaler.py:55002:         клавиш с "action": "filter_on_selected_text" — имя метода менять
+  call Supervertaler.py:55006:         grid_filters.filter_on_selected_text(
+  str  modules/grid/__init__.py:69:     filter_on_selected_text,
+  str  modules/grid/__init__.py:130:     "filter_on_selected_text",
+  str  modules/grid/filters.py:18:   "clear_filter" с "action": "filter_on_selected_text" (имя метода — часть
+  str  modules/grid/filters.py:68:     "filter_on_selected_text",
+  call modules/grid/filters.py:1161: def filter_on_selected_text(table, source_filter_text: str,
+  str  modules/shortcut_manager.py:642:             "action": "filter_on_selected_text"
+  str  modules/shortcut_manager.py:648:             "action": "filter_on_selected_text",
+  TOTAL 12
+
+=== _ensure_shared_filter ===
+  call Supervertaler.py:27179:         self.source_filter = self._ensure_shared_filter(
+  call Supervertaler.py:27188:         self.target_filter = self._ensure_shared_filter(
+  call Supervertaler.py:27330:         self.source_filter = self._ensure_shared_filter(
+  call Supervertaler.py:27338:         self.target_filter = self._ensure_shared_filter(
+  call Supervertaler.py:28545:     def _ensure_shared_filter(self, attr_name: str, placeholder: str,
+  str  Supervertaler.py:28562:             ensure_shared_filter_callback=self._ensure_shared_filter,
+  TOTAL 6
+
+=== _ensure_primary_filters_ready ===
+  call Supervertaler.py:28559:     def _ensure_primary_filters_ready(self):
+  call Supervertaler.py:51758:         self._ensure_primary_filters_ready()
+  TOTAL 2
+
+=== load_segments_to_grid ===
+  str  Supervertaler.py:3284:         # in load_segments_to_grid. This prevents ANY textChanged events during grid loading.
+  str  Supervertaler.py:6234:             load_segments_to_grid=self.load_segments_to_grid,
+  call Supervertaler.py:9460:                 self.load_segments_to_grid()
+  call Supervertaler.py:9463:             self.load_segments_to_grid()
+  call Supervertaler.py:9496:                 self.load_segments_to_grid()
+  call Supervertaler.py:9499:             self.load_segments_to_grid()
+  call Supervertaler.py:9548:         self.load_segments_to_grid()
+  str  Supervertaler.py:9643:         """Пересобрать self._list_numbers (индекс строки → номер в упорядоченном списке) после структурного изменения, зеркально предварительному проходу в load_segments_to_grid.
+  str  Supervertaler.py:9662:         # as load_segments_to_grid does — otherwise the new target editors emit
+  call Supervertaler.py:29402:         self.load_segments_to_grid()
+  call Supervertaler.py:30155:             self.load_segments_to_grid(progress_callback=_grid_progress)
+  call Supervertaler.py:33205:             self.load_segments_to_grid(progress_callback=_grid_progress)
+  call Supervertaler.py:33537:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:33635:                         self.load_segments_to_grid()
+  call Supervertaler.py:34634:             self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:35738:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:36010:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:36575:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:37040:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:37286:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:37549:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  str  Supervertaler.py:37763:             # load_segments_to_grid phase.
+  call Supervertaler.py:37995:                 self.load_segments_to_grid(progress_callback=prog.grid_callback)
+  str  Supervertaler.py:38003:                 # load_segments_to_grid; the second call here was duplicate
+  call Supervertaler.py:38559:                 self.load_segments_to_grid(progress_callback=prog.grid_callback)
+  str  Supervertaler.py:38569:                 # load_segments_to_grid above — the second call here was
+  call Supervertaler.py:38770:                 self.load_segments_to_grid(progress_callback=prog.grid_callback)
+  str  Supervertaler.py:38778:                 # load_segments_to_grid; remove the redundant second call
+  call Supervertaler.py:39207:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:39549:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:40031:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  call Supervertaler.py:40463:                 self.load_segments_to_grid(progress_callback=_prog.grid_callback)
+  str  Supervertaler.py:40649:                 Выделено из по-строчного тела load_segments_to_grid в рамках
+  str  Supervertaler.py:40657:         # The pre-pass in load_segments_to_grid stashes the computed list
+  str  Supervertaler.py:41075:         # DO NOT unblock signals here - they stay blocked until end of load_segments_to_grid
+  call Supervertaler.py:41102:     def load_segments_to_grid(self, progress_callback=None):
+  str  Supervertaler.py:41109:         self.log(f"🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!")
+  call Supervertaler.py:43662:                 вместе с ней автоматически. Вызывается после load_segments_to_grid(),
+  str  Supervertaler.py:43829:                         v1.10.148: используется из load_segments_to_grid, где
+  str  Supervertaler.py:45427:                 ``load_segments_to_grid``), но для колонки источника. Срабатывает
+  call Supervertaler.py:46930:             self.load_segments_to_grid()
+  call Supervertaler.py:46967:                 self.load_segments_to_grid()
+  call Supervertaler.py:47335:             self.load_segments_to_grid()
+  call Supervertaler.py:47650:             self.load_segments_to_grid()
+  call Supervertaler.py:50041:         # load_segments_to_grid() rebuild (which py-spy showed was ~64%
+  call Supervertaler.py:50362:                 # avoid load_segments_to_grid() here — py-spy showed it
+  call Supervertaler.py:50416:             # load_segments_to_grid() rebuild that previously dominated
+  call Supervertaler.py:50500:                 load_segments_to_grid(). Ячейки, чей виджет был заменён после
+  call Supervertaler.py:52141:         self.load_segments_to_grid()
+  call Supervertaler.py:52731:         self.load_segments_to_grid (сам метод не тронут); 18 lambda-вызовов
+  str  Supervertaler.py:52748:             reload_callback=self.load_segments_to_grid)
+  call Supervertaler.py:52976:                 Вызывается из load_segments_to_grid (начальная отрисовка), после
+  str  Supervertaler.py:53021:                 Вызывается один раз в конце load_segments_to_grid, чтобы
+  call Supervertaler.py:60407:             self.load_segments_to_grid(progress_callback=_grid_progress)
+  str  modules/dialogs/import_progress.py:20: # (stage/current/total/message → continue_bool) and load_segments_to_grid
+  call modules/dialogs/import_progress.py:38:             self.load_segments_to_grid(progress_callback=prog.grid_callback)
+  str  modules/dialogs/import_progress.py:127:         ``SupervertalerQt.load_segments_to_grid``."""
+  call modules/find_replace.py:160:         self.app.load_segments_to_grid()
+  str  modules/grid/filters.py:33: self.load_segments_to_grid); сам load_segments_to_grid не тронут.
+  call modules/grid/filters.py:587:     load_segments_to_grid().
+  str  modules/grid/filters.py:1013:     передаёт self.load_segments_to_grid); сам load_segments_to_grid не
+  str  modules/grid/helpers.py:85:     load_segments_to_grid.
+  str  modules/undo_manager.py:36:       update_progress_stats, apply_invisible_replacements, load_segments_to_grid,
+  str  modules/undo_manager.py:56:                  load_segments_to_grid: Callable[..., None],
+  str  modules/undo_manager.py:81:         self.load_segments_to_grid = load_segments_to_grid
+  call modules/undo_manager.py:288:             self.load_segments_to_grid()
+  TOTAL 66
+
+=== _apply_pagination_to_grid ===
+  call Supervertaler.py:28239:     def _apply_pagination_to_grid(self):
+  call Supervertaler.py:28390:             self._apply_pagination_to_grid()
+  call Supervertaler.py:28402:             self._apply_pagination_to_grid()
+  call Supervertaler.py:28414:             self._apply_pagination_to_grid()
+  call Supervertaler.py:28462:             self._apply_pagination_to_grid()
+  call Supervertaler.py:28473:             self._apply_pagination_to_grid()
+  call Supervertaler.py:28481:         self._apply_pagination_to_grid()
+  call Supervertaler.py:41231:             self._apply_pagination_to_grid()
+  call Supervertaler.py:50904:         self._apply_pagination_to_grid()
+  str  Supervertaler.py:51817:             apply_pagination_callback=self._apply_pagination_to_grid,
+  str  Supervertaler.py:51852:             apply_pagination_callback=self._apply_pagination_to_grid,
+  str  Supervertaler.py:51870:             apply_pagination_callback=self._apply_pagination_to_grid,
+  str  Supervertaler.py:52106:         (тот же self-специфичный паттерн, что в _apply_pagination_to_grid,
+  str  Supervertaler.py:52676:             apply_pagination_callback=self._apply_pagination_to_grid,
+  call Supervertaler.py:55926:                                 self._apply_pagination_to_grid()
+  call Supervertaler.py:55974:                         self._apply_pagination_to_grid()
+  str  Supervertaler.py:56273:             apply_pagination_callback=self._apply_pagination_to_grid,
+  str  modules/grid/filters.py:851:     self._apply_pagination_to_grid — сборку ~15 self-специфичных параметров
+  str  modules/grid/helpers.py:9: _apply_pagination_to_grid, _auto_resize_single_row, log).
+  call modules/grid/helpers.py:439:         apply_pagination_callback()         -> self._apply_pagination_to_grid()"""
+  TOTAL 20
+

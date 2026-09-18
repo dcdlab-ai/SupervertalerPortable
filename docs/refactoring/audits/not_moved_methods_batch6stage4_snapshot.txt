@@ -1,0 +1,217 @@
+=== show_manage_views_dialog (52202-52369, 168 lines) ===
+    def show_manage_views_dialog(self):
+        """Показывает диалог создания, правки и удаления представлений для мультифайловых проектов."""
+        from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+                                      QTableWidget, QTableWidgetItem, QHeaderView,
+                                      QPushButton, QLineEdit, QCheckBox, QGroupBox,
+                                      QInputDialog)
+        from PyQt6.QtCore import Qt
+
+        if not self.current_project or not getattr(self.current_project, 'is_multifile', False):
+            QMessageBox.information(self, "Not Available",
+                                    "Views are only available for multi-file projects.")
+            return
+
+        proj = self.current_project
+        files = getattr(proj, 'files', []) or []
+        if not files:
+            return
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.tr("Manage Views"))
+        dialog.setMinimumWidth(550)
+        dialog.setMinimumHeight(400)
+
+        layout = QVBoxLayout(dialog)
+
+        info_label = QLabel(
+            "Views let you work on a subset of files in a multi-file project.\n"
+            "Create a view by selecting files, then use the file filter dropdown to activate it."
+        )
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+
+        layout.addSpacing(10)
+
+        # ─── Existing Views Table ───
+        views = getattr(proj, 'views', []) or []
+
+        views_group = QGroupBox(f"Saved Views ({len(views)})")
+        views_layout = QVBoxLayout(views_group)
+
+        views_table = QTableWidget()
+        views_table.setColumnCount(3)
+        views_table.setHorizontalHeaderLabels(["View Name", "Files", "Segments"])
+        views_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        views_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        views_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        views_table.setAlternatingRowColors(True)
+
+        def refresh_views_table():
+            current_views = getattr(proj, 'views', []) or []
+            views_table.setRowCount(len(current_views))
+            views_group.setTitle(f"Saved Views ({len(current_views)})")
+            for row, view in enumerate(current_views):
+                views_table.setItem(row, 0, QTableWidgetItem(view.get('name', '')))
+                view_file_ids = set(view.get('file_ids', []))
+                file_names = [f.get('name', '?') for f in files if f['id'] in view_file_ids]
+                views_table.setItem(row, 1, QTableWidgetItem(", ".join(file_names)))
+                seg_count = sum(
+                    1 for s in proj.segments
+                    if getattr(s, 'file_id', None) in view_file_ids
+                )
+                views_table.setItem(row, 2, QTableWidgetItem(str(seg_count)))
+
+        refresh_views_table()
+        views_layout.addWidget(views_table)
+
+        # View action buttons
+        view_btn_layout = QHBoxLayout()
+
+        def delete_selected_view():
+            row = views_table.currentRow()
+            if row < 0:
+                return
+            current_views = getattr(proj, 'views', []) or []
+            if row >= len(current_views):
+                return
+            view_name = current_views[row].get('name', 'this view')
+            reply = QMessageBox.question(
+                dialog, "Delete View",
+                f"Delete view \"{view_name}\"?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                current_views.pop(row)
+                proj.views = current_views
+                refresh_views_table()
+                self._update_file_filter_combo()
+
+        delete_btn = QPushButton(self.tr("Delete Selected"))
+        delete_btn.clicked.connect(delete_selected_view)
+        view_btn_layout.addWidget(delete_btn)
+        view_btn_layout.addStretch()
+        views_layout.addLayout(view_btn_layout)
+
+        layout.addWidget(views_group)
+
+        # ─── Create New View ───
+        create_group = QGroupBox(self.tr("Create New View"))
+        create_layout = QVBoxLayout(create_group)
+
+        name_layout = QHBoxLayout()
+        name_layout.addWidget(QLabel(self.tr("Name:")))
+        name_input = QLineEdit()
+        name_input.setPlaceholderText(self.tr("e.g. Chapters 1-3"))
+        name_layout.addWidget(name_input)
+        create_layout.addLayout(name_layout)
+
+        create_layout.addWidget(QLabel(self.tr("Select files to include:")))
+
+        # File checkboxes
+        file_checkboxes = []
+        for file_info in files:
+            file_id = file_info['id']
+            file_name = file_info['name']
+            seg_count = file_info.get('segment_count', 0)
+            cb = CheckmarkCheckBox(f"{file_name} ({seg_count} segments)")
+            cb.setProperty("file_id", file_id)
+            file_checkboxes.append(cb)
+            create_layout.addWidget(cb)
+
+        # Select all / none
+        sel_layout = QHBoxLayout()
+        select_all_btn = QPushButton(self.tr("Select All"))
+        select_all_btn.clicked.connect(lambda: [cb.setChecked(True) for cb in file_checkboxes])
+        select_none_btn = QPushButton(self.tr("Select None"))
+        select_none_btn.clicked.connect(lambda: [cb.setChecked(False) for cb in file_checkboxes])
+        sel_layout.addWidget(select_all_btn)
+        sel_layout.addWidget(select_none_btn)
+        sel_layout.addStretch()
+        create_layout.addLayout(sel_layout)
+
+        def create_view():
+            name = name_input.text().strip()
+            if not name:
+                QMessageBox.warning(dialog, "Name Required", "Please enter a name for the view.")
+                return
+            selected_ids = [
+                cb.property("file_id") for cb in file_checkboxes if cb.isChecked()
+            ]
+            if not selected_ids:
+                QMessageBox.warning(dialog, "No Files Selected",
+                                    "Please select at least one file for the view.")
+                return
+            if proj.views is None:
+                proj.views = []
+            proj.views.append({"name": name, "file_ids": selected_ids})
+            name_input.clear()
+            for cb in file_checkboxes:
+                cb.setChecked(False)
+            refresh_views_table()
+            self._update_file_filter_combo()
+            self.log(f"Created view '{name}' with {len(selected_ids)} files")
+
+        create_btn = QPushButton(self.tr("Create View"))
+        create_btn.clicked.connect(create_view)
+        create_layout.addWidget(create_btn)
+
+        layout.addWidget(create_group)
+
+        # ─── Close button ───
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        close_btn = QPushButton(self.tr("Close"))
+        close_btn.clicked.connect(dialog.accept)
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
+
+        dialog.exec()
+--- sha256 b3d00f397a274a7e609ea594688ac2cb1a2d2c417a9fb79142015c7ccfb31895 ---
+
+=== _refresh_source_column_display (52555-52568, 14 lines) ===
+    def _refresh_source_column_display(self):
+        """Обновляет сетку по настройке hide_outer_wrapping_tags.
+        
+                Перезагружает всю сетку, чтобы корректно обработать:
+                - вырезание тегов в обеих колонках Source и Target;
+                - WYSIWYG-префиксы нумерации/маркеров списков;
+                - корректный расчёт позиции в списке."""
+        if not hasattr(self, 'table') or not self.table:
+            return
+        if not hasattr(self, 'current_project') or not self.current_project:
+            return
+
+        # Reload grid to apply changes with proper list numbering calculation
+        self.load_segments_to_grid()
+--- sha256 90d2bf1b354e20f4f961e27424ba0d4cc42dbc96dd2ba4d767383ad695893c32 ---
+
+=== _update_bulk_menu_label (53247-53273, 27 lines) ===
+    def _update_bulk_menu_label(self):
+        """Обновляет подпись меню Bulk Operations, показывая состояние фильтра.
+        
+                v1.10.234: использовать переведённую базовую подпись через
+                self.tr(...) вместо жёстко заданного английского литерала.
+                Обработчик выполняется на aboutToShow меню, поэтому прежний
+                литерал «&Bulk Operations» перезаписывал переведённый заголовок
+                меню при каждом открытии — заголовок показывался переведённым,
+                пока меню закрыто, и откатывался к английскому при открытии
+                (сообщено пользователем китайского интерфейса)."""
+        if not hasattr(self, 'bulk_menu') or not self.bulk_menu:
+            return
+        action = self.bulk_menu.menuAction()
+        base = self.tr("&Bulk Operations")  # honour the active UI translation
+        if not self.current_project or not hasattr(self, 'table') or not self.table:
+            action.setText(base)
+            return
+        visible = sum(1 for r in range(self.table.rowCount())
+                      if not self.table.isRowHidden(r))
+        total = self.table.rowCount()
+        if visible < total and visible > 0:
+            # Translatable filtered-count suffix; falls back to English "(N filtered)"
+            # if the active locale hasn't translated the suffix string.
+            suffix = self.tr(" ({n} filtered)").format(n=visible)
+            action.setText(base + suffix)
+        else:
+            action.setText(base)
+--- sha256 1d971a9a75db0676b6ba49ac178eb0b2cc6f62c8c2b909d8a8ee955a53a0299c ---

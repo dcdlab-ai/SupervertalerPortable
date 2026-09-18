@@ -417,6 +417,7 @@ from modules.workers import (TMSearchWorker, ProofreadWorker, GlossaryExtraction
 from modules.undo_manager import UndoManager  # Undo/redo-менеджер сетки (Batch #5)
 from modules.grid import helpers as grid_helpers  # Grid-хелперы: чистые функции (Batch #6 Stage 2)
 from modules.grid import pagination as grid_pagination  # Grid-пагинация: чистые функции (Batch #6 Stage 3)
+from modules.grid import filters as grid_filters  # Grid-фильтры и невидимые: чистые функции (Batch #6 Stage 4)
 
 
 # ============================================================================
@@ -28542,34 +28543,24 @@ class SupervertalerQt(QMainWindow):
         return widget.text()
 
     def _ensure_shared_filter(self, attr_name: str, placeholder: str,
-                               on_change: Optional[Callable] = None,
-                               on_return: Optional[Callable] = None) -> QLineEdit:
-        """Создаёт (или пересоздаёт) общие виджеты фильтров, которые могут быть уничтожены при смене компоновки."""
-        widget = getattr(self, attr_name, None)
-        if not self._widget_is_alive(widget):
-            widget = QLineEdit()
-            if on_change is not None:
-                widget.textChanged.connect(on_change)
-            if on_return is not None:
-                widget.returnPressed.connect(on_return)
+                              on_change: Optional[Callable] = None,
+                              on_return: Optional[Callable] = None) -> QLineEdit:
+        """Делегат: modules/grid/filters.ensure_shared_filter (Batch #6 Stage 4).
+        Разрешение атрибута по имени и запись — здесь (getattr/setattr
+        self-специфичны, пункт Г промпта Stage 2); атрибут записывается
+        ТОЛЬКО при пересоздании виджета (флаг created), как в исходном теле."""
+        widget, created = grid_filters.ensure_shared_filter(
+            getattr(self, attr_name, None), placeholder,
+            on_change=on_change, on_return=on_return)
+        if created:
             setattr(self, attr_name, widget)
-        widget.setPlaceholderText(placeholder)
         return widget
 
     def _ensure_primary_filters_ready(self):
-        """Гарантирует существование фильтров сетки перед программным использованием."""
-        self.source_filter = self._ensure_shared_filter(
-            'source_filter',
-            "Type to filter source segments...",
-            on_change=self.apply_filters,
-            on_return=self.apply_filters,
-        )
-        self.target_filter = self._ensure_shared_filter(
-            'target_filter',
-            "Type to filter target segments...",
-            on_change=self.apply_filters,
-            on_return=self.apply_filters,
-        )
+        """Делегат: modules/grid/filters.ensure_primary_filters_ready (Batch #6 Stage 4)."""
+        self.source_filter, self.target_filter = grid_filters.ensure_primary_filters_ready(
+            ensure_shared_filter_callback=self._ensure_shared_filter,
+            apply_filters_callback=self.apply_filters)
 
     def _build_warning_banner(self, key: str) -> QWidget:
         banner = QWidget()
@@ -51792,412 +51783,101 @@ class SupervertalerQt(QMainWindow):
                 break
     
     def _highlight_text_in_widget(self, row: int, col: int, search_term: str):
-        """Подсвечивает поисковый терм внутри виджета ячейки QTextEdit.
-        
-                Поскольку ячейки источника/перевода используют setCellWidget()
-                с редакторами QTextEdit, метод paint() делегата минуется.
-                Подсветку нужно делать прямо внутри виджета через QTextCursor
-                и QTextCharFormat.
-        
-                ПРИМЕЧАНИЕ: этот метод только ДОБАВЛЯЕТ жёлтые подсветки — он не
-                снимает существующее форматирование. Для снятия используйте
-                _clear_filter_highlights_in_widget()."""
-        widget = self.table.cellWidget(row, col)
-        if not widget or not hasattr(widget, 'document'):
-            return
-        
-        # Create yellow highlight format
-        highlight_format = QTextCharFormat()
-        highlight_format.setBackground(QColor("#FFFF00"))  # Yellow background
-        
-        # Find and highlight all occurrences (case-insensitive)
-        document = widget.document()
-        cursor = QTextCursor(document)
-        
-        search_term_lower = search_term.lower()
-        text = document.toPlainText()
-        text_lower = text.lower()
-        
-        # Find all occurrences
-        pos = 0
-        while True:
-            pos = text_lower.find(search_term_lower, pos)
-            if pos == -1:
-                break
-            
-            # Select the match and apply highlight
-            cursor.setPosition(pos)
-            cursor.movePosition(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.KeepAnchor, len(search_term))
-            cursor.mergeCharFormat(highlight_format)
-            
-            pos += len(search_term)
+        """Делегат: modules/grid/filters.highlight_text_in_widget (Batch #6 Stage 4)."""
+        grid_filters.highlight_text_in_widget(table=self.table, row=row, col=col, search_term=search_term)
     
     def _clear_filter_highlights_in_widget(self, row: int, col: int):
-        """Убирает жёлтые подсветки фильтра из виджета QTextEdit, сохраняя
-                прочее форматирование.
-        
-                Это эффективнее, чем перезагружать всю сетку ради снятия
-                подсветок."""
-        widget = self.table.cellWidget(row, col)
-        if not widget or not hasattr(widget, 'document'):
-            return
-        
-        # Iterate through the document and clear only yellow backgrounds
-        document = widget.document()
-        cursor = QTextCursor(document)
-        cursor.movePosition(QTextCursor.MoveOperation.Start)
-        
-        # Select the entire document
-        cursor.movePosition(QTextCursor.MoveOperation.End, QTextCursor.MoveMode.KeepAnchor)
-        
-        # Get current block and iterate character by character
-        # For efficiency, we'll just clear all backgrounds that are yellow
-        # This preserves termbase highlights (which are green shades) and tag colors
-        block = document.begin()
-        while block.isValid():
-            it = block.begin()
-            while not it.atEnd():
-                fragment = it.fragment()
-                if fragment.isValid():
-                    fmt = fragment.charFormat()
-                    bg = fmt.background().color()
-                    # Check if it's a yellow highlight (filter highlight)
-                    if bg.name().upper() == "#FFFF00":
-                        # Clear this specific range
-                        cursor.setPosition(fragment.position())
-                        cursor.setPosition(fragment.position() + fragment.length(), QTextCursor.MoveMode.KeepAnchor)
-                        clear_fmt = QTextCharFormat()
-                        clear_fmt.setBackground(QColor(Qt.GlobalColor.transparent))
-                        cursor.mergeCharFormat(clear_fmt)
-                it += 1
-            block = block.next()
+        """Делегат: modules/grid/filters.clear_filter_highlights_in_widget (Batch #6 Stage 4)."""
+        grid_filters.clear_filter_highlights_in_widget(table=self.table, row=row, col=col)
     
     def apply_filters(self):
-        """Применяет фильтры источника и перевода, показывая/скрывая строки
-                и подсвечивая совпадения.
-        
-                ОПТИМИЗИРОВАНО: сетка больше не перезагружается целиком. Вместо:
-                1. Снимаются только жёлтые подсветки фильтра (форматирование
-                   терминологий/тегов сохраняется).
-                2. Строки показываются/скрываются на месте.
-                3. На совпадающий текст наносятся новые подсветки."""
+        """Делегат: modules/grid/filters.apply_filters (Batch #6 Stage 4).
+        Живость фильтр-виджетов и тексты полей — через _widget_is_alive и
+        _get_line_edit_text (Stage 2); записи filtering_active /
+        _active_text_filter_rows — set-колбэками в порядке исходного тела."""
         if not self.current_project:
             return
-        
-        # Safety check: ensure table and filter widgets exist
-        if not hasattr(self, 'table') or self.table is None:
+        table = getattr(self, 'table', None)
+        if table is None:
             return
         has_source = self._widget_is_alive(getattr(self, 'source_filter', None))
         has_target = self._widget_is_alive(getattr(self, 'target_filter', None))
         if not has_source and not has_target:
             return
-
         source_filter_text = self._get_line_edit_text('source_filter').strip()
         target_filter_text = self._get_line_edit_text('target_filter').strip()
-        
-        # If both empty, clear everything
-        if not source_filter_text and not target_filter_text:
-            self.clear_filters()
-            return
-        
-        # Set flag to disable auto-center scrolling during filtering
-        self.filtering_active = True
-
-        # Track which rows match the active text filters so pagination can respect filtering
-        matching_rows: set[int] = set()
-        
-        # Batch UI updates for performance
-        self.table.setUpdatesEnabled(False)
-        
-        try:
-            visible_count = 0
-            segments = self.current_project.segments
-            total_segments = len(segments)
-            
-            # Pre-compute lowercase filter texts
-            source_filter_lower = source_filter_text.lower() if source_filter_text else None
-            target_filter_lower = target_filter_text.lower() if target_filter_text else None
-            
-            # IMPORTANT: Always search through ALL segments, not just visible rows
-            # Pagination state should not affect which segments we search
-            for row in range(total_segments):
-                if row >= total_segments:
-                    break
-                    
-                segment = segments[row]
-                source_lower = segment.source.lower()
-                target_lower = segment.target.lower()
-                
-                source_match = not source_filter_lower or source_filter_lower in source_lower
-                target_match = not target_filter_lower or target_filter_lower in target_lower
-                
-                show_row = source_match and target_match
-
-                if show_row:
-                    matching_rows.add(row)
-                
-                if show_row:
-                    visible_count += 1
-                    
-                    # Clear previous filter highlights first (only yellow, preserves other formatting)
-                    self._clear_filter_highlights_in_widget(row, 2)
-                    self._clear_filter_highlights_in_widget(row, 3)
-                    
-                    # Highlight matching terms in the QTextEdit widgets
-                    if source_filter_lower and source_filter_lower in source_lower:
-                        self._highlight_text_in_widget(row, 2, source_filter_text)
-                    
-                    if target_filter_lower and target_filter_lower in target_lower:
-                        self._highlight_text_in_widget(row, 3, target_filter_text)
-                else:
-                    # Clear highlights from hidden rows too (for when they become visible again)
-                    self._clear_filter_highlights_in_widget(row, 2)
-                    self._clear_filter_highlights_in_widget(row, 3)
-        finally:
-            # Re-enable UI updates
-            self.table.setUpdatesEnabled(True)
-
-        # Persist allowlist and apply combined pagination+filter visibility
-        self._active_text_filter_rows = matching_rows
-        if hasattr(self, '_apply_pagination_to_grid'):
-            self._apply_pagination_to_grid()
-
-        # Update status
-        if source_filter_text or target_filter_text:
-            self.log(f"Filter applied: showing {visible_count} of {len(self.current_project.segments)} segments")
+        grid_filters.apply_filters(
+            current_project=self.current_project,
+            table=table,
+            source_filter_text=source_filter_text,
+            target_filter_text=target_filter_text,
+            clear_filters_callback=self.clear_filters,
+            set_filtering_active_callback=lambda value: setattr(self, 'filtering_active', value),
+            set_active_text_filter_rows_callback=lambda value: setattr(self, '_active_text_filter_rows', value),
+            apply_pagination_callback=self._apply_pagination_to_grid,
+            log_callback=self.log)
 
     def clear_filters(self):
-        """Очищает все поля фильтров, подсветки и показывает все строки.
-        
-                ОПТИМИЗИРОВАНО: сетка больше не перезагружается целиком. Вместо:
-                1. Снимаются только жёлтые подсветки фильтра (форматирование
-                   терминологий/тегов сохраняется).
-                2. Все строки показываются на месте.
-                3. Намного быстрее перезагрузки всех виджетов."""
+        """Делегат: modules/grid/filters.clear_filters (Batch #6 Stage 4).
+        Живость source_filter/target_filter и обнуление мёртвых self-атрибутов
+        — здесь (пункты З/Ж промпта); grid_page_size/grid_current_page
+        передаются getattr-дефолтами (50/0); запись страницы при возврате к
+        выбранному сегменту — set_grid_page_callback ДО повторного
+        применения пагинации (порядок исходного тела)."""
         source_widget = getattr(self, 'source_filter', None)
         target_widget = getattr(self, 'target_filter', None)
         has_source = self._widget_is_alive(source_widget)
         has_target = self._widget_is_alive(target_widget)
         if not has_source and not has_target:
             return
-
-        # Clear delegate highlights and global search terms
-        if hasattr(self, 'table') and self.table is not None:
-            delegate = self.table.itemDelegate()
-            if delegate:
-                if hasattr(delegate, 'clear_all_highlights'):
-                    delegate.clear_all_highlights()
-                # Clear global search terms
-                delegate.global_search_term = None
-                delegate.global_source_search_term = None
-
-        # Remember which segment was selected before clearing
-        selected_segment_id = None
-        current_column = 3  # Default to target column
-        if self.current_project and hasattr(self, 'table') and self.table is not None:
-            current_row = self.table.currentRow()
-            current_column = self.table.currentColumn()
-            
-            if current_row >= 0:
-                # Get segment ID directly from the ID cell (column 0)
-                id_item = self.table.item(current_row, 0)
-                if id_item:
-                    try:
-                        selected_segment_id = int(id_item.text())
-                    except (ValueError, AttributeError):
-                        pass
-
-        if has_source:
-            source_widget.blockSignals(True)
-            source_widget.clear()
-            source_widget.blockSignals(False)
-        else:
+        if not has_source:
             self.source_filter = None
-
-        if has_target:
-            target_widget.blockSignals(True)
-            target_widget.clear()
-            target_widget.blockSignals(False)
-        else:
+        if not has_target:
             self.target_filter = None
 
-        # Clear any active text-filter allowlist so pagination can show rows normally
-        self._active_text_filter_rows = None
-        
-        # OPTIMIZED: Clear highlights and show rows WITHOUT reloading grid
-        if self.current_project:
-            # Safety check: ensure table exists
-            if not hasattr(self, 'table') or self.table is None:
-                return
-            
-            # Batch UI updates for performance
-            self.table.setUpdatesEnabled(False)
-            
-            try:
-                row_count = self.table.rowCount()
-                
-                for row in range(row_count):
-                    # Clear yellow filter highlights (preserves other formatting)
-                    self._clear_filter_highlights_in_widget(row, 2)  # Source
-                    self._clear_filter_highlights_in_widget(row, 3)  # Target
-                    
-                    # Show all rows
-                    self.table.setRowHidden(row, False)
-            finally:
-                # Re-enable UI updates
-                self.table.setUpdatesEnabled(True)
-            
-            # Clear filtering flag to re-enable auto-center
-            self.filtering_active = False
+        def reset_file_filter():
+            combo = getattr(self, 'file_filter_combo', None)
+            if combo:
+                combo.blockSignals(True)
+                combo.setCurrentIndex(0)
+                combo.blockSignals(False)
 
-            # Resolve the previously selected segment's row index BEFORE we
-            # re-apply pagination. If pagination is on, we need to switch to
-            # the page that contains this row first; otherwise the row stays
-            # hidden and the scroll/select call below silently no-ops on a
-            # hidden cell, leaving the user looking at page 1 even though
-            # they were working at the end of the project.
-            target_row = None
-            if selected_segment_id is not None:
-                for row, segment in enumerate(self.current_project.segments):
-                    if segment.id == selected_segment_id:
-                        target_row = row
-                        break
-
-            page_size = getattr(self, 'grid_page_size', 50)
-            if target_row is not None and page_size and page_size < 999999:
-                target_page = target_row // page_size
-                if getattr(self, 'grid_current_page', 0) != target_page:
-                    self.grid_current_page = target_page
-
-            # Re-apply pagination after clearing filters (also resizes visible rows)
-            if hasattr(self, '_apply_pagination_to_grid'):
-                self._apply_pagination_to_grid()
-
-            # Restore selection to the previously selected segment.
-            # PositionAtCenter centres it in the viewport so the user lands
-            # back where they were looking, not at the top of the page.
-            if target_row is not None:
-                self.table.setCurrentCell(target_row, current_column)
-                self.table.scrollToItem(
-                    self.table.item(target_row, 0),
-                    QTableWidget.ScrollHint.PositionAtCenter
-                )
-        
-        # Reset file filter to "All Files"
-        if hasattr(self, 'file_filter_combo') and self.file_filter_combo:
-            self.file_filter_combo.blockSignals(True)
-            self.file_filter_combo.setCurrentIndex(0)
-            self.file_filter_combo.blockSignals(False)
-        
-        self.log("Filters cleared")
+        grid_filters.clear_filters(
+            current_project=self.current_project,
+            table=getattr(self, 'table', None),
+            source_widget=source_widget if has_source else None,
+            target_widget=target_widget if has_target else None,
+            set_active_text_filter_rows_callback=lambda value: setattr(self, '_active_text_filter_rows', value),
+            set_filtering_active_callback=lambda value: setattr(self, 'filtering_active', value),
+            apply_pagination_callback=self._apply_pagination_to_grid,
+            set_grid_page_callback=lambda page: setattr(self, 'grid_current_page', page),
+            set_file_filter_callback=reset_file_filter,
+            log_callback=self.log,
+            grid_page_size=getattr(self, 'grid_page_size', 50),
+            grid_current_page=getattr(self, 'grid_current_page', 0))
     
     def _on_file_filter_changed(self, index):
-        """Обрабатывает смену выпадающего списка файлового фильтра для мультифайловых проектов."""
+        """Делегат: modules/grid/filters.on_file_filter_changed (Batch #6 Stage 4).
+        DYNAMIC_ENTRY_POINT (file_filter_combo.currentIndexChanged в
+        create_grid_view_widget_for_home). Диалог сохранённых представлений
+        остаётся методом окна и вызывается колбэком (NOT-MOVE)."""
         if not self.current_project or not hasattr(self, 'file_filter_combo'):
             return
-
-        data = self.file_filter_combo.currentData()
-
-        # "Manage Views..." action
-        if data == "manage_views":
-            # Reset to previous selection (All Files) before opening dialog
-            self.file_filter_combo.blockSignals(True)
-            self.file_filter_combo.setCurrentIndex(0)
-            self.file_filter_combo.blockSignals(False)
-            self.show_manage_views_dialog()
-            return
-
-        if data is None:
-            # "All Files" selected - re-apply pagination (keeps empty segments hidden)
-            if hasattr(self, '_apply_pagination_to_grid'):
-                self._apply_pagination_to_grid()
-            self._update_file_boundary_labels()
-            self.log("File filter: showing all files")
-            return
-
-        if not hasattr(self, 'table') or not self.table:
-            return
-
-        # View selected (dict with view_file_ids)
-        if isinstance(data, dict) and 'view_file_ids' in data:
-            view_file_ids = set(data['view_file_ids'])
-            visible_count = 0
-            for row, segment in enumerate(self.current_project.segments):
-                if row >= self.table.rowCount():
-                    break
-                segment_file_id = getattr(segment, 'file_id', None)
-                show_row = segment_file_id in view_file_ids and segment.source.strip()
-                self.table.setRowHidden(row, not show_row)
-                if show_row:
-                    visible_count += 1
-            self.log(f"View filter: showing {visible_count} segments from {len(view_file_ids)} files")
-            self._update_file_boundary_labels()
-            return
-
-        # Single file selected (int file_id)
-        file_id = data
-        visible_count = 0
-        for row, segment in enumerate(self.current_project.segments):
-            if row >= self.table.rowCount():
-                break
-            segment_file_id = getattr(segment, 'file_id', None)
-            show_row = segment_file_id == file_id and segment.source.strip()
-            self.table.setRowHidden(row, not show_row)
-            if show_row:
-                visible_count += 1
-
-        file_name = "Unknown"
-        files = getattr(self.current_project, 'files', [])
-        for f in files:
-            if f['id'] == file_id:
-                file_name = f['name']
-                break
-
-        self.log(f"File filter: showing {visible_count} segments from '{file_name}'")
-        self._update_file_boundary_labels()
+        grid_filters.on_file_filter_changed(
+            current_project=self.current_project,
+            table=getattr(self, 'table', None),
+            file_filter_combo=self.file_filter_combo,
+            apply_pagination_callback=self._apply_pagination_to_grid,
+            update_file_boundary_callback=self._update_file_boundary_labels,
+            show_manage_views_callback=self.show_manage_views_dialog,
+            log_callback=self.log)
 
     def _update_file_filter_combo(self):
-        """Обновляет выпадающий список файлового фильтра файлами и представлениями текущего проекта."""
+        """Делегат: modules/grid/filters.update_file_filter_combo (Batch #6 Stage 4)."""
         if not hasattr(self, 'file_filter_combo') or not self.file_filter_combo:
             return
-
-        self.file_filter_combo.blockSignals(True)
-        self.file_filter_combo.clear()
-        self.file_filter_combo.addItem("All Files", None)
-
-        is_multifile = getattr(self.current_project, 'is_multifile', False) if self.current_project else False
-        files = getattr(self.current_project, 'files', []) if self.current_project else []
-
-        if is_multifile and files:
-            # Saved views section
-            views = getattr(self.current_project, 'views', []) or []
-            if views:
-                self.file_filter_combo.insertSeparator(self.file_filter_combo.count())
-                for view in views:
-                    view_name = view.get('name', 'Unnamed View')
-                    file_count = len(view.get('file_ids', []))
-                    self.file_filter_combo.addItem(
-                        f"\U0001F441 {view_name} ({file_count} files)",
-                        {"view_file_ids": view.get('file_ids', [])}
-                    )
-
-            # Individual files section
-            self.file_filter_combo.insertSeparator(self.file_filter_combo.count())
-            for file_info in files:
-                file_id = file_info['id']
-                file_name = file_info['name']
-                seg_count = file_info.get('segment_count', 0)
-                self.file_filter_combo.addItem(f"\U0001F4C4 {file_name} ({seg_count} seg)", file_id)
-
-            # Manage Views action
-            self.file_filter_combo.insertSeparator(self.file_filter_combo.count())
-            self.file_filter_combo.addItem("Manage Views...", "manage_views")
-
-            self.file_filter_combo.show()
-        else:
-            self.file_filter_combo.hide()
-
-        self.file_filter_combo.blockSignals(False)
+        grid_filters.update_file_filter_combo(current_project=self.current_project,
+                                              file_filter_combo=self.file_filter_combo)
 
     def show_manage_views_dialog(self):
         """Показывает диалог создания, правки и удаления представлений для мультифайловых проектов."""
@@ -52369,188 +52049,81 @@ class SupervertalerQt(QMainWindow):
         dialog.exec()
 
     def toggle_invisible_display(self, char_type):
-        """Переключает отображение конкретного типа невидимых символов."""
-        if not hasattr(self, 'invisible_display_settings'):
-            self.invisible_display_settings = {
+        """Делегат: modules/grid/filters.toggle_invisible_display (Batch #6 Stage 4).
+        Инициализация дефолтного словаря настроек — здесь (запись self-атрибута
+        ДО вызова refresh, как в исходном теле); NBSP-флаг TagHighlighter —
+        через set-колбэк (класс живёт в монолите — прямой импорт дал бы цикл).
+        Атрибут записывается внутри pure-функции ДО refresh (порядок исходного
+        тела: запись настроек → флаг NBSP → refresh → log)."""
+        settings = getattr(self, 'invisible_display_settings', None)
+        if settings is None:
+            settings = {
                 'spaces': False,
                 'tabs': False,
                 'nbsp': False,
                 'linebreaks': False
             }
-
-        # Toggle the setting
-        self.invisible_display_settings[char_type] = not self.invisible_display_settings[char_type]
-
-        # Keep the highlighter NBSP-shading flag in sync (covers the no-project case too,
-        # where refresh_grid_invisibles() early-returns before it can update the flag).
-        TagHighlighter._show_nbsp = self.invisible_display_settings.get('nbsp', False)
-
-        # Refresh the grid to show/hide invisibles (re-runs the highlighter via setPlainText)
-        self.refresh_grid_invisibles()
-
-        # Log the change
-        status = "enabled" if self.invisible_display_settings[char_type] else "disabled"
-        char_names = {
-            'spaces': 'Spaces',
-            'tabs': 'Tabs',
-            'nbsp': 'Non-breaking Spaces',
-            'linebreaks': 'Line Breaks'
-        }
-        self.log(f"Show invisibles: {char_names[char_type]} {status}")
+            self.invisible_display_settings = settings
+        self.invisible_display_settings = grid_filters.toggle_invisible_display(
+            invisible_display_settings=settings,
+            char_type=char_type,
+            set_show_nbsp_callback=lambda value: setattr(TagHighlighter, '_show_nbsp', value),
+            refresh_callback=self.refresh_grid_invisibles,
+            log_callback=self.log,
+            write_settings_callback=lambda new: setattr(self, 'invisible_display_settings', new))
 
     def toggle_all_invisibles(self):
-        """Включает или выключает все невидимые символы."""
-        if not hasattr(self, 'invisible_display_settings'):
-            self.invisible_display_settings = {
+        """Делегат: modules/grid/filters.toggle_all_invisibles (Batch #6 Stage 4).
+        DYNAMIC_ENTRY_POINT (MENU_ACTION, подключается в меню невидимых).
+        Действия меню разрешаются getattr'ом здесь; отсутствующие передаются
+        None и пропускаются в pure-функции. Атрибут записывается внутри
+        pure-функции ДО refresh (порядок исходного тела:
+        self.invisible_display_settings = {...} → TagHighlighter._show_nbsp →
+        refresh_grid_invisibles)."""
+        settings = getattr(self, 'invisible_display_settings', None)
+        if settings is None:
+            settings = {
                 'spaces': False,
                 'tabs': False,
                 'nbsp': False,
                 'linebreaks': False
             }
-
-        # Check if any are currently on
-        any_on = any(self.invisible_display_settings.values())
-
-        # Toggle all to opposite state
-        new_state = not any_on
-        self.invisible_display_settings = {
-            'spaces': new_state,
-            'tabs': new_state,
-            'nbsp': new_state,
-            'linebreaks': new_state
-        }
-
-        # Keep the highlighter NBSP-shading flag in sync (covers the no-project case too).
-        TagHighlighter._show_nbsp = self.invisible_display_settings.get('nbsp', False)
-
-        # Update menu checkboxes – block signals so setChecked() does NOT re-fire
-        # toggle_invisible_display() and cause 4 extra grid reloads
-        for action_attr in ('show_spaces_action', 'show_tabs_action',
-                            'show_nbsp_action', 'show_linebreaks_action'):
-            action = getattr(self, action_attr, None)
-            if action is not None:
-                action.blockSignals(True)
-                action.setChecked(new_state)
-                action.blockSignals(False)
-
-        # Refresh the grid (in-place, no full reload; re-runs the highlighter via setPlainText)
-        self.refresh_grid_invisibles()
-
-        status = "enabled" if new_state else "disabled"
-        self.log(f"Show invisibles: All {status}")
+            self.invisible_display_settings = settings
+        self.invisible_display_settings = grid_filters.toggle_all_invisibles(
+            invisible_display_settings=settings,
+            menu_actions=[getattr(self, attr, None) for attr in (
+                'show_spaces_action', 'show_tabs_action',
+                'show_nbsp_action', 'show_linebreaks_action')],
+            set_show_nbsp_callback=lambda value: setattr(TagHighlighter, '_show_nbsp', value),
+            refresh_callback=self.refresh_grid_invisibles,
+            log_callback=self.log,
+            write_settings_callback=lambda new: setattr(self, 'invisible_display_settings', new))
 
     def refresh_grid_invisibles(self):
-        """Обновляет отображение невидимых символов на месте, без перезагрузки
-                сетки.
-        
-                Обходит существующие виджеты ячеек и напрямую повторно применяет
-                (или снимает) подстановки невидимых символов, избегая дорогого
-                полного перестроения сетки, которое запустило бы
-                load_segments_to_grid().
-        
-                Стратегия обработки сигналов
-                -----------------------
-                Мы вызываем setPlainText() с заблокированными сигналами Qt на
-                каждом виджете. В отличие от load_segments_to_grid() мы НЕ
-                разблокируем сигналы после — виджеты уже имеют подключённые
-                с исходной загрузки сетки обработчики textChanged, и эти
-                обработчики остаются активными для будущих правок пользователя.
-                Держать сигналы заблокированными только на время setPlainText()
-                (и короткого окна отложенных событий) необходимо, чтобы
-                устаревшие маркеры невидимых символов не записались обратно
-                в segment.target.
-        
-                Также поднимается _suppress_target_change_handlers как
-                подстраховка, чтобы любой просочившийся сигнал (например, на уже
-                сфокусированной ячейке, чьё отложенное событие сработало до
-                вступления blockSignals) молча игнорировался обработчиком
-                on_target_text_changed."""
+        """Делегат: modules/grid/filters.refresh_grid_invisibles (Batch #6 Stage 4).
+        Guards и запись self.showing_invisible_spaces — здесь (порядок тела);
+        _suppress_target_change_handlers — getattr(..., False) + set-колбэк
+        (тот же self-специфичный паттерн, что в _apply_pagination_to_grid,
+        Stage 3); TagHighlighter — set-колбэк (класс в монолите)."""
         if not hasattr(self, 'table') or not self.table:
             return
         if not hasattr(self, 'invisible_display_settings'):
             return
         if not hasattr(self, 'current_project') or not self.current_project:
             return
-
-        # Update the legacy boolean used by word-wrap logic
         self.showing_invisible_spaces = self.invisible_display_settings.get('spaces', False)
-
-        # Keep the highlighter's NBSP shading flag in sync BEFORE we re-set widget text:
-        # NBSP is no longer substituted into the text, so toggling it does not change the
-        # string. The per-cell setPlainText() below re-runs TagHighlighter.highlightBlock(),
-        # which reads this class flag to decide whether to shade real NBSP characters.
-        TagHighlighter._show_nbsp = self.invisible_display_settings.get('nbsp', False)
-
-        segments = self.current_project.segments
-        row_count = self.table.rowCount()
-
-        # Suppress the target-changed handler for all cells during the refresh
-        old_suppress = getattr(self, '_suppress_target_change_handlers', False)
-        self._suppress_target_change_handlers = True
-        try:
-            for row in range(row_count):
-                if row >= len(segments):
-                    break
-                segment = segments[row]
-
-                # --- Source column (col 2) – read-only, no save risk ---
-                source_widget = self.table.cellWidget(row, 2)
-                if source_widget is not None:
-                    source_for_display = segment.source
-                    if self.hide_outer_wrapping_tags:
-                        stripped, _ = strip_outer_wrapping_tags(source_for_display)
-                        source_for_display = stripped
-                    if getattr(self, 'tag_view_mode', 'tags') == 'compact':
-                        source_for_display = compact_tags(source_for_display)
-                    new_source_text = self.apply_invisible_replacements(source_for_display)
-                    source_widget.blockSignals(True)
-                    source_widget.setPlainText(new_source_text)
-                    source_widget.blockSignals(False)
-
-                # --- Target column (col 3) ---
-                # Always use segment.target (the clean, marker-free canonical text)
-                # as the source of truth, then re-apply current marker settings.
-                target_widget = self.table.cellWidget(row, 3)
-                if target_widget is not None:
-                    target_for_display = segment.target
-                    if self.hide_outer_wrapping_tags:
-                        stripped, _ = strip_outer_wrapping_tags(target_for_display)
-                        target_for_display = stripped
-                    # Apply compact tag shortening (display only – reversed before saving)
-                    if getattr(self, 'tag_view_mode', 'tags') == 'compact':
-                        # Re-use the tag_map built from source so numbering stays consistent
-                        tag_map = {}
-                        src_display = segment.source
-                        if self.hide_outer_wrapping_tags:
-                            src_display, _ = strip_outer_wrapping_tags(src_display)
-                        compact_tags(src_display, tag_map)
-                        target_for_display = compact_tags(target_for_display, tag_map)
-                        target_widget._compact_tag_map = tag_map
-                    else:
-                        target_widget._compact_tag_map = None
-                    new_target_text = self.apply_invisible_replacements(target_for_display)
-                    target_widget.blockSignals(True)
-                    target_widget.setPlainText(new_target_text)
-                    # Keep signals blocked – user edits will unblock naturally when
-                    # the widget is next focused and the handler fires from keystrokes.
-                    # We restore signals here so the widget stays interactive, but
-                    # _suppress_target_change_handlers guards against the queued event.
-                    target_widget.blockSignals(False)
-                    # Reset initial-load flag so the single queued textChanged event
-                    # that Qt delivers after blockSignals(False) is eaten harmlessly.
-                    target_widget._initial_load_complete = False
-        finally:
-            self._suppress_target_change_handlers = old_suppress
-
-        # Resize rows since space→middle-dot substitution changes text width
-        self.auto_resize_rows()
-
-        # Refresh Match Panel TM panes so ↵ markers appear/disappear with toggling
-        if hasattr(self, 'match_panel_tm_matches') and self.match_panel_tm_matches:
-            try:
-                self._update_match_panel_tm_display()
-            except Exception:
-                pass
+        grid_filters.refresh_grid_invisibles(
+            current_project=self.current_project,
+            table=self.table,
+            invisible_display_settings=self.invisible_display_settings,
+            hide_outer_wrapping_tags=self.hide_outer_wrapping_tags,
+            tag_view_mode=getattr(self, 'tag_view_mode', 'tags'),
+            old_suppress=getattr(self, '_suppress_target_change_handlers', False),
+            set_suppress_callback=lambda value: setattr(self, '_suppress_target_change_handlers', value),
+            set_show_nbsp_callback=lambda value: setattr(TagHighlighter, '_show_nbsp', value),
+            auto_resize_callback=self.auto_resize_rows,
+            update_match_panel_callback=self._update_match_panel_tm_display,
+            update_match_panel_available=bool(getattr(self, 'match_panel_tm_matches', None)))
 
     def _refresh_source_column_display(self):
         """Обновляет сетку по настройке hide_outer_wrapping_tags.
@@ -52568,80 +52141,18 @@ class SupervertalerQt(QMainWindow):
         self.load_segments_to_grid()
 
     def apply_invisible_replacements(self, text):
-        """Применяет подстановки невидимых символов к тексту по настройкам."""
-        # Always guard recognised tags against being split mid-way by the grid
-        # word-wrap (see protect_tags_from_linebreak) – runs even when no
-        # invisible-marker settings are active. The WORD JOINER it inserts is
-        # stripped again by reverse_invisible_replacements, so saved text is
-        # unaffected. Applies to both source and target display cells.
-        text = protect_tags_from_linebreak(text)
-
-        if not hasattr(self, 'invisible_display_settings'):
-            return text
-
-        result = text
-
-        # Replace spaces with middle dot (·) followed by zero-width space for word-wrap capability
-        # The zero-width space (U+200B) provides a line-break opportunity
-        if self.invisible_display_settings.get('spaces', False):
-            result = result.replace(' ', '·\u200B')
-
-        # Replace tabs with right arrow (→) followed by zero-width space
-        if self.invisible_display_settings.get('tabs', False):
-            result = result.replace('\t', '→\u200B')
-
-        # Non-breaking spaces are NO LONGER substituted (Camp B approach, as used by
-        # VS Code/memoQ/Trados): the real U+00A0 / U+202F characters stay in the text and
-        # their positions are shaded with a coloured background box by the TagHighlighter.
-        # This avoids the old fragile '°' sentinel that collided with real degree signs.
-
-        # Replace line breaks with return arrow (↵)
-        if self.invisible_display_settings.get('linebreaks', False):
-            result = result.replace('\n', '↵\n')
-            result = result.replace('\r', '↵')
-
-        return result
+        """Делегат: modules/grid/filters.apply_invisible_replacements (Batch #6 Stage 4).
+        Сигнатурный контракт сохранён (пункт Б промпта): один позиционный
+        аргумент, возвращает строку; вызывающие — модуль undo_manager
+        (bound-колбэк при конструировании) и диалог псевдоперевода
+        (hasattr-охраняемый вызов)."""
+        return grid_filters.apply_invisible_replacements(
+            text, invisible_display_settings=getattr(self, 'invisible_display_settings', None))
 
     def reverse_invisible_replacements(self, text):
-        """Обращает ВСЕ подстановки невидимых символов, получая исходный текст.
-        
-                ПРИМЕЧАНИЕ: мы всегда безусловно вырезаем ВСЕ типы маркеров,
-                независимо от того, какие настройки включены сейчас. Это
-                необходимо, потому что:
-                - пользователь может выключить настройку после того, как маркеры
-                  уже помещены в виджет; маркеры всё равно должны быть убраны
-                  из сохраняемого текста;
-                - refresh_grid_invisibles() вызывает setPlainText() с чистым
-                  текстом segment.target, но отложенное событие textChanged,
-                  сработавшее после, увидит только что установленный текст
-                  (который может содержать маркеры) и всё равно должен очистить
-                  его корректно."""
-        result = text
-
-        # Strip the tag-protection WORD JOINER (U+2060) unconditionally. It is
-        # display-only (inserted by protect_tags_from_linebreak) and must never
-        # reach saved segment text, tag counts, TM, or exports.
-        result = result.replace(WORD_JOINER, '')
-
-        # Reverse spaces (middle dot + zero-width space → space) – always
-        result = result.replace('·\u200B', ' ')
-        result = result.replace('·', ' ')  # Fallback for any without zero-width space
-
-        # Reverse tabs (right arrow + zero-width space → tab) – always
-        result = result.replace('→\u200B', '\t')
-        result = result.replace('→', '\t')  # Fallback
-
-        # Reverse line breaks (return arrow → line break) – always
-        result = result.replace('↵\n', '\n')
-        result = result.replace('↵', '\r')
-        # Legacy: pilcrow was used as line-break marker before v1.9.295
-        result = result.replace('¶\n', '\n')
-        result = result.replace('¶', '\r')
-
-        # Always strip any stray zero-width spaces left over
-        result = result.replace('\u200B', '')
-
-        return result
+        """Делегат: modules/grid/filters.reverse_invisible_replacements (Batch #6 Stage 4).
+        Pure-функция состояния окна не читает — передача 1:1."""
+        return grid_filters.reverse_invisible_replacements(text)
 
     # ========================================================================
     # SPELLCHECK METHODS
@@ -53126,123 +52637,44 @@ class SupervertalerQt(QMainWindow):
         open_file(str(folder))
 
     def filter_empty_segments(self):
-        """Быстрый фильтр, показывающий только сегменты с пустым переводом."""
+        """Делегат: modules/grid/filters.filter_empty_segments (Batch #6 Stage 4)."""
         if not self.current_project:
             return
-        
-        # Safety check: ensure table exists
-        if not hasattr(self, 'table') or self.table is None:
+        table = getattr(self, 'table', None)
+        if table is None:
             return
-        
-        # Clear filter boxes first
-        source_widget = getattr(self, 'source_filter', None)
-        target_widget = getattr(self, 'target_filter', None)
-        if self._widget_is_alive(source_widget):
-            source_widget.blockSignals(True)
-            source_widget.clear()
-            source_widget.blockSignals(False)
-        if self._widget_is_alive(target_widget):
-            target_widget.blockSignals(True)
-            target_widget.clear()
-            target_widget.blockSignals(False)
-        
-        # OPTIMIZED: Batch UI updates and don't reload grid
-        self.table.setUpdatesEnabled(False)
-        try:
-            # Clear any yellow text filter highlights (but preserve termbase/tag formatting)
-            self._clear_all_filter_highlights()
-            
-            # Hide rows with non-empty target (empty structural segments always hidden)
-            visible_count = 0
-            for row, segment in enumerate(self.current_project.segments):
-                if row >= self.table.rowCount():
-                    break
-
-                has_empty_target = not segment.target or not segment.target.strip()
-                show_row = has_empty_target and segment.source.strip()
-                self.table.setRowHidden(row, not show_row)
-
-                if show_row:
-                    visible_count += 1
-        finally:
-            self.table.setUpdatesEnabled(True)
-        
-        self.log(f"🔍 Empty segments filter: showing {visible_count} of {len(self.current_project.segments)} segments")
+        grid_filters.filter_empty_segments(
+            current_project=self.current_project,
+            table=table,
+            source_widget=getattr(self, 'source_filter', None),
+            target_widget=getattr(self, 'target_filter', None),
+            log_callback=self.log)
     
     def _clear_all_filter_highlights(self):
-        """Снимает жёлтые подсветки фильтра со всех ячеек без перезагрузки сетки."""
-        if not hasattr(self, 'table') or self.table is None:
+        """Делегат: modules/grid/filters.clear_all_filter_highlights (Batch #6 Stage 4)."""
+        table = getattr(self, 'table', None)
+        if table is None:
             return
-        
-        for row in range(self.table.rowCount()):
-            # Clear source column (2)
-            self._clear_filter_highlights_in_widget(row, 2)
-            
-            # Clear target column (3)
-            self._clear_filter_highlights_in_widget(row, 3)
+        grid_filters.clear_all_filter_highlights(table=table)
 
     def apply_quick_filter(self, filter_type: str):
-        """Применяет быстрый фильтр по типу — интегрируется с системой пагинации."""
+        """Делегат: modules/grid/filters.apply_quick_filter (Batch #6 Stage 4).
+        6 вызовов через lambda из меню быстрых фильтров — имена сохранены."""
         if not self.current_project:
             return
-
-        if not hasattr(self, 'table') or self.table is None:
+        table = getattr(self, 'table', None)
+        if table is None:
             return
-
-        # Clear filter boxes first
-        source_widget = getattr(self, 'source_filter', None)
-        target_widget = getattr(self, 'target_filter', None)
-        if self._widget_is_alive(source_widget):
-            source_widget.blockSignals(True)
-            source_widget.clear()
-            source_widget.blockSignals(False)
-        if self._widget_is_alive(target_widget):
-            target_widget.blockSignals(True)
-            target_widget.clear()
-            target_widget.blockSignals(False)
-
-        # Clear any yellow text filter highlights (but preserve termbase/tag formatting)
-        self._clear_all_filter_highlights()
-
-        # Calculate matching rows - collect into a set for pagination integration
-        matching_rows = set()
-        for row, segment in enumerate(self.current_project.segments):
-            show_row = False
-
-            if filter_type == "empty":
-                show_row = not segment.target or not segment.target.strip()
-            elif filter_type == "not_started":
-                show_row = segment.status in ["not_started", "draft"]
-            elif filter_type == "confirmed":
-                show_row = segment.status == "confirmed"
-            elif filter_type == "locked":
-                show_row = getattr(segment, 'locked', False)
-            elif filter_type == "not_locked":
-                show_row = not getattr(segment, 'locked', False)
-            elif filter_type == "commented":
-                show_row = bool(segment.notes and segment.notes.strip())
-
-            if show_row:
-                matching_rows.add(row)
-
-        # Integrate with pagination system - this ensures the filter persists
-        # when other UI events trigger pagination updates
-        self._active_text_filter_rows = matching_rows
-        self.filtering_active = True
-
-        # Apply the filter through the pagination system
-        if hasattr(self, '_apply_pagination_to_grid'):
-            self._apply_pagination_to_grid()
-
-        filter_names = {
-            "empty": "Empty segments",
-            "not_started": "Not started",
-            "confirmed": "Confirmed",
-            "locked": "Locked",
-            "not_locked": "Not locked",
-            "commented": "Commented"
-        }
-        self.log(f"🔍 {filter_names.get(filter_type, 'Quick')} filter: showing {len(matching_rows)} of {len(self.current_project.segments)} segments")
+        grid_filters.apply_quick_filter(
+            current_project=self.current_project,
+            table=table,
+            filter_type=filter_type,
+            source_widget=getattr(self, 'source_filter', None),
+            target_widget=getattr(self, 'target_filter', None),
+            set_active_text_filter_rows_callback=lambda value: setattr(self, '_active_text_filter_rows', value),
+            set_filtering_active_callback=lambda value: setattr(self, 'filtering_active', value),
+            apply_pagination_callback=self._apply_pagination_to_grid,
+            log_callback=self.log)
     
     def _update_bulk_menu_label(self):
         """Обновляет подпись меню Bulk Operations, показывая состояние фильтра.
@@ -53273,240 +52705,47 @@ class SupervertalerQt(QMainWindow):
             action.setText(base)
 
     def show_advanced_filters_dialog(self):
-        """Показывает диалог расширенных фильтров с детальными опциями фильтрации."""
-        if not self.current_project:
-            QMessageBox.information(self, "No Project", "Please open or create a project first.")
-            return
-        
-        dialog = AdvancedFiltersDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            filters = dialog.get_filters()
-            self.apply_advanced_filters(filters)
+        """Делегат: modules/grid/filters.show_advanced_filters_dialog (Batch #6 Stage 4).
+        DYNAMIC_ENTRY_POINT (кнопка расширенных фильтров, clicked.connect)."""
+        grid_filters.show_advanced_filters_dialog(
+            current_project=self.current_project,
+            parent=self,
+            apply_advanced_filters_callback=self.apply_advanced_filters)
     
     def apply_advanced_filters(self, filters: dict):
-        """Применяет расширенные фильтры к сетке — оптимизировано по скорости."""
-        if not self.current_project or not hasattr(self, 'table') or self.table is None:
+        """Делегат: modules/grid/filters.apply_advanced_filters (Batch #6 Stage 4)."""
+        if not self.current_project or getattr(self, 'table', None) is None:
             return
-        
-        # Clear text filter boxes
-        source_widget = getattr(self, 'source_filter', None)
-        target_widget = getattr(self, 'target_filter', None)
-        if self._widget_is_alive(source_widget):
-            source_widget.blockSignals(True)
-            source_widget.clear()
-            source_widget.blockSignals(False)
-        if self._widget_is_alive(target_widget):
-            target_widget.blockSignals(True)
-            target_widget.clear()
-            target_widget.blockSignals(False)
-        
-        # OPTIMIZED: Batch UI updates and don't reload grid
-        self.table.setUpdatesEnabled(False)
-        try:
-            # Clear any yellow text filter highlights (but preserve termbase/tag formatting)
-            self._clear_all_filter_highlights()
-            
-            visible_count = 0
-            for row, segment in enumerate(self.current_project.segments):
-                if row >= self.table.rowCount():
-                    break
-                
-                show_row = True
-                
-                # Match rate filter
-                if filters.get('match_rate_enabled'):
-                    match_percent = getattr(segment, 'match_percent', 0) or 0
-                    min_rate = filters.get('match_rate_min', 0)
-                    max_rate = filters.get('match_rate_max', 102)
-                    if not (min_rate <= match_percent <= max_rate):
-                        show_row = False
-                
-                # Row status filters
-                status_filters = filters.get('row_status', [])
-                if status_filters:
-                    if segment.status not in status_filters:
-                        show_row = False
-                
-                # Locked/unlocked filter
-                if filters.get('locked_filter'):
-                    locked_value = getattr(segment, 'locked', False)
-                    if filters['locked_filter'] == 'locked' and not locked_value:
-                        show_row = False
-                    elif filters['locked_filter'] == 'unlocked' and locked_value:
-                        show_row = False
-                
-                # Other properties
-                if filters.get('has_comments'):
-                    if not (segment.notes and segment.notes.strip()):
-                        show_row = False
-                
-                if filters.get('has_proofreading'):
-                    if not getattr(segment, 'proofreading_notes', None):
-                        show_row = False
-                
-                if filters.get('repetitions_only'):
-                    # TODO: Implement repetition detection
-                    pass
-
-                # Empty structural segments are always hidden
-                if not segment.source.strip():
-                    show_row = False
-
-                self.table.setRowHidden(row, not show_row)
-
-                if show_row:
-                    visible_count += 1
-        finally:
-            self.table.setUpdatesEnabled(True)
-        
-        self.log(f"🔍 Advanced filters: showing {visible_count} of {len(self.current_project.segments)} segments")
+        grid_filters.apply_advanced_filters(
+            current_project=self.current_project,
+            table=getattr(self, 'table', None),
+            filters=filters,
+            source_widget=getattr(self, 'source_filter', None),
+            target_widget=getattr(self, 'target_filter', None),
+            log_callback=self.log)
 
     def apply_sort(self, sort_type: str = None):
-        """Сортирует сегменты по разным критериям (похоже на memoQ)."""
-        if not self.current_project or not hasattr(self, 'table') or self.table is None:
+        """Делегат: modules/grid/filters.apply_sort (Batch #6 Stage 4).
+        Единственное пересечение состава Stage 4 с циклом SCC#1 (пункт А
+        промпта): полная перезагрузка грида — reload_callback =
+        self.load_segments_to_grid (сам метод не тронут); 18 lambda-вызовов
+        меню сортировки в create_grid_view_widget_for_home продолжают
+        работать по имени."""
+        if not self.current_project or getattr(self, 'table', None) is None:
             return
-
-        if not self.current_project.segments:
-            return
-
-        # Show progress dialog during sorting
-        from PyQt6.QtWidgets import QProgressDialog
-        from PyQt6.QtCore import Qt
-
-        progress = QProgressDialog("Sorting segments, please wait...", None, 0, 0, self)
-        progress.setWindowTitle(self.tr("Sorting"))
-        progress.setWindowModality(Qt.WindowModality.WindowModal)
-        progress.setMinimumDuration(0)  # Show immediately
-        progress.show()
-        QApplication.processEvents()  # Force UI update
-
-        try:
-            # Store original document order if not already stored
-            if not hasattr(self, '_original_segment_order'):
-                self._original_segment_order = self.current_project.segments.copy()
-
-            # Update current sort state
-            self.current_sort = sort_type
-
-            # If sort_type is None, restore document order
-            if sort_type is None:
-                # Restore document order by sorting by segment ID (original position)
-                # This works even if the stored original order is wrong
-                self.current_project.segments.sort(key=lambda seg: int(seg.id))
-
-                # Update stored original order to this correct order
-                self._original_segment_order = self.current_project.segments.copy()
-
-                # Set pagination to "All" to show all segments
-                if hasattr(self, 'page_size_combo') and self._widget_is_alive(self.page_size_combo):
-                    self.page_size_combo.blockSignals(True)
-                    self.page_size_combo.setCurrentText("All")
-                    self.page_size_combo.blockSignals(False)
-                    # Update the internal page size variable
-                    if hasattr(self, 'grid_page_size'):
-                        self.grid_page_size = 999999
-
-                self.load_segments_to_grid()
-                self.log("↩️ Restored document order (showing all segments)")
-                return
-
-            # Helper function to get text without tags for more accurate sorting
-            def strip_tags(text: str) -> str:
-                """Удаляет HTML/XML-теги из текста для сортировки."""
-                import re
-                return re.sub(r'<[^>]+>', '', text).strip()
-
-            # Calculate frequency maps if needed
-            frequency_cache = {}
-            if 'freq' in sort_type:
-                from collections import Counter
-                if 'source' in sort_type:
-                    counter = Counter(strip_tags(seg.source).lower() for seg in self.current_project.segments)
-                    frequency_cache = {strip_tags(seg.source).lower(): counter[strip_tags(seg.source).lower()]
-                                     for seg in self.current_project.segments}
-                else:  # target frequency
-                    counter = Counter(strip_tags(seg.target).lower() for seg in self.current_project.segments if seg.target)
-                    frequency_cache = {strip_tags(seg.target).lower(): counter[strip_tags(seg.target).lower()]
-                                     for seg in self.current_project.segments if seg.target}
-
-            # Sort based on selected criterion
-            if sort_type == 'source_asc':
-                self.current_project.segments.sort(key=lambda s: strip_tags(s.source).lower())
-                sort_name = "Source A → Z"
-            elif sort_type == 'source_desc':
-                self.current_project.segments.sort(key=lambda s: strip_tags(s.source).lower(), reverse=True)
-                sort_name = "Source Z → A"
-            elif sort_type == 'target_asc':
-                self.current_project.segments.sort(key=lambda s: strip_tags(s.target).lower() if s.target else "")
-                sort_name = "Target A → Z"
-            elif sort_type == 'target_desc':
-                self.current_project.segments.sort(key=lambda s: strip_tags(s.target).lower() if s.target else "", reverse=True)
-                sort_name = "Target Z → A"
-            elif sort_type == 'source_length_asc':
-                self.current_project.segments.sort(key=lambda s: len(strip_tags(s.source)))
-                sort_name = "Source (shorter first)"
-            elif sort_type == 'source_length_desc':
-                self.current_project.segments.sort(key=lambda s: len(strip_tags(s.source)), reverse=True)
-                sort_name = "Source (longer first)"
-            elif sort_type == 'target_length_asc':
-                self.current_project.segments.sort(key=lambda s: len(strip_tags(s.target)) if s.target else 0)
-                sort_name = "Target (shorter first)"
-            elif sort_type == 'target_length_desc':
-                self.current_project.segments.sort(key=lambda s: len(strip_tags(s.target)) if s.target else 0, reverse=True)
-                sort_name = "Target (longer first)"
-            elif sort_type == 'match_asc':
-                self.current_project.segments.sort(key=lambda s: getattr(s, 'match_percent', 0) or 0)
-                sort_name = "Match Rate (lower first)"
-            elif sort_type == 'match_desc':
-                self.current_project.segments.sort(key=lambda s: getattr(s, 'match_percent', 0) or 0, reverse=True)
-                sort_name = "Match Rate (higher first)"
-            elif sort_type == 'source_freq_asc':
-                self.current_project.segments.sort(key=lambda s: frequency_cache.get(strip_tags(s.source).lower(), 0))
-                sort_name = "Source Frequency (lower first)"
-            elif sort_type == 'source_freq_desc':
-                self.current_project.segments.sort(key=lambda s: frequency_cache.get(strip_tags(s.source).lower(), 0), reverse=True)
-                sort_name = "Source Frequency (higher first)"
-            elif sort_type == 'target_freq_asc':
-                self.current_project.segments.sort(key=lambda s: frequency_cache.get(strip_tags(s.target).lower(), 0) if s.target else 0)
-                sort_name = "Target Frequency (lower first)"
-            elif sort_type == 'target_freq_desc':
-                self.current_project.segments.sort(key=lambda s: frequency_cache.get(strip_tags(s.target).lower(), 0) if s.target else 0, reverse=True)
-                sort_name = "Target Frequency (higher first)"
-            elif sort_type == 'modified_asc':
-                self.current_project.segments.sort(key=lambda s: s.modified_at if s.modified_at else "")
-                sort_name = "Last Changed (oldest first)"
-            elif sort_type == 'modified_desc':
-                self.current_project.segments.sort(key=lambda s: s.modified_at if s.modified_at else "", reverse=True)
-                sort_name = "Last Changed (newest first)"
-            elif sort_type == 'status':
-                # Sort by status in a logical order: not_started, draft, confirmed
-                status_order = {'not_started': 0, 'draft': 1, 'confirmed': 2, 'approved': 3}
-                self.current_project.segments.sort(key=lambda s: status_order.get(s.status, 99))
-                sort_name = "Row Status"
-            else:
-                self.log(f"⚠️ Unknown sort type: {sort_type}")
-                return
-
-            # Set pagination to "All" to show all sorted segments
-            if hasattr(self, 'page_size_combo') and self._widget_is_alive(self.page_size_combo):
-                self.page_size_combo.blockSignals(True)
-                self.page_size_combo.setCurrentText("All")
-                self.page_size_combo.blockSignals(False)
-                # Update the internal page size variable
-                if hasattr(self, 'grid_page_size'):
-                    self.grid_page_size = 999999
-
-            # Reload grid to reflect new order
-            self.load_segments_to_grid()
-            self.log(f"⇅ Sorted by: {sort_name} (showing all segments)")
-
-        except Exception as e:
-            self.log(f"❌ Error sorting segments: {e}")
-            import traceback
-            traceback.print_exc()
-        finally:
-            # Close progress dialog
-            progress.close()
+        grid_filters.apply_sort(
+            current_project=self.current_project,
+            parent=self,
+            sort_type=sort_type,
+            original_segment_order=getattr(self, '_original_segment_order', None),
+            set_original_segment_order_callback=lambda value: setattr(self, '_original_segment_order', value),
+            set_current_sort_callback=lambda value: setattr(self, 'current_sort', value),
+            page_size_combo=getattr(self, 'page_size_combo', None),
+            set_grid_page_size_callback=(lambda value: setattr(self, 'grid_page_size', value))
+                if hasattr(self, 'grid_page_size') else None,
+            tr_callback=self.tr,
+            log_callback=self.log,
+            reload_callback=self.load_segments_to_grid)
 
     # ========================================================================
     # TABBED SEGMENT EDITOR METHODS (for Grid view)
@@ -55757,68 +54996,24 @@ class SupervertalerQt(QMainWindow):
     # ========================================================================
     
     def filter_on_selected_text(self):
-        """Фильтрует по выделенному сейчас тексту в колонке источника или
-                перевода.
-        
-                Переключающее поведение: если фильтры уже активны, Ctrl+Shift+F
-                их очистит. Иначе — фильтрация по выбранному тексту."""
-        from PyQt6.QtWidgets import QApplication
-        
-        # Сначала проверяем, активны ли фильтры сейчас (для поведения переключателя)
+        """Делегат: modules/grid/filters.filter_on_selected_text (Batch #6 Stage 4).
+        DYNAMIC_ENTRY_POINT: Ctrl+Shift+F (таблица hotkey-диспетчера монолита);
+        записи "filter_selected_text"/"clear_filter" в менеджере горячих
+        клавиш с "action": "filter_on_selected_text" — имя метода менять
+        нельзя."""
         source_filter_text = self._get_line_edit_text('source_filter').strip() if hasattr(self, 'source_filter') else ""
         target_filter_text = self._get_line_edit_text('target_filter').strip() if hasattr(self, 'target_filter') else ""
-        filters_active = bool(source_filter_text or target_filter_text)
-        
-        # Переключение: если фильтры активны, очищаем их и выходим
-        if filters_active:
-            self.clear_filters()
-            self.log(f"🔍 Filters cleared ({format_shortcut_for_display('Ctrl+Shift+F')} toggle)")
-            return
-        
-        # Фильтры не активны — пытаемся фильтровать по выделенному тексту
-        focused_widget = QApplication.focusWidget()
-        
-        selected_text = ""
-        is_source = False
-        is_target = False
-        
-        # Проверяем, что это текстовый редактор (источник или перевод)
-        if focused_widget and isinstance(focused_widget, (EditableGridTextEditor, ReadOnlyGridTextEditor)):
-            cursor = focused_widget.textCursor()
-            selected_text = cursor.selectedText().strip()
-            
-            # Определяем, источник это или перевод, по столбцу
-            if hasattr(self, 'table') and self.table:
-                for row in range(self.table.rowCount()):
-                    # Проверяем столбец источника (индекс 2)
-                    source_widget = self.table.cellWidget(row, 2)
-                    if source_widget == focused_widget:
-                        is_source = True
-                        break
-                    # Проверяем столбец перевода (индекс 3)
-                    target_widget = self.table.cellWidget(row, 3)
-                    if target_widget == focused_widget:
-                        is_target = True
-                        break
-        
-        # Снимаем маркеры невидимых символов, чтобы фильтр сравнивал чистый текст сегмента
-        if selected_text and hasattr(self, 'reverse_invisible_replacements'):
-            selected_text = self.reverse_invisible_replacements(selected_text)
-            selected_text = selected_text.strip()
-
-        if not selected_text:
-            self.log("⚠️ No text selected. Select text in source or target column first.")
-            return
-
-        # Вставляем выделенный текст в нужное поле фильтра и применяем фильтр
-        if is_source and hasattr(self, 'source_filter') and self.source_filter:
-            self.source_filter.setText(selected_text)
-            self.apply_filters()
-            self.log(f"🔍 Filtering source on: '{selected_text}'")
-        elif is_target and hasattr(self, 'target_filter') and self.target_filter:
-            self.target_filter.setText(selected_text)
-            self.apply_filters()
-            self.log(f"🔍 Filtering target on: '{selected_text}'")
+        grid_filters.filter_on_selected_text(
+            table=getattr(self, 'table', None),
+            source_filter_text=source_filter_text,
+            target_filter_text=target_filter_text,
+            source_widget=getattr(self, 'source_filter', None),
+            target_widget=getattr(self, 'target_filter', None),
+            clear_filters_callback=self.clear_filters,
+            apply_filters_callback=self.apply_filters,
+            reverse_replacements_callback=self.reverse_invisible_replacements,
+            editor_classes=(EditableGridTextEditor, ReadOnlyGridTextEditor),
+            log_callback=self.log)
     
     def copy_source_to_grid_target(self):
         """Копирует источник в перевод в текущей выбранной строке сетки."""

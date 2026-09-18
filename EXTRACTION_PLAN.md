@@ -230,6 +230,52 @@ MEDIUM.
 revert.
 ### Expected result
 −2 500 строк.
+#### Статус Step 6 после Batch #6 Stage 4 (2026-09-18) — Step 6 ЗАВЕРШЁН ЦЕЛИКОМ
+Step 6 выполнялся тремя под-батчами (решение владельца по Stage 1 Batch #6;
+архитектура — модули ЧИСТЫХ ФУНКЦИЙ с явными параметрами и именованными
+колбэками, НЕ классы-контейнеры):
+- Стадия 2 (коммит `4ace504`) — `modules/grid/helpers.py`, 507 строк: 16 функций
+  + 17 тонких делегатов в монолите; `_get_line_edit_text` оставлен в монолите
+  целиком (self-специфичная getattr-логика).
+- Стадия 3 (коммит `26b998c`) — `modules/grid/pagination.py`, 584 строки:
+  14 функций + 14 делегатов + 2 module-level константы `PAGE_AUTO_ALL_THRESHOLD`
+  / `PAGE_FALLBACK_SIZE` (перенесены с класса); populate-кластер
+  (`_start_background_populate`/`_background_populate_step` и его константы)
+  намеренно НЕ тронут — Step 8.
+- Стадия 4 (этот коммит) — `modules/grid/filters.py`, 1277 строк: 20 функций
+  + 1 внутренняя `_refresh_grid_invisibles_cells` + 20 делегатов.
+- `modules/grid/__init__.py`: 134 строки, `__all__` = 55 имён (3 модуля +
+  16 helpers + 16 pagination + 20 filters).
+
+Фактические номера: документированные в блоке выше диапазоны (31574–32100,
+32150–32188 + 55494–57100) устарели сильнее, чем на один батч — сдвиг от
+стартового состояния монолита уже −4951. На HEAD Stage 4 (68 386 строк)
+окно кластера — 51794–55821, состав 20 методов = 1097 строк; окно содержит
+посторонние блоки, которые НЕ переносились: `show_manage_views_dialog`
+(52202–52369, открытый вопрос Stage 1 §8 п.3), `_refresh_source_column_display`
+(52555–52568, Step 8/теги), `_update_bulk_menu_label` (53247–53273, подпись меню
+Bulk Operations), spellcheck/словари (52645–53126), комментарии сегментов +
+voice dictation (53510–55753). Метод `_ensure_shared_filter`/
+`_ensure_primary_filters_ready` физически лежит отдельно (28544/28559 на HEAD).
+
+Валидация Stage 4: AST 22/22 байт-в-байт; 8 метрик ровные
+(1211/18/35/24/24/0/85/2); манифест — только монолит + `__init__.py` + новый
+`filters.py`; 3 NOT-MOVE блока BYTE-IDENTICAL (sha256 + containment 1/1);
+контрольные блоки spellcheck 9ac157cd… / comments/dictation 6496a472… — по
+1 вхождению; функциональные сценарии 65/65 PASS (в т.ч. F11 — apply_sort через
+reload_callback, единственное пересечение с SCC#1); Undo/Redo Batch #5 — 38/38
+PASS (третий прогон); smoke save/load OK. Отчёт:
+`docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 4.txt`; сигнатуры:
+`docs/refactoring/audits/batch6_stage4_signatures.txt`.
+
+Незакрытые вопросы Step 6, перенесённые дальше:
+- `show_manage_views_dialog` — остался в монолите (открытый вопрос Stage 1 §8
+  п.3 не решён; логичное место — Step 8 «Grid: render + match panel + comments
+  UI» или отдельный мини-батч «диалоги представлений»).
+- Предсуществующий бесконечный цикл в `clear_filter_highlights_in_widget` при
+  наложении и снятии подсветки в ОДНОМ диапазоне (воспроизведён и на HEAD —
+  НЕ регрессия Stage 4). Требует отдельного решения владельца.
+- `filter_empty_segments` — мёртвый код (0 call sites), перенесён как есть.
 
 ## Step 7 — Settings service (IO-слой)
 
@@ -237,6 +283,7 @@ revert.
 Единая точка персистентности настроек.
 ### Source
 `Supervertaler.py` 48308–48750 + 29585–30500 (IO-часть: `_get_settings_dir`, `_get_unified_settings_path`, `_load/_save_unified_settings`, `_load/_save_settings_section`, `load/save_general_settings`, `load/save_llm_settings`, `load/save_proxy_settings`, `load/save_api_keys`, provider states, языки, диктовка, словарь команд, спеллчек, недавние проекты).
+ВНИМАНИЕ: эти номера устарели (Batch #1–#6 сдвинули монолит на −4951; сейчас 68 386 строк). Предварительная AST-карта кандидатов IO после Batch #6 Stage 4 (46 методов IO, ~1709 строк; UI-билдеры вкладок исключены) — в `PROJECT_STATUS.md`, раздел «Что дальше». Точный состав и границы пересчитать AST на старте Step 7.
 ### Destination
 `modules/settings_service.py` (расширение логики `modules/config_manager.py`).
 ### Objects to move

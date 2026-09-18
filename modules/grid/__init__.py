@@ -1,7 +1,9 @@
 # modules.grid — grid-слой, извлекаемый из Supervertaler.py (Step 6 EXTRACTION_PLAN.md).
 # Stage 2 (Batch #6): helpers.py — модуль ЧИСТЫХ ФУНКЦИЙ (решение владельца,
 # Stage 1 §6): явные параметры, без класса и без ссылок на главное окно.
-# Stage 3/4 добавят сюда pagination.py и filters.py.
+# Stage 3 (Batch #6): pagination.py — модуль чистых функций пагинации.
+# Stage 4 (Batch #6): filters.py — модуль чистых функций фильтров и
+# невидимых символов (закрывает Step 6 целиком).
 
 from . import helpers
 from .helpers import (
@@ -23,8 +25,6 @@ from .helpers import (
     get_filtered_segments_with_rows,
 )
 
-# Stage 3 (Batch #6): pagination.py — модуль чистых функций пагинации
-# (тот же принцип, что и helpers.py; делегаты сохранены в SupervertalerQt).
 from . import pagination
 from .pagination import (
     maybe_auto_set_page_size,
@@ -45,9 +45,37 @@ from .pagination import (
     PAGE_FALLBACK_SIZE,
 )
 
+# Stage 4 (Batch #6): filters.py — модуль чистых функций фильтров источника/
+# перевода, файлового фильтра, невидимых символов и сортировки.
+from . import filters
+from .filters import (
+    highlight_text_in_widget,
+    clear_filter_highlights_in_widget,
+    apply_filters,
+    clear_filters,
+    on_file_filter_changed,
+    update_file_filter_combo,
+    toggle_invisible_display,
+    toggle_all_invisibles,
+    refresh_grid_invisibles,
+    apply_invisible_replacements,
+    reverse_invisible_replacements,
+    filter_empty_segments,
+    clear_all_filter_highlights,
+    apply_quick_filter,
+    show_advanced_filters_dialog,
+    apply_advanced_filters,
+    apply_sort,
+    filter_on_selected_text,
+    ensure_shared_filter,
+    ensure_primary_filters_ready,
+)
+
 __all__ = [
     "helpers",
     "pagination",
+    "filters",
+] + [
     "widget_is_alive",
     "segment_for_grid_row",
     "recompute_list_numbers",
@@ -64,6 +92,7 @@ __all__ = [
     "move_to_next_visible_row",
     "is_text_filter_active",
     "get_filtered_segments_with_rows",
+] + [
     "maybe_auto_set_page_size",
     "get_total_pages",
     "update_pagination_ui",
@@ -80,4 +109,26 @@ __all__ = [
     "on_page_size_changed",
     "PAGE_AUTO_ALL_THRESHOLD",
     "PAGE_FALLBACK_SIZE",
+] + [
+    "highlight_text_in_widget",
+    "clear_filter_highlights_in_widget",
+    "apply_filters",
+    "clear_filters",
+    "on_file_filter_changed",
+    "update_file_filter_combo",
+    "toggle_invisible_display",
+    "toggle_all_invisibles",
+    "refresh_grid_invisibles",
+    "apply_invisible_replacements",
+    "reverse_invisible_replacements",
+    "filter_empty_segments",
+    "clear_all_filter_highlights",
+    "apply_quick_filter",
+    "show_advanced_filters_dialog",
+    "apply_advanced_filters",
+    "apply_sort",
+    "filter_on_selected_text",
+    "ensure_shared_filter",
+    "ensure_primary_filters_ready",
 ]
+

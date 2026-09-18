@@ -4,15 +4,16 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-17 (Batch #6 Stage 3) • **Текущий шаг:** Step 6 Stage 3 выполнен (pagination.py); СТОП — ждать GO владельца → Stage 4 (filters.py)
+**Обновлено:** 2026-09-18 (Batch #6 Stage 4) • **Текущий шаг:** Step 6 ЗАКРЫТ ЦЕЛИКОМ (helpers+pagination+filters, модуль 68 386 строк); СТОП — ждать решения владельца по Step 7
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **69 191**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
-Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5). **Step 6 (Batch #6):
-Stage 1 (инвентаризация), Stage 2 (helpers.py) и Stage 3 (pagination.py →
-modules/grid/) выполнены**; Stage 4 (filters.py) ждёт GO владельца. Среда,
+сейчас **68 386**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
+(Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
+Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
+Дальше — Step 7 (Settings service, IO-слой) только по решению владельца. Среда,
 тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед любой
 работой).
 
@@ -26,7 +27,7 @@ modules/grid/) выполнены**; Stage 4 (filters.py) ждёт GO владе
 | 3 | Event-фильтры + диалоги + чекбоксы | ✅ выполнен | Batch #3a `c7497d6` (`modules/event_filters.py`), #3b `4895e72` (`modules/dialogs/`), #3c `e543787` (`modules/styled_widgets.py`) |
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
-| 6 | Grid: helpers/pagination/filters | 🟡 Stage 1–3 выполнены; Stage 4 (filters) ждёт GO | Stage 1 `c5a5da1`; Stage 2 — `modules/grid/helpers.py` (16 функций + 17 делегатов); Stage 3 — `modules/grid/pagination.py` (14 функций + 14 делегатов, 2 module-level константы; `modules/grid/__init__.py` расширен); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage2*.txt`, `*batch6stage3*` |
+| 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
 | 7 | Settings service (IO-слой) | ⬜ не начат | — |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
@@ -36,7 +37,53 @@ modules/grid/) выполнены**; Stage 4 (filters.py) ждёт GO владе
 | 13 | Перевод-ядро (вкл. PreTranslationWorker) | ⬜ не начат | — |
 | 14 | SuperLookup + Voice + финальный cleanup | ⬜ не начат | — |
 
-## Что дальше: Step 6 — Grid: helpers/pagination/filters (Batch #6)
+## Что дальше: Step 6 ЗАКРЫТ ЦЕЛИКОМ (Batch #6 Stage 4 — последний под-батч)
+
+**Stage 4 выполнен** (18.09.2026, filters.py). Состав переноса: 20 методов
+(20 pure-функций + 1 внутренняя `_refresh_grid_invisibles_cells`) в
+`modules/grid/filters.py` (1277 строк) + 20 тонких делегатов в монолите с
+точными исходными именами/сигнатурами (7 делегатов сохранили ведущий `_`,
+одноимённые функции — без него). Замена выполнялась строго по AST-спанам
+снизу вверх ПО ИМЕНАМ (кластер — не непрерывный блок; окно 51794–55821 на HEAD
+содержит посторонние блоки: show_manage_views_dialog, `_refresh_source_column_
+display`, spellcheck 52645–53126, comments/dictation 53510–55753).
+AST: 22/22 совпало с координаторской таблицей байт-в-байт; 20 тел = 1097 строк →
+20 делегатов = 291 строка + 1 строка импорта. Монолит **69 191 → 68 386**
+(net −805; numstat: `Supervertaler.py` +222/−1027, `modules/grid/__init__.py`
++54/−3, новый `modules/grid/filters.py` 1277). Класс SupervertalerQt:
+6053–63263 → 6054–62458; 819 методов / 838 членов до и после.
+Стоп-условия не сработали: 8 метрик ровные (1211/18/35/24/24/0/85/2);
+манифест — только монолит + `__init__.py` + новый `filters.py` (0 правок
+внешних call sites подтверждено SHA256); 3 NOT-MOVE блока BYTE-IDENTICAL
+(`show_manage_views_dialog` b3d00f39…, `_refresh_source_column_display`
+90d2bf1b…, `_update_bulk_menu_label` 1d971a9a…); контрольные блоки spellcheck
+9ac157cd… и comments/dictation 6496a472… — по 1 вхождению; сценарии фильтров
+65/65 PASS (включая F11 apply_sort → reload_callback, единственное пересечение
+с SCC#1); Undo/Redo Batch #5 — 38/38 PASS (третий прогон); smoke save/load OK.
+Две находки вне «механического» скоупа: (1) предсуществующий бесконечный цикл
+в `clear_filter_highlights_in_widget` при наложении+снятии подсветки в одном
+диапазоне — воспроизводится и на HEAD, регрессии нет; (2) в этом же коммите
+исправлен порядок записи настроек невидимых символов (write_settings_callback
+теперь вызывается ДО refresh — как в исходном теле HEAD). Отчёт:
+`docs/refactoring/reports/ОТЧЁТ Batch #6 Stage 4.txt`; сигнатуры:
+`docs/refactoring/audits/batch6_stage4_signatures.txt`.
+**Итог Step 6:** `modules/grid/` = helpers.py 507 + pagination.py 584 +
+filters.py 1277 + `__init__.py` 134; 50 публичных функций + 51 делегат в
+монолите. Документация Step 6 закрыта целиком.
+
+**Дальше: СТОП — ждать решения владельца.** Следующий шаг плана — Step 7
+(Settings service, IO-слой). Номера строк в `EXTRACTION_PLAN.md` для Step 7
+устарели (Batch #1–#6 сдвинули монолит на −4951); предварительная AST-карта
+после Stage 4 (только чтение, кандидаты IO — 46 методов, 1709 строк; UI-билдеры
+вкладок исключены): `_get_settings_dir` 44639–44641, `_get_unified_settings_
+path` 44643–44645, `_load_unified_settings` 44647–44661, `_save_unified_settings`
+44663–44672, `_load_settings_section` 44674–44676, `_save_settings_section`
+44678–44682, `load_general_settings` 44522–44618, load/save clipboard privacy
+44690–44722, `_migrate_settings_to_unified` 44724–44814, general-from-file
+44883–44929, dictation 44931–45002, language pair/language 45004–45021 и
+45228–45261, voice vocabulary 45029–45092, spellcheck IO 52262–52280, llm/proxy
+56987–57111, api keys 61235–61247, «недавние проекты» 32231–32430. Точный состав
+и границы — пересчитать AST заново на старте Step 7 (как требует AGENTS.md).
 
 **Stage 3 выполнен** (17.09.2026, pagination.py). Состав переноса: 14 методов
 (14 pure-функций) в `modules/grid/pagination.py` + 2 module-level константы
