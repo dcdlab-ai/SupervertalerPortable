@@ -1,0 +1,198 @@
+| tier | метод | строки | строк |
+|---|---|---|---|
+| A | `_get_settings_dir` | 44639–44641 | 3 |
+| A | `_get_unified_settings_path` | 44643–44645 | 3 |
+| A | `_load_unified_settings` | 44647–44661 | 15 |
+| A | `_save_unified_settings` | 44663–44672 | 10 |
+| A | `_load_settings_section` | 44674–44676 | 3 |
+| A | `_save_settings_section` | 44678–44682 | 5 |
+| B | `load_general_settings` | 44522–44618 | 97 |
+| B | `_load_general_settings_from_file` | 44883–44922 | 40 |
+| B | `save_general_settings` | 44924–44929 | 6 |
+| B | `load_clipboard_privacy_settings` | 44690–44699 | 10 |
+| B | `save_clipboard_privacy_settings` | 44701–44722 | 22 |
+| B | `_migrate_settings_to_unified` | 44724–44814 | 91 |
+| B | `_migrate_to_workbench_layout` | 44816–44881 | 66 |
+| B | `_migrate_voice_dictation_default_off` | 45143–45174 | 32 |
+| B | `load_dictation_settings` | 44931–44946 | 16 |
+| B | `save_dictation_settings` | 44948–45002 | 55 |
+| B | `_load_language_pair_from_disk` | 45004–45021 | 18 |
+| B | `load_voice_vocabulary_settings` | 45029–45067 | 39 |
+| B | `save_voice_vocabulary_settings` | 45069–45092 | 24 |
+| B | `load_language_settings` | 45228–45249 | 22 |
+| B | `save_language_settings` | 45251–45261 | 11 |
+| B | `_save_spellcheck_settings` | 52262–52271 | 10 |
+| B | `_load_spellcheck_settings` | 52273–52280 | 8 |
+| B | `load_llm_settings` | 56987–57025 | 39 |
+| B | `save_llm_settings` | 57027–57034 | 8 |
+| B | `load_proxy_settings` | 57040–57056 | 17 |
+| B | `save_proxy_settings` | 57058–57065 | 8 |
+| B | `_get_proxy_url` | 57067–57089 | 23 |
+| B | `_get_proxy_dict` | 57091–57098 | 8 |
+| B | `load_provider_enabled_states` | 57283–57309 | 27 |
+| B | `save_provider_enabled_states` | 57311–57318 | 8 |
+| B | `load_api_keys` | 61235–61243 | 9 |
+| B | `save_api_keys` | 61245–61247 | 3 |
+| B | `load_recent_projects` | 32306–32368 | 63 |
+| B | `save_recent_projects` | 32370–32380 | 11 |
+| C | `get_autocorrect_settings` | 44620–44631 | 12 |
+| C | `add_to_recent_projects` | 32238–32288 | 51 |
+| C | `_remove_from_recent_projects` | 32290–32304 | 15 |
+| C | `clear_recent_projects` | 32416–32430 | 15 |
+| C | `load_font_sizes_from_preferences` | 45275–45361 | 87 |
+
+Итоги по тирам (методов / строк verbatim):
+* A: 6 методов / 39 строк
+* B: 29 методов / 791 строк
+* C: 5 методов / 180 строк
+* A+B (рекомендуемый состав): 35 методов / 830 строк
+* A+B+C (состав координатора): 40 методов / 1010 строк
+
+### Вне состава (классифицированные кандидаты полного скана класса)
+
+| группа | метод | строки | строк |
+|---|---|---|---|
+| G1-bootstrap | `__init__` | 6066–6531 | 466 |
+| G1-bootstrap | `_show_data_location_dialog` | 6533–6652 | 120 |
+| G1-bootstrap | `_reinitialize_with_new_data_path` | 6654–6708 | 55 |
+| G1-bootstrap | `_show_first_run_welcome` | 6710–6725 | 16 |
+| G1-bootstrap | `_show_setup_wizard` | 6727–6975 | 249 |
+| G2-ui-tabs | `create_settings_tab` | 20483–20616 | 134 |
+| G2-ui-tabs | `_update_settings_sidebar_theme` | 20682–20694 | 13 |
+| G2-ui-tabs | `_create_language_pair_tab` | 20714–20809 | 96 |
+| G2-ui-tabs | `_create_ai_settings_tab` | 20811–21856 | 1046 |
+| G2-ui-tabs | `_create_mt_settings_tab` | 21858–21968 | 111 |
+| G2-ui-tabs | `_create_mt_quick_lookup_settings_tab` | 21978–22356 | 379 |
+| G2-ui-tabs | `_create_backup_settings_tab` | 22460–22593 | 134 |
+| G2-ui-tabs | `_create_general_settings_tab` | 22612–23435 | 824 |
+| G2-ui-tabs | `_create_clipboard_settings_tab` | 23437–23667 | 231 |
+| G2-ui-tabs | `_create_autocorrect_settings_tab` | 23669–23759 | 91 |
+| G2-ui-tabs | `_create_view_settings_tab` | 23774–24672 | 899 |
+| G2-ui-tabs | `_create_voice_settings_tab` | 25507–25575 | 69 |
+| G2-ui-tabs | `_create_debug_settings_tab` | 26043–26159 | 117 |
+| G2-ui-tabs | `_create_user_identity_tab` | 25433–25494 | 62 |
+| G2-ui-tabs | `_create_file_types_settings_tab` | 44451–44520 | 70 |
+| G2-ui-tabs | `_switch_settings_subtab` | 28520–28532 | 13 |
+| G2-ui-save | `_save_mt_quick_lookup_settings` | 22358–22396 | 39 |
+| G2-ui-save | `_live_save_backup_settings` | 22595–22610 | 16 |
+| G2-ui-save | `_save_debug_settings_from_ui` | 26161–26173 | 13 |
+| G2-ui-save | `_save_llm_settings_from_ui` | 26211–26291 | 81 |
+| G2-ui-save | `_save_ai_settings_from_ui` | 26293–26477 | 185 |
+| G2-ui-save | `_save_api_keys_from_ui` | 26479–26490 | 12 |
+| G2-ui-save | `_save_mt_settings_from_ui` | 26492–26511 | 20 |
+| G2-ui-save | `_save_general_settings_from_ui` | 26513–26703 | 191 |
+| G2-ui-save | `_save_view_settings_from_ui` | 26705–26728 | 24 |
+| G2-ui-save | `_save_view_settings_from_ui_impl` | 26730–27026 | 297 |
+| G2-ui-save | `_save_user_identity_from_ui` | 25496–25505 | 10 |
+| G2-ui-save | `_save_language_settings_from_ui` | 45263–45273 | 11 |
+| G2-ui-save | `_persist_autocorrect_settings` | 23761–23772 | 12 |
+| G2-ui-nav | `open_mt_quick_lookup_settings` | 22398–22428 | 31 |
+| G2-ui-nav | `open_settings_to_keyboard_shortcuts` | 25999–26022 | 24 |
+| G2-ui-nav | `_go_to_settings_tab` | 56930–56957 | 28 |
+| G2-ui-nav | `_open_voice_in_workbench` | 25577–25591 | 15 |
+| G3-sentinels | `_set_confirmed_progress_basis` | 8481–8504 | 24 |
+| G3-sentinels | `save_current_font_sizes` | 44228–44278 | 51 |
+| G3-sentinels | `_save_bottom_dock_active_tab` | 43603–43613 | 11 |
+| G3-sentinels | `_toggle_match_panel_tm_layout` | 41495–41544 | 50 |
+| G3-sentinels | `get_termbase_code_map` | 49124–49130 | 7 |
+| G3-sentinels | `save_termbase_code_map` | 49132–49139 | 8 |
+| G3-sentinels | `_set_fr_demote_to_draft` | 50149–50159 | 11 |
+| G3-sentinels | `_set_voice_pause_setting` | 54397–54404 | 8 |
+| G3-sentinels | `_maybe_show_okapi_java_warning` | 58442–58508 | 67 |
+| G3-sentinels | `_apply_reimport_settings` | 48685–48700 | 16 |
+| G3-sentinels | `_init_usage_statistics` | 45363–45385 | 23 |
+| G3-sentinels | `_on_usage_stats_toggled` | (не найден в классе) | - |
+| G3-sentinels | `restore_last_project_if_enabled` | 45387–45416 | 30 |
+| G3-sentinels | `_verify_export_word_count` | 14213–14252 | 40 |
+| G3-sentinels | `_apply_row_color` | 43958–44022 | 65 |
+| G3-sentinels | `_load_superlookup_landing_pref` | (не найден в классе) | - |
+| G3-sentinels | `_on_landing_pref_changed` | (не найден в классе) | - |
+| G3-sentinels | `_setup_progress_indicators` | 8140–8215 | 76 |
+| G3-sentinels | `_setup_tray_icon` | 29437–29560 | 124 |
+| G3-sentinels | `_on_toggle_close_to_tray` | 29788–29791 | 4 |
+| G3-sentinels | `_on_toggle_start_minimized` | 29793–29796 | 4 |
+| G3-sentinels | `setup_ollama_keepwarm` | (не найден в классе) | - |
+| G3-sentinels | `show_find_replace_dialog` | 49693–50045 | 353 |
+| G4-file-io | `new_project` | 29154–29422 | 269 |
+| G4-file-io | `load_project` | 29909–30455 | 547 |
+| G4-file-io | `save_project` | 31803–31811 | 9 |
+| G4-file-io | `save_project_as` | 31813–31841 | 29 |
+| G4-file-io | `save_project_to_file` | 31843–32014 | 172 |
+| G4-file-io | `_maybe_make_versioned_backup` | 32016–32052 | 37 |
+| G4-file-io | `restart_auto_backup_timer` | 32054–32079 | 26 |
+| G4-file-io | `perform_auto_backup` | 32081–32134 | 54 |
+| G4-file-io | `import_document` | 32455–32581 | 127 |
+| G4-file-io | `import_simple_txt` | 33294–33666 | 373 |
+| G4-file-io | `_load_synonyms_bulk` | 30457–30516 | 60 |
+| G4-file-io | `load_segments_to_grid` | 41102–41272 | 171 |
+| G4-file-io | `_trigger_idle_prefetch` | 31276–31322 | 47 |
+| G4-file-io | `_prefetch_worker_run` | 31351–31459 | 109 |
+| G4-file-io | `_get_api_keys` | 11432–11435 | 4 |
+| G4-file-io | `_load_image_context_from_path` | 11304–11393 | 90 |
+| G4-file-io | `_project_export_path` | 12993–13007 | 15 |
+| G5-other-json | `check_for_updates` | 57573–58077 | 505 |
+| G5-other-json | `_fetch_latest_release_info_from_github` | 58079–58102 | 24 |
+| G5-other-json | `_get_diagnostic_log_path` | 58179–58197 | 19 |
+| G5-other-json | `_get_whisper_cache_path` | 58519–58525 | 7 |
+| G5-other-json | `export_debug_log_now` | 26175–26202 | 28 |
+| G5-other-json | `_load_system_prompt_into_editor` | 25320–25352 | 33 |
+| G5-other-json | `_save_system_prompt_from_ui` | 25354–25394 | 41 |
+| G5-other-json | `_apply_proactive_highlighting` | 49555–49611 | 57 |
+| G5-other-json | `show_about` | 58245–58307 | 63 |
+| G5-other-json | `_open_url` | 57553–57559 | 7 |
+| G5-other-json | `_open_folder_in_explorer` | 52622–52637 | 16 |
+| G5-other-json | `_open_voice_scripts_folder` | 24714–24719 | 6 |
+| G5-other-json | `open_superbrowser_window` | 10085–10125 | 41 |
+| G5-other-json | `_ensure_superlookup_top_tab` | 11811–11839 | 29 |
+| G5-other-json | `_ensure_voice_top_tab` | 11881–11901 | 21 |
+| G5-other-json | `detach_superlookup` | 11903–12034 | 132 |
+| G6-voice-runtime | `start_voice_dictation` | 54495–54713 | 219 |
+| G6-voice-runtime | `stop_voice_dictation_if_recording` | 54456–54493 | 38 |
+| G6-voice-runtime | `on_dictation_complete` | 54715–54730 | 16 |
+| G6-voice-runtime | `on_dictation_status` | 54807–54810 | 4 |
+| G6-voice-runtime | `on_dictation_error` | 54812–54829 | 18 |
+| G6-voice-runtime | `on_dictation_finished` | 54831–54844 | 14 |
+| G6-voice-runtime | `_resume_alwayson_after_dictation` | 54846–54864 | 19 |
+| G6-voice-runtime | `_toggle_alwayson_listening` | 24721–24834 | 114 |
+| G6-voice-runtime | `_on_alwayson_dictation` | 25120–25154 | 35 |
+| G6-voice-runtime | `_get_voice_release_poller` | 53968–54004 | 37 |
+| G6-voice-runtime | `_register_voice_pushtotalk_deferred` | 54045–54060 | 16 |
+| G6-voice-runtime | `_register_voice_command_ptt_deferred` | 54064–54085 | 22 |
+| G6-voice-runtime | `_on_voice_command_ptt_press` | 54087–54155 | 69 |
+| G6-voice-runtime | `_on_voice_command_ptt_release` | 54157–54217 | 61 |
+| G6-voice-runtime | `_do_voice_command_ptt_stop` | 54219–54256 | 38 |
+| G6-voice-runtime | `_get_voice_hotkey_listener` | 54258–54312 | 55 |
+| G6-voice-runtime | `_voice_pause_mode` | 54321–54325 | 5 |
+| G6-voice-runtime | `_ensure_voice_pause_hotkey_armed` | 54351–54382 | 32 |
+| G6-voice-runtime | `_on_voice_pause_press` | 54384–54391 | 8 |
+| G6-voice-runtime | `_on_voice_pause_release` | 54393–54395 | 3 |
+| G6-voice-runtime | `_begin_voice_pause_capture` | 54406–54417 | 12 |
+| G6-voice-runtime | `_on_voice_pause_key_captured` | 54419–54439 | 21 |
+| G6-voice-runtime | `_clear_voice_pause_hotkey` | 54441–54454 | 14 |
+| G6-voice-runtime | `_dictation_shortcut_label` | 54909–54931 | 23 |
+| G6-voice-runtime | `_set_dictation_button_recording` | 54933–54960 | 28 |
+| G6-voice-runtime | `_collect_voice_dictation_termbase_terms` | 45176–45226 | 51 |
+| G6-voice-runtime | `build_voice_initial_prompt` | 45094–45119 | 26 |
+| G6-voice-runtime | `on_model_loading_started` | 54866–54899 | 34 |
+| G6-voice-runtime | `on_model_loading_finished` | 54901–54907 | 7 |
+| G6-voice-runtime | `_populate_voice_commands_table` | 24674–24690 | 17 |
+| G6-voice-runtime | `_reset_voice_commands` | 24692–24704 | 13 |
+| G7-spellcheck-runtime | `_update_spellcheck_button_style` | 52161–52167 | 7 |
+| G7-spellcheck-runtime | `_toggle_spellcheck` | 52169–52215 | 47 |
+| G7-spellcheck-runtime | `_toggle_spellcheck_from_button` | 52217–52260 | 44 |
+| G7-spellcheck-runtime | `_refresh_all_highlighters` | 52282–52317 | 36 |
+| G7-spellcheck-runtime | `_open_custom_dictionary_dialog` | 52319–52370 | 52 |
+| G7-spellcheck-runtime | `_save_custom_dictionary` | 52372–52390 | 19 |
+| G7-spellcheck-runtime | `_show_spellcheck_info` | 52392–52620 | 229 |
+| G7-spellcheck-runtime | `_initialize_spellcheck_for_target_language` | 48608–48620 | 13 |
+
+Итоги по группам вне состава:
+* G1-bootstrap: 5 методов / 906 строк
+* G2-ui-nav: 4 методов / 98 строк
+* G2-ui-save: 13 методов / 911 строк
+* G2-ui-tabs: 16 методов / 4289 строк
+* G3-sentinels: 19 методов / 972 строк
+* G4-file-io: 17 методов / 2139 строк
+* G5-other-json: 16 методов / 1029 строк
+* G6-voice-runtime: 31 методов / 1069 строк
+* G7-spellcheck-runtime: 8 методов / 447 строк

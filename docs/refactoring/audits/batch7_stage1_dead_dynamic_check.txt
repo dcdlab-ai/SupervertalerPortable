@@ -1,0 +1,7 @@
+names checked: 40
+save_dictation_settings	line 69	section: Публичные zero-ref	| 24 | `save_dictation_settings` | Supervertaler.py:48617 (55L) | Zero textual-ссылок (анализ идентичен DEFINITELY), но публичное имя — сохранена консервативнос
+save_voice_vocabulary_settings	line 260	section: DYNAMIC_ENTRY_POINT	| 137 | `save_voice_vocabulary_settings` | 48738 | EXTERNAL_ATTR_REF |
+get_autocorrect_settings	line 259	section: DYNAMIC_ENTRY_POINT	| 136 | `get_autocorrect_settings` | 48289 | EXTERNAL_ATTR_REF |
+clear_recent_projects	line 213	section: DYNAMIC_ENTRY_POINT	| 90 | `clear_recent_projects` | 36039 | MENU_ACTION |
+--- found in report: 4/40
+FOUND: clear_recent_projects, get_autocorrect_settings, save_dictation_settings, save_voice_vocabulary_settings

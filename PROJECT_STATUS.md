@@ -4,7 +4,7 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-18 (Batch #6 Stage 4) • **Текущий шаг:** Step 6 ЗАКРЫТ ЦЕЛИКОМ (helpers+pagination+filters, модуль 68 386 строк); СТОП — ждать решения владельца по Step 7
+**Обновлено:** 2026-09-24 (Batch #7 Stage 1) • **Текущий шаг:** Step 7 — Stage 1 (инвентаризация, read-only) выполнен; СТОП — ждать решения владельца по V1–V4 отчёта, монолит 68 386 строк
 
 ## Кратко: где мы находимся
 
@@ -13,7 +13,12 @@
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
-Дальше — Step 7 (Settings service, IO-слой) только по решению владельца. Среда,
+По **Step 7** выполнен **Stage 1 (Batch #7, read-only инвентаризация, 24.09.2026)**:
+состав уточнён до 35 методов / 830 строк (было «~25» в плане, «~46» у координатора),
+риски картированы (fan-in `load_general_settings` 61, дукт-тайпед-обращения из
+`modules/` к приватным именам, дубликаты владельца `settings.json`). Перенос
+(Stage 2) не начат — ждёт решения владельца по V1–V4.
+Дальше — Step 7 Stage 2+ только по решению владельца. Среда,
 тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед любой
 работой).
 
@@ -28,16 +33,67 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | ⬜ не начат | — |
+| 7 | Settings service (IO-слой) | 🔄 Stage 1 выполнен (read-only инвентаризация 24.09.2026); Stage 2 не начат — ждёт решения владельца по V1–V4 | Batch #7 Stage 1 (read-only): отчёт `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 — Stage 1 закрыт (Batch #7 Stage 1, 24.09.2026, read-only)
+
+**Stage 1 выполнен** (HEAD `b5c46e7`, монолит 68 386 строк, sha256 блоба
+`802c504c8849ac58551bece6b297917426e31226` — код не менялся). Отчёт:
+`docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`; разбор 1.1–1.9:
+`docs/refactoring/audits/step7_stage1_findings.md`; измерения:
+`docs/refactoring/audits/batch7_stage1_{methods_ast,candidates_scan,inventory_tables,callsites_categorized,callsites_raw,dependencies,dead_dynamic_check,config_manager_overlap}.*`.
+
+**Состав (подтверждён AST):** 35 методов / 830 строк = A (ядро API, 6 методов /
+39 строк: `_get_settings_dir` 44639–44641, `_get_unified_settings_path` 44643–44645,
+`_load_unified_settings` 44647–44661, `_save_unified_settings` 44663–44672,
+`_load_settings_section` 44674–44676, `_save_settings_section` 44678–44682) + B
+(29 доменных аксессоров, 791 строка). Миграции: `_migrate_settings_to_unified`
+**44724–44814**, `_migrate_to_workbench_layout` **44816–44881**,
+`_migrate_voice_dictation_default_off` **45143–45174** (третья, в плане отсутствует).
+Тир C (не включать): `get_autocorrect_settings` 44620–44631,
+`add/_remove/clear_recent_projects` 32238–32288 / 32290–32304 / 32416–32430,
+`load_font_sizes_from_preferences` 45275–45361.
+Не два окна из плана, а ≥9 кластеров в span **8481–61247**; «~25» плана ≈ ядро A+B,
+«~46» координатора смешало A+B + тир C + одноразовые писатели секций (группа G3:
+`_set_voice_pause_setting`, `save_termbase_code_map`, `_set_fr_demote_to_draft`,
+`_persist_autocorrect_settings` и др. — все вне состава).
+
+**Главные риски/факты:** `load_general_settings` = **61 call-сайт** (56 методов
+`SupervertalerQt`, `PreTranslationWorker.run` 5479, `SuperlookupTab` 66766/66809,
+`main()` 68357, `modules/quicktrans.py:303`) + 7 `getattr`-строковых обращений; это НЕ
+чистый IO (2 строки чтения из 97 + 35 присваиваний `self.<attr>`) → SPLIT.
+Семантика «файл читается заново на каждый вызов» подтверждена (кэшей нет). Дукт-тайпед
+обращения из `modules/` есть и к ПРИВАТНЫМ именам (`_load_unified_settings`,
+`_save_unified_settings`, `_load_settings_section`, `_save_settings_section`,
+`_get_proxy_url`) → 35 тонких делегатов с исходными именами. ConfigManager:
+`get_preferences_path/load_preferences/save_preferences` — дубликаты того же файла/секции
+с 0 call-sites, а его резолвер user_data (`~/.supervertaler_config.json`) отличается от
+монолитного (`%APPDATA%/Supervertaler/config.json`) → сервис не должен резолвить путь сам.
+Наблюдения вне скопа: латентный баг `modules/termbase_entry_editor.py:121/131`,
+дубликаты чтения `settings.json` (llm_clients/feature_manager/ui_scale), три механизма
+указателя user_data.
+
+**Решение владельца (V1–V4) перед Stage 2:** (V1) архитектура — рекомендация: новый
+класс `SettingsService` в `modules/settings_service.py` с явным `settings_dir`
+(+ опц. `log`), ConfigManager не расширять; (V2) не включать тир C; (V3) SPLIT для
+`load_general_settings` и `_migrate_voice_dictation_default_off` обязателен, для
+`save_clipboard_privacy_settings`/`save_dictation_settings`/`load_language_settings` —
+на выбор; (V4) под-батч S2.5 (recent + миграции) с валидацией на копии user_data.
+
+**Разбивка Stage 2+ (по риску):** S2.1 ядро API (6/39) → S2.2 general + общий reading
+(5/175, fan-in 90) → S2.3 LLM/proxy/provider/api keys (10/150, ★ ровно на границе
+конвенции 10 методов) → S2.4 языки/диктовка/словарь/спеллчек (9/203) → S2.5 recent +
+миграции (5/263). Ни один под-батч не превышает 10 методов.
+
+
 | 12 | TM / Termbase сервисы | ⬜ не начат | — |
 | 13 | Перевод-ядро (вкл. PreTranslationWorker) | ⬜ не начат | — |
 | 14 | SuperLookup + Voice + финальный cleanup | ⬜ не начат | — |
 
-## Что дальше: Step 6 ЗАКРЫТ ЦЕЛИКОМ (Batch #6 Stage 4 — последний под-батч)
+## История: Step 6 ЗАКРЫТ ЦЕЛИКОМ (Batch #6 Stage 4 — последний под-батч)
 
 **Stage 4 выполнен** (18.09.2026, filters.py). Состав переноса: 20 методов
 (20 pure-функций + 1 внутренняя `_refresh_grid_invisibles_cells`) в

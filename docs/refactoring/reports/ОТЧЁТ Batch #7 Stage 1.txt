@@ -1,0 +1,485 @@
+ОТЧЁТ Batch #7 Stage 1 — Step 7 (Settings service, IO-слой): инвентаризация,
+карта call sites, рекомендация по архитектуре и разбивке
+════════════════════════════════════════════════════════════════════════════
+Дата: 24.09.2026
+HEAD: b5c46e7 ("update VALIDATION_BACKLOG.md"); предыдущий функциональный коммит —
+      b5c46e7~1 = 3cca422 ("Extract grid filters into modules/grid/filters.py …").
+Монолит Supervertaler.py: 68 386 строк (Python-счётчик), sha256 блоба
+      802c504c8849ac58551bece6b297917426e31226 == git rev-parse HEAD:Supervertaler.py.
+Режим: READ-ONLY ANALYSIS. Код не изменялся (подтверждение — в конце отчёта).
+Класс-цель: SupervertalerQt — AST 6054–62458, 819 прямых методов.
+Артефакты: docs/refactoring/audits/batch7_stage1_*.txt и
+docs/refactoring/audits/step7_stage1_findings.md; рабочие скрипты —
+D:\Temp\SupervertalerPortable\refactoring\batch7_stage1\run-001\.
+
+Все девять подзадач (1.1–1.9) закрыты. Чужой незавершённой работы не было: файл
+docs/refactoring/audits/step7_stage1_findings.md до этой сессии не существовал,
+секции «ПЕРЕДАЧА СМЕНЫ» в промпте нет.
+
+════════════════════════════════════════════════════════════════════════════
+1.1–1.2 ПОЛНАЯ ТАБЛИЦА СОСТАВА (метод → границы → кластер → комментарий)
+════════════════════════════════════════════════════════════════════════════
+Тиры: A = ядро API (безусловно в Stage 2); B = доменные аксессоры (в Stage 2; часть
+требует SPLIT или инъекции зависимостей); C = UI-связанные соседи (НЕ включать).
+Кластеры (AST): K1 = settings-ядро 44451–45361; K2 = recent projects 32195–32430;
+K3 = spellcheck IO 52262–52280; K4 = llm/proxy/provider 56987–57318;
+K5 = api keys 61235–61247.
+
+
+тир | метод                               | строки        | строк | кластер | комментарий
+----+-------------------------------------+---------------+-------+---------+--------------------------------------------------------------------------------------
+A   | _get_settings_dir                   | 44639–44641   |   3   | K1      | = self.user_data_path/"workbench"/"settings"; 3 вызова, все внутри состава
+A   | _get_unified_settings_path          | 44643–44645   |   3   | K1      | + потребители 22756/22767 (usage-stats) и 45369 (_init_usage_statistics)
+A   | _load_unified_settings              | 44647–44661   |  15   | K1      | читает файл КАЖДЫЙ раз; гарантирует 4 секции; на ошибке — пустые секции
+A   | _save_unified_settings              | 44663–44672   |  10   | K1      | mkdir + json.dump(indent=2, ensure_ascii=False); использует self.log
+A   | _load_settings_section              | 44674–44676   |   3   | K1      | 1 строка тела; 28 вызовов (1 из main():68357, 2 duck-typed string-ref из clipboard-виджета)
+A   | _save_settings_section              | 44678–44682   |   5   | K1      | read-modify-write; 1 string-ref из modules/clipboard_manager_widget.py:2299
+B   | load_general_settings               | 44522–44618   |  97   | K1      | макс. fan-in (61 вызов); НЕ чистый IO: 35 присваиваний self.<attr> + вызов load_llm_settings → SPLIT
+B   | _load_general_settings_from_file    | 44883–44922   |  40   | K1      | чистый file-read + дефолты + миграция ключей termview_*→termlens_*; 4 вызова
+B   | save_general_settings               | 44924–44929   |   6   | K1      | 1 строка тела + try/log; 27 вызовов (монолит: UI-сохранение)
+B   | load_clipboard_privacy_settings     | 44690–44699   |  10   | K1      | чтение features.clipboard_privacy; +1 duck-typed сайт (clipboard widget:771)
+B   | save_clipboard_privacy_settings     | 44701–44722   |  22   | K1      | запись features + живой refresh виджета (self._clipboard_top_widget) → SPLIT
+B   | _migrate_settings_to_unified        | 44724–44814   |  91   | K1      | одноразовая (4 старых файла → settings.json); Path(__file__) → repo-root мина; вызовы 6326/6658
+B   | _migrate_to_workbench_layout        | 44816–44881   |  66   | K1      | одноразовая; shutil-перемещение каталогов + .migrated-флаг; вызовы 6327/6659
+B   | _migrate_voice_dictation_default_off| 45143–45174   |  32   | K1      | ТРЕТЬЯ миграция (в плане не названа): DB UPDATE + сентинела в ui → SPLIT/остаётся
+B   | load_dictation_settings             | 44931–44946   |  16   | K1      | дефолты + чтение ui.dictation_settings; +2 duck-typed сайта voice_tab 736/781
+B   | save_dictation_settings             | 44948–45002   |  55   | K1      | PROBABLY_DEAD (0 вызовов), содержит QMessageBox(self, …) → SPLIT или остаётся
+B   | _load_language_pair_from_disk       | 45004–45021   |  18   | K1      | чтение ui + установка source/target_language; 1 вызов (__init__:6337)
+B   | load_voice_vocabulary_settings      | 45029–45067   |  39   | K1      | дефолты + нормализация; +duck-typed voice_tab:1239
+B   | save_voice_vocabulary_settings      | 45069–45092   |  24   | K1      | 0 прямых вызовов; DYNAMIC_ENTRY_POINT (EXTERNAL_ATTR_REF, voice_tab:1280)
+B   | _save_spellcheck_settings           | 52262–52271   |  10   | K3      | запись ui.spellcheck_settings.enabled
+B   | _load_spellcheck_settings           | 52273–52280   |   8   | K3      | чтение того же; 1 вызов (27238 create_grid_view_widget)
+B   | load_llm_settings                   | 56987–57025   |  39   | K4      | дефолты провайдеров + автомиграция профилей; вызывает load_api_keys(); 4 duck-typed сайта в modules/
+B   | save_llm_settings                   | 57027–57034   |   8   | K4      | запись ui.llm_settings
+B   | load_proxy_settings                 | 57040–57056   |  17   | K4      | чтение ui.proxy_settings
+B   | save_proxy_settings                 | 57058–57065   |   8   | K4      | запись ui.proxy_settings
+B   | _get_proxy_url                      | 57067–57089   |  23   | K4      | производный геттер (load_proxy_settings + urllib.parse.quote); 15 вызовов, 2 в modules/
+B   | _get_proxy_dict                     | 57091–57098   |   8   | K4      | производный ({http,https}); 5 вызовов (MT-функции)
+B   | load_provider_enabled_states        | 57283–57309   |  27   | K4      | дефолты 13 провайдеров; 1 duck-typed сайт quicktrans:326
+B   | save_provider_enabled_states        | 57311–57318   |   8   | K4      | запись ui.provider_enabled_states
+B   | load_api_keys                       | 61235–61243   |   9   | K5      | чтение api_keys; 45 call-сайтов (в modules/ — свои реализации, наблюдение F2)
+B   | save_api_keys                       | 61245–61247   |   3   | K5      | запись api_keys; 1 вызов (26490)
+B   | load_recent_projects                | 32306–32368   |  63   | K2      | recent_projects.json: UTF-8→latin-1 фолбэк, старый dict→list формат, авто-очистка не-.svproj; self.recent_projects_file
+B   | save_recent_projects                | 32370–32380   |  11   | K2      | запись + mkdir user_data_path
+C   | get_autocorrect_settings            | 44620–44631   |  12   | K1      | in-memory getter (без IO); DYNAMIC_ENTRY_POINT (modules/autocorrect.py — на каждое нажатие)
+C   | add_to_recent_projects              | 32238–32288   |  51   | K2      | IO + UI (update_recent_menu/display, self.current_project, _canon_path, MAX_RECENT_PROJECTS)
+C   | _remove_from_recent_projects        | 32290–32304   |  15   | K2      | то же; 1 вызов из load_project:30446
+C   | clear_recent_projects               | 32416–32430   |  15   | K2      | QMessageBox + UI; 0 прямых вызовов (QAction connect 32421) → MENU_ACTION
+C   | load_font_sizes_from_preferences    | 45275–45361   |  87   | K1      | читает general-секцию, применяет UI (results_panels, apply_font_to_grid, классы монолита) → перенос без NameError невозможен
+
+Итоги: A = 6 методов / 39 строк; B = 29 / 791; C = 5 / 180.
+       A+B = 35 методов / 830 строк; A+B+C = 40 методов / 1010 строк.
+
+Точные границы миграций (подтверждены AST):
+  _migrate_settings_to_unified         = 44724–44814 (91L)
+  _migrate_to_workbench_layout         = 44816–44881 (66L)
+  _migrate_voice_dictation_default_off = 45143–45174 (32L)  ← в плане отсутствует
+
+B   | load_language_settings              | 45228–45249   |  22   | K1      | читает ui + побочные эффекты spellcheck (TagHighlighter, spellcheck_manager) → SPLIT
+B   | save_language_settings              | 45251–45261   |  11   | K1      | запись ui; 2 вызова (20791, 45267)
+
+РАСХОЖДЕНИЕ С ОЖИДАНИЯМИ ПЛАНА «~25» И КООРДИНАТОРА «~46»
+- План «~25 методов» называл только ядро + general/llm/proxy/api-keys + общие слова
+  «языки, диктовка, словарь, спеллчек, недавние». Фактическое ядро A+B = 35 методов /
+  830 строк: план не назвал load_clipboard_privacy_settings, save_clipboard_privacy_settings,
+  _load_general_settings_from_file, _load_language_pair_from_disk и третью миграцию.
+  «Expected result −1 200 строк» недостижим: verbatim 830 минус ~35 делегатов по
+  2–4 строки ≈ −700.
+- Координатор «~46 / ~1709 строк» — греп-оценка «на глаз»: смешаны A+B (35), тир C
+  (5: add/remove/clear_recent_projects, load_font_sizes_from_preferences,
+  get_autocorrect_settings) и часть группы G3 одноразовых писателей
+  (_set_voice_pause_setting, save_termbase_code_map, _set_fr_demote_to_draft,
+  _persist_autocorrect_settings и др.). 35 + 5 + ~6 = 46 — совпадение по числу, не по
+  составу: в счёт попали UI-обработчики, которых в плане Step 7 нет.
+- «Не два окна, а минимум 9 кластеров» — подтверждено, но span ещё шире: не
+  32 231–61 247, а 8481–61 247 (≈52 800 строк).
+- Полный скан класса (чтобы состав был доказательно закрыт): 205 кандидатов по name- и
+  body-паттернам, все классифицированы; вне состава 9 групп — G1 bootstrap (5 методов /
+  906 строк), G2 UI-вкладки настроек + их _save_*_from_ui + навигация (33 / 5 298),
+  G3 одноразовые писатели секций (19 / 972), G4 проектный/файловый IO (17 / 2 139),
+  G5 прочий JSON/log-IO (16 / 1 029), G6 голосовой runtime (31 / 1 069),
+  G7 spellcheck-runtime (8 / 447).
+
+ОБЪЯСНЕНИЕ НЕОБЪЯСНЁННЫХ РАЗРЫВОВ (из 1.1 промпта)
+- 44619–44638: пустая + get_autocorrect_settings (44620–44631) + пустая + баннер-
+  комментарий «Unified Settings Infrastructure … api_keys/general/ui/features»
+  (44633–44637) + пустая. Это ПРОПУЩЕННЫЙ метод, а не пропущенный IO.
+- 44683–44689, 44930, 45022–45028, 45093: пустые/разделительные строки.
+- 45092–45228 (136 строк): build_voice_initial_prompt (45094–45119, Whisper-prompt),
+  open_termbases_tab (45121–45141, UI-навигация), _migrate_voice_dictation_default_off
+  (45143–45174, ВХОДИТ в состав), _collect_voice_dictation_termbase_terms
+  (45176–45226, читает БД терминологий).
+- 45262–45274: _save_language_settings_from_ui (UI-обработчик с QMessageBox).
+- 57112–57162: _get_active_custom_profile/_get_custom_mt_profiles/
+  _get_active_custom_mt_profile — потребители load_llm_settings, не IO.
+- 32195–32230: update_recent_menu (построение QMenu).
+Дополнительно найдено (грепом по именам не ловилось — найден AST-поиском потребителей
+приватного API): третья миграция _migrate_voice_dictation_default_off (45143–45174) и
+13 прямых читателей/писателей settings.json вне «окон» координатора:
+get_termbase_code_map (49124–49130), save_termbase_code_map (49132–49139),
+_set_fr_demote_to_draft (50149–50159), _set_voice_pause_setting (54397–54404),
+_set_confirmed_progress_basis (8481–8504), _persist_autocorrect_settings (23761–23772),
+save_current_font_sizes (44228–44278), _save_bottom_dock_active_tab (43603–43613),
+_toggle_match_panel_tm_layout (41495–41544), _maybe_show_okapi_java_warning (58442–58508),
+_apply_reimport_settings (48685–48700), _init_usage_statistics (45363–45385),
+_verify_export_word_count (14213–14252). Все — группа G3, вне состава.
+
+
+════════════════════════════════════════════════════════════════════════════
+1.3 CIRCULAR DEPENDENCY CHECK (план утверждает «Нет»)
+════════════════════════════════════════════════════════════════════════════
+ВЫВОД: утверждение ПОДТВЕРЖДЕНО для состава A+B, при обязательном сохранении делегатов.
+Факты:
+1) В телах всех 35 методов A+B нет ни одного import из modules/ (проверено грепом по
+   дампам тел + по deps-картам). Единственная внешняя библиотечная зависимость —
+   QMessageBox (PyQt6) в save_dictation_settings.
+2) Единственный «from modules.…» в тире C — get_autocorrect_settings →
+   from modules.autocorrect import AutoCorrectSettings; modules/autocorrect.py монолит
+   не импортирует (0 файлов репозитория импортируют Supervertaler.py — методика
+   DEAD_CODE_REPORT.md, п.12) → цикла нет.
+3) Блокер — не цикл, а неразрешимые глобальные имена монолита:
+   • load_language_settings (45228–45249) ссылается на TagHighlighter (класс монолита,
+     строка 2926) и self.spellcheck_manager → вне монолита NameError (нужен SPLIT);
+   • load_font_sizes_from_preferences (45275–45361, тир C) импортирует
+     modules.translation_results_panel И ссылается на EditableGridTextEditor,
+     ReadOnlyGridTextEditor, SupervertalerQt (классы монолита);
+   • add/_remove/clear_recent_projects (тир C) используют модульную функцию _canon_path,
+     self.current_project, self.project_file_path, self.MAX_RECENT_PROJECTS, QMessageBox
+     и UI-методы update_recent_menu/update_recent_projects_display.
+4) Обратного направления (сервис → монолит) нет ни в одном варианте: делегаты живут в
+   монолите и импортируют сервис (монолит → modules.settings_service). Цикл не
+   появится при условии, что modules/settings_service.py НЕ импортирует
+   termbase_entry_editor/voice_tab/clipboard_manager_widget/quicktrans — они общаются
+   с сервисом только через parent_app-дукт-тайпинг (в импорте не нуждаются).
+5) Не-циклическая мина: _migrate_settings_to_unified использует
+   Path(__file__).parent / "user_data_private" / "api_keys.txt" (44850–44851). После
+   переноса в modules/ Path(__file__) укажет на modules/ → путь изменится. В Stage 2
+
+════════════════════════════════════════════════════════════════════════════
+1.4 CALL SITES (фокус — load_general_settings)
+════════════════════════════════════════════════════════════════════════════
+Полная карта: docs/refactoring/audits/batch7_stage1_callsites_categorized.txt
+(394 ссылки: 345 call-сайтов, 30 string-ref, 3 attr-ref, 40 def).
+
+load_general_settings — ТОЧНОЕ число реальных вызовов: 61
+  • 60 в монолите: 56 из методов SupervertalerQt, 1 из PreTranslationWorker.run (5479),
+    2 из SuperlookupTab (66766 on_close, 66809 _browse_for_autohotkey), 1 из модульной
+    функции main() (68357 — там же window._load_settings_section("ui"));
+  • 1 внешний: modules/quicktrans.py:303 (_load_mt_quick_settings).
+  • Плюс 7 string-ref (обращения по строковому имени): 1809 highlight_termbase_matches,
+    55545/55554 _play_sound_effect, 64697 _load_superlookup_landing_pref,
+    64712/64713 _on_landing_pref_changed, 7861 show_term_insert_popup,
+    modules/quicktrans.py:302 — все в форме
+    getattr(self, 'load_general_settings', lambda: {})() («мягкий» duck-typing).
+  • Итого fan-in = 60 (монолит) + 1 (modules) + 7 строковых = 68 обращений;
+    в плане «до 48» — там не учтены getattr-формы и вызовы из
+    main()/SuperlookupTab/PreTranslationWorker.
+
+Остальные методы (полная таблица — в docs/refactoring/audits/step7_stage1_findings.md,
+раздел 1.4.2). Ключевое:
+  • _load_settings_section 28 (26 SupervertalerQt + main() + termbase-баг), 2 string-ref
+    в modules/clipboard_manager_widget.py (2284/2298) — реальные duck-typed вызовы;
+  • _save_settings_section 11 + 1 string-ref (clipboard-виджет 2299);
+  • _load_unified_settings 12 / _save_unified_settings 11 (по одному мнимому сайту в
+    termbase_entry_editor), _get_settings_dir 3, _get_unified_settings_path 4;
+  • save_general_settings 27 (все монолит), _load_general_settings_from_file 4
+    (41540, 44295, 44487, 44525);
+  • load_llm_settings 28 (24 монолит + 4 модуля: chat_backend:139, chat_view_widget:737,
+    quicktrans:370/454), _get_proxy_url 15 (13 + chat_backend:150, chat_view_widget:745),
+    load_provider_enabled_states 13 (12 + quicktrans:326), _get_proxy_dict 5,
+    save_llm_settings 3, load_proxy_settings 2, save_proxy_settings 1,
+    save_provider_enabled_states 3, save_api_keys 1 (26490);
+  • load_api_keys 45: в modules/ это СВОИ функции (modules/llm_clients.py:1864/1901 при
+    собственном def load_api_keys на строке 43) и duck-typed parent_app.load_api_keys()
+    в quicktrans 324/440, chat_backend 101/103, chat_view_widget 712/714,
+    pdf_rescue_Qt 55;
+  • load_recent_projects 5, save_recent_projects 3;
+  • _migrate_settings_to_unified 2 (__init__:6326, _reinitialize_with_new_data_path:6658
+    — догадка координатора 6327/6659 верна с точностью до строки),
+    _migrate_to_workbench_layout 2 (__init__:6327, 6659),
+    _migrate_voice_dictation_default_off 1 (__init__:6388),
+    _load_language_pair_from_disk 1 (__init__:6337);
+  • load_dictation_settings 8 + 2 string-ref (voice_tab 736/781),
+    load_voice_vocabulary_settings 3 + 1 string-ref (voice_tab:1239),
+    save_voice_vocabulary_settings 0 (живёт только через string-ref voice_tab:1280),
+    save_dictation_settings 0 (PROBABLY_DEAD), clear_recent_projects 0 (QAction connect
+    32421), get_autocorrect_settings 1 (вызов из modules/autocorrect.py по атрибуту),
+    load_font_sizes_from_preferences 1 (__init__:6501),
+    load_clipboard_privacy_settings 1 + 1 string-ref (clipboard-виджет 771),
+    save_clipboard_privacy_settings 1 (23481), load/save_language_settings 1/2,
+    _load_spellcheck_settings 1 (27238), _save_spellcheck_settings 2,
+    load/save clipboard privacy 1/1, add_to_recent_projects 2,
+    _remove_from_recent_projects 1 (load_project:30446).
+
+
+ПОДТВЕРЖДЕНИЕ «НЕ КЭШИРУЕТСЯ НИГДЕ» (проверка семантики, которую нельзя сломать):
+  • _load_unified_settings на каждом вызове делает open()+json.load; полей-кэшей у
+    класса нет: грепы lru_cache|functools.cache|_settings_cache|_cached_settings —
+    0 совпадений в составе;
+  • единственный производный кэш настроек в монолите — _row_color_settings_cached
+    (_apply_row_color, 41116/43976/44093), явно инвалидируется, файл не кэширует;
+  • все внешние duck-typed потребители вызывают метод в момент потребности и не хранят
+    результат дольше одного вызова: modules/quicktrans.py:303 (на каждый
+    _get_enabled_providers), modules/voice_tab.py:1233/1239 (перезагрузка словаря при
+    построении вкладки), modules/clipboard_manager_widget.py:2284/2298 (при чтении/
+    записи paste-method), modules/autocorrect.py (снимок настроек на КАЖДОЕ нажатие
+    клавиши — прямо в докстринге get_autocorrect_settings), PreTranslationWorker (на
+    старте прогона), main()/SuperlookupTab (в момент действия).
+
+════════════════════════════════════════════════════════════════════════════
+1.5 ЗАВИСИМОСТИ / ОТНОШЕНИЕ К СУЩЕСТВУЮЩЕМУ ConfigManager
+════════════════════════════════════════════════════════════════════════════
+Полные карты self.*-атрибутов — docs/refactoring/audits/batch7_stage1_dependencies.txt.
+Сводка по типам внешних зависимостей состава A+B:
+  • только путь к настройкам + json/open — 26 из 35 методов (ядро, general-from-file,
+    save_general_settings, dictation load, language-pair, voice vocabulary, spellcheck,
+    llm, proxy, provider states, api keys, recent projects load/save);
+  • путь + self.log — 13 методов (см. таблицу тиров: все `save_*` + load_clipboard +
+    load_recent_projects + load_language_settings + _migrate_voice_dictation_default_off);
+  • доп. состояние экземпляра — save_recent_projects (self.recent_projects_file +
+    mkdir user_data_path), load_recent_projects (self.recent_projects_file; путь задан
+    в __init__:6419 и переприсваивается в 6701 как <user_data>/workbench/settings/
+    recent_projects.json);
+  • UI/БД — save_clipboard_privacy_settings (self._clipboard_top_widget.
+    refresh_privacy_settings), save_dictation_settings (QMessageBox(self, …)),
+    load_language_settings (TagHighlighter.set_spellcheck_enabled +
+    self.spellcheck_manager), _migrate_voice_dictation_default_off (self.db_manager);
+  • специфика миграций — _migrate_settings_to_unified (Path(__file__), user_data_path,
+    json, shutil), _migrate_to_workbench_layout (datetime.utcnow, shutil, write_text).
+
+ДУБЛИРУЕТ ЛИ СОСТАВ ЛОГИКУ ConfigManager? Да, ровно в одной точке, и это важно:
+  • ConfigManager.get_preferences_path() (config_manager.py:358–361) даёт ТОТ ЖЕ путь
+    <user_data>/workbench/settings/settings.json; load_preferences() (363–373) и
+    save_preferences() (375–395) читают/пишут ТУ ЖЕ секцию "ui" с теми же
+    json.dump(indent=2, ensure_ascii=False);
+  • НО реальных call-sites у этих трёх методов — 0 (грепом по всему репозиторию только
+    определения; feature_manager.py имеет собственные _load_preferences/
+    _save_preferences, к ConfigManager не обращающиеся);
+  • и есть ортогональность: ConfigManager резолвит user_data через
+    ~/.supervertaler_config.json (+ dev-флаг .supervertaler.local), а монолит — через
+    get_config_pointer_path() = %APPDATA%/Supervertaler/config.json (Win) /
+    ~/Library/Application Support/… (macOS) / $XDG_CONFIG_HOME/… (Linux). Это РАЗНЫЕ
+    указатели → сервис, взявший путь у ConfigManager, может молча уйти в другой каталог.
+Дополнительно (не монолит) тот же файл читают/пишут: modules/feature_manager.py
+(секция features), modules/ui_scale.py (_read_scale_from_disk), modules/llm_clients.py:43
+(секция api_keys + своя копия резолвера пути), modules/voice_tab.py и
+
+════════════════════════════════════════════════════════════════════════════
+1.6 DYNAMIC_ENTRY_POINT / СТРОКОВЫЕ ССЫЛКИ
+════════════════════════════════════════════════════════════════════════════
+Сверка 40 имён состава с DEAD_CODE_REPORT.md
+(docs/refactoring/audits/batch7_stage1_dead_dynamic_check.txt): совпало 4 из 40.
+  • save_voice_vocabulary_settings — DYNAMIC_ENTRY_POINT (EXTERNAL_ATTR_REF):
+    вызов getattr(self._parent_app, 'save_voice_vocabulary_settings') в
+    modules/voice_tab.py:1280 → имя/сигнатуру сохранять точно;
+  • get_autocorrect_settings — DYNAMIC_ENTRY_POINT (EXTERNAL_ATTR_REF):
+    main_window.get_autocorrect_settings() из modules/autocorrect.py;
+  • clear_recent_projects — DYNAMIC_ENTRY_POINT (MENU_ACTION): QAction connect (32421)
+    → обычный метод-делегат (не staticmethod);
+  • save_dictation_settings — PROBABLY_DEAD («Публичные zero-ref», 55L, 0 ссылок):
+    переносить как есть, НЕ удалять (план не разрешает; прецедент filter_empty_segments
+    в Step 6).
+Остальные 36 имён в DEAD_CODE_REPORT.md отсутствуют. Но отдельным AST-сканом найдены
+дукт-тайпед-обращения из modules/, которых в отчёте нет: clipboard_manager_widget.py
+(771, 2284, 2298), voice_tab.py (736, 781, 1061, 1239, 1280), quicktrans.py (302, 323,
+325, 370, 439, 454), chat_backend.py (100–103, 139–140, 149–150), chat_view_widget.py
+(711–714, 737–738, 744–745), pdf_rescue_Qt.py (53–55), autocorrect.py
+(get_autocorrect_settings). Среди них — ПРИВАТНЫЕ имена (_load_unified_settings,
+_save_unified_settings, _load_settings_section, _save_settings_section, _get_proxy_url).
+СЛЕДСТВИЕ ДЛЯ STAGE 2: строгий режим Step 6 — 35 тонких делегатов с исходными именами
+и сигнатурами, включая 29 имён с ведущим «_»; никаких переименований и «приватизаций».
+
+════════════════════════════════════════════════════════════════════════════
+1.7 РЕКОМЕНДАЦИЯ ПО АРХИТЕКТУРЕ (решение — за владельцем)
+════════════════════════════════════════════════════════════════════════════
+РЕКОМЕНДАЦИЯ: вариант (б) в модифицированной форме — новый
+modules/settings_service.py с КЛАССОМ, который конструируется явным путём
+(settings_dir: Path, опционально log: Callable[[str], None]) и НЕ резолвит user_data
+через ConfigManager.get_user_data_path(). ConfigManager остаётся владельцем «где лежит
+user_data» для внешнего мира; его дубликаты load_preferences/save_preferences выводятся
+из эксплуатации отдельным решением (не в Stage 2).
+
+Обоснование (по фактам 1.5, а не «как в Step 5/6»):
+1) Всему составу нужны ровно два внешних входа: каталог настроек и лог-колбэк
+   (26 методов — только путь; 13 — путь + лог; 3 — ещё путь recent_projects.json;
+   4 — UI/БД и потому не переносятся «как есть»). Любая «обёртка с состоянием» избыточна.
+2) Путь нельзя брать из ConfigManager: разные файлы-указатели (см. 1.5) → риск молча
+   читать/писать чужой settings.json. Явный settings_dir = тот же каталог, что сейчас
+   (self.user_data_path / "workbench" / "settings"), снимает риск без унификации.
+3) Вариант (а) «расширить ConfigManager» отклонён: (i) тянет bootstrap первого запуска
+   и свой указатель; (ii) внутри уже лежат мёртвые дубликаты load_preferences/
+   save_preferences для ЭТОГО ЖЕ файла — их судьбу пришлось бы решать в том же
+   механическом батче; (iii) класс стал бы смешанной ответственностью
+   (bootstrap + формат settings + дефолты секций).
+4) Вариант (в) «чистые функции с явными параметрами» (стиль Step 6) рабочий, но
+   проигрывает: есть общий инвариант (4 секции api_keys/general/ui/features + дефолты
+   доменных аксессоров), который в виде функций разъедется по модулю без единой точки
+   контракта; класс = одна точка владения форматом и при этом остаётся stateless между
+   вызовами (никакого кэша — см. 1.9).
+5) Делегаты обязательны при любом выборе: 11 внешних дукт-тайпед-консументов
+   обращаются к 6 именам, включая приватные — имена и сигнатуры в монолите
+   сохраняются 1:1.
+
+SPLIT-МЕТОДЫ (перенос только файловой части; побочный эффект остаётся в делегате):
+  • load_general_settings (97L): в сервис — чтение + merge дефолтов + миграция
+    termview_*→termlens_* (фактически _load_general_settings_from_file); в монолите —
+    35 присваиваний self.<attr> и вызов self.load_llm_settings();
+  • save_clipboard_privacy_settings (22L): в сервис — чтение/запись features; в
+    монолите — refresh_privacy_settings() живого виджета;
+  • save_dictation_settings (55L): в сервис — запись ui.dictation_settings; в монолите —
+    QMessageBox.information/warning(self, …);
+  • load_language_settings (22L): в сервис — чтение секции ui; в монолите —
+    TagHighlighter/spellcheck_manager/log;
+  • _migrate_voice_dictation_default_off (32L): в сервис — запись сентинелы; в
+    монолите — DB UPDATE + commit.
+ОСТАЮТСЯ В МОНОЛИТЕ (рекомендация): load_font_sizes_from_preferences,
+get_autocorrect_settings, add/remove/clear_recent_projects (тир C) — опираются на
+глобальные имена монолита (TagHighlighter, EditableGridTextEditor,
+ReadOnlyGridTextEditor, SupervertalerQt, _canon_path) или UI-оркестрацию.
+ВНЕ STEP 7 (отдельные решения владельца): унификация трёх механизмов указателя
+user_data (F5), вывод дубликатов ConfigManager (F4), llm_clients.load_api_keys (F2),
+прямые читатели в feature_manager/ui_scale (F3), баг termbase_entry_editor (F1).
+
+modules/clipboard_manager_widget.py (через parent_app). Подробности —
+docs/refactoring/audits/batch7_stage1_config_manager_overlap.txt.
+
+   корень репозитория передавать явно.
+6) Дополнительно: modules/termbase_entry_editor.py:121/131 вызывают
+   self._load_settings_section/self._load_unified_settings, которых у QDialog нет →
+
+════════════════════════════════════════════════════════════════════════════
+1.8 РЕКОМЕНДАЦИЯ ПО РАЗБИВКЕ STAGE 2+ НА ПОД-БАТЧИ
+════════════════════════════════════════════════════════════════════════════
+35 методов одним коммитом — неприемлемо (в Step 6 filters.py = 20 методов потребовал
+трёх моделей на Этапе 3). Предлагаю 5 под-батчей (6+5+10+9+5 = 35 методов / 830 строк),
+порядок — по типу риска:
+
+S2.1 «Ядро API» — 6 методов / 39 строк
+  _get_settings_dir, _get_unified_settings_path, _load_unified_settings,
+  _save_unified_settings, _load_settings_section, _save_settings_section.
+  Call-sites вне состава: ~29 (из 69 суммарных: 2 string-ref в clipboard-виджете,
+  68357 в main(), 22756/22767/45369). Фундамент для остальных; ранняя проверка режима
+  делегатов; откат тривиален.
+
+S2.2 «general + общий reading» — 5 методов / 175 строк
+  _load_general_settings_from_file, save_general_settings, load_general_settings (SPLIT),
+  load_clipboard_privacy_settings, save_clipboard_privacy_settings (SPLIT).
+  Call-sites: load_general_settings 61 + save_general_settings 27 + 1 + 1 = 90 →
+  САМЫЙ ВЫСОКИЙ fan-in. Требует S2.1 в сервисе; проверять полным циклом настроек
+  (изменить каждую вкладку → перезапуск).
+
+S2.3 «LLM / proxy / provider / api keys» — 10 методов / 150 строк
+  load_llm_settings, save_llm_settings, load_proxy_settings, save_proxy_settings,
+  _get_proxy_url, _get_proxy_dict, load_provider_enabled_states,
+  save_provider_enabled_states, load_api_keys, save_api_keys.
+  Call-sites 116, из них 10 в modules/ (chat_backend, chat_view_widget, quicktrans,
+  pdf_rescue) + 10 string-ref. ★ 10 методов — ровно на границе конвенции живого
+  чек-листа Этапа 2 (отметить явно): весь сетевой слой настроек в одном прогоне.
+
+S2.4 «Языки / диктовка / словарь / спеллчек-IO» — 9 методов / 203 строки
+  load_dictation_settings, save_dictation_settings (SPLIT), _load_language_pair_from_disk,
+  load_voice_vocabulary_settings, save_voice_vocabulary_settings, load_language_settings
+  (SPLIT), save_language_settings, _save_spellcheck_settings, _load_spellcheck_settings.
+  Call-sites 18, из них 4 string-ref в modules/voice_tab.py. Проверять голосовую вкладку
+  и spellcheck отдельно (duck-typed потребители).
+
+S2.5 «Recent projects + миграции» — 5 методов / 263 строки (231 без SPLIT-метода)
+  load_recent_projects, save_recent_projects, _migrate_settings_to_unified,
+  _migrate_to_workbench_layout, _migrate_voice_dictation_default_off (SPLIT).
+  Call-sites 13. Здесь Path(__file__)-мина и self.recent_projects_file; миграции
+  необратимо двигают файлы пользователя → отдельный коммит с валидацией на КОПИИ
+  старого user_data.
+
+Альтернатива владельцу: не делать SPLIT-методы вовсе, оставив load_general_settings,
+save_clipboard_privacy_settings, save_dictation_settings, load_language_settings,
+_migrate_voice_dictation_default_off целиком в монолите (состав сжимается до
+30 методов / ~590 строк, но чтение general-секции тогда живёт в двух местах:
+файловое — в сервисе, применение — в монолите).
+
+════════════════════════════════════════════════════════════════════════════
+1.9 СЕМАНТИКА «ЧТЕНИЕ С ДИСКА ПРИ КАЖДОМ ВЫЗОВЕ» — ЗАФИКСИРОВАНО, НЕ ЧИНИТЬ
+════════════════════════════════════════════════════════════════════════════
+ПОДТВЕРЖДЕНО: ни один метод состава не кэширует результат между вызовами.
+  • _load_unified_settings (44647–44661) на каждом вызове open()+json.load;
+    _load_settings_section / load_general_settings / load_llm_settings / … — цепочки к
+    нему; полей-кэшей нет (грепы lru_cache|functools.cache|_settings_cache|
+    _cached_settings — 0 совпадений);
+  • единственный settings-derived кэш в монолите — _row_color_settings_cached
+    (_apply_row_color, вне состава, сбрасывается явно, файл не кэширует);
+  • внешние потребители читают «по требованию» (см. 1.4.1): quicktrans — на каждый
+    _get_enabled_providers; voice_tab — при построении вкладки; clipboard-виджет — при
+    чтении/записи paste-method; modules/autocorrect.py — снимок на КАЖДОЕ нажатие
+    клавиши.
+
+ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ ДЛЯ STAGE 2+ (не оптимизировать):
+1) перенесённый код открывает файл заново на каждый вызов — никаких lru_cache,
+   «прочитал один раз в __init__ сервиса», self._settings-кэшей в делегате;
+2) SPLIT-делегаты вызывают сервис на КАЖДОМ вызове и не сохраняют прочитанный dict в
+   атрибут окна (иначе 7 getattr-сайтов и modules/* увидят устаревшие данные);
+3) в отчёте каждого под-батча подтверждать это замером («файл открывается N раз за
+   прогон сценария; кэша нет»). Идея «заодно закэшировать» отклоняется как
+   противоречащая плану.
+
+   это НЕ потребители API (латентный баг, наблюдение F1), т.е. минус 2 «внешних» сайта
+   из статистики 1.4.
+
+
+════════════════════════════════════════════════════════════════════════════
+НАБЛЮДЕНИЯ ВНЕ СКОПА (не чинилось)
+════════════════════════════════════════════════════════════════════════════
+F1. modules/termbase_entry_editor.py:121/131 вызывают self._load_settings_section("ui")
+    / self._load_unified_settings() / self._save_unified_settings(...), которых класс
+    TermbaseEntryEditor(QDialog) не определяет (AST: 35 методов, этих трёх нет;
+    _parent_app/__getattr__ отсутствуют) → AttributeError глотается except Exception,
+    выбор терминологий не сохраняется/не читается (тихий no-op). Требует решения
+    владельца; на состав Step 7 не влияет.
+F2. modules/llm_clients.py:43 — своя load_api_keys() + своя копия резолвера user_data
+    (APPDATA/…/config.json): вторая реализация того же контракта.
+F3. Тот же settings.json читают напрямую modules/feature_manager.py (features) и
+    modules/ui_scale.py (_read_scale_from_disk) — цель «единый владелец формата» без их
+    унификации не достигается.
+F4. ConfigManager.get_preferences_path/load_preferences/save_preferences — 0 call-sites
+    (мёртвые дубликаты для того же файла/секции).
+F5. Три механизма указателя user_data (монолит %APPDATA%; ConfigManager
+    ~/.supervertaler_config.json + .supervertaler.local; копия в llm_clients.py).
+    AGENTS.md упоминает ~/.supervertaler_config.json как «глобальный» — фактически это
+    указатель ConfigManager, а не тот, которым живёт приложение.
+F6. load_general_settings не является «IO-методом»: 2 строки чтения из 97, остальное —
+    35 присваиваний self.<attr> (+ чтение LLM-настроек).
+F7. save_dictation_settings (PROBABLY_DEAD, 55L) при переносе затащит QMessageBox и
+    требует self-окно как parent → SPLIT либо остаётся в монолите; удалять нельзя.
+F8. load_font_sizes_from_preferences — единственный кандидат, где IO и UI-применение
+    переплетены так, что механический перенос даст NameError.
+F9. Тул-квирк: PowerShell (Get-Content … | Measure-Object -Line) даёт на этом файле
+    63 195 вместо 68 386 — для счётчиков строк использовать Python/wc -l.
+
+════════════════════════════════════════════════════════════════════════════
+ВЫВОД
+════════════════════════════════════════════════════════════════════════════
+ГОТОВ К STAGE 2 — с 4 открытыми вопросами к владельцу (ни один не блокирует
+инвентаризацию; все блокируют старт S2.1):
+  V1. Архитектура: (а) расширить ConfigManager / (б) класс SettingsService с явным
+      settings_dir (рекомендация) / (в) чистые функции (стиль Step 6).
+  V2. Состав: принимать ли тир C (add/remove/clear_recent_projects,
+      load_font_sizes_from_preferences, get_autocorrect_settings) — рекомендация: НЕТ.
+  V3. SPLIT: делать ли разделение 5 методов (рекомендация: да, обязательно для
+      load_general_settings и _migrate_voice_dictation_default_off; для
+      save_clipboard_privacy_settings / save_dictation_settings / load_language_settings
+      допустимо оставить целиком в монолите).
+  V4. Миграции: подтверждается ли отдельный под-батч S2.5 с валидацией на копии
+      user_data, и остаются ли _migrate_voice_dictation_default_off (в плане нет) и
+      save_dictation_settings (PROBABLY_DEAD) в составе.
+
+════════════════════════════════════════════════════════════════════════════
+ПОДТВЕРЖДЕНИЕ: НИ ОДНА СТРОКА КОДА НЕ ИЗМЕНЕНА
+════════════════════════════════════════════════════════════════════════════
+• git hash-object Supervertaler.py = 802c504c8849ac58551bece6b297917426e31226 ==
+  git rev-parse HEAD:Supervertaler.py — монолит байт-в-байт как в HEAD.
+• modules/config_manager.py и любой другой .py не изменялись (git status: только новые
+  файлы документации/аудита и правки планировочных .md).
+• modules/settings_service.py не создавался; файлов-заглушек нет.
+• Созданные артефакты — только документация: docs/refactoring/audits/
+  batch7_stage1_*.txt, docs/refactoring/audits/step7_stage1_findings.md, этот отчёт,
+  а также статусные правки PROJECT_STATUS.md и EXTRACTION_PLAN.md (подтверждённые
+  номера + статус Stage 1).
+

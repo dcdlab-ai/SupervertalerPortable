@@ -1,0 +1,728 @@
+### _get_proxy_dict: calls=5 (mono=5 [of which SupervertalerQt=5], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:60931 in SupervertalerQt.call_google_translate
+    CALL Supervertaler.py:60956 in SupervertalerQt.call_deepl
+    CALL Supervertaler.py:61064 in SupervertalerQt.call_microsoft_translate
+    CALL Supervertaler.py:61173 in SupervertalerQt.call_modernmt
+    CALL Supervertaler.py:61221 in SupervertalerQt.call_mymemory
+    CALL[other] Supervertaler.py:60931 in SupervertalerQt.call_google_translate
+    CALL[other] Supervertaler.py:60956 in SupervertalerQt.call_deepl
+    CALL[other] Supervertaler.py:61064 in SupervertalerQt.call_microsoft_translate
+    CALL[other] Supervertaler.py:61173 in SupervertalerQt.call_modernmt
+    CALL[other] Supervertaler.py:61221 in SupervertalerQt.call_mymemory
+    DEF Supervertaler.py:57091
+### _get_proxy_url: calls=15 (mono=13 [of which SupervertalerQt=13], modules=2, other=0) string-refs=3 attr-refs=0 defs=1
+    CALL Supervertaler.py:47595 in SupervertalerQt._run_proofreading
+    CALL Supervertaler.py:57095 in SupervertalerQt._get_proxy_dict
+    CALL Supervertaler.py:57105 in SupervertalerQt._apply_gemini_proxy
+    CALL Supervertaler.py:57194 in SupervertalerQt.call_custom_mt
+    CALL Supervertaler.py:57280 in SupervertalerQt.create_llm_client
+    CALL Supervertaler.py:59490 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL Supervertaler.py:59755 in SupervertalerQt.autotag_segments_bulk
+    CALL Supervertaler.py:60528 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:60680 in SupervertalerQt.fetch_and_update
+    CALL Supervertaler.py:62188 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:62230 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:62344 in SupervertalerQt._add_mt_and_llm_matches
+    CALL Supervertaler.py:62385 in SupervertalerQt._add_mt_and_llm_matches
+    CALL[modules] modules/chat_backend.py:150 in ChatBackend.init_llm_client
+    CALL[modules] modules/chat_view_widget.py:745 in ChatViewWidget._on_model_selected
+    CALL[other] Supervertaler.py:47595 in SupervertalerQt._run_proofreading
+    CALL[other] Supervertaler.py:57095 in SupervertalerQt._get_proxy_dict
+    CALL[other] Supervertaler.py:57105 in SupervertalerQt._apply_gemini_proxy
+    CALL[other] Supervertaler.py:57194 in SupervertalerQt.call_custom_mt
+    CALL[other] Supervertaler.py:57280 in SupervertalerQt.create_llm_client
+    CALL[other] Supervertaler.py:59490 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL[other] Supervertaler.py:59755 in SupervertalerQt.autotag_segments_bulk
+    CALL[other] Supervertaler.py:60528 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:60680 in SupervertalerQt.fetch_and_update
+    CALL[other] Supervertaler.py:62188 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:62230 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:62344 in SupervertalerQt._add_mt_and_llm_matches
+    CALL[other] Supervertaler.py:62385 in SupervertalerQt._add_mt_and_llm_matches
+    STR Supervertaler.py:57194 in SupervertalerQt.call_custom_mt
+    STR modules/chat_backend.py:149 in ChatBackend.init_llm_client
+    STR modules/chat_view_widget.py:744 in ChatViewWidget._on_model_selected
+    DEF Supervertaler.py:57067
+### _get_settings_dir: calls=3 (mono=3 [of which SupervertalerQt=3], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:44645 in SupervertalerQt._get_unified_settings_path
+    CALL Supervertaler.py:44665 in SupervertalerQt._save_unified_settings
+    CALL Supervertaler.py:44726 in SupervertalerQt._migrate_settings_to_unified
+    CALL[other] Supervertaler.py:44645 in SupervertalerQt._get_unified_settings_path
+    CALL[other] Supervertaler.py:44665 in SupervertalerQt._save_unified_settings
+    CALL[other] Supervertaler.py:44726 in SupervertalerQt._migrate_settings_to_unified
+    DEF Supervertaler.py:44639
+### _get_unified_settings_path: calls=4 (mono=4 [of which SupervertalerQt=4], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:22756 in SupervertalerQt._create_general_settings_tab
+    CALL Supervertaler.py:22767 in SupervertalerQt._on_usage_stats_toggled
+    CALL Supervertaler.py:44649 in SupervertalerQt._load_unified_settings
+    CALL Supervertaler.py:45369 in SupervertalerQt._init_usage_statistics
+    CALL[other] Supervertaler.py:22756 in SupervertalerQt._create_general_settings_tab
+    CALL[other] Supervertaler.py:22767 in SupervertalerQt._on_usage_stats_toggled
+    CALL[other] Supervertaler.py:44649 in SupervertalerQt._load_unified_settings
+    CALL[other] Supervertaler.py:45369 in SupervertalerQt._init_usage_statistics
+    DEF Supervertaler.py:44643
+### _load_general_settings_from_file: calls=4 (mono=4 [of which SupervertalerQt=4], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:41540 in SupervertalerQt._toggle_match_panel_tm_layout
+    CALL Supervertaler.py:44295 in SupervertalerQt.get_effective_import_options
+    CALL Supervertaler.py:44487 in SupervertalerQt._save
+    CALL Supervertaler.py:44525 in SupervertalerQt.load_general_settings
+    CALL[other] Supervertaler.py:41540 in SupervertalerQt._toggle_match_panel_tm_layout
+    CALL[other] Supervertaler.py:44295 in SupervertalerQt.get_effective_import_options
+    CALL[other] Supervertaler.py:44487 in SupervertalerQt._save
+    CALL[other] Supervertaler.py:44525 in SupervertalerQt.load_general_settings
+    DEF Supervertaler.py:44883
+### _load_language_pair_from_disk: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6337 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6337 in SupervertalerQt.__init__
+    DEF Supervertaler.py:45004
+### _load_settings_section: calls=28 (mono=27 [of which SupervertalerQt=26], modules=1, other=0) string-refs=2 attr-refs=0 defs=1
+    CALL Supervertaler.py:14221 in SupervertalerQt._verify_export_word_count
+    CALL Supervertaler.py:23767 in SupervertalerQt._persist_autocorrect_settings
+    CALL Supervertaler.py:23960 in SupervertalerQt._create_view_settings_tab
+    CALL Supervertaler.py:26483 in SupervertalerQt._save_api_keys_from_ui
+    CALL Supervertaler.py:29473 in SupervertalerQt._setup_tray_icon
+    CALL Supervertaler.py:29789 in SupervertalerQt._on_toggle_close_to_tray
+    CALL Supervertaler.py:29794 in SupervertalerQt._on_toggle_start_minimized
+    CALL Supervertaler.py:29836 in SupervertalerQt.closeEvent
+    CALL Supervertaler.py:44696 in SupervertalerQt.load_clipboard_privacy_settings
+    CALL Supervertaler.py:44903 in SupervertalerQt._load_general_settings_from_file
+    CALL Supervertaler.py:44940 in SupervertalerQt.load_dictation_settings
+    CALL Supervertaler.py:45013 in SupervertalerQt._load_language_pair_from_disk
+    CALL Supervertaler.py:45054 in SupervertalerQt.load_voice_vocabulary_settings
+    CALL Supervertaler.py:45160 in SupervertalerQt._migrate_voice_dictation_default_off
+    CALL Supervertaler.py:45238 in SupervertalerQt.load_language_settings
+    CALL Supervertaler.py:49127 in SupervertalerQt.get_termbase_code_map
+    CALL Supervertaler.py:49901 in SupervertalerQt.show_find_replace_dialog
+    CALL Supervertaler.py:50155 in SupervertalerQt._set_fr_demote_to_draft
+    CALL Supervertaler.py:52276 in SupervertalerQt._load_spellcheck_settings
+    CALL Supervertaler.py:57008 in SupervertalerQt.load_llm_settings
+    CALL Supervertaler.py:57050 in SupervertalerQt.load_proxy_settings
+    CALL Supervertaler.py:57302 in SupervertalerQt.load_provider_enabled_states
+    CALL Supervertaler.py:58448 in SupervertalerQt._maybe_show_okapi_java_warning
+    CALL Supervertaler.py:61237 in SupervertalerQt.load_api_keys
+    CALL Supervertaler.py:68357 in main
+    CALL Supervertaler.py:8174 in SupervertalerQt._setup_progress_indicators
+    CALL Supervertaler.py:8492 in SupervertalerQt._set_confirmed_progress_basis
+    CALL[modules] modules/termbase_entry_editor.py:121 in TermbaseEntryEditor._load_termbase_selections
+    CALL[other] Supervertaler.py:14221 in SupervertalerQt._verify_export_word_count
+    CALL[other] Supervertaler.py:23767 in SupervertalerQt._persist_autocorrect_settings
+    CALL[other] Supervertaler.py:23960 in SupervertalerQt._create_view_settings_tab
+    CALL[other] Supervertaler.py:26483 in SupervertalerQt._save_api_keys_from_ui
+    CALL[other] Supervertaler.py:29473 in SupervertalerQt._setup_tray_icon
+    CALL[other] Supervertaler.py:29789 in SupervertalerQt._on_toggle_close_to_tray
+    CALL[other] Supervertaler.py:29794 in SupervertalerQt._on_toggle_start_minimized
+    CALL[other] Supervertaler.py:29836 in SupervertalerQt.closeEvent
+    CALL[other] Supervertaler.py:44696 in SupervertalerQt.load_clipboard_privacy_settings
+    CALL[other] Supervertaler.py:44903 in SupervertalerQt._load_general_settings_from_file
+    CALL[other] Supervertaler.py:44940 in SupervertalerQt.load_dictation_settings
+    CALL[other] Supervertaler.py:45013 in SupervertalerQt._load_language_pair_from_disk
+    CALL[other] Supervertaler.py:45054 in SupervertalerQt.load_voice_vocabulary_settings
+    CALL[other] Supervertaler.py:45160 in SupervertalerQt._migrate_voice_dictation_default_off
+    CALL[other] Supervertaler.py:45238 in SupervertalerQt.load_language_settings
+    CALL[other] Supervertaler.py:49127 in SupervertalerQt.get_termbase_code_map
+    CALL[other] Supervertaler.py:49901 in SupervertalerQt.show_find_replace_dialog
+    CALL[other] Supervertaler.py:50155 in SupervertalerQt._set_fr_demote_to_draft
+    CALL[other] Supervertaler.py:52276 in SupervertalerQt._load_spellcheck_settings
+    CALL[other] Supervertaler.py:57008 in SupervertalerQt.load_llm_settings
+    CALL[other] Supervertaler.py:57050 in SupervertalerQt.load_proxy_settings
+    CALL[other] Supervertaler.py:57302 in SupervertalerQt.load_provider_enabled_states
+    CALL[other] Supervertaler.py:58448 in SupervertalerQt._maybe_show_okapi_java_warning
+    CALL[other] Supervertaler.py:61237 in SupervertalerQt.load_api_keys
+    CALL[other] Supervertaler.py:68357 in main
+    CALL[other] Supervertaler.py:8174 in SupervertalerQt._setup_progress_indicators
+    CALL[other] Supervertaler.py:8492 in SupervertalerQt._set_confirmed_progress_basis
+    STR modules/clipboard_manager_widget.py:2284 in ClipboardManagerWidget._resolve_paste_method
+    STR modules/clipboard_manager_widget.py:2298 in ClipboardManagerWidget._set_paste_method
+    DEF Supervertaler.py:44674
+### _load_spellcheck_settings: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:27238 in SupervertalerQt.create_grid_view_widget
+    CALL[other] Supervertaler.py:27238 in SupervertalerQt.create_grid_view_widget
+    DEF Supervertaler.py:52273
+### _load_unified_settings: calls=12 (mono=11 [of which SupervertalerQt=11], modules=1, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:44676 in SupervertalerQt._load_settings_section
+    CALL Supervertaler.py:44680 in SupervertalerQt._save_settings_section
+    CALL Supervertaler.py:44707 in SupervertalerQt.save_clipboard_privacy_settings
+    CALL Supervertaler.py:44951 in SupervertalerQt.save_dictation_settings
+    CALL Supervertaler.py:45254 in SupervertalerQt.save_language_settings
+    CALL Supervertaler.py:49135 in SupervertalerQt.save_termbase_code_map
+    CALL Supervertaler.py:52265 in SupervertalerQt._save_spellcheck_settings
+    CALL Supervertaler.py:54399 in SupervertalerQt._set_voice_pause_setting
+    CALL Supervertaler.py:57030 in SupervertalerQt.save_llm_settings
+    CALL Supervertaler.py:57061 in SupervertalerQt.save_proxy_settings
+    CALL Supervertaler.py:57314 in SupervertalerQt.save_provider_enabled_states
+    CALL[modules] modules/termbase_entry_editor.py:131 in TermbaseEntryEditor._save_termbase_selections
+    CALL[other] Supervertaler.py:44676 in SupervertalerQt._load_settings_section
+    CALL[other] Supervertaler.py:44680 in SupervertalerQt._save_settings_section
+    CALL[other] Supervertaler.py:44707 in SupervertalerQt.save_clipboard_privacy_settings
+    CALL[other] Supervertaler.py:44951 in SupervertalerQt.save_dictation_settings
+    CALL[other] Supervertaler.py:45254 in SupervertalerQt.save_language_settings
+    CALL[other] Supervertaler.py:49135 in SupervertalerQt.save_termbase_code_map
+    CALL[other] Supervertaler.py:52265 in SupervertalerQt._save_spellcheck_settings
+    CALL[other] Supervertaler.py:54399 in SupervertalerQt._set_voice_pause_setting
+    CALL[other] Supervertaler.py:57030 in SupervertalerQt.save_llm_settings
+    CALL[other] Supervertaler.py:57061 in SupervertalerQt.save_proxy_settings
+    CALL[other] Supervertaler.py:57314 in SupervertalerQt.save_provider_enabled_states
+    STR modules/voice_tab.py:1061 in VoiceTab._set_dictation_keys
+    DEF Supervertaler.py:44647
+### _migrate_settings_to_unified: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6326 in SupervertalerQt.__init__
+    CALL Supervertaler.py:6658 in SupervertalerQt._reinitialize_with_new_data_path
+    CALL[other] Supervertaler.py:6326 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6658 in SupervertalerQt._reinitialize_with_new_data_path
+    DEF Supervertaler.py:44724
+### _migrate_to_workbench_layout: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6327 in SupervertalerQt.__init__
+    CALL Supervertaler.py:6659 in SupervertalerQt._reinitialize_with_new_data_path
+    CALL[other] Supervertaler.py:6327 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6659 in SupervertalerQt._reinitialize_with_new_data_path
+    DEF Supervertaler.py:44816
+### _migrate_voice_dictation_default_off: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6388 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6388 in SupervertalerQt.__init__
+    DEF Supervertaler.py:45143
+### _remove_from_recent_projects: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:30446 in SupervertalerQt.load_project
+    CALL[other] Supervertaler.py:30446 in SupervertalerQt.load_project
+    DEF Supervertaler.py:32290
+### _save_settings_section: calls=11 (mono=11 [of which SupervertalerQt=11], modules=0, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:22728 in SupervertalerQt._on_language_changed
+    CALL Supervertaler.py:29791 in SupervertalerQt._on_toggle_close_to_tray
+    CALL Supervertaler.py:29796 in SupervertalerQt._on_toggle_start_minimized
+    CALL Supervertaler.py:29853 in SupervertalerQt.closeEvent
+    CALL Supervertaler.py:44927 in SupervertalerQt.save_general_settings
+    CALL Supervertaler.py:45074 in SupervertalerQt.save_voice_vocabulary_settings
+    CALL Supervertaler.py:45169 in SupervertalerQt._migrate_voice_dictation_default_off
+    CALL Supervertaler.py:50157 in SupervertalerQt._set_fr_demote_to_draft
+    CALL Supervertaler.py:58506 in SupervertalerQt._maybe_show_okapi_java_warning
+    CALL Supervertaler.py:61247 in SupervertalerQt.save_api_keys
+    CALL Supervertaler.py:8494 in SupervertalerQt._set_confirmed_progress_basis
+    CALL[other] Supervertaler.py:22728 in SupervertalerQt._on_language_changed
+    CALL[other] Supervertaler.py:29791 in SupervertalerQt._on_toggle_close_to_tray
+    CALL[other] Supervertaler.py:29796 in SupervertalerQt._on_toggle_start_minimized
+    CALL[other] Supervertaler.py:29853 in SupervertalerQt.closeEvent
+    CALL[other] Supervertaler.py:44927 in SupervertalerQt.save_general_settings
+    CALL[other] Supervertaler.py:45074 in SupervertalerQt.save_voice_vocabulary_settings
+    CALL[other] Supervertaler.py:45169 in SupervertalerQt._migrate_voice_dictation_default_off
+    CALL[other] Supervertaler.py:50157 in SupervertalerQt._set_fr_demote_to_draft
+    CALL[other] Supervertaler.py:58506 in SupervertalerQt._maybe_show_okapi_java_warning
+    CALL[other] Supervertaler.py:61247 in SupervertalerQt.save_api_keys
+    CALL[other] Supervertaler.py:8494 in SupervertalerQt._set_confirmed_progress_basis
+    STR modules/clipboard_manager_widget.py:2299 in ClipboardManagerWidget._set_paste_method
+    DEF Supervertaler.py:44678
+### _save_spellcheck_settings: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:52212 in SupervertalerQt._toggle_spellcheck
+    CALL Supervertaler.py:52259 in SupervertalerQt._toggle_spellcheck_from_button
+    CALL[other] Supervertaler.py:52212 in SupervertalerQt._toggle_spellcheck
+    CALL[other] Supervertaler.py:52259 in SupervertalerQt._toggle_spellcheck_from_button
+    DEF Supervertaler.py:52262
+### _save_unified_settings: calls=11 (mono=10 [of which SupervertalerQt=10], modules=1, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:44682 in SupervertalerQt._save_settings_section
+    CALL Supervertaler.py:44710 in SupervertalerQt.save_clipboard_privacy_settings
+    CALL Supervertaler.py:44973 in SupervertalerQt.save_dictation_settings
+    CALL Supervertaler.py:45259 in SupervertalerQt.save_language_settings
+    CALL Supervertaler.py:49137 in SupervertalerQt.save_termbase_code_map
+    CALL Supervertaler.py:52269 in SupervertalerQt._save_spellcheck_settings
+    CALL Supervertaler.py:54402 in SupervertalerQt._set_voice_pause_setting
+    CALL Supervertaler.py:57032 in SupervertalerQt.save_llm_settings
+    CALL Supervertaler.py:57063 in SupervertalerQt.save_proxy_settings
+    CALL Supervertaler.py:57316 in SupervertalerQt.save_provider_enabled_states
+    CALL[modules] modules/termbase_entry_editor.py:134 in TermbaseEntryEditor._save_termbase_selections
+    CALL[other] Supervertaler.py:44682 in SupervertalerQt._save_settings_section
+    CALL[other] Supervertaler.py:44710 in SupervertalerQt.save_clipboard_privacy_settings
+    CALL[other] Supervertaler.py:44973 in SupervertalerQt.save_dictation_settings
+    CALL[other] Supervertaler.py:45259 in SupervertalerQt.save_language_settings
+    CALL[other] Supervertaler.py:49137 in SupervertalerQt.save_termbase_code_map
+    CALL[other] Supervertaler.py:52269 in SupervertalerQt._save_spellcheck_settings
+    CALL[other] Supervertaler.py:54402 in SupervertalerQt._set_voice_pause_setting
+    CALL[other] Supervertaler.py:57032 in SupervertalerQt.save_llm_settings
+    CALL[other] Supervertaler.py:57063 in SupervertalerQt.save_proxy_settings
+    CALL[other] Supervertaler.py:57316 in SupervertalerQt.save_provider_enabled_states
+    STR modules/voice_tab.py:1062 in VoiceTab._set_dictation_keys
+    DEF Supervertaler.py:44663
+### add_to_recent_projects: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:30164 in SupervertalerQt.load_project
+    CALL Supervertaler.py:31841 in SupervertalerQt.save_project_as
+    CALL[other] Supervertaler.py:30164 in SupervertalerQt.load_project
+    CALL[other] Supervertaler.py:31841 in SupervertalerQt.save_project_as
+    DEF Supervertaler.py:32238
+### clear_recent_projects: calls=0 (mono=0 [of which SupervertalerQt=0], modules=0, other=0) string-refs=0 attr-refs=1 defs=1
+    ATTR Supervertaler.py:32228 in SupervertalerQt.update_recent_menu
+    DEF Supervertaler.py:32416
+### get_autocorrect_settings: calls=1 (mono=1 [of which SupervertalerQt=0], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:3497 in EditableGridTextEditor._maybe_apply_autocorrect
+    CALL[other] Supervertaler.py:3497 in EditableGridTextEditor._maybe_apply_autocorrect
+    DEF Supervertaler.py:44620
+### load_api_keys: calls=45 (mono=35 [of which SupervertalerQt=28], modules=10, other=0) string-refs=8 attr-refs=0 defs=3
+    CALL Supervertaler.py:11435 in SupervertalerQt._get_api_keys
+    CALL Supervertaler.py:18484 in SupervertalerQt._do_extract_terms
+    CALL Supervertaler.py:21363 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:21913 in SupervertalerQt._create_mt_settings_tab
+    CALL Supervertaler.py:21990 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL Supervertaler.py:24747 in SupervertalerQt._toggle_alwayson_listening
+    CALL Supervertaler.py:47573 in SupervertalerQt._run_proofreading
+    CALL Supervertaler.py:54601 in SupervertalerQt.start_voice_dictation
+    CALL Supervertaler.py:5636 in PreTranslationWorker._translate_with_mt
+    CALL Supervertaler.py:5659 in PreTranslationWorker._translate_with_llm
+    CALL Supervertaler.py:57015 in SupervertalerQt.load_llm_settings
+    CALL Supervertaler.py:57189 in SupervertalerQt.call_custom_mt
+    CALL Supervertaler.py:5729 in PreTranslationWorker._translate_batch_with_llm
+    CALL Supervertaler.py:58566 in SupervertalerQt.translate_current_segment
+    CALL Supervertaler.py:58569 in SupervertalerQt.translate_current_segment
+    CALL Supervertaler.py:59131 in SupervertalerQt.autotag_current_segment
+    CALL Supervertaler.py:5942 in PreTranslationWorker._translate_single_with_llm
+    CALL Supervertaler.py:59458 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL Supervertaler.py:59728 in SupervertalerQt.autotag_segments_bulk
+    CALL Supervertaler.py:59898 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:5994 in PreTranslationWorker._autotag_segment_llm
+    CALL Supervertaler.py:59959 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:60642 in SupervertalerQt._fetch_llm_translation_async
+    CALL Supervertaler.py:60770 in SupervertalerQt._fetch_mt_translation_async
+    CALL Supervertaler.py:60896 in SupervertalerQt.call_google_translate
+    CALL Supervertaler.py:60950 in SupervertalerQt.call_deepl
+    CALL Supervertaler.py:61023 in SupervertalerQt.call_microsoft_translate
+    CALL Supervertaler.py:61081 in SupervertalerQt.call_amazon_translate
+    CALL Supervertaler.py:61137 in SupervertalerQt.call_modernmt
+    CALL Supervertaler.py:61190 in SupervertalerQt.call_mymemory
+    CALL Supervertaler.py:61997 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:62171 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:62319 in SupervertalerQt._add_mt_and_llm_matches
+    CALL Supervertaler.py:63221 in SuperlookupTab._update_mt_provider_status
+    CALL Supervertaler.py:63293 in SuperlookupTab._perform_mt_lookup
+    CALL[modules] modules/chat_backend.py:101 in ChatBackend.init_llm_client
+    CALL[modules] modules/chat_backend.py:103 in ChatBackend.init_llm_client
+    CALL[modules] modules/chat_view_widget.py:712 in ChatViewWidget._on_model_selected
+    CALL[modules] modules/chat_view_widget.py:714 in ChatViewWidget._on_model_selected
+    CALL[modules] modules/llm_clients.py:1864 in _load_api_key
+    CALL[modules] modules/llm_clients.py:1901 in get_google_translation
+    CALL[modules] modules/pdf_rescue_Qt.py:55 in PDFRescueQt.__init__
+    CALL[modules] modules/quicktrans.py:324 in QuickTransProviderMixin._get_enabled_providers
+    CALL[modules] modules/quicktrans.py:440 in QuickTransProviderMixin._call_llm_translation
+    CALL[modules] modules/quicktrans.py:442 in QuickTransProviderMixin._call_llm_translation
+    CALL[other] Supervertaler.py:11435 in SupervertalerQt._get_api_keys
+    CALL[other] Supervertaler.py:18484 in SupervertalerQt._do_extract_terms
+    CALL[other] Supervertaler.py:21363 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:21913 in SupervertalerQt._create_mt_settings_tab
+    CALL[other] Supervertaler.py:21990 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL[other] Supervertaler.py:24747 in SupervertalerQt._toggle_alwayson_listening
+    CALL[other] Supervertaler.py:47573 in SupervertalerQt._run_proofreading
+    CALL[other] Supervertaler.py:54601 in SupervertalerQt.start_voice_dictation
+    CALL[other] Supervertaler.py:5636 in PreTranslationWorker._translate_with_mt
+    CALL[other] Supervertaler.py:5659 in PreTranslationWorker._translate_with_llm
+    CALL[other] Supervertaler.py:57015 in SupervertalerQt.load_llm_settings
+    CALL[other] Supervertaler.py:57189 in SupervertalerQt.call_custom_mt
+    CALL[other] Supervertaler.py:5729 in PreTranslationWorker._translate_batch_with_llm
+    CALL[other] Supervertaler.py:58566 in SupervertalerQt.translate_current_segment
+    CALL[other] Supervertaler.py:58569 in SupervertalerQt.translate_current_segment
+    CALL[other] Supervertaler.py:59131 in SupervertalerQt.autotag_current_segment
+    CALL[other] Supervertaler.py:5942 in PreTranslationWorker._translate_single_with_llm
+    CALL[other] Supervertaler.py:59458 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL[other] Supervertaler.py:59728 in SupervertalerQt.autotag_segments_bulk
+    CALL[other] Supervertaler.py:59898 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:5994 in PreTranslationWorker._autotag_segment_llm
+    CALL[other] Supervertaler.py:59959 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:60642 in SupervertalerQt._fetch_llm_translation_async
+    CALL[other] Supervertaler.py:60770 in SupervertalerQt._fetch_mt_translation_async
+    CALL[other] Supervertaler.py:60896 in SupervertalerQt.call_google_translate
+    CALL[other] Supervertaler.py:60950 in SupervertalerQt.call_deepl
+    CALL[other] Supervertaler.py:61023 in SupervertalerQt.call_microsoft_translate
+    CALL[other] Supervertaler.py:61081 in SupervertalerQt.call_amazon_translate
+    CALL[other] Supervertaler.py:61137 in SupervertalerQt.call_modernmt
+    CALL[other] Supervertaler.py:61190 in SupervertalerQt.call_mymemory
+    CALL[other] Supervertaler.py:61997 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:62171 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:62319 in SupervertalerQt._add_mt_and_llm_matches
+    CALL[other] Supervertaler.py:63221 in SuperlookupTab._update_mt_provider_status
+    CALL[other] Supervertaler.py:63293 in SuperlookupTab._perform_mt_lookup
+    STR Supervertaler.py:57015 in SupervertalerQt.load_llm_settings
+    STR Supervertaler.py:63220 in SuperlookupTab._update_mt_provider_status
+    STR Supervertaler.py:63292 in SuperlookupTab._perform_mt_lookup
+    STR modules/chat_backend.py:100 in ChatBackend.init_llm_client
+    STR modules/chat_view_widget.py:711 in ChatViewWidget._on_model_selected
+    STR modules/pdf_rescue_Qt.py:53 in PDFRescueQt.__init__
+    STR modules/quicktrans.py:323 in QuickTransProviderMixin._get_enabled_providers
+    STR modules/quicktrans.py:439 in QuickTransProviderMixin._call_llm_translation
+    DEF Supervertaler.py:61235
+    DEF modules/llm_clients.py:43
+    DEF modules/pdf_rescue_Qt.py:1749
+### load_clipboard_privacy_settings: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:23468 in SupervertalerQt._create_clipboard_settings_tab
+    CALL[other] Supervertaler.py:23468 in SupervertalerQt._create_clipboard_settings_tab
+    STR modules/clipboard_manager_widget.py:771 in ClipboardManagerWidget._load_privacy_settings
+    DEF Supervertaler.py:44690
+### load_dictation_settings: calls=8 (mono=8 [of which SupervertalerQt=8], modules=0, other=0) string-refs=2 attr-refs=0 defs=1
+    CALL Supervertaler.py:24733 in SupervertalerQt._toggle_alwayson_listening
+    CALL Supervertaler.py:25148 in SupervertalerQt._on_alwayson_dictation
+    CALL Supervertaler.py:54306 in SupervertalerQt._get_voice_hotkey_listener
+    CALL Supervertaler.py:54323 in SupervertalerQt._voice_pause_mode
+    CALL Supervertaler.py:54364 in SupervertalerQt._ensure_voice_pause_hotkey_armed
+    CALL Supervertaler.py:54469 in SupervertalerQt.stop_voice_dictation_if_recording
+    CALL Supervertaler.py:54573 in SupervertalerQt.start_voice_dictation
+    CALL Supervertaler.py:54717 in SupervertalerQt.on_dictation_complete
+    CALL[other] Supervertaler.py:24733 in SupervertalerQt._toggle_alwayson_listening
+    CALL[other] Supervertaler.py:25148 in SupervertalerQt._on_alwayson_dictation
+    CALL[other] Supervertaler.py:54306 in SupervertalerQt._get_voice_hotkey_listener
+    CALL[other] Supervertaler.py:54323 in SupervertalerQt._voice_pause_mode
+    CALL[other] Supervertaler.py:54364 in SupervertalerQt._ensure_voice_pause_hotkey_armed
+    CALL[other] Supervertaler.py:54469 in SupervertalerQt.stop_voice_dictation_if_recording
+    CALL[other] Supervertaler.py:54573 in SupervertalerQt.start_voice_dictation
+    CALL[other] Supervertaler.py:54717 in SupervertalerQt.on_dictation_complete
+    STR modules/voice_tab.py:736 in VoiceTab._load_settings
+    STR modules/voice_tab.py:781 in VoiceTab._refresh_voice_pause_ui
+    DEF Supervertaler.py:44931
+### load_font_sizes_from_preferences: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6501 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6501 in SupervertalerQt.__init__
+    DEF Supervertaler.py:45275
+### load_general_settings: calls=61 (mono=60 [of which SupervertalerQt=56], modules=1, other=0) string-refs=7 attr-refs=0 defs=1
+    CALL Supervertaler.py:10269 in SupervertalerQt._quick_count_lang_pair
+    CALL Supervertaler.py:1810 in ReadOnlyGridTextEditor.highlight_termbase_matches
+    CALL Supervertaler.py:20825 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:20826 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:21988 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL Supervertaler.py:22360 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL Supervertaler.py:22468 in SupervertalerQt._create_backup_settings_tab
+    CALL Supervertaler.py:22601 in SupervertalerQt._live_save_backup_settings
+    CALL Supervertaler.py:22621 in SupervertalerQt._create_general_settings_tab
+    CALL Supervertaler.py:22724 in SupervertalerQt._on_language_changed
+    CALL Supervertaler.py:23784 in SupervertalerQt._create_view_settings_tab
+    CALL Supervertaler.py:25442 in SupervertalerQt._create_user_identity_tab
+    CALL Supervertaler.py:25498 in SupervertalerQt._save_user_identity_from_ui
+    CALL Supervertaler.py:26052 in SupervertalerQt._create_debug_settings_tab
+    CALL Supervertaler.py:26166 in SupervertalerQt._save_debug_settings_from_ui
+    CALL Supervertaler.py:26264 in SupervertalerQt._save_llm_settings_from_ui
+    CALL Supervertaler.py:26400 in SupervertalerQt._save_ai_settings_from_ui
+    CALL Supervertaler.py:26568 in SupervertalerQt._save_general_settings_from_ui
+    CALL Supervertaler.py:26738 in SupervertalerQt._save_view_settings_from_ui_impl
+    CALL Supervertaler.py:27030 in SupervertalerQt._apply_global_ui_font_scale
+    CALL Supervertaler.py:27084 in SupervertalerQt._get_global_ui_font_scale
+    CALL Supervertaler.py:27097 in SupervertalerQt._get_ui_chrome_compact
+    CALL Supervertaler.py:27110 in SupervertalerQt._apply_ui_chrome_compactness
+    CALL Supervertaler.py:27852 in SupervertalerQt.create_grid_view_widget_for_home
+    CALL Supervertaler.py:28041 in SupervertalerQt.create_grid_view_widget_for_home
+    CALL Supervertaler.py:28640 in SupervertalerQt.create_translation_grid
+    CALL Supervertaler.py:28914 in SupervertalerQt.create_assistance_panel
+    CALL Supervertaler.py:32022 in SupervertalerQt._maybe_make_versioned_backup
+    CALL Supervertaler.py:32065 in SupervertalerQt.restart_auto_backup_timer
+    CALL Supervertaler.py:32507 in SupervertalerQt.import_document
+    CALL Supervertaler.py:33359 in SupervertalerQt.import_simple_txt
+    CALL Supervertaler.py:33448 in SupervertalerQt.import_simple_txt
+    CALL Supervertaler.py:34254 in SupervertalerQt.import_folder_multifile
+    CALL Supervertaler.py:34356 in SupervertalerQt.import_folder_multifile
+    CALL Supervertaler.py:38046 in SupervertalerQt.get_translator_name
+    CALL Supervertaler.py:41409 in SupervertalerQt._create_match_panel
+    CALL Supervertaler.py:43573 in SupervertalerQt.set_termlens_position
+    CALL Supervertaler.py:43609 in SupervertalerQt._save_bottom_dock_active_tab
+    CALL Supervertaler.py:43623 in SupervertalerQt._on_match_top_tab_changed
+    CALL Supervertaler.py:43966 in SupervertalerQt._apply_row_color
+    CALL Supervertaler.py:44232 in SupervertalerQt.save_current_font_sizes
+    CALL Supervertaler.py:45278 in SupervertalerQt.load_font_sizes_from_preferences
+    CALL Supervertaler.py:45391 in SupervertalerQt.restore_last_project_if_enabled
+    CALL Supervertaler.py:48218 in SupervertalerQt._schedule_delayed_lookup
+    CALL Supervertaler.py:5479 in PreTranslationWorker.run
+    CALL Supervertaler.py:55545 in SupervertalerQt._play_sound_effect
+    CALL Supervertaler.py:55554 in SupervertalerQt._play_sound_effect
+    CALL Supervertaler.py:56473 in SupervertalerQt._on_termlens_font_size_changed
+    CALL Supervertaler.py:58664 in SupervertalerQt.translate_current_segment
+    CALL Supervertaler.py:59330 in SupervertalerQt._build_quicklauncher_document_context
+    CALL Supervertaler.py:60127 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:6308 in SupervertalerQt.__init__
+    CALL Supervertaler.py:6469 in SupervertalerQt.__init__
+    CALL Supervertaler.py:64698 in SuperlookupTab._load_superlookup_landing_pref
+    CALL Supervertaler.py:64713 in SuperlookupTab._on_landing_pref_changed
+    CALL Supervertaler.py:6478 in SupervertalerQt.__init__
+    CALL Supervertaler.py:6721 in SupervertalerQt._show_first_run_welcome
+    CALL Supervertaler.py:6949 in SupervertalerQt.on_finish
+    CALL Supervertaler.py:7861 in SupervertalerQt.show_term_insert_popup
+    CALL Supervertaler.py:8286 in SupervertalerQt._setup_ollama_keepwarm
+    CALL[modules] modules/quicktrans.py:303 in QuickTransProviderMixin._load_mt_quick_settings
+    CALL[other] Supervertaler.py:10269 in SupervertalerQt._quick_count_lang_pair
+    CALL[other] Supervertaler.py:1810 in ReadOnlyGridTextEditor.highlight_termbase_matches
+    CALL[other] Supervertaler.py:20825 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:20826 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:21988 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL[other] Supervertaler.py:22360 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL[other] Supervertaler.py:22468 in SupervertalerQt._create_backup_settings_tab
+    CALL[other] Supervertaler.py:22601 in SupervertalerQt._live_save_backup_settings
+    CALL[other] Supervertaler.py:22621 in SupervertalerQt._create_general_settings_tab
+    CALL[other] Supervertaler.py:22724 in SupervertalerQt._on_language_changed
+    CALL[other] Supervertaler.py:23784 in SupervertalerQt._create_view_settings_tab
+    CALL[other] Supervertaler.py:25442 in SupervertalerQt._create_user_identity_tab
+    CALL[other] Supervertaler.py:25498 in SupervertalerQt._save_user_identity_from_ui
+    CALL[other] Supervertaler.py:26052 in SupervertalerQt._create_debug_settings_tab
+    CALL[other] Supervertaler.py:26166 in SupervertalerQt._save_debug_settings_from_ui
+    CALL[other] Supervertaler.py:26264 in SupervertalerQt._save_llm_settings_from_ui
+    CALL[other] Supervertaler.py:26400 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:26568 in SupervertalerQt._save_general_settings_from_ui
+    CALL[other] Supervertaler.py:26738 in SupervertalerQt._save_view_settings_from_ui_impl
+    CALL[other] Supervertaler.py:27030 in SupervertalerQt._apply_global_ui_font_scale
+    CALL[other] Supervertaler.py:27084 in SupervertalerQt._get_global_ui_font_scale
+    CALL[other] Supervertaler.py:27097 in SupervertalerQt._get_ui_chrome_compact
+    CALL[other] Supervertaler.py:27110 in SupervertalerQt._apply_ui_chrome_compactness
+    CALL[other] Supervertaler.py:27852 in SupervertalerQt.create_grid_view_widget_for_home
+    CALL[other] Supervertaler.py:28041 in SupervertalerQt.create_grid_view_widget_for_home
+    CALL[other] Supervertaler.py:28640 in SupervertalerQt.create_translation_grid
+    CALL[other] Supervertaler.py:28914 in SupervertalerQt.create_assistance_panel
+    CALL[other] Supervertaler.py:32022 in SupervertalerQt._maybe_make_versioned_backup
+    CALL[other] Supervertaler.py:32065 in SupervertalerQt.restart_auto_backup_timer
+    CALL[other] Supervertaler.py:32507 in SupervertalerQt.import_document
+    CALL[other] Supervertaler.py:33359 in SupervertalerQt.import_simple_txt
+    CALL[other] Supervertaler.py:33448 in SupervertalerQt.import_simple_txt
+    CALL[other] Supervertaler.py:34254 in SupervertalerQt.import_folder_multifile
+    CALL[other] Supervertaler.py:34356 in SupervertalerQt.import_folder_multifile
+    CALL[other] Supervertaler.py:38046 in SupervertalerQt.get_translator_name
+    CALL[other] Supervertaler.py:41409 in SupervertalerQt._create_match_panel
+    CALL[other] Supervertaler.py:43573 in SupervertalerQt.set_termlens_position
+    CALL[other] Supervertaler.py:43609 in SupervertalerQt._save_bottom_dock_active_tab
+    CALL[other] Supervertaler.py:43623 in SupervertalerQt._on_match_top_tab_changed
+    CALL[other] Supervertaler.py:43966 in SupervertalerQt._apply_row_color
+    CALL[other] Supervertaler.py:44232 in SupervertalerQt.save_current_font_sizes
+    CALL[other] Supervertaler.py:45278 in SupervertalerQt.load_font_sizes_from_preferences
+    CALL[other] Supervertaler.py:45391 in SupervertalerQt.restore_last_project_if_enabled
+    CALL[other] Supervertaler.py:48218 in SupervertalerQt._schedule_delayed_lookup
+    CALL[other] Supervertaler.py:5479 in PreTranslationWorker.run
+    CALL[other] Supervertaler.py:55545 in SupervertalerQt._play_sound_effect
+    CALL[other] Supervertaler.py:55554 in SupervertalerQt._play_sound_effect
+    CALL[other] Supervertaler.py:56473 in SupervertalerQt._on_termlens_font_size_changed
+    CALL[other] Supervertaler.py:58664 in SupervertalerQt.translate_current_segment
+    CALL[other] Supervertaler.py:59330 in SupervertalerQt._build_quicklauncher_document_context
+    CALL[other] Supervertaler.py:60127 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:6308 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6469 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:64698 in SuperlookupTab._load_superlookup_landing_pref
+    CALL[other] Supervertaler.py:64713 in SuperlookupTab._on_landing_pref_changed
+    CALL[other] Supervertaler.py:6478 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6721 in SupervertalerQt._show_first_run_welcome
+    CALL[other] Supervertaler.py:6949 in SupervertalerQt.on_finish
+    CALL[other] Supervertaler.py:7861 in SupervertalerQt.show_term_insert_popup
+    CALL[other] Supervertaler.py:8286 in SupervertalerQt._setup_ollama_keepwarm
+    STR Supervertaler.py:1809 in ReadOnlyGridTextEditor.highlight_termbase_matches
+    STR Supervertaler.py:55545 in SupervertalerQt._play_sound_effect
+    STR Supervertaler.py:55554 in SupervertalerQt._play_sound_effect
+    STR Supervertaler.py:64697 in SuperlookupTab._load_superlookup_landing_pref
+    STR Supervertaler.py:64712 in SuperlookupTab._on_landing_pref_changed
+    STR Supervertaler.py:7861 in SupervertalerQt.show_term_insert_popup
+    STR modules/quicktrans.py:302 in QuickTransProviderMixin._load_mt_quick_settings
+    DEF Supervertaler.py:44522
+### load_language_settings: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:6472 in SupervertalerQt.__init__
+    CALL[other] Supervertaler.py:6472 in SupervertalerQt.__init__
+    DEF Supervertaler.py:45228
+### load_llm_settings: calls=28 (mono=24 [of which SupervertalerQt=24], modules=4, other=0) string-refs=4 attr-refs=0 defs=1
+    CALL Supervertaler.py:11720 in SupervertalerQt._on_main_tab_changed
+    CALL Supervertaler.py:18481 in SupervertalerQt._do_extract_terms
+    CALL Supervertaler.py:20823 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:22051 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL Supervertaler.py:22307 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL Supervertaler.py:22390 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL Supervertaler.py:26339 in SupervertalerQt._save_ai_settings_from_ui
+    CALL Supervertaler.py:44600 in SupervertalerQt.load_general_settings
+    CALL Supervertaler.py:47418 in SupervertalerQt.show_proofread_dialog
+    CALL Supervertaler.py:57121 in SupervertalerQt._get_active_custom_profile
+    CALL Supervertaler.py:57145 in SupervertalerQt._get_custom_mt_profiles
+    CALL Supervertaler.py:57156 in SupervertalerQt._get_active_custom_mt_profile
+    CALL Supervertaler.py:57266 in SupervertalerQt.create_llm_client
+    CALL Supervertaler.py:58556 in SupervertalerQt.translate_current_segment
+    CALL Supervertaler.py:59125 in SupervertalerQt.autotag_current_segment
+    CALL Supervertaler.py:59453 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL Supervertaler.py:59722 in SupervertalerQt.autotag_segments_bulk
+    CALL Supervertaler.py:59899 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:60018 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:60646 in SupervertalerQt._fetch_llm_translation_async
+    CALL Supervertaler.py:62175 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:62325 in SupervertalerQt._add_mt_and_llm_matches
+    CALL Supervertaler.py:8237 in SupervertalerQt._update_llm_indicator
+    CALL Supervertaler.py:8317 in SupervertalerQt.ping
+    CALL[modules] modules/chat_backend.py:139 in ChatBackend.init_llm_client
+    CALL[modules] modules/chat_view_widget.py:737 in ChatViewWidget._on_model_selected
+    CALL[modules] modules/quicktrans.py:370 in QuickTransProviderMixin._get_enabled_providers
+    CALL[modules] modules/quicktrans.py:454 in QuickTransProviderMixin._call_llm_translation
+    CALL[other] Supervertaler.py:11720 in SupervertalerQt._on_main_tab_changed
+    CALL[other] Supervertaler.py:18481 in SupervertalerQt._do_extract_terms
+    CALL[other] Supervertaler.py:20823 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:22051 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL[other] Supervertaler.py:22307 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL[other] Supervertaler.py:22390 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL[other] Supervertaler.py:26339 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:44600 in SupervertalerQt.load_general_settings
+    CALL[other] Supervertaler.py:47418 in SupervertalerQt.show_proofread_dialog
+    CALL[other] Supervertaler.py:57121 in SupervertalerQt._get_active_custom_profile
+    CALL[other] Supervertaler.py:57145 in SupervertalerQt._get_custom_mt_profiles
+    CALL[other] Supervertaler.py:57156 in SupervertalerQt._get_active_custom_mt_profile
+    CALL[other] Supervertaler.py:57266 in SupervertalerQt.create_llm_client
+    CALL[other] Supervertaler.py:58556 in SupervertalerQt.translate_current_segment
+    CALL[other] Supervertaler.py:59125 in SupervertalerQt.autotag_current_segment
+    CALL[other] Supervertaler.py:59453 in SupervertalerQt.run_grid_quicklauncher_prompt
+    CALL[other] Supervertaler.py:59722 in SupervertalerQt.autotag_segments_bulk
+    CALL[other] Supervertaler.py:59899 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:60018 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:60646 in SupervertalerQt._fetch_llm_translation_async
+    CALL[other] Supervertaler.py:62175 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:62325 in SupervertalerQt._add_mt_and_llm_matches
+    CALL[other] Supervertaler.py:8237 in SupervertalerQt._update_llm_indicator
+    CALL[other] Supervertaler.py:8317 in SupervertalerQt.ping
+    STR modules/chat_backend.py:140 in ChatBackend.init_llm_client
+    STR modules/chat_view_widget.py:738 in ChatViewWidget._on_model_selected
+    STR modules/quicktrans.py:371 in QuickTransProviderMixin._get_enabled_providers
+    STR modules/quicktrans.py:454 in QuickTransProviderMixin._call_llm_translation
+    DEF Supervertaler.py:56987
+### load_provider_enabled_states: calls=13 (mono=12 [of which SupervertalerQt=10], modules=1, other=0) string-refs=3 attr-refs=0 defs=1
+    CALL Supervertaler.py:20824 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:21867 in SupervertalerQt._create_mt_settings_tab
+    CALL Supervertaler.py:21991 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL Supervertaler.py:26259 in SupervertalerQt._save_llm_settings_from_ui
+    CALL Supervertaler.py:26388 in SupervertalerQt._save_ai_settings_from_ui
+    CALL Supervertaler.py:26506 in SupervertalerQt._save_mt_settings_from_ui
+    CALL Supervertaler.py:59960 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:60650 in SupervertalerQt._fetch_llm_translation_async
+    CALL Supervertaler.py:60775 in SupervertalerQt._fetch_mt_translation_async
+    CALL Supervertaler.py:61998 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL Supervertaler.py:63223 in SuperlookupTab._update_mt_provider_status
+    CALL Supervertaler.py:63295 in SuperlookupTab._perform_mt_lookup
+    CALL[modules] modules/quicktrans.py:326 in QuickTransProviderMixin._get_enabled_providers
+    CALL[other] Supervertaler.py:20824 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:21867 in SupervertalerQt._create_mt_settings_tab
+    CALL[other] Supervertaler.py:21991 in SupervertalerQt._create_mt_quick_lookup_settings_tab
+    CALL[other] Supervertaler.py:26259 in SupervertalerQt._save_llm_settings_from_ui
+    CALL[other] Supervertaler.py:26388 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:26506 in SupervertalerQt._save_mt_settings_from_ui
+    CALL[other] Supervertaler.py:59960 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:60650 in SupervertalerQt._fetch_llm_translation_async
+    CALL[other] Supervertaler.py:60775 in SupervertalerQt._fetch_mt_translation_async
+    CALL[other] Supervertaler.py:61998 in SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive
+    CALL[other] Supervertaler.py:63223 in SuperlookupTab._update_mt_provider_status
+    CALL[other] Supervertaler.py:63295 in SuperlookupTab._perform_mt_lookup
+    STR Supervertaler.py:63222 in SuperlookupTab._update_mt_provider_status
+    STR Supervertaler.py:63294 in SuperlookupTab._perform_mt_lookup
+    STR modules/quicktrans.py:325 in QuickTransProviderMixin._get_enabled_providers
+    DEF Supervertaler.py:57283
+### load_proxy_settings: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:21448 in SupervertalerQt._create_ai_settings_tab
+    CALL Supervertaler.py:57073 in SupervertalerQt._get_proxy_url
+    CALL[other] Supervertaler.py:21448 in SupervertalerQt._create_ai_settings_tab
+    CALL[other] Supervertaler.py:57073 in SupervertalerQt._get_proxy_url
+    DEF Supervertaler.py:57040
+### load_recent_projects: calls=5 (mono=5 [of which SupervertalerQt=5], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:32199 in SupervertalerQt.update_recent_menu
+    CALL Supervertaler.py:32251 in SupervertalerQt.add_to_recent_projects
+    CALL Supervertaler.py:32297 in SupervertalerQt._remove_from_recent_projects
+    CALL Supervertaler.py:32394 in SupervertalerQt.update_recent_projects_display
+    CALL Supervertaler.py:45396 in SupervertalerQt.restore_last_project_if_enabled
+    CALL[other] Supervertaler.py:32199 in SupervertalerQt.update_recent_menu
+    CALL[other] Supervertaler.py:32251 in SupervertalerQt.add_to_recent_projects
+    CALL[other] Supervertaler.py:32297 in SupervertalerQt._remove_from_recent_projects
+    CALL[other] Supervertaler.py:32394 in SupervertalerQt.update_recent_projects_display
+    CALL[other] Supervertaler.py:45396 in SupervertalerQt.restore_last_project_if_enabled
+    DEF Supervertaler.py:32306
+### load_voice_vocabulary_settings: calls=3 (mono=3 [of which SupervertalerQt=3], modules=0, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:24783 in SupervertalerQt._toggle_alwayson_listening
+    CALL Supervertaler.py:45103 in SupervertalerQt.build_voice_initial_prompt
+    CALL Supervertaler.py:54660 in SupervertalerQt.start_voice_dictation
+    CALL[other] Supervertaler.py:24783 in SupervertalerQt._toggle_alwayson_listening
+    CALL[other] Supervertaler.py:45103 in SupervertalerQt.build_voice_initial_prompt
+    CALL[other] Supervertaler.py:54660 in SupervertalerQt.start_voice_dictation
+    STR modules/voice_tab.py:1239 in VoiceTab._vocab_load_into_ui
+    DEF Supervertaler.py:45029
+### save_api_keys: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:26490 in SupervertalerQt._save_api_keys_from_ui
+    CALL[other] Supervertaler.py:26490 in SupervertalerQt._save_api_keys_from_ui
+    DEF Supervertaler.py:61245
+### save_clipboard_privacy_settings: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:23481 in SupervertalerQt._persist
+    CALL[other] Supervertaler.py:23481 in SupervertalerQt._persist
+    DEF Supervertaler.py:44701
+### save_dictation_settings: calls=0 (mono=0 [of which SupervertalerQt=0], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    DEF Supervertaler.py:44948
+### save_general_settings: calls=27 (mono=27 [of which SupervertalerQt=24], modules=0, other=0) string-refs=1 attr-refs=0 defs=1
+    CALL Supervertaler.py:22376 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL Supervertaler.py:22607 in SupervertalerQt._live_save_backup_settings
+    CALL Supervertaler.py:23770 in SupervertalerQt._persist_autocorrect_settings
+    CALL Supervertaler.py:25500 in SupervertalerQt._save_user_identity_from_ui
+    CALL Supervertaler.py:26170 in SupervertalerQt._save_debug_settings_from_ui
+    CALL Supervertaler.py:26285 in SupervertalerQt._save_llm_settings_from_ui
+    CALL Supervertaler.py:26443 in SupervertalerQt._save_ai_settings_from_ui
+    CALL Supervertaler.py:26675 in SupervertalerQt._save_general_settings_from_ui
+    CALL Supervertaler.py:26876 in SupervertalerQt._save_view_settings_from_ui_impl
+    CALL Supervertaler.py:27035 in SupervertalerQt._apply_global_ui_font_scale
+    CALL Supervertaler.py:27112 in SupervertalerQt._apply_ui_chrome_compactness
+    CALL Supervertaler.py:32574 in SupervertalerQt.import_document
+    CALL Supervertaler.py:33452 in SupervertalerQt.import_simple_txt
+    CALL Supervertaler.py:34360 in SupervertalerQt.import_folder_multifile
+    CALL Supervertaler.py:41542 in SupervertalerQt._toggle_match_panel_tm_layout
+    CALL Supervertaler.py:43576 in SupervertalerQt.set_termlens_position
+    CALL Supervertaler.py:43611 in SupervertalerQt._save_bottom_dock_active_tab
+    CALL Supervertaler.py:43625 in SupervertalerQt._on_match_top_tab_changed
+    CALL Supervertaler.py:44250 in SupervertalerQt.save_current_font_sizes
+    CALL Supervertaler.py:44491 in SupervertalerQt._save
+    CALL Supervertaler.py:56479 in SupervertalerQt._on_termlens_font_size_changed
+    CALL Supervertaler.py:60129 in SupervertalerQt.translate_batch
+    CALL Supervertaler.py:64715 in SuperlookupTab._on_landing_pref_changed
+    CALL Supervertaler.py:66766 in SuperlookupTab.on_close
+    CALL Supervertaler.py:66809 in SuperlookupTab._browse_for_autohotkey
+    CALL Supervertaler.py:6723 in SupervertalerQt._show_first_run_welcome
+    CALL Supervertaler.py:6951 in SupervertalerQt.on_finish
+    CALL[other] Supervertaler.py:22376 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL[other] Supervertaler.py:22607 in SupervertalerQt._live_save_backup_settings
+    CALL[other] Supervertaler.py:23770 in SupervertalerQt._persist_autocorrect_settings
+    CALL[other] Supervertaler.py:25500 in SupervertalerQt._save_user_identity_from_ui
+    CALL[other] Supervertaler.py:26170 in SupervertalerQt._save_debug_settings_from_ui
+    CALL[other] Supervertaler.py:26285 in SupervertalerQt._save_llm_settings_from_ui
+    CALL[other] Supervertaler.py:26443 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:26675 in SupervertalerQt._save_general_settings_from_ui
+    CALL[other] Supervertaler.py:26876 in SupervertalerQt._save_view_settings_from_ui_impl
+    CALL[other] Supervertaler.py:27035 in SupervertalerQt._apply_global_ui_font_scale
+    CALL[other] Supervertaler.py:27112 in SupervertalerQt._apply_ui_chrome_compactness
+    CALL[other] Supervertaler.py:32574 in SupervertalerQt.import_document
+    CALL[other] Supervertaler.py:33452 in SupervertalerQt.import_simple_txt
+    CALL[other] Supervertaler.py:34360 in SupervertalerQt.import_folder_multifile
+    CALL[other] Supervertaler.py:41542 in SupervertalerQt._toggle_match_panel_tm_layout
+    CALL[other] Supervertaler.py:43576 in SupervertalerQt.set_termlens_position
+    CALL[other] Supervertaler.py:43611 in SupervertalerQt._save_bottom_dock_active_tab
+    CALL[other] Supervertaler.py:43625 in SupervertalerQt._on_match_top_tab_changed
+    CALL[other] Supervertaler.py:44250 in SupervertalerQt.save_current_font_sizes
+    CALL[other] Supervertaler.py:44491 in SupervertalerQt._save
+    CALL[other] Supervertaler.py:56479 in SupervertalerQt._on_termlens_font_size_changed
+    CALL[other] Supervertaler.py:60129 in SupervertalerQt.translate_batch
+    CALL[other] Supervertaler.py:64715 in SuperlookupTab._on_landing_pref_changed
+    CALL[other] Supervertaler.py:66766 in SuperlookupTab.on_close
+    CALL[other] Supervertaler.py:66809 in SuperlookupTab._browse_for_autohotkey
+    CALL[other] Supervertaler.py:6723 in SupervertalerQt._show_first_run_welcome
+    CALL[other] Supervertaler.py:6951 in SupervertalerQt.on_finish
+    STR Supervertaler.py:64712 in SuperlookupTab._on_landing_pref_changed
+    DEF Supervertaler.py:44924
+### save_language_settings: calls=2 (mono=2 [of which SupervertalerQt=2], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:20791 in SupervertalerQt._autosave_lang
+    CALL Supervertaler.py:45267 in SupervertalerQt._save_language_settings_from_ui
+    CALL[other] Supervertaler.py:20791 in SupervertalerQt._autosave_lang
+    CALL[other] Supervertaler.py:45267 in SupervertalerQt._save_language_settings_from_ui
+    DEF Supervertaler.py:45251
+### save_llm_settings: calls=3 (mono=3 [of which SupervertalerQt=3], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:22393 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL Supervertaler.py:26245 in SupervertalerQt._save_llm_settings_from_ui
+    CALL Supervertaler.py:26370 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:22393 in SupervertalerQt._save_mt_quick_lookup_settings
+    CALL[other] Supervertaler.py:26245 in SupervertalerQt._save_llm_settings_from_ui
+    CALL[other] Supervertaler.py:26370 in SupervertalerQt._save_ai_settings_from_ui
+    DEF Supervertaler.py:57027
+### save_provider_enabled_states: calls=3 (mono=3 [of which SupervertalerQt=3], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:26261 in SupervertalerQt._save_llm_settings_from_ui
+    CALL Supervertaler.py:26390 in SupervertalerQt._save_ai_settings_from_ui
+    CALL Supervertaler.py:26508 in SupervertalerQt._save_mt_settings_from_ui
+    CALL[other] Supervertaler.py:26261 in SupervertalerQt._save_llm_settings_from_ui
+    CALL[other] Supervertaler.py:26390 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:26508 in SupervertalerQt._save_mt_settings_from_ui
+    DEF Supervertaler.py:57311
+### save_proxy_settings: calls=1 (mono=1 [of which SupervertalerQt=1], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:26472 in SupervertalerQt._save_ai_settings_from_ui
+    CALL[other] Supervertaler.py:26472 in SupervertalerQt._save_ai_settings_from_ui
+    DEF Supervertaler.py:57058
+### save_recent_projects: calls=3 (mono=3 [of which SupervertalerQt=3], modules=0, other=0) string-refs=0 attr-refs=0 defs=1
+    CALL Supervertaler.py:32284 in SupervertalerQt.add_to_recent_projects
+    CALL Supervertaler.py:32300 in SupervertalerQt._remove_from_recent_projects
+    CALL Supervertaler.py:32426 in SupervertalerQt.clear_recent_projects
+    CALL[other] Supervertaler.py:32284 in SupervertalerQt.add_to_recent_projects
+    CALL[other] Supervertaler.py:32300 in SupervertalerQt._remove_from_recent_projects
+    CALL[other] Supervertaler.py:32426 in SupervertalerQt.clear_recent_projects
+    DEF Supervertaler.py:32370
+### save_voice_vocabulary_settings: calls=0 (mono=0 [of which SupervertalerQt=0], modules=0, other=0) string-refs=1 attr-refs=0 defs=1
+    STR modules/voice_tab.py:1280 in VoiceTab._vocab_save_from_ui
+    DEF Supervertaler.py:45069

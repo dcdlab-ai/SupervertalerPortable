@@ -1,0 +1,84 @@
+BATCH #7 STAGE 1 — ФАКТЫ О ДУБЛИРОВАНИИ «ВЛАДЕЛЬЦА ФАЙЛА НАСТРОЕК» И РАЗРЕШЕНИЯ user_data
+=============================================================================
+Собрано read-only на HEAD b5c46e7 (монолит 68 386 строк; sha256 блоба Supervertaler.py
+802c504c8849ac58551bece6b297917426e31226 — совпадает с HEAD:Supervertaler.py).
+
+A. ЦЕЛЕВОЙ ФАЙЛ НАСТРОЕК (уже существует и уже имеет 2+ «владельцев»)
+
+A1. Монолит (класс SupervertalerQt, строки 44639–44682):
+    _get_settings_dir()        -> self.user_data_path / "workbench" / "settings"
+    _get_unified_settings_path() -> _get_settings_dir() / "settings.json"
+    _load_unified_settings()   -> json.load всего файла, гарантирует 4 секции
+                                  ("api_keys", "general", "ui", "features")
+    _save_unified_settings()   -> json.dump(indent=2, ensure_ascii=False)
+
+A2. modules/config_manager.py (класс ConfigManager, строки 358–395) — ТОТ ЖЕ ФАЙЛ:
+    get_preferences_path()  -> os.path.join(get_user_data_path(), 'workbench',
+                                           'settings', 'settings.json')
+    load_preferences()      -> json.load(...).get('ui', {})
+    save_preferences()      -> читает файл, ставит all_settings['ui'], пишет
+                               json.dump(indent=2, ensure_ascii=False)
+    Real call sites: 0 (grep по *.py, modules/*.py, modules/*/*.py: только само
+    определение; вызовы load_preferences/save_preferences/get_preferences_path
+    отсутствуют).
+    => дублирующая реализация того же контракта; get_preferences_path() совпадает
+       с _get_unified_settings_path() байт-в-байт по смыслу (тот же путь).
+
+A3. modules/feature_manager.py (152–189) — тот же файл, секция "features":
+    self.settings_file = user_data_path/"workbench"/"settings"/"settings.json";
+    _load_preferences() -> data.get("features", {})
+    _save_preferences() -> читает файл, ставит ["features"], пишет indent=2.
+
+A4. modules/ui_scale.py (89–100) — читает тот же файл напрямую
+    (_read_scale_from_disk: <user_data>/workbench/settings/settings.json,
+    с фолбэком на старый <user_data>/settings.json).
+
+A5. modules/llm_clients.py:43 load_api_keys() — СВОЯ реализация чтения секции
+    "api_keys" из того же файла (+ legacy api_keys.txt), плюс своё вычисление
+    user_data пути (см. блок B) и свой def load_api_keys (третье определение имени
+    в репозитории после монолита и pdf_rescue_Qt.py:1749, где это заглушка-атрибут).
+
+Итог A: «единый владелец формата settings» (Goal Step 7) — цель, а не факт:
+до Steps 7 файл читают/пишут минимум 4 разных места (монолит, config_manager,
+feature_manager, ui_scale/llm_clients). Перенос монолитного IO в сервис не
+устраняет эти дубликаты сам по себе — это отдельное решение владельца.
+
+B. РАЗРЕШЕНИЕ user_data ПУТИ — ТРИ РАЗНЫХ MECHANISM (риск double-resolution)
+
+B1. Монолит: get_config_pointer_path() (строки ~160–195) ->
+    Windows: %APPDATA%/Supervertaler/config.json;  macOS: ~/Library/Application
+    Support/Supervertaler/config.json;  Linux: $XDG_CONFIG_HOME/Supervertaler/config.json.
+    Читается load_user_data_path_from_config() (218–238), пишется
+    save_user_data_path() (208–215), дефолт get_default_user_data_path() =
+    Path.home()/"Supervertaler" (195–205).
+    self.user_data_path = get_user_data_path()  (Supervertaler.py:6298).
+
+B2. ConfigManager (modules/config_manager.py):
+    CONFIG_FILENAME = ".supervertaler_config.json" -> Path.home()/.supervertaler_config.json
+    (+ dev-режим по флагу .supervertaler.local в корне репозитория).
+    Это ДРУГОЙ файл-указатель, чем B1 => ConfigManager.get_user_data_path() может
+    вернуть ДРУГОЙ каталог, чем self.user_data_path монолита.
+
+B3. modules/llm_clients.py:46–68 — ещё одна копия B1 (APPDATA/…/config.json,
+    свой код, читает ключ "user_data_path").
+
+Итог B: сервис настроек НЕ должен сам разрешать user_data путь через
+ConfigManager.get_user_data_path() — иначе возможен молчаливый уход на другой
+каталог. Путь надо передавать уже разрешённым (self.user_data_path) либо
+провайдером-callback'ом. Унификация B1/B2/B3 — отдельное решение владельца.
+
+C. ВНЕШНИЕ ДУКТ-ТАЙПЕД-КОНСУМЕНТЫ (имена должны остаться на главном окне)
+
+* modules/quicktrans.py:302 `hasattr(parent_app,'load_general_settings')` ->
+  parent_app.load_general_settings(); 323–326 load_api_keys/load_provider_enabled_states;
+  370–371 load_llm_settings; 439–440 load_api_keys; 454 load_llm_settings.
+* modules/voice_tab.py:1061–1062 getattr(self._parent_app,'_load_unified_settings'),
+  getattr(...,'_save_unified_settings'); 736/781 'load_dictation_settings';
+  1239 'load_voice_vocabulary_settings'; 1280 'save_voice_vocabulary_settings'.
+* modules/clipboard_manager_widget.py:2284 getattr(self._parent_app,'_load_settings_section'),
+  2298 + '_save_settings_section'; 771 'load_clipboard_privacy_settings'.
+* modules/chat_backend.py:100–103,139–140,149–150 (load_api_keys/load_llm_settings/_get_proxy_url);
+  modules/chat_view_widget.py:711–714,737–738,744–745; modules/pdf_rescue_Qt.py:53–55.
+* modules/autocorrect.py — `settings = main_window.get_autocorrect_settings()`.
+Итог C: сохраняются И приватные имена (_load_unified_settings, _save_unified_settings,
+_load_settings_section, _save_settings_section, _get_proxy_url), НЕ только публичные.

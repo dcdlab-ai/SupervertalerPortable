@@ -1,0 +1,394 @@
+add_to_recent_projects	def	Supervertaler.py:32238	<body of SupervertalerQt>	MONOLITH
+_remove_from_recent_projects	def	Supervertaler.py:32290	<body of SupervertalerQt>	MONOLITH
+load_recent_projects	def	Supervertaler.py:32306	<body of SupervertalerQt>	MONOLITH
+save_recent_projects	def	Supervertaler.py:32370	<body of SupervertalerQt>	MONOLITH
+clear_recent_projects	def	Supervertaler.py:32416	<body of SupervertalerQt>	MONOLITH
+load_general_settings	def	Supervertaler.py:44522	<body of SupervertalerQt>	MONOLITH
+get_autocorrect_settings	def	Supervertaler.py:44620	<body of SupervertalerQt>	MONOLITH
+_get_settings_dir	def	Supervertaler.py:44639	<body of SupervertalerQt>	MONOLITH
+_get_unified_settings_path	def	Supervertaler.py:44643	<body of SupervertalerQt>	MONOLITH
+_load_unified_settings	def	Supervertaler.py:44647	<body of SupervertalerQt>	MONOLITH
+_save_unified_settings	def	Supervertaler.py:44663	<body of SupervertalerQt>	MONOLITH
+_load_settings_section	def	Supervertaler.py:44674	<body of SupervertalerQt>	MONOLITH
+_save_settings_section	def	Supervertaler.py:44678	<body of SupervertalerQt>	MONOLITH
+load_clipboard_privacy_settings	def	Supervertaler.py:44690	<body of SupervertalerQt>	MONOLITH
+save_clipboard_privacy_settings	def	Supervertaler.py:44701	<body of SupervertalerQt>	MONOLITH
+_migrate_settings_to_unified	def	Supervertaler.py:44724	<body of SupervertalerQt>	MONOLITH
+_migrate_to_workbench_layout	def	Supervertaler.py:44816	<body of SupervertalerQt>	MONOLITH
+_load_general_settings_from_file	def	Supervertaler.py:44883	<body of SupervertalerQt>	MONOLITH
+save_general_settings	def	Supervertaler.py:44924	<body of SupervertalerQt>	MONOLITH
+load_dictation_settings	def	Supervertaler.py:44931	<body of SupervertalerQt>	MONOLITH
+save_dictation_settings	def	Supervertaler.py:44948	<body of SupervertalerQt>	MONOLITH
+_load_language_pair_from_disk	def	Supervertaler.py:45004	<body of SupervertalerQt>	MONOLITH
+load_voice_vocabulary_settings	def	Supervertaler.py:45029	<body of SupervertalerQt>	MONOLITH
+save_voice_vocabulary_settings	def	Supervertaler.py:45069	<body of SupervertalerQt>	MONOLITH
+_migrate_voice_dictation_default_off	def	Supervertaler.py:45143	<body of SupervertalerQt>	MONOLITH
+load_language_settings	def	Supervertaler.py:45228	<body of SupervertalerQt>	MONOLITH
+save_language_settings	def	Supervertaler.py:45251	<body of SupervertalerQt>	MONOLITH
+load_font_sizes_from_preferences	def	Supervertaler.py:45275	<body of SupervertalerQt>	MONOLITH
+_save_spellcheck_settings	def	Supervertaler.py:52262	<body of SupervertalerQt>	MONOLITH
+_load_spellcheck_settings	def	Supervertaler.py:52273	<body of SupervertalerQt>	MONOLITH
+load_llm_settings	def	Supervertaler.py:56987	<body of SupervertalerQt>	MONOLITH
+save_llm_settings	def	Supervertaler.py:57027	<body of SupervertalerQt>	MONOLITH
+load_proxy_settings	def	Supervertaler.py:57040	<body of SupervertalerQt>	MONOLITH
+save_proxy_settings	def	Supervertaler.py:57058	<body of SupervertalerQt>	MONOLITH
+_get_proxy_url	def	Supervertaler.py:57067	<body of SupervertalerQt>	MONOLITH
+_get_proxy_dict	def	Supervertaler.py:57091	<body of SupervertalerQt>	MONOLITH
+load_provider_enabled_states	def	Supervertaler.py:57283	<body of SupervertalerQt>	MONOLITH
+save_provider_enabled_states	def	Supervertaler.py:57311	<body of SupervertalerQt>	MONOLITH
+load_api_keys	def	Supervertaler.py:61235	<body of SupervertalerQt>	MONOLITH
+save_api_keys	def	Supervertaler.py:61245	<body of SupervertalerQt>	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:68357	main	MONOLITH
+_migrate_voice_dictation_default_off	call-attr	Supervertaler.py:6388	SupervertalerQt.__init__	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:6469	SupervertalerQt.__init__	MONOLITH
+load_language_settings	call-attr	Supervertaler.py:6472	SupervertalerQt.__init__	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:6478	SupervertalerQt.__init__	MONOLITH
+load_font_sizes_from_preferences	call-attr	Supervertaler.py:6501	SupervertalerQt.__init__	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:8286	SupervertalerQt._setup_ollama_keepwarm	MONOLITH
+load_api_keys	call-name	Supervertaler.py:11435	SupervertalerQt._get_api_keys	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:20823	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:20824	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:20825	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:20826	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:21363	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_proxy_settings	call-attr	Supervertaler.py:21448	SupervertalerQt._create_ai_settings_tab	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:21867	SupervertalerQt._create_mt_settings_tab	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:21913	SupervertalerQt._create_mt_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:21988	SupervertalerQt._create_mt_quick_lookup_settings_tab	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:21990	SupervertalerQt._create_mt_quick_lookup_settings_tab	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:21991	SupervertalerQt._create_mt_quick_lookup_settings_tab	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:22051	SupervertalerQt._create_mt_quick_lookup_settings_tab	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:22307	SupervertalerQt._create_mt_quick_lookup_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:22360	SupervertalerQt._save_mt_quick_lookup_settings	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:22376	SupervertalerQt._save_mt_quick_lookup_settings	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:22468	SupervertalerQt._create_backup_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:22621	SupervertalerQt._create_general_settings_tab	MONOLITH
+_get_unified_settings_path	call-attr	Supervertaler.py:22756	SupervertalerQt._create_general_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:23784	SupervertalerQt._create_view_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:25442	SupervertalerQt._create_user_identity_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:25498	SupervertalerQt._save_user_identity_from_ui	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:25500	SupervertalerQt._save_user_identity_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26052	SupervertalerQt._create_debug_settings_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26166	SupervertalerQt._save_debug_settings_from_ui	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:26170	SupervertalerQt._save_debug_settings_from_ui	MONOLITH
+save_llm_settings	call-attr	Supervertaler.py:26245	SupervertalerQt._save_llm_settings_from_ui	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:26259	SupervertalerQt._save_llm_settings_from_ui	MONOLITH
+save_provider_enabled_states	call-attr	Supervertaler.py:26261	SupervertalerQt._save_llm_settings_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26264	SupervertalerQt._save_llm_settings_from_ui	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:26285	SupervertalerQt._save_llm_settings_from_ui	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:26339	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+save_llm_settings	call-attr	Supervertaler.py:26370	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:26388	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+save_provider_enabled_states	call-attr	Supervertaler.py:26390	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26400	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:26443	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:26483	SupervertalerQt._save_api_keys_from_ui	MONOLITH
+save_api_keys	call-attr	Supervertaler.py:26490	SupervertalerQt._save_api_keys_from_ui	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:26506	SupervertalerQt._save_mt_settings_from_ui	MONOLITH
+save_provider_enabled_states	call-attr	Supervertaler.py:26508	SupervertalerQt._save_mt_settings_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26568	SupervertalerQt._save_general_settings_from_ui	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:26675	SupervertalerQt._save_general_settings_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:26738	SupervertalerQt._save_view_settings_from_ui_impl	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:26876	SupervertalerQt._save_view_settings_from_ui_impl	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:27030	SupervertalerQt._apply_global_ui_font_scale	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:27035	SupervertalerQt._apply_global_ui_font_scale	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:27084	SupervertalerQt._get_global_ui_font_scale	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:27097	SupervertalerQt._get_ui_chrome_compact	MONOLITH
+_load_spellcheck_settings	call-attr	Supervertaler.py:27238	SupervertalerQt.create_grid_view_widget	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:27852	SupervertalerQt.create_grid_view_widget_for_home	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:28640	SupervertalerQt.create_translation_grid	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:28914	SupervertalerQt.create_assistance_panel	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:29473	SupervertalerQt._setup_tray_icon	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:29789	SupervertalerQt._on_toggle_close_to_tray	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:29791	SupervertalerQt._on_toggle_close_to_tray	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:29794	SupervertalerQt._on_toggle_start_minimized	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:29796	SupervertalerQt._on_toggle_start_minimized	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:32065	SupervertalerQt.restart_auto_backup_timer	MONOLITH
+load_recent_projects	call-attr	Supervertaler.py:32199	SupervertalerQt.update_recent_menu	MONOLITH
+load_recent_projects	call-attr	Supervertaler.py:32251	SupervertalerQt.add_to_recent_projects	MONOLITH
+save_recent_projects	call-attr	Supervertaler.py:32284	SupervertalerQt.add_to_recent_projects	MONOLITH
+load_recent_projects	call-attr	Supervertaler.py:32394	SupervertalerQt.update_recent_projects_display	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:32507	SupervertalerQt.import_document	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:32574	SupervertalerQt.import_document	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:33359	SupervertalerQt.import_simple_txt	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:33448	SupervertalerQt.import_simple_txt	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:33452	SupervertalerQt.import_simple_txt	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:34254	SupervertalerQt.import_folder_multifile	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:34356	SupervertalerQt.import_folder_multifile	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:34360	SupervertalerQt.import_folder_multifile	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:38046	SupervertalerQt.get_translator_name	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:41409	SupervertalerQt._create_match_panel	MONOLITH
+_load_general_settings_from_file	call-attr	Supervertaler.py:44525	SupervertalerQt.load_general_settings	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:44600	SupervertalerQt.load_general_settings	MONOLITH
+_get_unified_settings_path	call-attr	Supervertaler.py:44649	SupervertalerQt._load_unified_settings	MONOLITH
+_get_settings_dir	call-attr	Supervertaler.py:44665	SupervertalerQt._save_unified_settings	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:44680	SupervertalerQt._save_settings_section	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:44682	SupervertalerQt._save_settings_section	MONOLITH
+_get_settings_dir	call-attr	Supervertaler.py:44726	SupervertalerQt._migrate_settings_to_unified	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:44903	SupervertalerQt._load_general_settings_from_file	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:44951	SupervertalerQt.save_dictation_settings	MONOLITH
+load_voice_vocabulary_settings	call-attr	Supervertaler.py:45103	SupervertalerQt.build_voice_initial_prompt	MONOLITH
+save_language_settings	call-attr	Supervertaler.py:45267	SupervertalerQt._save_language_settings_from_ui	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:47418	SupervertalerQt.show_proofread_dialog	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:47573	SupervertalerQt._run_proofreading	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:48218	SupervertalerQt._schedule_delayed_lookup	MONOLITH
+_save_spellcheck_settings	call-attr	Supervertaler.py:52212	SupervertalerQt._toggle_spellcheck	MONOLITH
+_save_spellcheck_settings	call-attr	Supervertaler.py:52259	SupervertalerQt._toggle_spellcheck_from_button	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54717	SupervertalerQt.on_dictation_complete	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:57095	SupervertalerQt._get_proxy_dict	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:57105	SupervertalerQt._apply_gemini_proxy	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:58556	SupervertalerQt.translate_current_segment	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:59125	SupervertalerQt.autotag_current_segment	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:59453	SupervertalerQt.run_grid_quicklauncher_prompt	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:59458	SupervertalerQt.run_grid_quicklauncher_prompt	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:59722	SupervertalerQt.autotag_segments_bulk	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:60642	SupervertalerQt._fetch_llm_translation_async	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:60646	SupervertalerQt._fetch_llm_translation_async	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:60650	SupervertalerQt._fetch_llm_translation_async	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:60770	SupervertalerQt._fetch_mt_translation_async	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:60775	SupervertalerQt._fetch_mt_translation_async	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:61237	SupervertalerQt.load_api_keys	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:61247	SupervertalerQt.save_api_keys	MONOLITH
+get_autocorrect_settings	call-attr	Supervertaler.py:3497	EditableGridTextEditor._maybe_apply_autocorrect	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:5636	PreTranslationWorker._translate_with_mt	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:5659	PreTranslationWorker._translate_with_llm	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:5729	PreTranslationWorker._translate_batch_with_llm	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:5942	PreTranslationWorker._translate_single_with_llm	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:5994	PreTranslationWorker._autotag_segment_llm	MONOLITH
+_migrate_settings_to_unified	call-attr	Supervertaler.py:6326	SupervertalerQt.__init__	MONOLITH
+_migrate_to_workbench_layout	call-attr	Supervertaler.py:6327	SupervertalerQt.__init__	MONOLITH
+_load_language_pair_from_disk	call-attr	Supervertaler.py:6337	SupervertalerQt.__init__	MONOLITH
+_migrate_settings_to_unified	call-attr	Supervertaler.py:6658	SupervertalerQt._reinitialize_with_new_data_path	MONOLITH
+_migrate_to_workbench_layout	call-attr	Supervertaler.py:6659	SupervertalerQt._reinitialize_with_new_data_path	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:6721	SupervertalerQt._show_first_run_welcome	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:6723	SupervertalerQt._show_first_run_welcome	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:8237	SupervertalerQt._update_llm_indicator	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:8492	SupervertalerQt._set_confirmed_progress_basis	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:8494	SupervertalerQt._set_confirmed_progress_basis	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:10269	SupervertalerQt._quick_count_lang_pair	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:14221	SupervertalerQt._verify_export_word_count	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:18481	SupervertalerQt._do_extract_terms	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:18484	SupervertalerQt._do_extract_terms	MONOLITH
+save_language_settings	call-attr	Supervertaler.py:20791	SupervertalerQt._autosave_lang	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:22390	SupervertalerQt._save_mt_quick_lookup_settings	MONOLITH
+save_llm_settings	call-attr	Supervertaler.py:22393	SupervertalerQt._save_mt_quick_lookup_settings	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:22601	SupervertalerQt._live_save_backup_settings	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:22607	SupervertalerQt._live_save_backup_settings	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:22724	SupervertalerQt._on_language_changed	MONOLITH
+load_clipboard_privacy_settings	call-attr	Supervertaler.py:23468	SupervertalerQt._create_clipboard_settings_tab	MONOLITH
+save_clipboard_privacy_settings	call-attr	Supervertaler.py:23481	SupervertalerQt._persist	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:23770	SupervertalerQt._persist_autocorrect_settings	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:25148	SupervertalerQt._on_alwayson_dictation	MONOLITH
+save_proxy_settings	call-attr	Supervertaler.py:26472	SupervertalerQt._save_ai_settings_from_ui	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:27110	SupervertalerQt._apply_ui_chrome_compactness	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:27112	SupervertalerQt._apply_ui_chrome_compactness	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:28041	SupervertalerQt.create_grid_view_widget_for_home	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:29836	SupervertalerQt.closeEvent	MONOLITH
+add_to_recent_projects	call-attr	Supervertaler.py:30164	SupervertalerQt.load_project	MONOLITH
+add_to_recent_projects	call-attr	Supervertaler.py:31841	SupervertalerQt.save_project_as	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:32022	SupervertalerQt._maybe_make_versioned_backup	MONOLITH
+load_recent_projects	call-attr	Supervertaler.py:32297	SupervertalerQt._remove_from_recent_projects	MONOLITH
+save_recent_projects	call-attr	Supervertaler.py:32426	SupervertalerQt.clear_recent_projects	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:43573	SupervertalerQt.set_termlens_position	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:43576	SupervertalerQt.set_termlens_position	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:43609	SupervertalerQt._save_bottom_dock_active_tab	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:43611	SupervertalerQt._save_bottom_dock_active_tab	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:43623	SupervertalerQt._on_match_top_tab_changed	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:43625	SupervertalerQt._on_match_top_tab_changed	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:43966	SupervertalerQt._apply_row_color	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:44232	SupervertalerQt.save_current_font_sizes	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:44250	SupervertalerQt.save_current_font_sizes	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:44491	SupervertalerQt._save	MONOLITH
+_get_settings_dir	call-attr	Supervertaler.py:44645	SupervertalerQt._get_unified_settings_path	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:44707	SupervertalerQt.save_clipboard_privacy_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:44710	SupervertalerQt.save_clipboard_privacy_settings	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:44927	SupervertalerQt.save_general_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:44940	SupervertalerQt.load_dictation_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:44973	SupervertalerQt.save_dictation_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:45013	SupervertalerQt._load_language_pair_from_disk	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:45054	SupervertalerQt.load_voice_vocabulary_settings	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:45074	SupervertalerQt.save_voice_vocabulary_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:45160	SupervertalerQt._migrate_voice_dictation_default_off	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:45169	SupervertalerQt._migrate_voice_dictation_default_off	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:45238	SupervertalerQt.load_language_settings	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:45254	SupervertalerQt.save_language_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:45259	SupervertalerQt.save_language_settings	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:45278	SupervertalerQt.load_font_sizes_from_preferences	MONOLITH
+_get_unified_settings_path	call-attr	Supervertaler.py:45369	SupervertalerQt._init_usage_statistics	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:45391	SupervertalerQt.restore_last_project_if_enabled	MONOLITH
+load_recent_projects	call-attr	Supervertaler.py:45396	SupervertalerQt.restore_last_project_if_enabled	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:49127	SupervertalerQt.get_termbase_code_map	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:49135	SupervertalerQt.save_termbase_code_map	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:49137	SupervertalerQt.save_termbase_code_map	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:50155	SupervertalerQt._set_fr_demote_to_draft	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:50157	SupervertalerQt._set_fr_demote_to_draft	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:52265	SupervertalerQt._save_spellcheck_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:52269	SupervertalerQt._save_spellcheck_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:52276	SupervertalerQt._load_spellcheck_settings	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:54399	SupervertalerQt._set_voice_pause_setting	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:54402	SupervertalerQt._set_voice_pause_setting	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54573	SupervertalerQt.start_voice_dictation	MONOLITH
+load_voice_vocabulary_settings	call-attr	Supervertaler.py:54660	SupervertalerQt.start_voice_dictation	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:56473	SupervertalerQt._on_termlens_font_size_changed	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:57008	SupervertalerQt.load_llm_settings	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:57030	SupervertalerQt.save_llm_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:57032	SupervertalerQt.save_llm_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:57050	SupervertalerQt.load_proxy_settings	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:57061	SupervertalerQt.save_proxy_settings	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:57063	SupervertalerQt.save_proxy_settings	MONOLITH
+load_proxy_settings	call-attr	Supervertaler.py:57073	SupervertalerQt._get_proxy_url	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:57121	SupervertalerQt._get_active_custom_profile	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:57145	SupervertalerQt._get_custom_mt_profiles	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:57156	SupervertalerQt._get_active_custom_mt_profile	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:57189	SupervertalerQt.call_custom_mt	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:57280	SupervertalerQt.create_llm_client	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:57302	SupervertalerQt.load_provider_enabled_states	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:57314	SupervertalerQt.save_provider_enabled_states	MONOLITH
+_save_unified_settings	call-attr	Supervertaler.py:57316	SupervertalerQt.save_provider_enabled_states	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:58448	SupervertalerQt._maybe_show_okapi_java_warning	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:58664	SupervertalerQt.translate_current_segment	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:59330	SupervertalerQt._build_quicklauncher_document_context	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:59898	SupervertalerQt.translate_batch	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:59899	SupervertalerQt.translate_batch	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:59959	SupervertalerQt.translate_batch	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:59960	SupervertalerQt.translate_batch	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:60018	SupervertalerQt.translate_batch	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:61023	SupervertalerQt.call_microsoft_translate	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:61081	SupervertalerQt.call_amazon_translate	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:61137	SupervertalerQt.call_modernmt	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:61190	SupervertalerQt.call_mymemory	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:61997	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:61998	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+load_api_keys	string-ref	Supervertaler.py:63292	SuperlookupTab._perform_mt_lookup	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:63293	SuperlookupTab._perform_mt_lookup	MONOLITH
+load_provider_enabled_states	string-ref	Supervertaler.py:63294	SuperlookupTab._perform_mt_lookup	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:63295	SuperlookupTab._perform_mt_lookup	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:6308	SupervertalerQt.__init__	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:7861	SupervertalerQt.show_term_insert_popup	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:8317	SupervertalerQt.ping	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:22728	SupervertalerQt._on_language_changed	MONOLITH
+_get_unified_settings_path	call-attr	Supervertaler.py:22767	SupervertalerQt._on_usage_stats_toggled	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:23767	SupervertalerQt._persist_autocorrect_settings	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:24733	SupervertalerQt._toggle_alwayson_listening	MONOLITH
+load_voice_vocabulary_settings	call-attr	Supervertaler.py:24783	SupervertalerQt._toggle_alwayson_listening	MONOLITH
+_remove_from_recent_projects	call-attr	Supervertaler.py:30446	SupervertalerQt.load_project	MONOLITH
+clear_recent_projects	attr-ref	Supervertaler.py:32228	SupervertalerQt.update_recent_menu	MONOLITH
+save_recent_projects	call-attr	Supervertaler.py:32300	SupervertalerQt._remove_from_recent_projects	MONOLITH
+_load_general_settings_from_file	call-attr	Supervertaler.py:41540	SupervertalerQt._toggle_match_panel_tm_layout	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:41542	SupervertalerQt._toggle_match_panel_tm_layout	MONOLITH
+_load_unified_settings	call-attr	Supervertaler.py:44676	SupervertalerQt._load_settings_section	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:54601	SupervertalerQt.start_voice_dictation	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:56479	SupervertalerQt._on_termlens_font_size_changed	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:57194	SupervertalerQt.call_custom_mt	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:58506	SupervertalerQt._maybe_show_okapi_java_warning	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:58566	SupervertalerQt.translate_current_segment	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:58569	SupervertalerQt.translate_current_segment	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:59131	SupervertalerQt.autotag_current_segment	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:59490	SupervertalerQt.run_grid_quicklauncher_prompt	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:59728	SupervertalerQt.autotag_segments_bulk	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:60127	SupervertalerQt.translate_batch	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:60129	SupervertalerQt.translate_batch	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:60896	SupervertalerQt.call_google_translate	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:60950	SupervertalerQt.call_deepl	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:62171	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:62175	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:62319	SupervertalerQt._add_mt_and_llm_matches	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:62325	SupervertalerQt._add_mt_and_llm_matches	MONOLITH
+load_api_keys	string-ref	Supervertaler.py:63220	SuperlookupTab._update_mt_provider_status	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:63221	SuperlookupTab._update_mt_provider_status	MONOLITH
+load_provider_enabled_states	string-ref	Supervertaler.py:63222	SuperlookupTab._update_mt_provider_status	MONOLITH
+load_provider_enabled_states	call-attr	Supervertaler.py:63223	SuperlookupTab._update_mt_provider_status	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:64715	SuperlookupTab._on_landing_pref_changed	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:66809	SuperlookupTab._browse_for_autohotkey	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:1809	ReadOnlyGridTextEditor.highlight_termbase_matches	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:1810	ReadOnlyGridTextEditor.highlight_termbase_matches	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:5479	PreTranslationWorker.run	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:6949	SupervertalerQt.on_finish	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:6951	SupervertalerQt.on_finish	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:7861	SupervertalerQt.show_term_insert_popup	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:8174	SupervertalerQt._setup_progress_indicators	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:24747	SupervertalerQt._toggle_alwayson_listening	MONOLITH
+_save_settings_section	call-attr	Supervertaler.py:29853	SupervertalerQt.closeEvent	MONOLITH
+_load_general_settings_from_file	call-attr	Supervertaler.py:44487	SupervertalerQt._save	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:47595	SupervertalerQt._run_proofreading	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54306	SupervertalerQt._get_voice_hotkey_listener	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54323	SupervertalerQt._voice_pause_mode	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54469	SupervertalerQt.stop_voice_dictation_if_recording	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:55545	SupervertalerQt._play_sound_effect	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:55554	SupervertalerQt._play_sound_effect	MONOLITH
+load_api_keys	call-attr	Supervertaler.py:57015	SupervertalerQt.load_llm_settings	MONOLITH
+_get_proxy_url	string-ref	Supervertaler.py:57194	SupervertalerQt.call_custom_mt	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:57266	SupervertalerQt.create_llm_client	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:59755	SupervertalerQt.autotag_segments_bulk	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:60528	SupervertalerQt.translate_batch	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:60680	SupervertalerQt.fetch_and_update	MONOLITH
+_get_proxy_dict	call-attr	Supervertaler.py:60931	SupervertalerQt.call_google_translate	MONOLITH
+_get_proxy_dict	call-attr	Supervertaler.py:60956	SupervertalerQt.call_deepl	MONOLITH
+_get_proxy_dict	call-attr	Supervertaler.py:61064	SupervertalerQt.call_microsoft_translate	MONOLITH
+_get_proxy_dict	call-attr	Supervertaler.py:61173	SupervertalerQt.call_modernmt	MONOLITH
+_get_proxy_dict	call-attr	Supervertaler.py:61221	SupervertalerQt.call_mymemory	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:64697	SuperlookupTab._load_superlookup_landing_pref	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:64698	SuperlookupTab._load_superlookup_landing_pref	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:64712	SuperlookupTab._on_landing_pref_changed	MONOLITH
+save_general_settings	string-ref	Supervertaler.py:64712	SuperlookupTab._on_landing_pref_changed	MONOLITH
+load_general_settings	call-attr	Supervertaler.py:64713	SuperlookupTab._on_landing_pref_changed	MONOLITH
+save_general_settings	call-attr	Supervertaler.py:66766	SuperlookupTab.on_close	MONOLITH
+load_llm_settings	call-attr	Supervertaler.py:11720	SupervertalerQt._on_main_tab_changed	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:23960	SupervertalerQt._create_view_settings_tab	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:44696	SupervertalerQt.load_clipboard_privacy_settings	MONOLITH
+_load_settings_section	call-attr	Supervertaler.py:49901	SupervertalerQt.show_find_replace_dialog	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:55545	SupervertalerQt._play_sound_effect	MONOLITH
+load_general_settings	string-ref	Supervertaler.py:55554	SupervertalerQt._play_sound_effect	MONOLITH
+load_api_keys	string-ref	Supervertaler.py:57015	SupervertalerQt.load_llm_settings	MONOLITH
+_load_general_settings_from_file	call-attr	Supervertaler.py:44295	SupervertalerQt.get_effective_import_options	MONOLITH
+load_dictation_settings	call-attr	Supervertaler.py:54364	SupervertalerQt._ensure_voice_pause_hotkey_armed	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:62188	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:62230	SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:62344	SupervertalerQt._add_mt_and_llm_matches	MONOLITH
+_get_proxy_url	call-attr	Supervertaler.py:62385	SupervertalerQt._add_mt_and_llm_matches	MONOLITH
+load_api_keys	string-ref	modules/chat_backend.py:100	ChatBackend.init_llm_client	modules/
+load_api_keys	call-attr	modules/chat_backend.py:101	ChatBackend.init_llm_client	modules/
+load_api_keys	call-name	modules/chat_backend.py:103	ChatBackend.init_llm_client	modules/
+load_llm_settings	call-attr	modules/chat_backend.py:139	ChatBackend.init_llm_client	modules/
+load_llm_settings	string-ref	modules/chat_backend.py:140	ChatBackend.init_llm_client	modules/
+_get_proxy_url	call-attr	modules/chat_backend.py:150	ChatBackend.init_llm_client	modules/
+_get_proxy_url	string-ref	modules/chat_backend.py:149	ChatBackend.init_llm_client	modules/
+load_api_keys	string-ref	modules/chat_view_widget.py:711	ChatViewWidget._on_model_selected	modules/
+load_api_keys	call-attr	modules/chat_view_widget.py:712	ChatViewWidget._on_model_selected	modules/
+load_api_keys	call-name	modules/chat_view_widget.py:714	ChatViewWidget._on_model_selected	modules/
+load_llm_settings	call-attr	modules/chat_view_widget.py:737	ChatViewWidget._on_model_selected	modules/
+_get_proxy_url	call-attr	modules/chat_view_widget.py:745	ChatViewWidget._on_model_selected	modules/
+load_llm_settings	string-ref	modules/chat_view_widget.py:738	ChatViewWidget._on_model_selected	modules/
+_get_proxy_url	string-ref	modules/chat_view_widget.py:744	ChatViewWidget._on_model_selected	modules/
+load_clipboard_privacy_settings	string-ref	modules/clipboard_manager_widget.py:771	ClipboardManagerWidget._load_privacy_settings	modules/
+_load_settings_section	string-ref	modules/clipboard_manager_widget.py:2284	ClipboardManagerWidget._resolve_paste_method	modules/
+_load_settings_section	string-ref	modules/clipboard_manager_widget.py:2298	ClipboardManagerWidget._set_paste_method	modules/
+_save_settings_section	string-ref	modules/clipboard_manager_widget.py:2299	ClipboardManagerWidget._set_paste_method	modules/
+load_api_keys	def	modules/llm_clients.py:43	<module>	modules/
+load_api_keys	call-name	modules/llm_clients.py:1864	_load_api_key	modules/
+load_api_keys	call-name	modules/llm_clients.py:1901	get_google_translation	modules/
+load_api_keys	def	modules/pdf_rescue_Qt.py:1749	<body of StandaloneApp>	modules/
+load_api_keys	string-ref	modules/pdf_rescue_Qt.py:53	PDFRescueQt.__init__	modules/
+load_api_keys	call-attr	modules/pdf_rescue_Qt.py:55	PDFRescueQt.__init__	modules/
+load_general_settings	string-ref	modules/quicktrans.py:302	QuickTransProviderMixin._load_mt_quick_settings	modules/
+load_general_settings	call-attr	modules/quicktrans.py:303	QuickTransProviderMixin._load_mt_quick_settings	modules/
+load_api_keys	string-ref	modules/quicktrans.py:323	QuickTransProviderMixin._get_enabled_providers	modules/
+load_api_keys	call-attr	modules/quicktrans.py:324	QuickTransProviderMixin._get_enabled_providers	modules/
+load_provider_enabled_states	string-ref	modules/quicktrans.py:325	QuickTransProviderMixin._get_enabled_providers	modules/
+load_provider_enabled_states	call-attr	modules/quicktrans.py:326	QuickTransProviderMixin._get_enabled_providers	modules/
+load_api_keys	call-attr	modules/quicktrans.py:440	QuickTransProviderMixin._call_llm_translation	modules/
+load_api_keys	call-name	modules/quicktrans.py:442	QuickTransProviderMixin._call_llm_translation	modules/
+load_llm_settings	call-attr	modules/quicktrans.py:370	QuickTransProviderMixin._get_enabled_providers	modules/
+load_api_keys	string-ref	modules/quicktrans.py:439	QuickTransProviderMixin._call_llm_translation	modules/
+load_llm_settings	call-attr	modules/quicktrans.py:454	QuickTransProviderMixin._call_llm_translation	modules/
+load_llm_settings	string-ref	modules/quicktrans.py:371	QuickTransProviderMixin._get_enabled_providers	modules/
+load_llm_settings	string-ref	modules/quicktrans.py:454	QuickTransProviderMixin._call_llm_translation	modules/
+_load_settings_section	call-attr	modules/termbase_entry_editor.py:121	TermbaseEntryEditor._load_termbase_selections	modules/
+_load_unified_settings	call-attr	modules/termbase_entry_editor.py:131	TermbaseEntryEditor._save_termbase_selections	modules/
+_save_unified_settings	call-attr	modules/termbase_entry_editor.py:134	TermbaseEntryEditor._save_termbase_selections	modules/
+load_dictation_settings	string-ref	modules/voice_tab.py:736	VoiceTab._load_settings	modules/
+load_dictation_settings	string-ref	modules/voice_tab.py:781	VoiceTab._refresh_voice_pause_ui	modules/
+_load_unified_settings	string-ref	modules/voice_tab.py:1061	VoiceTab._set_dictation_keys	modules/
+_save_unified_settings	string-ref	modules/voice_tab.py:1062	VoiceTab._set_dictation_keys	modules/
+load_voice_vocabulary_settings	string-ref	modules/voice_tab.py:1239	VoiceTab._vocab_load_into_ui	modules/
+save_voice_vocabulary_settings	string-ref	modules/voice_tab.py:1280	VoiceTab._vocab_save_from_ui	modules/
