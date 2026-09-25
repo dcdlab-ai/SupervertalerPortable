@@ -471,6 +471,32 @@ F9. Тул-квирк: PowerShell (Get-Content … | Measure-Object -Line) да�
       save_dictation_settings (PROBABLY_DEAD) в составе.
 
 ════════════════════════════════════════════════════════════════════════════
+ПРАВКИ КООРДИНАТОРА (25.09.2026, по независимому аудиту Б1)
+════════════════════════════════════════════════════════════════════════════
+1. Раздел 1.6/1.4, _save_unified_settings: пропущен call site modules/voice_tab.py:1062
+   (getattr внутри _set_dictation_keys, соседняя строка с уже учтённой 1061 для
+   _load_unified_settings, но для другого метода). Fan-in _save_unified_settings = 12,
+   не 11.
+2. Раздел 1.4, load_general_settings — ОТКРЫТЫЙ СПОР, не решён этим документом: отчёт
+   характеризует все 7 duck-typed вызовов (1809, 55545, 55554, 64697, 64712, 64713,
+   quicktrans.py:302) как getattr(self, 'load_general_settings', lambda: {})(). Аудит
+   Б1 оспаривает это для Supervertaler.py:1809 (highlight_termbase_matches) и
+   modules/quicktrans.py:302-303 — по его прочтению это hasattr-guard на
+   self.parent()-цепочке / self.parent_app, не getattr(self, …). Требует прямой
+   проверки кода этих двух мест перед стартом S2.2; на S2.1 не влияет.
+3. Решения владельца по V1–V4 (раздел «ВЫВОД» ниже) приняты координатором по
+   делегации — см. EXTRACTION_PLAN.md, статус Step 7, за полным текстом и
+   обоснованием. Кратко: V1 — новый класс SettingsService (вариант б); V2 — тир C
+   не включать; V3 — SPLIT обязателен для load_general_settings и
+   _migrate_voice_dictation_default_off, остальные три SPLIT-кандидата
+   (save_clipboard_privacy_settings, save_dictation_settings, load_language_settings)
+   НЕ переносятся в Step 7 вовсе, остаются целиком в монолите; V4 — S2.5 отдельным
+   под-батчем с валидацией на копии user_data. Итоговый состав Stage 2: 32 метода
+   (6 A + 26 B) / ~731 строка, не 35/830 как в разделах 1.1–1.2 выше. Разбивка
+   S2.1–S2.5 из раздела 1.8 актуальна с поправкой на сокращённые S2.2 (4 метода) и
+   S2.4 (7 методов) — точный состав в EXTRACTION_PLAN.md.
+
+════════════════════════════════════════════════════════════════════════════
 ПОДТВЕРЖДЕНИЕ: НИ ОДНА СТРОКА КОДА НЕ ИЗМЕНЕНА
 ════════════════════════════════════════════════════════════════════════════
 • git hash-object Supervertaler.py = 802c504c8849ac58551bece6b297917426e31226 ==
