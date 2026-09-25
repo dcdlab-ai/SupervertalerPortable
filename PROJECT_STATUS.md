@@ -42,8 +42,10 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
 ## Что дальше: Step 7 Stage 2 — под-батч S2.1 закрыт (Batch #7 Stage 2, 25.09.2026)
 
-**S2.1 выполнен** (база HEAD `043da2a`, монолит 68 386 → **68 400** строк, `git diff
---numstat` 47/33 по одному файлу). Отчёт:
+**S2.1 выполнен** (база HEAD `043da2a`, монолит 68 386 → **68 400** строк; прирост
++14 разобран замером: импорт +1, блок делегатов −6, проводка в `__init__` +10 и в
+`_reinitialize_with_new_data_path` +9 — `git diff --numstat` 47/33 по одному файлу,
+но уточнение регионов см. §8.1 отчёта и `audits/batch7s21_line_accounting.txt`). Отчёт:
 `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.1).txt`; промпт:
 `docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.1 settings core).txt`;
 аудиты: `docs/refactoring/audits/batch7s21_*` (манифест до/после + сравнение, counts,
@@ -79,12 +81,21 @@ teardown идентичен на обоих — предсуществующий
 остаётся в монолите), `_load_general_settings_from_file` 44897–44936 (40),
 `save_general_settings` 44938–44943 (6), `load_clipboard_privacy_settings`
 44704–44713 (10); `save_clipboard_privacy_settings` 44715–44736 — НЕ переносится
-(V3). Открытый вопрос перед стартом S2.2 (из EXTRACTION_PLAN.md): прямая цитата кода
-дукт-тайпед-обращений `load_general_settings` в `Supervertaler.py:1809` и
-`modules/quicktrans.py:302–303` (спор Б1: `getattr(self, …)` или hasattr-guard).
+(V3). **Открытый вопрос перед стартом S2.2 ЗАКРЫТ (25.09.2026, follow-up S2.1)**:
+прямая цитата кода показала, что формы `getattr(self, 'load_general_settings', lambda: {})()`
+нет ни в одном из 7 мест — везде `hasattr`-guard + обычное обращение к атрибуту
+(`Supervertaler.py:1810–1811` на `parent()`-цепочке, `modules/quicktrans.py:302–303`
+на `parent_app`, плюс 7881, 55559, 55568, 64711, 64726 на `self`/`mw`) → аудит Б1
+подтверждён, формулировка Stage 1 §1.4 ошибочна; делегат с исходным именем сохраняет
+все места работоспособными, «мягкого» duck-typing-контракта не требуется. Цитаты и
+инвентарь: `docs/refactoring/audits/batch7s21_open_item_quotes.txt`; разбор — §8.2
+отчёта S2.1.
 Если за время паузы строки 44542–44943 или файлы `modules/{voice_tab,
 clipboard_manager_widget,termbase_entry_editor}.py` трогали — границы и метрики
 пересчитать AST заново перед переносом.
+Прирост монолита S2.1 (+14 строк: импорт +1, делегаты −6, проводка в `__init__` +10 и
+в `_reinitialize…` +9) подтверждён difflib-замером по всем 10 неравным регионам —
+`docs/refactoring/audits/batch7s21_line_accounting.txt`, §8.1 отчёта S2.1.
 
 ## Что дальше: Step 7 — Stage 1 закрыт (Batch #7 Stage 1, 24.09.2026, read-only)
 

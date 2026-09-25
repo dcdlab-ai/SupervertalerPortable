@@ -1,0 +1,75 @@
+Открытый пункт перед S2.2 — ЗАКРЫТ прямой цитатой кода
+(Batch #7 Stage 2, S2.1 — follow-up-аудит; см. §8 отчёта S2.1)
+==========================================================================================
+ПРЕДМЕТ. Были ли duck-typed обращения к load_general_settings формой
+`getattr(self, 'load_general_settings', lambda: {})()` (как утверждает раздел 1.4
+отчёта Batch #7 Stage 1) или `hasattr`-guard'ами (как утверждает независимый аудит
+Б1; спор касался Supervertaler.py:1809 и modules/quicktrans.py:302-303).
+
+МЕТОД. Текстовый инвентарь ВСЕХ вхождений имени `load_general_settings` в
+Supervertaler.py и modules/*.py на дереве после S2.1 (68 400 строк; строки ниже
+44696 сдвинуты на +14 относительно коммита 043da2a) + дословные цитаты двух
+спорных мест. Скрипт-инвентарь: grep по шаблонам
+`getattr(...'load_general_settings'`, `hasattr(..., 'load_general_settings'`,
+`load_general_settings()`.
+
+ЦИТАТЫ (дословно; номера строк — как в дереве после S2.1)
+
+1) Supervertaler.py:1803-1815 — блок разрешения настроек подсветки терминов
+   (в отчёте Stage 1 это место названо «1809»; там нумерация на 1 меньше):
+
+        parent = self.parent()
+        while parent:
+            if hasattr(parent, 'termbase_highlight_style'):
+                highlight_style = getattr(parent, 'termbase_highlight_style', 'semibold')
+                dotted_color = getattr(parent, 'termbase_dotted_color', '#808080')
+                hide_shorter = getattr(parent, 'termbase_hide_shorter_matches', False)
+                break
+            elif hasattr(parent, 'load_general_settings'):
+                settings = parent.load_general_settings()
+
+   → `hasattr`-guard по цепочке `parent()` + ОБЫЧНОЕ обращение к атрибуту
+     (`parent.load_general_settings()`). Формы `getattr(self, …, lambda: {})()`
+     здесь НЕТ. Чтение аудита Б1 ПОДТВЕРЖДЕНО.
+
+2) modules/quicktrans.py:300-305:
+
+    def _load_mt_quick_settings(self) -> Dict[str, Any]:
+        """Load MT Quick Lookup specific settings"""
+        if hasattr(self.parent_app, 'load_general_settings'):
+            settings = self.parent_app.load_general_settings()
+            return settings.get('mt_quick_lookup', {})
+        return {}
+
+   → `hasattr`-guard на `self.parent_app` + обычный вызов. Формы
+     `getattr(self, …, lambda: {})()` здесь НЕТ. Чтение аудита Б1 ПОДТВЕРЖДЕНО.
+
+ПОЛНЫЙ ИНВЕНТАРЬ ВСЕХ 7 «СТРОКОВЫХ» МЕСТ (измерено на дереве после S2.1)
+
+    1810  elif hasattr(parent, 'load_general_settings'):        parent()-цепочка (termbase-popup)
+    1811      settings = parent.load_general_settings()          обычный вызов
+    7881  gen = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}
+    55559 settings = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}
+    55568 settings = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}
+    64711 if mw and hasattr(mw, 'load_general_settings'):        main window из Superlookup-контекста
+    64726 if mw and hasattr(mw, 'load_general_settings') and hasattr(mw, 'save_general_settings'):
+    modules/quicktrans.py:302-303  if hasattr(self.parent_app, 'load_general_settings'):
+                                   settings = self.parent_app.load_general_settings()
+
+  Проверка сдвига (косвенное подтверждение, что дерево не менялось иначе):
+  в отчёте Stage 1 назывались 1809 / 55545 / 55554 / 64697 / 64712 / 64713;
+  здесь 1810 / 55559 / 55568 / 64711 / 64726 / 64727 = +1 в раннем месте и +14
+  после 44696, что совпадает с измеренным сдвигом S2.1 (line_accounting.txt).
+
+ВЕРДИКТ. Формы `getattr(self, 'load_general_settings', lambda: {})()` в репозитории
+НЕТ НИ В ОДНОМ из 7 мест. Все сайты — `hasattr`-guard + обычное обращение к атрибуту,
+причём либо на самом окне (`self`, внутри класса), либо на ДРУГОМ объекте
+(`self.parent()`-цепочка, `self.parent_app`, `mw`).
+
+СЛЕДСТВИЕ ДЛЯ S2.2. Делегат с исходным именем `load_general_settings` на
+SupervertalerQt сохраняет все 7 мест работоспособными без каких-либо оговорок:
+атрибут существует, `hasattr(...)` даёт True, вызов уходит в сервис; «мягкого»
+duck-typing-контракта (lambda-дефолта) нигде не требуется.
+Формулировка раздела 1.4 отчёта Batch #7 Stage 1 в части «все в форме
+`getattr(self, 'load_general_settings', lambda: {}())`» — ОШИБОЧНА; поправка внесена
+в EXTRACTION_PLAN.md (пункт ОТКРЫТО переведён в ЗАКРЫТО) и в §8 отчёта S2.1.
