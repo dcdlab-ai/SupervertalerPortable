@@ -418,6 +418,7 @@ from modules.undo_manager import UndoManager  # Undo/redo-менеджер се�
 from modules.grid import helpers as grid_helpers  # Grid-хелперы: чистые функции (Batch #6 Stage 2)
 from modules.grid import pagination as grid_pagination  # Grid-пагинация: чистые функции (Batch #6 Stage 3)
 from modules.grid import filters as grid_filters  # Grid-фильтры и невидимые: чистые функции (Batch #6 Stage 4)
+from modules.settings_service import SettingsService  # Единый IO-слой настроек (Batch #7 Stage 2, S2.1)
 
 
 # ============================================================================
@@ -6297,6 +6298,16 @@ class SupervertalerQt(QMainWindow):
         # the right thing without a special case.
         self.user_data_path = get_user_data_path()
 
+        # Единый IO-слой настроек (Batch #7 Stage 2, S2.1). Каталог передаётся
+        # РОВНО тем выражением, которым его резолвил прежний
+        # _get_settings_dir: self.user_data_path / "workbench" / "settings".
+        # Путь резолвится заново на каждом вызове (кэша нет); при смене каталога
+        # данных сервис пересоздаётся в _reinitialize_with_new_data_path().
+        self.settings_service = SettingsService(
+            self.user_data_path / "workbench" / "settings",
+            log=self.log,
+        )
+
         # Configure the persistent token-usage ledger (metadata only; on by
         # default, matching the Trados plugin). Writes to
         # <user_data>/workbench/usage/usage-YYYY-MM.jsonl.
@@ -6654,6 +6665,15 @@ class SupervertalerQt(QMainWindow):
     def _reinitialize_with_new_data_path(self):
         """Заново инициализировать менеджеры после смены пользователем пути к данным."""
         try:
+            # Перепривязать settings-сервис к НОВОМУ каталогу данных ПЕРВЫМ делом
+            # (Batch #7 Stage 2, S2.1): миграции ниже читают/пишут
+            # <user_data>/workbench/settings через делегаты этого сервиса, поэтому
+            # старая привязка означала бы работу с покинутым каталогом.
+            self.settings_service = SettingsService(
+                self.user_data_path / "workbench" / "settings",
+                log=self.log,
+            )
+
             # Migrate settings if needed for the new data path
             self._migrate_settings_to_unified()
             self._migrate_to_workbench_layout()
@@ -44636,50 +44656,44 @@ class SupervertalerQt(QMainWindow):
     #   "api_keys", "general", "ui", "features"
     # ═══════════════════════════════════════════════════════════════════════
 
+    # Ядро API этого блока перенесено в modules/settings_service.py
+    # (Batch #7 Stage 2, под-батч S2.1). Здесь остаются ТОНКИЕ ДЕЛЕГАТЫ с
+    # исходными именами и сигнатурами: их вызывают снаружи по строке
+    # (main() 68357, modules/voice_tab.py, modules/clipboard_manager_widget.py)
+    # и ещё не перенесённые методы монолита (_migrate_settings_to_unified,
+    # _migrate_voice_dictation_default_off — уходят в S2.5).
+    # self.settings_service создаётся в __init__ и пересоздаётся при смене
+    # каталога данных в _reinitialize_with_new_data_path().
+
     def _get_settings_dir(self) -> Path:
-        """Возвращает путь к под-папке настроек."""
-        return self.user_data_path / "workbench" / "settings"
+        """Возвращает путь к под-папке настроек.
+        (Тонкий делегат: SettingsService._get_settings_dir, Batch #7 Stage 2)"""
+        return self.settings_service._get_settings_dir()
 
     def _get_unified_settings_path(self) -> Path:
-        """Возвращает путь к единому файлу settings.json."""
-        return self._get_settings_dir() / "settings.json"
+        """Возвращает путь к единому файлу settings.json.
+        (Тонкий делегат: SettingsService._get_unified_settings_path, Batch #7 Stage 2)"""
+        return self.settings_service._get_unified_settings_path()
 
     def _load_unified_settings(self) -> Dict[str, Any]:
-        """Загружает весь единый файл настроек."""
-        settings_file = self._get_unified_settings_path()
-        if not settings_file.exists():
-            return {"api_keys": {}, "general": {}, "ui": {}, "features": {}}
-        try:
-            with open(settings_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            # Ensure all sections exist
-            for section in ("api_keys", "general", "ui", "features"):
-                if section not in data:
-                    data[section] = {}
-            return data
-        except Exception:
-            return {"api_keys": {}, "general": {}, "ui": {}, "features": {}}
+        """Загружает весь единый файл настроек.
+        (Тонкий делегат: SettingsService._load_unified_settings, Batch #7 Stage 2)"""
+        return self.settings_service._load_unified_settings()
 
     def _save_unified_settings(self, data: Dict[str, Any]):
-        """Сохраняет весь единый файл настроек."""
-        settings_dir = self._get_settings_dir()
-        settings_dir.mkdir(parents=True, exist_ok=True)
-        settings_file = settings_dir / "settings.json"
-        try:
-            with open(settings_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            self.log(f"⚠ Could not save settings: {str(e)}")
+        """Сохраняет весь единый файл настроек.
+        (Тонкий делегат: SettingsService._save_unified_settings, Batch #7 Stage 2)"""
+        return self.settings_service._save_unified_settings(data)
 
     def _load_settings_section(self, section: str) -> Dict[str, Any]:
-        """Загружает конкретную секцию из единого файла настроек."""
-        return self._load_unified_settings().get(section, {})
+        """Загружает конкретную секцию из единого файла настроек.
+        (Тонкий делегат: SettingsService._load_settings_section, Batch #7 Stage 2)"""
+        return self.settings_service._load_settings_section(section)
 
     def _save_settings_section(self, section: str, section_data: Dict[str, Any]):
-        """Сохраняет конкретную секцию в единый файл настроек (сохраняя остальные секции)."""
-        all_settings = self._load_unified_settings()
-        all_settings[section] = section_data
-        self._save_unified_settings(all_settings)
+        """Сохраняет конкретную секцию в единый файл настроек (сохраняя остальные секции).
+        (Тонкий делегат: SettingsService._save_settings_section, Batch #7 Stage 2)"""
+        return self.settings_service._save_settings_section(section, section_data)
 
     # ------------------------------------------------------------------
     # Clipboard privacy settings (issue #246)

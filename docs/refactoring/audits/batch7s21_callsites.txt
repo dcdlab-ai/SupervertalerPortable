@@ -1,0 +1,43 @@
+===== BEFORE (git HEAD tree) =====
+_get_settings_dir              calls=  5 (monolith=  3, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:76: return self._get_settings_dir() / "settings.json"
+      MODULE modules/settings_service.py:96: settings_dir = self._get_settings_dir()
+_get_unified_settings_path     calls=  5 (monolith=  4, modules=1, other=0) defs=2
+      MODULE modules/settings_service.py:80: settings_file = self._get_unified_settings_path()
+_load_unified_settings         calls= 14 (monolith= 11, modules=3, other=0) defs=2
+      MODULE modules/settings_service.py:107: return self._load_unified_settings().get(section, {})
+      MODULE modules/settings_service.py:111: all_settings = self._load_unified_settings()
+      MODULE modules/termbase_entry_editor.py:131: all_settings = self._load_unified_settings()
+_save_unified_settings         calls= 12 (monolith= 10, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:113: self._save_unified_settings(all_settings)
+      MODULE modules/termbase_entry_editor.py:134: self._save_unified_settings(all_settings)
+_load_settings_section         calls= 29 (monolith= 27, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:32: ``window._load_settings_section("ui")`` из ``main()`` монолита. Ещё не
+      MODULE modules/termbase_entry_editor.py:121: prefs = self._load_settings_section("ui")
+_save_settings_section         calls= 11 (monolith= 11, modules=0, other=0) defs=2
+
+===== AFTER (working tree) =====
+_get_settings_dir              calls=  4 (monolith=  2, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:76: return self._get_settings_dir() / "settings.json"
+      MODULE modules/settings_service.py:96: settings_dir = self._get_settings_dir()
+_get_unified_settings_path     calls=  5 (monolith=  4, modules=1, other=0) defs=2
+      MODULE modules/settings_service.py:80: settings_file = self._get_unified_settings_path()
+_load_unified_settings         calls= 13 (monolith= 10, modules=3, other=0) defs=2
+      MODULE modules/settings_service.py:107: return self._load_unified_settings().get(section, {})
+      MODULE modules/settings_service.py:111: all_settings = self._load_unified_settings()
+      MODULE modules/termbase_entry_editor.py:131: all_settings = self._load_unified_settings()
+_save_unified_settings         calls= 12 (monolith= 10, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:113: self._save_unified_settings(all_settings)
+      MODULE modules/termbase_entry_editor.py:134: self._save_unified_settings(all_settings)
+_load_settings_section         calls= 30 (monolith= 28, modules=2, other=0) defs=2
+      MODULE modules/settings_service.py:32: ``window._load_settings_section("ui")`` из ``main()`` монолита. Ещё не
+      MODULE modules/termbase_entry_editor.py:121: prefs = self._load_settings_section("ui")
+_save_settings_section         calls= 12 (monolith= 12, modules=0, other=0) defs=2
+
+===== DELTA (after - before) =====
+_get_settings_dir              calls -1   defs +0   monolith def lines: ['Supervertaler.py:44639: def _get_settings_dir(self) -> Path:'] -> ['Supervertaler.py:44668: def _get_settings_dir(self) -> Path:']
+_get_unified_settings_path     calls +0   defs +0   monolith def lines: ['Supervertaler.py:44643: def _get_unified_settings_path(self) -> Path:'] -> ['Supervertaler.py:44673: def _get_unified_settings_path(self) -> Path:']
+_load_unified_settings         calls -1   defs +0   monolith def lines: ['Supervertaler.py:44647: def _load_unified_settings(self) -> Dict[str, Any]:'] -> ['Supervertaler.py:44678: def _load_unified_settings(self) -> Dict[str, Any]:']
+_save_unified_settings         calls +0   defs +0   monolith def lines: ['Supervertaler.py:44663: def _save_unified_settings(self, data: Dict[str, Any]):'] -> ['Supervertaler.py:44683: def _save_unified_settings(self, data: Dict[str, Any]):']
+_load_settings_section         calls +1   defs +0   monolith def lines: ['Supervertaler.py:44674: def _load_settings_section(self, section: str) -> Dict[str, Any]:'] -> ['Supervertaler.py:44688: def _load_settings_section(self, section: str) -> Dict[str, Any]:']
+_save_settings_section         calls +1   defs +0   monolith def lines: ['Supervertaler.py:44678: def _save_settings_section(self, section: str, section_data: Dict[str, Any]):'] -> ['Supervertaler.py:44693: def _save_settings_section(self, section: str, section_data: Dict[str, Any]):']

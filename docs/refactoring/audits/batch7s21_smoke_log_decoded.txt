@@ -1,0 +1,64 @@
+믯㶿㴽匠⸲‱浳歯㩥琠潷瀭潲散獳猠癡⽥潬摡㴠㴽਍python.exe : QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\smoke_run.ps1:6 знак:1
++ & $py -u (Join-Path $root 'tools\batch_validation\smoke_project.py')  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (QFontDatabase: .../Qt6/lib/fonts.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontcon
+fig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\_old\Supervertaler-Portable\Supervertaler
+[LangSettings] Loaded from settings.json: English тЖТ Russian
+ЁЯУК Creating database tables...
+тЬЕ Database tables created and committed successfully
+ЁЯФН Checking database schema for migrations...
+ЁЯФН Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+тЬЕ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+ЁЯУК Creating database tables...
+тЬЕ Database tables created and committed successfully
+ЁЯФН Checking database schema for migrations...
+ЁЯФН Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+тЬЕ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ЁЯФМ Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] ЁЯУЛ Refreshing termbase list (project_id: 0)
+[LOG]   Found 1 termbase(s) in database
+[LOG] тЬУ Prompt library already migrated (or no old structure found)
+[LOG] тЬУ Prompt library migration completed successfully
+[LOG] тЬУ Loaded 7 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/bonsai-27b
+[LOG] [ChatBackend] Loaded 0 messages
+[LOG] тЬУ Attachment directories initialized: D:\_old\Supervertaler-Portable\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+тМи [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] тМи [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] тМи Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] тЬУ UI chrome: compact
+[LOG] ЁЯТ╛ DEBUG: Saving 3 segments
+[LOG] ЁЯТ╛ Seg 1: target='EMPTY...', status=not_started
+[LOG] ЁЯТ╛ Seg 2: target='EMPTY...', status=not_started
+[LOG] ЁЯТ╛ Seg 3: target='EMPTY...', status=not_started
+[LOG] тЬУ Saved project: s21_smoke.svproj
+[LOG] ЁЯТ╛ Versioned backup saved: s21_smoke_20260925-163408.svproj (every 1 saves)
+SAVE_OK 3198
+[Hotkeys] pynput hotkey manager stopped on exit
+䅓䕖䕟䥘㵔ര瀊礀琀栀漀渀⸀攀砀攀 㨀 儀䘀漀渀琀䐀愀琀愀戀愀猀攀㨀 䌀愀渀渀漀琀 昀椀渀搀 昀漀渀琀 搀椀爀攀挀琀漀爀礀 䔀㨀⼀䐀攀瘀⼀瀀礀琀栀漀渀ⴀ攀洀戀攀搀⼀䰀椀戀⼀猀椀琀攀ⴀ瀀愀挀欀愀最攀猀⼀倀礀儀琀㘀⼀儀琀㘀⼀氀椀戀⼀昀漀渀琀猀⸀ഀ਀䐀㨀尀吀攀洀瀀尀匀甀瀀攀爀瘀攀爀琀愀氀攀爀倀漀爀琀愀戀氀攀尀爀攀昀愀挀琀漀爀椀渀最尀戀愀琀挀栀㜀开猀琀愀最攀㈀开猀㈀㄀尀爀甀渀ⴀ　　㄀尀猀洀漀欀攀开爀甀渀⸀瀀猀㄀㨀㠀 㜀㴄〄㨄㨄㄀ഀ਀⬀ ☀ ␀瀀礀 ⴀ甀 ⠀䨀漀椀渀ⴀ倀愀琀栀 ␀爀漀漀琀 ✀琀漀漀氀猀尀戀愀琀挀栀开瘀愀氀椀搀愀琀椀漀渀尀猀洀漀欀攀开瀀爀漀樀攀挀琀⸀瀀礀✀⤀  ⸀⸀⸀ഀ਀⬀ 縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀縀ഀ਀    ⬀ 䌀愀琀攀最漀爀礀䤀渀昀漀          㨀 一漀琀匀瀀攀挀椀昀椀攀搀㨀 ⠀儀䘀漀渀琀䐀愀琀愀戀愀猀攀㨀 ⸀⸀⸀⼀儀琀㘀⼀氀椀戀⼀昀漀渀琀猀⸀㨀匀琀爀椀渀最⤀ 嬀崀Ⰰ 刀攀洀漀琀攀䔀砀挀攀瀀琀椀漀渀ഀ਀    ⬀ 䘀甀氀氀礀儀甀愀氀椀昀椀攀搀䔀爀爀漀爀䤀搀 㨀 一愀琀椀瘀攀䌀漀洀洀愀渀搀䔀爀爀漀爀ഀ਀ ഀ਀一漀琀攀 琀栀愀琀 儀琀 渀漀 氀漀渀最攀爀 猀栀椀瀀猀 昀漀渀琀猀⸀ 䐀攀瀀氀漀礀 猀漀洀攀 ⠀昀爀漀洀 栀琀琀瀀猀㨀⼀⼀搀攀樀愀瘀甀ⴀ昀漀渀琀猀⸀最椀琀栀甀戀⸀椀漀⼀ 昀漀爀 攀砀愀洀瀀氀攀⤀ 漀爀 猀眀椀琀挀栀 琀漀 昀漀渀琀挀漀渀ഀ਀昀椀最⸀ഀ਀嬀唀匀䔀刀 䴀伀䐀䔀崀 唀猀椀渀最 ✀甀猀攀爀开搀愀琀愀⼀✀ 昀漀氀搀攀爀ഀ਀嬀䐀愀琀愀 倀愀琀栀猀崀 唀猀攀爀 搀愀琀愀㨀 䐀㨀尀开漀氀搀尀匀甀瀀攀爀瘀攀爀琀愀氀攀爀ⴀ倀漀爀琀愀戀氀攀尀匀甀瀀攀爀瘀攀爀琀愀氀攀爀ഀ਀嬀䰀愀渀最匀攀琀琀椀渀最猀崀 䰀漀愀搀攀搀 昀爀漀洀 猀攀琀琀椀渀最猀⸀樀猀漀渀㨀 䔀渀最氀椀猀栀 䈀ᘄ∄ 刀甀猀猀椀愀渀ഀ਀Ā⼄⌄ᨄ 䌀爀攀愀琀椀渀最 搀愀琀愀戀愀猀攀 琀愀戀氀攀猀⸀⸀⸀ഀ਀䈀Ⰴᔄ 䐀愀琀愀戀愀猀攀 琀愀戀氀攀猀 挀爀攀愀琀攀搀 愀渀搀 挀漀洀洀椀琀琀攀搀 猀甀挀挀攀猀猀昀甀氀氀礀ഀ਀Ā⼄␄ᴄ 䌀栀攀挀欀椀渀最 搀愀琀愀戀愀猀攀 猀挀栀攀洀愀 昀漀爀 洀椀最爀愀琀椀漀渀猀⸀⸀⸀ഀ਀Ā⼄␄ᴄ 䘀漀甀渀搀 琀攀爀洀戀愀猀攀开琀攀爀洀猀 挀漀氀甀洀渀猀㨀 嬀✀挀愀猀攀开猀攀渀猀椀琀椀瘀攀✀Ⰰ ✀挀氀椀攀渀琀✀Ⰰ ✀挀漀渀琀攀砀琀✀Ⰰ ✀挀爀攀愀琀攀搀开搀愀琀攀✀Ⰰ ✀搀攀昀椀渀椀琀椀漀渀✀Ⰰ ✀搀漀洀愀椀渀✀Ⰰ ✀昀漀爀戀椀搀搀攀渀✀Ⰰ ✀昀漀爀戀椀搀搀攀渀开琀攀爀洀猀✀Ⰰ ✀椀搀✀Ⰰ ✀椀猀开渀漀渀琀爀愀渀猀氀愀琀愀戀氀攀✀Ⰰ ✀洀漀搀椀昀椀攀搀开搀愀琀攀✀Ⰰ ✀渀漀琀攀✀Ⰰ ✀渀漀琀攀猀✀Ⰰ ✀瀀愀爀琀开漀昀开猀瀀攀攀挀栀✀Ⰰ ✀瀀爀椀漀爀椀琀礀✀Ⰰ ✀瀀爀漀樀攀挀琀✀Ⰰ ✀瀀爀漀樀攀挀琀开椀搀✀Ⰰ ✀猀漀甀爀挀攀开愀戀戀爀攀瘀椀愀琀椀漀渀✀Ⰰ ✀猀漀甀爀挀攀开氀愀渀最✀Ⰰ ✀猀漀甀爀挀攀开琀攀爀洀✀Ⰰ ✀猀礀渀漀渀礀洀猀✀Ⰰ ✀琀愀爀最攀琀开愀戀戀爀攀瘀椀愀琀椀漀渀✀Ⰰ ✀琀愀爀最攀琀开氀愀渀最✀Ⰰ ✀琀愀爀最攀琀开琀攀爀洀✀Ⰰ ✀琀攀爀洀开甀甀椀搀✀Ⰰ ✀琀攀爀洀戀愀猀攀开椀搀✀Ⰰ ✀琀洀开猀漀甀爀挀攀开椀搀✀Ⰰ ✀甀爀氀✀Ⰰ ✀甀猀愀最攀开挀漀甀渀琀✀崀ഀ਀䈀Ⰴᔄ 䐀愀琀愀戀愀猀攀 猀挀栀攀洀愀 椀猀 挀甀爀爀攀渀琀 ⴀ 挀栀攀挀欀椀渀最 唀唀䤀䐀猀⸀⸀⸀ഀ਀嬀䰀伀䜀崀 嬀伀䬀崀 䐀愀琀愀戀愀猀攀 挀漀渀渀攀挀琀攀搀㨀 猀甀瀀攀爀瘀攀爀琀愀氀攀爀⸀搀戀ഀ਀Ā⼄⌄ᨄ 䌀爀攀愀琀椀渀最 搀愀琀愀戀愀猀攀 琀愀戀氀攀猀⸀⸀⸀ഀ਀䈀Ⰴᔄ 䐀愀琀愀戀愀猀攀 琀愀戀氀攀猀 挀爀攀愀琀攀搀 愀渀搀 挀漀洀洀椀琀琀攀搀 猀甀挀挀攀猀猀昀甀氀氀礀ഀ਀Ā⼄␄ᴄ 䌀栀攀挀欀椀渀最 搀愀琀愀戀愀猀攀 猀挀栀攀洀愀 昀漀爀 洀椀最爀愀琀椀漀渀猀⸀⸀⸀ഀ਀Ā⼄␄ᴄ 䘀漀甀渀搀 琀攀爀洀戀愀猀攀开琀攀爀洀猀 挀漀氀甀洀渀猀㨀 嬀✀挀愀猀攀开猀攀渀猀椀琀椀瘀攀✀Ⰰ ✀挀氀椀攀渀琀✀Ⰰ ✀挀漀渀琀攀砀琀✀Ⰰ ✀挀爀攀愀琀攀搀开搀愀琀攀✀Ⰰ ✀搀攀昀椀渀椀琀椀漀渀✀Ⰰ ✀搀漀洀愀椀渀✀Ⰰ ✀昀漀爀戀椀搀搀攀渀✀Ⰰ ✀昀漀爀戀椀搀搀攀渀开琀攀爀洀猀✀Ⰰ ✀椀搀✀Ⰰ ✀椀猀开渀漀渀琀爀愀渀猀氀愀琀愀戀氀攀✀Ⰰ ✀洀漀搀椀昀椀攀搀开搀愀琀攀✀Ⰰ ✀渀漀琀攀✀Ⰰ ✀渀漀琀攀猀✀Ⰰ ✀瀀愀爀琀开漀昀开猀瀀攀攀挀栀✀Ⰰ ✀瀀爀椀漀爀椀琀礀✀Ⰰ ✀瀀爀漀樀攀挀琀✀Ⰰ ✀瀀爀漀樀攀挀琀开椀搀✀Ⰰ ✀猀漀甀爀挀攀开愀戀戀爀攀瘀椀愀琀椀漀渀✀Ⰰ ✀猀漀甀爀挀攀开氀愀渀最✀Ⰰ ✀猀漀甀爀挀攀开琀攀爀洀✀Ⰰ ✀猀礀渀漀渀礀洀猀✀Ⰰ ✀琀愀爀最攀琀开愀戀戀爀攀瘀椀愀琀椀漀渀✀Ⰰ ✀琀愀爀最攀琀开氀愀渀最✀Ⰰ ✀琀愀爀最攀琀开琀攀爀洀✀Ⰰ ✀琀攀爀洀开甀甀椀搀✀Ⰰ ✀琀攀爀洀戀愀猀攀开椀搀✀Ⰰ ✀琀洀开猀漀甀爀挀攀开椀搀✀Ⰰ ✀甀爀氀✀Ⰰ ✀甀猀愀最攀开挀漀甀渀琀✀崀ഀ਀䈀Ⰴᔄ 䐀愀琀愀戀愀猀攀 猀挀栀攀洀愀 椀猀 挀甀爀爀攀渀琀 ⴀ 挀栀攀挀欀椀渀最 唀唀䤀䐀猀⸀⸀⸀ഀ਀嬀䰀伀䜀崀 嬀伀䬀崀 䐀愀琀愀戀愀猀攀 挀漀渀渀攀挀琀攀搀㨀 猀甀瀀攀爀瘀攀爀琀愀氀攀爀⸀搀戀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᰄ 吀愀戀氀攀 猀椀最渀愀氀猀 挀漀渀渀攀挀琀攀搀㨀 挀甀爀爀攀渀琀䌀攀氀氀䌀栀愀渀最攀搀Ⰰ 椀琀攀洀䌀氀椀挀欀攀搀Ⰰ 挀攀氀氀䐀漀甀戀氀攀䌀氀椀挀欀攀搀Ⰰ 椀琀攀洀匀攀氀攀挀琀椀漀渀䌀栀愀渀最攀搀ഀ਀嬀䰀伀䜀崀 吀䴀 䈀爀漀眀猀攀爀㨀 䰀漀愀搀攀搀 　 攀渀琀爀椀攀猀ഀ਀嬀䰀伀䜀崀 吀䴀 猀琀愀琀椀猀琀椀挀猀 爀攀昀爀攀猀栀攀搀ഀ਀嬀䰀伀䜀崀 Ā⼄⌄ᬄ 刀攀昀爀攀猀栀椀渀最 琀攀爀洀戀愀猀攀 氀椀猀琀 ⠀瀀爀漀樀攀挀琀开椀搀㨀 　⤀ഀ਀嬀䰀伀䜀崀   䘀漀甀渀搀 ㄀ 琀攀爀洀戀愀猀攀⠀猀⤀ 椀渀 搀愀琀愀戀愀猀攀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 倀爀漀洀瀀琀 氀椀戀爀愀爀礀 愀氀爀攀愀搀礀 洀椀最爀愀琀攀搀 ⠀漀爀 渀漀 漀氀搀 猀琀爀甀挀琀甀爀攀 昀漀甀渀搀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 倀爀漀洀瀀琀 氀椀戀爀愀爀礀 洀椀最爀愀琀椀漀渀 挀漀洀瀀氀攀琀攀搀 猀甀挀挀攀猀猀昀甀氀氀礀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䰀漀愀搀攀搀 㜀 瀀爀漀洀瀀琀猀 昀爀漀洀 甀渀椀昀椀攀搀 氀椀戀爀愀爀礀ഀ਀嬀䰀伀䜀崀 嬀䌀栀愀琀䈀愀挀欀攀渀搀崀 䰀䰀䴀 挀氀椀攀渀琀㨀 挀甀猀琀漀洀开漀瀀攀渀愀椀⼀戀漀渀猀愀椀ⴀ㈀㜀戀ഀ਀嬀䰀伀䜀崀 嬀䌀栀愀琀䈀愀挀欀攀渀搀崀 䰀漀愀搀攀搀 　 洀攀猀猀愀最攀猀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䄀琀琀愀挀栀洀攀渀琀 搀椀爀攀挀琀漀爀椀攀猀 椀渀椀琀椀愀氀椀稀攀搀㨀 䐀㨀尀开漀氀搀尀匀甀瀀攀爀瘀攀爀琀愀氀攀爀ⴀ倀漀爀琀愀戀氀攀尀匀甀瀀攀爀瘀攀爀琀愀氀攀爀尀眀漀爀欀戀攀渀挀栀尀愀椀开愀猀猀椀猀琀愀渀琀ഀ਀嬀匀甀瀀攀爀氀漀漀欀甀瀀崀 匀甀瀀攀爀氀漀漀欀甀瀀吀愀戀⸀开开椀渀椀琀开开 挀愀氀氀攀搀ഀ਀嬀匀甀瀀攀爀氀漀漀欀甀瀀崀 琀栀攀洀攀开洀愀渀愀最攀爀㨀 䘀愀氀猀攀ഀ਀嬀匀甀瀀攀爀氀漀漀欀甀瀀崀 匀甀挀挀攀猀猀昀甀氀氀礀 椀洀瀀漀爀琀攀搀 匀甀瀀攀爀氀漀漀欀甀瀀䔀渀最椀渀攀ഀ਀嬀匀甀瀀攀爀氀漀漀欀甀瀀崀 儀圀攀戀䔀渀最椀渀攀嘀椀攀眀 渀漀琀 愀瘀愀椀氀愀戀氀攀 ⴀ 攀砀琀攀爀渀愀氀 戀爀漀眀猀攀爀 漀渀氀礀ഀ਀嬀嘀漀椀挀攀崀 倀甀猀栀ⴀ琀漀ⴀ琀愀氀欀㨀 瀀爀攀猀猀 瘀椀愀 刀攀最椀猀琀攀爀䠀漀琀䬀攀礀Ⰰ 爀攀氀攀愀猀攀 瘀椀愀 䜀攀琀䄀猀礀渀挀䬀攀礀匀琀愀琀攀 瀀漀氀氀椀渀最 ⠀甀渀猀攀琀⤀ഀ਀嬀䰀伀䜀崀 嬀嘀漀椀挀攀崀 倀甀猀栀ⴀ琀漀ⴀ琀愀氀欀㨀 瀀爀攀猀猀 瘀椀愀 刀攀最椀猀琀攀爀䠀漀琀䬀攀礀Ⰰ 爀攀氀攀愀猀攀 瘀椀愀 䜀攀琀䄀猀礀渀挀䬀攀礀匀琀愀琀攀 瀀漀氀氀椀渀最 ⠀甀渀猀攀琀⤀ഀ਀嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 䴀愀渀愀最攀爀 愀瘀愀椀氀愀戀氀攀㨀 吀爀甀攀ഀ਀嬀䰀伀䜀崀 嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 䴀愀渀愀最攀爀 愀瘀愀椀氀愀戀氀攀㨀 吀爀甀攀ഀ਀嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 刀攀最椀猀琀攀爀椀渀最㨀 挀琀爀氀⬀愀氀琀⬀焀ഀ਀嬀䰀伀䜀崀 嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 刀攀最椀猀琀攀爀椀渀最㨀 挀琀爀氀⬀愀氀琀⬀焀ഀ਀嬀䜀氀漀戀愀氀䠀漀琀欀攀礀䴀愀渀愀最攀爀崀 刀攀最椀猀琀攀爀攀搀 挀琀爀氀⬀愀氀琀⬀焀 ⠀圀椀渀䄀倀䤀⤀ഀ਀嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 匀琀愀爀琀攀搀㨀 吀爀甀攀ഀ਀嬀䰀伀䜀崀 嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 匀琀愀爀琀攀搀㨀 吀爀甀攀ഀ਀䈀ᰄ㠄 嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 刀攀最椀猀琀攀爀攀搀 瘀椀愀 眀椀渀愀瀀椀㨀 挀琀爀氀⬀愀氀琀⬀焀ഀ਀嬀䰀伀䜀崀 䈀ᰄ㠄 嬀䜀氀漀戀愀氀 䠀漀琀欀攀礀猀崀 刀攀最椀猀琀攀爀攀搀 瘀椀愀 眀椀渀愀瀀椀㨀 挀琀爀氀⬀愀氀琀⬀焀ഀ਀嬀䰀伀䜀崀 䈀ᰄ㠄 䜀氀漀戀愀氀 栀漀琀欀攀礀猀 爀攀最椀猀琀攀爀攀搀 ⠀䌀琀爀氀⬀䄀氀琀⬀䰀Ⰰ 䌀琀爀氀⬀䄀氀琀⬀儀Ⰰ 䄀氀琀⬀䬀⤀ഀ਀嬀䰀伀䜀崀 圀攀氀挀漀洀攀 琀漀 匀甀瀀攀爀瘀攀爀琀愀氀攀爀 圀漀爀欀戀攀渀挀栀 瘀㄀⸀㄀　⸀㌀㜀㄀ഀ਀嬀䰀伀䜀崀 匀甀瀀攀爀瘀攀爀琀愀氀攀爀㨀 吀栀攀 唀氀琀椀洀愀琀攀 吀爀愀渀猀氀愀琀椀漀渀 圀漀爀欀戀攀渀挀栀⸀ഀ਀嬀䰀伀䜀崀 䄀甀琀漀 戀愀挀欀甀瀀 攀渀愀戀氀攀搀㨀 攀瘀攀爀礀 㔀 洀椀渀甀琀攀⠀猀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 唀䤀 挀栀爀漀洀攀㨀 挀漀洀瀀愀挀琀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䄀氀琀攀爀渀愀琀椀渀最 爀漀眀 挀漀氀漀爀猀 愀瀀瀀氀椀攀搀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄĄ⼄␄ᐄĄ⼄␄ᐄ 氀漀愀搀开猀攀最洀攀渀琀猀开琀漀开最爀椀搀 䌀䄀䰀䰀䔀䐀 ⴀ 琀栀椀猀 眀椀氀氀 刀䔀䰀伀䄀䐀 最爀椀搀 昀爀漀洀 猀攀最洀攀渀琀 搀愀琀愀℀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄ 䈀䔀䘀伀刀䔀 䰀伀䄀䐀㨀 䘀椀爀猀琀 㜀 猀攀最洀攀渀琀猀㨀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄ   匀攀最 ㄀ ⠀漀戀樀 ㄀㔀㔀㐀㤀㤀㜀　㈀㘀㐀㌀㈀⤀㨀 琀愀爀最攀琀㴀✀䔀䴀倀吀夀⸀⸀⸀✀Ⰰ 氀攀渀㴀　Ⰰ 猀琀愀琀甀猀㴀渀漀琀开猀琀愀爀琀攀搀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄ   匀攀最 ㈀ ⠀漀戀樀 ㄀㔀㔀㐀㤀㤀㘀㤀　㄀㌀㤀㈀⤀㨀 琀愀爀最攀琀㴀✀䔀䴀倀吀夀⸀⸀⸀✀Ⰰ 氀攀渀㴀　Ⰰ 猀琀愀琀甀猀㴀渀漀琀开猀琀愀爀琀攀搀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄ   匀攀最 ㌀ ⠀漀戀樀 ㄀㔀㔀㐀㤀㤀㘀㤀　㄀㜀㄀㈀⤀㨀 琀愀爀最攀琀㴀✀䔀䴀倀吀夀⸀⸀⸀✀Ⰰ 氀攀渀㴀　Ⰰ 猀琀愀琀甀猀㴀渀漀琀开猀琀愀爀琀攀搀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䄀甀琀漀ⴀ爀攀猀椀稀攀搀 爀漀眀猀 琀漀 昀椀琀 挀漀渀琀攀渀琀 ⠀挀漀洀瀀愀挀琀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䰀漀愀搀攀搀 ㌀ 猀攀最洀攀渀琀猀 琀漀 最爀椀搀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䄀甀琀漀ⴀ爀攀猀椀稀攀搀 爀漀眀猀 琀漀 昀椀琀 挀漀渀琀攀渀琀 ⠀挀漀洀瀀愀挀琀⤀ഀ਀嬀䰀伀䜀崀 吀䴀 搀愀琀愀戀愀猀攀 挀漀渀昀椀最甀爀攀搀 ⠀攀渀 䈀ᘄ∄ 渀氀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䄀甀琀漀ⴀ爀攀猀椀稀攀搀 爀漀眀猀 琀漀 昀椀琀 挀漀渀琀攀渀琀 ⠀挀漀洀瀀愀挀琀⤀ഀ਀嬀䰀伀䜀崀 Ā⼄␄␄‥䐀䔀䄀䌀吀䤀嘀䄀吀䔀㨀 琀攀爀洀戀愀猀攀开椀搀㴀㔀Ⰰ 瀀爀漀樀攀挀琀开椀搀㴀㈀㈀㔀㐀㔀㘀㤀　㜀㈀ഀ਀嬀䰀伀䜀崀   䈀Ⰴ⌄ 䤀渀猀攀爀琀攀搀 搀攀愀挀琀椀瘀愀琀椀漀渀 爀攀挀漀爀搀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䐀攀愀挀琀椀瘀愀琀攀搀 琀攀爀洀戀愀猀攀 㔀 昀漀爀 瀀爀漀樀攀挀琀 ㈀㈀㔀㐀㔀㘀㤀　㜀㈀ഀ਀嬀䰀伀䜀崀 Ā⼄⌄ᬄ 一漀 愀挀琀椀瘀攀 琀攀爀洀戀愀猀攀猀 猀愀瘀攀搀 昀漀爀 琀栀椀猀 瀀爀漀樀攀挀琀ഀ਀嬀䰀伀䜀崀 Ā⼄⌄ᬄ 刀攀昀爀攀猀栀椀渀最 琀攀爀洀戀愀猀攀 氀椀猀琀 ⠀瀀爀漀樀攀挀琀开椀搀㨀 ㈀㈀㔀㐀㔀㘀㤀　㜀㈀⤀ഀ਀嬀䰀伀䜀崀   䘀漀甀渀搀 ㄀ 琀攀爀洀戀愀猀攀⠀猀⤀ 椀渀 搀愀琀愀戀愀猀攀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 刀攀昀爀攀猀栀攀搀 琀攀爀洀戀愀猀攀 唀䤀 眀椀琀栀 爀攀猀琀漀爀攀搀 愀挀琀椀瘀愀琀椀漀渀猀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 匀瀀攀氀氀挀栀攀挀欀 椀渀椀琀椀愀氀椀稀攀搀 昀漀爀 琀愀爀最攀琀 氀愀渀最甀愀最攀㨀 渀氀 ⠀搀椀猀愀戀氀攀搀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 匀攀琀 匀甀瀀攀爀氀漀漀欀甀瀀 氀愀渀最甀愀最攀猀㨀 攀渀 䈀ᘄ∄ 渀氀ഀ਀嬀䰀伀䜀崀 䈀Ⰴ⌄ 䰀漀愀搀攀搀 瀀爀漀樀攀挀琀㨀 猀㈀㄀猀洀漀欀攀 ⠀㌀ 猀攀最洀攀渀琀猀⤀ഀ਀嬀䰀伀䜀崀 䈀Ⰴᔄ 䈀甀椀氀琀 琀攀爀洀戀愀猀攀 椀渀搀攀砀㨀 　 琀攀爀洀猀 椀渀 　⸀　　猀ഀ਀嬀䰀伀䜀崀 Ā⼄␄ᐄ 匀琀愀爀琀椀渀最 戀愀挀欀最爀漀甀渀搀 琀攀爀洀戀愀猀攀 戀愀琀挀栀 瀀爀漀挀攀猀猀漀爀 昀漀爀 ㌀ 猀攀最洀攀渀琀猀⸀⸀⸀ഀ਀嬀䰀伀䜀崀 䈀Ⰴᔄ 吀攀爀洀戀愀猀攀 戀愀琀挀栀 眀漀爀欀攀爀 挀漀洀瀀氀攀琀攀㨀 ㌀ 猀攀最洀攀渀琀猀 椀渀 　⸀　　猀 ⠀㈀㘀㜀㜀㈀㈀ 猀攀最⼀猀攀挀Ⰰ 　 眀椀琀栀 洀愀琀挀栀攀猀⤀ഀ਀嬀䰀伀䜀崀 Ā⼄℄ᄄ伄唄ἥ  吀攀爀洀戀愀猀攀 䐀䈀 愀甀琀漀ⴀ爀攀昀爀攀猀栀㨀 眀愀琀挀栀椀渀最 猀甀瀀攀爀瘀攀爀琀愀氀攀爀⸀搀戀 ⠀㈀猀 搀攀戀漀甀渀挀攀⤀ഀ਀䰀伀䄀䐀开伀䬀 猀㈀㄀猀洀漀欀攀 ㌀ 匀攀最洀攀渀琀 ㄀ 猀漀甀爀挀攀ഀ਀䰀䅏彄塅呉ⴽ〱㌷㐷㠱㤱਍䵓䭏彅佄䕎਍

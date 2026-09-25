@@ -1,0 +1,75 @@
+[stage] root=E:\Dev\SupervertalerPortable mode=load svproj=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\s21_smoke.svproj
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\_old\Supervertaler-Portable\Supervertaler
+[LangSettings] Loaded from settings.json: English → Russian
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 1 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 7 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/bonsai-27b
+[LOG] [ChatBackend] Loaded 0 messages
+[LOG] ✓ Attachment directories initialized: D:\_old\Supervertaler-Portable\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[stage] instantiated
+[LOG] ✓ Alternating row colors applied
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2596888813184): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 2 (obj 2596888704528): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 3 (obj 2596888704848): target='EMPTY...', len=0, status=not_started
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 3 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] 🔴 DEACTIVATE: termbase_id=5, project_id=2254569072
+[LOG]   ✓ Inserted deactivation record
+[LOG] ✓ Deactivated termbase 5 for project 2254569072
+[LOG] 📋 No active termbases saved for this project
+[LOG] 📋 Refreshing termbase list (project_id: 2254569072)
+[LOG]   Found 1 termbase(s) in database
+[LOG] ✓ Refreshed termbase UI with restored activations
+[LOG] ✓ Spellcheck initialized for target language: nl (disabled)
+[LOG] ✓ Set Superlookup languages: en → nl
+[LOG] ✓ Loaded project: s21smoke (3 segments)
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 3 segments...
+[LOG] ✅ Termbase batch worker complete: 3 segments in 0.00s (340079 seg/sec, 0 with matches)
+[LOG] 👁️  Termbase DB auto-refresh: watching supervertaler.db (2s debounce)
+LOAD_OK s21smoke 3 Segment 1 source
+REACHED_END

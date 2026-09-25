@@ -1,0 +1,456 @@
+ОТЧЁТ Batch #7 Stage 2, под-батч S2.1 — Settings Service: ядро API
+(перенос 6 методов / 39 строк в modules/settings_service.py)
+════════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-25. Ветка main. Режим: ACTIVE REFACTOR (перенос, не разведка).
+База: HEAD 043da2a (ожидался 5f4d5f0 — см. 1.1). Промпт: «ПЕРЕНОС S2.1 —
+Settings Service, ядро API (Batch #7 Stage 2, под-батч 1/5)»; сохранён как
+docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.1 settings core).txt.
+Разведка Б2 (Batch #7 Stage 1) принята как есть — повторный AST-обход состава не
+делался; пересчитывались только границы после правок (3.5) и остаток Stage 2.
+Артефакты: docs/refactoring/audits/batch7s21_*; рабочие прогоны —
+D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\ (скрипты,
+снапшоты, JSON-результаты; head-wt — worktree HEAD для DO/POS-сравнения).
+
+ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 386 → 68 400 строк (+14; git diff --numstat
+47/33 по одному файлу), новый modules/settings_service.py (113 строк), 6 тонких
+делегатов на месте тел, 8 метрик без изменений, живой прогон приложения —
+13/13 PASS (offscreen), смоук save/load — OK, манифест — изменён ровно 1 файл
+и добавлен ровно 1.
+
+════════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 1 — БАЗОВАЯ ЛИНИЯ И СООТВЕТСТВИЕ РАЗВЕДКЕ Б2
+════════════════════════════════════════════════════════════════════════════════
+1.1 HEAD ОТЛИЧАЕТСЯ ОТ ОЖИДАЕМОГО SHA — ДОКЛАДЫВАЮ (не «стоп»)
+- `git rev-parse HEAD` = 043da2a («Batch #7 Stage 1: Step 7 inventory …»), а не
+  ожидавшийся 5f4d5f08. Объект 5f4d5f08 существует и является НЕ предком, а
+  ПОТОМКОМ HEAD: main(локально) = 043da2a, origin/main = 5f4d5f0 («Add files via
+  upload») → 482c4c5 («Add files via upload») → 043da2a.
+- Проверка по правилу промпта (актуальна ли разведка Б2):
+  `git diff --stat 043da2a 5f4d5f0` = ТОЛЬКО два документа
+  (EXTRACTION_PLAN.md +11 строк; docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt
+  522/485 — судя по всему, загруженный вариант отчёта). Ни одного .py-файла
+  расхождение не затрагивает: строки 44639–44682, 8 метрик и
+  modules/{termbase_entry_editor,voice_tab,clipboard_manager_widget}.py в обоих
+  коммитах идентичны (git log по этим путям в диапазоне 043da2a..5f4d5f0 — пусто).
+  → Разведка Б2 АКТУАЛЬНА, «стоп» не требуется.
+- Дополнительно (важно для коммита): в дереве уже были ГОТОВЫ К КОММИТУ правки
+  Stage 1 — `git status` до начала работы: `M  EXTRACTION_PLAN.md`,
+  `M  "docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt"` (проиндексированы,
+  не закоммичены). Они не трогались и вошли в итоговый коммит батча.
+- Рабочее дерево по .py-файлам было чистым (изменённых/untracked .py — нет).
+
+1.2 ГРАНИЦЫ БЛОКА (AST, из git HEAD) + СНАПШОТЫ
+- `ast.parse` документа из `git show HEAD:Supervertaler.py`: в диапазоне
+  44639–44682 находятся РОВНО 6 прямых def класса SupervertalerQt, посторонних
+  def/вложенных узлов нет; блок непрерывен (пробельные строки только между
+  методами) — подтверждение промпта, скрипт snapshot_block.py.
+- Размеры совпали с промптом 1:1: _get_settings_dir 44639–44641 (3),
+  _get_unified_settings_path 44643–44645 (3), _load_unified_settings 44647–44661
+  (15), _save_unified_settings 44663–44672 (10), _load_settings_section
+  44674–44676 (3), _save_settings_section 44678–44682 (5) = 39 строк кода в
+  44 строках блока. Тела сохранены в run-001\snapshot\ + snapshot_index.txt;
+  sha256 всего блока 44639–44682 =
+  9404ebc7646d5373628ba68611dc26de6784a1e2bb7f903e5e713089226851d5
+  (артефакт: audits/batch7s21_snapshot_index.txt).
+- Контроль базовой линии: sha256 блоба HEAD:Supervertaler.py =
+  312786326a65a6cdd73f3fe632d0d1e6fe2f7611b2c64aea195dd8d25002f31c;
+  git hash-object = 802c504c8849ac58551bece6b297917426e31226 (совпадает с
+  отчётом Stage 1) — базовая линия снята с нетронутого HEAD.
+- Перевод строк: и блоб, и рабочая копия Supervertaler.py — чистый LF (CRLF = 0),
+  поэтому побайтовое сравнение «git HEAD ↔ рабочая копия» корректно (ловушка из
+  AGENTS.md на этом файле не срабатывает).
+
+1.3 МАНИФЕСТ / PY_COMPILE / 8 МЕТРИК — ДО
+- manifest.py (143 файла) → audits/batch7s21_manifest_before.txt;
+  py_compile_all.py → COMPILE_OK; counts.py → 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2
+  (audits/batch7s21_baseline_counts.txt) — совпадает с базовой линией Batch #6
+  Stage 4 (батчи #6 и #7 Stage 1 код не меняли).
+
+════════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════════════════════
+2.1 НОВЫЙ МОДУЛЬ modules/settings_service.py (113 строк, новый файл)
+- Класс SettingsService: __init__(settings_dir: Path, log=None) — ЯВНЫЙ каталог
+  (V1), НЕ через ConfigManager; путь внутри сервиса не резолвится.
+- Тела 6 методов перенесены; внутренние self.-вызовы сохранены как в оригинале:
+  _get_unified_settings_path → self._get_settings_dir(); _load_unified_settings →
+  self._get_unified_settings_path(); _load_settings_section/_save_settings_section →
+  self._load_unified_settings(); _save_settings_section → self._save_unified_settings().
+- Единственная смысловая правка переносимого кода (инъекция зависимости):
+  _get_settings_dir возвращает self.settings_dir вместо
+  self.user_data_path / "workbench" / "settings". Остальные 5 тел — БАЙТ-В-БАЙТ
+  (см. 2.2).
+- Лог-колбэк: `self.log = log if callable(log) else (lambda message: None)` —
+  ровно для того, чтобы строка исходного тела
+  `self.log(f"⚠ Could not save settings: {str(e)}")` осталась неизменной и не
+  падала при отсутствии колбэка. Кэша нет, состояния между вызовами нет.
+- Импорты модуля — только stdlib (json, pathlib, typing) → цикла импортов нет
+  (условие Stage 1 §1.3 выполнено: сервис не импортирует voice_tab/
+  clipboard_manager_widget/termbase_entry_editor/quicktrans).
+
+2.2 ДОКАЗАТЕЛЬСТВО ВЕРБАТИМ-ПЕРЕНОСА (AST + построчное сравнение с git HEAD)
+verify_s21.py сравнивает тела в новом модуле с телами из
+`git show HEAD:Supervertaler.py` (тот же источник, что и снапшоты — без ловушки
+LF/CRLF). Результат (audits/batch7s21_verify_out.txt):
+  _get_settings_dir              DIFF, ровно 1 строка (заявленная инъекция)
+  _get_unified_settings_path     VERBATIM (3)
+  _load_unified_settings         VERBATIM (15)
+  _save_unified_settings         VERBATIM (10)
+  _load_settings_section         VERBATIM (3)
+  _save_settings_section         VERBATIM (5)
+→ VERBATIM 5/6 + 1 задокументированная правка; других расхождений нет (в т.ч.
+комментарий `# Ensure all sections exist`, строка
+`json.dump(data, f, indent=2, ensure_ascii=False)`, дефолтный dict из 4 секций).
+- Дополнительно: перенесённые тела ИСЧЕЗЛИ из монолита — строки
+  `for section in ("api_keys", "general", "ui", "features"):`,
+  `settings_file = self._get_unified_settings_path()`,
+  `all_settings[section] = section_data` → по 0 вхождений в Supervertaler.py.
+
+2.3 ПРОВОДКА В ОКНЕ (2 вставки кода; вторая — ВЫНУЖДЕННАЯ, обосновываю)
+(а) SupervertalerQt.__init__ (6301–6309), сразу после
+    `self.user_data_path = get_user_data_path()` (6300) и ДО миграций
+    (6326/6327), блока usage-log (зовёт self.load_general_settings()) и
+    `_migrate_voice_dictation_default_off()` (6399, вызов НЕ обёрнут в try — то
+    есть успешная инстанциация уже доказывает работу делегатов на старте):
+        self.settings_service = SettingsService(
+            self.user_data_path / "workbench" / "settings", log=self.log)
+    Каталог задан РОВНО прежним выражением резолва (новой логики нет); self.log —
+    метод класса (нигде не переприсваивается), доступен в этой точке.
+(б) SupervertalerQt._reinitialize_with_new_data_path() (6668–6676) — ПЕРВЫМ
+    оператором try-блока, ПЕРЕД self._migrate_settings_to_unified() и
+    self._migrate_to_workbench_layout(), тот же
+    `SettingsService(self.user_data_path / "workbench" / "settings", log=self.log)`.
+ОБОСНОВАНИЕ (без (б) была бы регрессия): оригинальный _get_settings_dir читал
+self.user_data_path В МОМЕНТ ВЫЗОВА, а `self.user_data_path` переприсваивается в
+трёх местах монолита — 6630, 6934 (визард первого запуска) и 22859 (Settings →
+Change data folder), и ВСЕ ТРИ сразу зовут _reinitialize_with_new_data_path()
+(четвёртое присваивание, 62680, — в другом классе, SuperlookupTab). Сервис,
+сконструированный явным путём, обязан перепривязываться вместе с остальными
+«path-derived» менеджерами (spellcheck_manager, fr_history, theme_manager,
+recent_projects_file) — ровно так, как это уже делает этот метод. Порядок
+«перепривязка ПЕРВОЙ» — тоже не косметика: внутри метода ДО остальных менеджеров
+работают две ещё не перенесённые миграции, и _migrate_settings_to_unified
+использует self._get_settings_dir(); при привязке только в __init__ (или в конце
+метода) миграция при смене каталога писала бы в СТАРЫЙ каталог — тихая потеря
+пользовательских настроек. Проверено живьём (C11, §3.2): делегаты читают маркер
+из нового каталога, ошибок в логе нет, production-файл не изменён.
+Обе вставки — единственный код вне «6 делегатов» и объявлены здесь как часть
+диффа (§5: изменён ровно один .py + добавлен ровно один .py).
+- Отвергнутая альтернатива (фиксирую, чтобы не изобретали заново): передавать в
+  сервис callable/lambda вместо Path — 0 лишних вставок, но нарушает требование
+  промпта «конструктор — явный settings_dir».
+
+2.4 ДЕЛЕГАТЫ (6, с исходными именами и сигнатурами)
+Место: 44639–44696 (блок 44 строки → 38 строк: 8 строк комментария-шапки +
+6×4 строки). Спаны и содержимое (audits/batch7s21_verify_out.txt):
+  _get_settings_dir            44668–44671  → self.settings_service._get_settings_dir()
+  _get_unified_settings_path   44673–44676  → …_get_unified_settings_path()
+  _load_unified_settings       44678–44681  → …_load_unified_settings()
+  _save_unified_settings       44683–44686  → …_save_unified_settings(data)
+  _load_settings_section       44688–44691  → …_load_settings_section(section)
+  _save_settings_section       44693–44696  → …_save_settings_section(section, section_data)
+Все 6: 2 statement'а (докстринг + return), ПЕРВЫЕ строки (сигнатуры) байт-в-байт
+совпадают с исходными (verify_s21.py: signature_identical=True для всех 6;
+forwards_to_service=True). Делегаты обязательны минимум для: main() 68370
+(`window._load_settings_section("ui")` — безусловный вызов при старте),
+getattr-строк modules/voice_tab.py:1061/1062 и
+modules/clipboard_manager_widget.py:2284/2298/2299, и двух ещё не перенесённых
+методов монолита (_migrate_settings_to_unified → _get_settings_dir;
+_migrate_voice_dictation_default_off → _load_settings_section/_save_settings_section).
+Строка импорта (Supervertaler.py:421):
+`from modules.settings_service import SettingsService  # Единый IO-слой настроек (Batch #7 Stage 2, S2.1)`.
+
+2.5 NOT-MOVE — ВЫПОЛНЕНО, ПОВЕДЕНИЕ НЕ ТРОНУТО
+modules/termbase_entry_editor.py (класс TermbaseEntryEditor(QDialog), 35 методов):
+  121 self._load_settings_section("ui")  131 self._load_unified_settings()
+  134 self._save_unified_settings(all_settings)
+- Файл БАЙТ-В-БАЙТ как в HEAD: sha256 рабочей копии =
+  f31f519787c5c17f02b7dc2e71d3f185ae82c0b8d17b73e0bbcbc2a686ef1e92 = sha256 блоба
+  HEAD (audits/not_moved_methods_batch7stage2s21_snapshot.txt).
+- Методов из состава S2.1 на этом классе нет и не появилось (AST: 0 совпадений по
+  6 именам). Шимы _load_termbase_selections 116–124 (sha256 5c94266c…) и
+  _save_termbase_selections 126–136 (sha256 4c839959…) оставлены как есть;
+  AttributeError по-прежнему глотается их локальными try/except (тихий no-op).
+  Эти 3 сайта в фан-ин состава НЕ считаются — иначе «внешних потребителей» было бы
+  на 2 больше (наблюдение F1 Stage 1 остаётся отдельным решением владельца).
+
+2.6 ОСТАЛЬНОЙ КОД НЕ ТРОГАЛСЯ
+- modules/voice_tab.py, modules/clipboard_manager_widget.py,
+  modules/termbase_entry_editor.py, modules/config_manager.py — SHA256 идентичны
+  HEAD (0 правок call-sites вне монолита; см. манифест §3.5 и §5).
+
+════════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════════════════════
+3.1 AST / СТРУКТУРНАЯ ПРОВЕРКА (verify_s21.py, class_shape.py)
+- SupervertalerQt: 6054–62458 / 819 методов / 839 членов (19 Assign + 1 Expr +
+  819 FunctionDef) ДО → 6055–62472 / 819 / 839 ПОСЛЕ. Баланс «6 ушло — 6
+  делегатов пришло» сходится; множество имён методов до и после ИДЕНТИЧНО
+  (diff пуст в обе стороны) — ничего не потеряно и не переименовано.
+  DUPES: ['closeEvent', 'show_about'] — предсуществующие, новых нет.
+  (Примечание к методике: при ключевании методов ПО ИМЕНИ уникальных имён 817 —
+  поэтому в audits/batch7s21_remaining_ast.txt заголовок «методов 817»; прямое
+  число узлов класса = 819.)
+- modules/settings_service.py: единственный класс SettingsService, методы
+  ['__init__', 6 перенесённых], импорты только stdlib; "missing methods: []".
+- Инвентарь определений по всему репозиторию (AST, walk): каждое из 6 имён имеет
+  РОВНО ДВА определения — делегат в Supervertaler.py и метод в
+  modules/settings_service.py (3-й копии нигде нет).
+
+3.2 ЖИВОЙ ПРОГОН ПРИЛОЖЕНИЯ (offscreen, QDialog.exec → Rejected; драйвер
+    app_check_s21_run{1,2,3}.py). Итог run-003: PASS=13 / FAIL=0 (ALL_CHECKS_PASS);
+    run-002: PASS=12 / FAIL=0. Ниже — проверки и их результат в терминах
+    наблюдаемых значений (JSON: audits/batch7s21_app_check_run{2,3}.json).
+  C1  self.settings_service существует и принадлежит модулю modules.settings_service
+      (class SettingsService), settings_dir = <user_data>/workbench/settings.
+  C2  _get_settings_dir() == user_data_path / "workbench" / "settings" — резолв
+      не изменился (значение: D:\_old\Supervertaler-Portable\Supervertaler\workbench\settings).
+  C3  _get_unified_settings_path() == _get_settings_dir()/"settings.json".
+  C4  ПРЯМАЯ ПРОВЕРКА main():68370 — выражение
+      `window._load_settings_section("ui")` выполнено на живом окне:
+      dict, 6 ключей, start_minimized_to_tray=False (значит, window.show()
+      на старте выполнится как раньше).
+  C5  Результаты делегатов и сервиса совпадают: ui-секция, весь файл и путь — equal=True.
+  C6  СЕМАНТИКА «ЧИТАЕТСЯ С ДИСКА КАЖДЫЙ РАЗ»: 4 вызова (3× _load_settings_section
+      + 1× _load_unified_settings) = РОВНО 4 открытия settings.json
+      (счётчик на builtins.open). Кэша нет, что и требовал Stage 1 §1.9.
+  C7  getattr-путь modules/voice_tab.py (реальный виджет VoiceTab(self)):
+      getattr(parent,'_load_unified_settings'/'_save_unified_settings') → callable;
+      vt._set_dictation_keys(_s21_probe="marker") → вернул True (не провалился в
+      default getattr!), запись дошла до сервиса: в перехваченном dict
+      ui.dictation_settings._s21_probe == "marker".
+  C8  getattr-путь modules/clipboard_manager_widget.py (реальный
+      ClipboardManagerWidget): _resolve_paste_method() = "auto" (прочитано через
+      делегат _load_settings_section('features'); ключа в файле нет → корректный
+      fallback); _set_paste_method("auto") → вызов дошёл до сервиса с
+      features.clipboard_paste_method == "auto".
+  C9  ПУТЬ СОХРАНЕНИЯ GENERAL-ВКЛАДКИ: save_general_settings({...}) → перехват на
+      уровне СЕРВИСА дал ("general", 1 ключ) — т.е. монолитный save_general_settings
+      (S2.2) уже сейчас ходит через делегат в сервис.
+  C10 РЕАЛЬНЫЙ read-modify-write через делегаты на production-файле ТЕМИ ЖЕ
+      данными (бэкап снят заранее): sha256 до == после
+      (752e19bbd37f631451347203bcb737a8db7361277cd4d8bc9367de5a20272de3),
+      bytes_identical=true, readback_equal=true, лишние верхнеуровневые секции
+      (usage_statistics_asked/enabled) сохранены — т.е. сервис не «схлопывает»
+      файл до 4 секций.
+  C11 ПЕРЕПРИВЯЗКА ПРИ СМЕНЕ КАТАЛОГА ДАННЫХ (проверка правки 2.3б): при
+      user_data_path = <temp> и вызове _reinitialize_with_new_data_path() делегаты
+      указывают на <temp>/workbench/settings, читают МАРКЕР оттуда
+      (_s21_marker="temp-dir"), запись уходит в temp-файл, а в логе
+      reinit_log_errors = [] (две НЕ перенесённые миграции,
+      _migrate_settings_to_unified/_migrate_to_workbench_layout, отработали через
+      делегаты без ошибок). После возврата пути сервис снова указывает на
+      production-каталог, ui-секция читается.
+  C12 production settings.json побайтово не изменился за весь прогон (sha256
+      start == end) — включая C10/C11.
+  Отдельно: инстанциация SupervertalerQt (успешная) сама по себе является прямым
+  доказательством работы делегатов в __init__: _migrate_settings_to_unified()
+  (6326) и _migrate_voice_dictation_default_off() (6399) вызываются БЕЗ обёртки
+  try/except, а внутри ходят через _get_settings_dir/_load_settings_section/
+  _save_settings_section; AttributeError на отсутствующем self.settings_service
+  уронил бы старт приложения.
+
+3.3 ПОЛНЫЙ ЦИКЛ НАСТРОЕК НА КОПИИ user_data (C13, изоляция по AGENTS)
+Из-за правила «smoke/записывающие тесты пишут в продовые данные» полный цикл
+выполнен на КОПИИ: сервис перепривязан на <stage>\cycle_test_user_data, где
+заранее лежит settings.json с api_keys.openai="KEY-STAYS" и
+general.show_compare_panel=false. Результат одного прогона:
+  - general_read_before = false (читается из копии);
+  - save_general_settings({"show_compare_panel": True, "_s21_cycle": 42}) →
+    в файле копии general = {"show_compare_panel": true, "_s21_cycle": 42};
+  - api_keys.PRESERVED = {"openai": "KEY-STAYS"} (read-modify-write секций);
+  - _save_settings_section("ui", {...}) → _load_settings_section("ui") = {"_s21_ui": "cycle"};
+  - load_general_settings() (97 строк, S2.2) применил значение к живому окну:
+    window.show_compare_panel == true (цепочка монолит → делегат → сервис → копия);
+  - log_errors_during_cycle = [];
+  - delegate_dir_back_to_production = true, prod_settings_sha_unchanged_by_cycle = true.
+
+3.4 СМОУК-ТЕСТ save/load (tools/batch_validation + stage-вариант smoke_root.py,
+    который принимает repo_root аргументом, чтобы тот же скрипт гонялся и в
+    worktree HEAD)
+- SAVE (S2.1-дерево): SAVE_OK 3198 (файл создан).
+- LOAD: одинаково в обоих деревьях — `LOAD_OK s21smoke 3 "Segment 1 source"` +
+  REACHED_END.
+- ВАЖНОЕ НАБЛЮДЕНИЕ (не регрессия, доказано DO/POS): оба процесса завершаются с
+  кодом 0xC0000005 (Access Violation) ПОСЛЕ печати LOAD_OK/REACHED_END, т.е. на
+  teardown интерпретатора:
+      worktree S2.1 (043da2a+патч): LOAD_OK … exit -1073741819
+      HEAD 043da2a (worktree):      LOAD_OK … exit -1073741819
+  Идентично → предсуществующий краш на выходе offscreen-процесса (Qt/teardown),
+  к settings IO отношения не имеет (audits/batch7s21_smoke_exit_compare.txt,
+  batch7s21_smoke_load_{worktree,head}.txt). Побочный эффект, который стоит знать:
+  этот краш обрывает буферизованный вывод, поэтому первый прогон смоука через
+  PowerShell-редирект («*>>», UTF-16) выглядел обрезанным и без LOAD_OK — лечится
+  прогоном с прямым -RedirectStandardOutput и faulthandler.enable() (в
+  stage-варианте включено; оно же ловит Windows fatal exceptions).
+
+3.5 ИЗМЕРЕНИЯ ПОСЛЕ (на итоговом дереве; все артефакты в audits/)
+- py_compile_all.py: COMPILE_OK (144 .py-файла против 143 до).
+- 8 метрик (counts.py): 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 — ИДЕНТИЧНЫ
+  базовой линии (audits/batch7s21_counts_after.txt ≡ batch7s21_baseline_counts.txt).
+  Никаких упоминаний метрик-паттернов в новых докстрингах/комментариях не
+  добавлено (проверено этим же счётчиком).
+- SHA256-манифест: 143 → 144 файла; changed = 1 (Supervertaler.py:
+  312786326a65a6cdd73f3fe632d0d1e6fe2f7611b2c64aea195dd8d25002f31c →
+  20419b6a3e292ae39eb5d23cc45c180e1c2166a461ec7d3928bba7607a554f69),
+  added = 1 (modules/settings_service.py, sha256
+  4c6831417f0acba1e28bf23212a570d60bfafe6781effb1a702cfd7e927dc442),
+  removed = 0 (audits/batch7s21_manifest_cmp.txt).
+- Объём монолита: 68 386 → 68 400 строк (+14), git diff --numstat = 47/33 по
+  одному файлу. Арифметика: блок 44→38 строк (−6), импорт +1, __init__ +10,
+  _reinitialize_with_new_data_path +9. Новый модуль — 113 строк (из них 6 тел =
+  39 строк перенесённого кода + шапка/докстринги/конструктор).
+- Инвентарь call-sites 6 имён (callsites_s21.py; счётчик по синтаксису
+  `имя(`, getattr-строки без вызова в него НЕ входят — они проверены живьём в C7/C8).
+  Методическая оговорка: «до» = блоб HEAD:Supervertaler.py + ТЕКУЩЕЕ дерево
+  modules/, поэтому дельта изолирует ровно монолитный перенос:
+    имя                          до (всего/монолит)   после (всего/монолит)   объяснение
+    _get_settings_dir              5 / 3                 4 / 2               −2 ушло в сервис, +1 делегат
+    _get_unified_settings_path     5 / 4                 5 / 4               −1 ушло, +1 делегат
+    _load_unified_settings        14 / 11               13 / 10              −2 ушло, +1 делегат
+    _save_unified_settings        12 / 10               12 / 10              −1 ушло, +1 делегат
+    _load_settings_section        29 / 27               30 / 28              +1 (только делегат)
+    _save_settings_section        11 / 11               12 / 12              +1 (только делегат)
+  Итог: ни один внешний вызов не потерян; прибавка монолитных сайтов там, где
+  делегат сам является вызовом сервиса, компенсирована переносом внутренних
+  вызовов в модуль. Числа помогают проверить поправку Stage 1: текстовых вызовов
+  `_save_unified_settings(` ровно 12 (10 монолит + 2 в modules/: перенесённое
+  внутреннее из _save_settings_section и мнимый сайт
+  termbase_entry_editor.py:134) — согласуется с правкой инвентаря «12, не 11»;
+  getattr-строка modules/voice_tab.py:1062 учитывается отдельно (без скобок).
+
+3.6 «ПЕРЕДАЧА СМЕНЫ» (смена драйвера в процессе работы) — ЖУРНАЛ
+Валидация велась тремя последовательными прогонами живого приложения; смена
+состояния фиксируется явно, чтобы следующий исполнитель не переснимал замеры:
+  run-001: 12 проверок, 11 PASS / 1 FAIL — FAIL был ЛОЖНЫЙ, ошибка ХАРНЕССА
+    (вызвал cw._get_paste_method(), а реальный метод называется
+    _resolve_paste_method; в C9 вызвал save_general_settings() без обязательного
+    аргумента). Код приложения при этом не менялся — правка только в тестовом
+    драйвере (принцип AGENTS «FAIL харнесса ≠ регрессия»); лог run-001 сохранён
+    (audits/batch7s21_app_check_run1.txt) как доказательство исправления.
+  run-002: 12/12 PASS (после исправления харнесса).
+  run-003: 13/13 PASS (тот же драйвер + C13 «полный цикл на копии»).
+  Смоук: см. 3.4 (первый прогон через PS-редирект дал обрезанный лог; повторён
+  через stage-вариант с прямым RedirectStandardOutput и в worktree HEAD).
+  Все числовые утверждения этого отчёта воспроизведены измерением (см. команды
+  в run-001\*.py), а не взяты из памяти.
+
+════════════════════════════════════════════════════════════════════════════════
+4. НЕПОКРЫТЫЕ ПРОВЕРКИ (обязательный раздел; честно, без «зелёного» умолчания)
+════════════════════════════════════════════════════════════════════════════════
+N1. НАЖМЕНИЕ КНОПКИ СОХРАНЕНИЯ В UI НЕ ВЫПОЛНЯЛОСЬ. Все модальные диалоги
+    offscreen блокируются, поэтому QDialog.exec замокан (→ Rejected), а значит
+    обработчик кнопки «Apply/Save» General-вкладки не нажимался. Путь проверен
+    двумя косвенными, но измеримыми способами: (а) вызов
+    save_general_settings(<данные>) с перехватом на уровне сервиса — C9; (б)
+    полный цикл save→файл→load→живое окно на КОПИИ user_data — C13.
+N2. GUI НЕ ОТОБРАЖАЛСЯ НА ЭКРАНЕ (QT_QPA_PLATFORM=offscreen): не проверялись
+    визуальная отрисовка, DPI/масштаб шрифтов, темы, локализованные подписи.
+N3. СМЕНА КАТАЛОГА ДАННЫХ проверена программно (user_data_path = temp +
+    _reinitialize_with_new_data_path(), C11/C13); реальные UI-пути смены
+    каталога (визард первого запуска, Settings → Change data folder) не
+    нажимались. Не проверялась и ветка ОШИБКИ записи:
+    `except Exception as e: self.log("⚠ Could not save settings: …")` не
+    воспроизводилась (текст строки сохранён байт-в-байт, но сам сценарий
+    «диск только для чтения / ошибка dump» — нет).
+N4. ПОВРЕЖДЁННЫЙ settings.json на живом окне не подкладывался (fallback на
+    4 пустые секции перенесён байт-в-байт из HEAD, но end-to-end не
+    воспроизводился; UTF-8/BOM-варианты не проверялись).
+N5. КОНКУРЕНТНОСТЬ/ОБРЫВ ЗАПИСИ: поведение при двух процессах, пишущих
+    settings.json одновременно, и при обрыве записи (нет atomic-rename — так было
+    и до переноса) не проверялось.
+N6. РЕАЛЬНЫЙ ВВОД не воспроизводился: voice-виджет и clipboard-виджет построены
+    offscreen и их getattr-пути отработали (C7/C8), но диктовка голосом и
+    фактическая вставка из буфера обмена не выполнялись.
+N7. ПОЛНЫЙ ЧЕЛОВЕЧЕСКИЙ ЦИКЛ «изменить каждую вкладку → перезапуск → проверить»
+    (пункт Validation плана Step 7) НЕ выполнялся: он требует, чтобы через сервис
+    ходили доменные аксессоры (S2.2–S2.4). Для S2.1 доступный поверхностный слой
+    закрыт целиком (чтение/запись секций, main(), два duck-typed потребителя,
+    миграции __init__, смена каталога).
+N8. МИГРАЦИИ S2.5 не проверялись на настоящем старом user_data: в C11 обе
+    сработали в режиме early-return (файл new-layout уже существует). Проверка на
+    КОПИИ старого каталога — по плану в S2.5.
+N9. НАГРУЗКА/ПРОИЗВОДИТЕЛЬНОСТЬ не замерялась (сколько раз файл открывается при
+    сотнях вызовов). Проверено ровно отсутствие кэша: 4 вызова = 4 открытия (C6).
+N10. СБОРКИ И ДРУГИЕ ОС: не проверялись frozen/EXE-сборка, macOS, Linux
+    (отдельный путь указателя user_data), а также разбор `pyproject.toml`-версии.
+N11. ПРЕДСУЩЕСТВУЮЩИЙ КРАШ НА ВЫХОДЕ (0xC0000005) не диагностировался: вне
+    скоупа S2.1, воспроизводится идентично на HEAD (см. 3.4). Отдельное решение
+    владельца — стоит завести в VALIDATION_BACKLOG.
+N12. АВТОМАТИЧЕСКИХ ТЕСТОВ В ПРОЕКТЕ НЕТ: все проверки S2.1 — скриптовые драйверы
+    в stage-каталоге (в репозиторий не входят). Для регрессии в S2.2+ их придётся
+    либо переиспользовать (они параметризуемы: repo_root/out/stage),
+    либо перенести в tools/batch_validation новым PR-ом.
+
+════════════════════════════════════════════════════════════════════════════════
+5. ПОДТВЕРЖДЕНИЕ ОТСУТСТВИЯ ПРАВОК КОДА ВНЕ ЗАЯВЛЕННОГО ДИФФА
+════════════════════════════════════════════════════════════════════════════════
+- SHA256-манифест 143 → 144 файла: changed = РОВНО 1 (Supervertaler.py),
+  added = РОВНО 1 (modules/settings_service.py), removed = 0. Ни один другой .py
+  репозитория не изменён (в т.ч. tools/, scripts/, okapi-sidecar/, translations/).
+- git status после работы: `M Supervertaler.py`, `?? modules/settings_service.py` —
+  плюс документы батча (промпт/отчёт/аудиты) и две правки Stage 1, которые в дереве
+  уже были проиндексированы ДО старта S2.1 (EXTRACTION_PLAN.md,
+  docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt) — они не менялись.
+- Внешние потребители — побайтово как в HEAD (sha256 файлов совпадают):
+  modules/termbase_entry_editor.py f31f5197…, modules/voice_tab.py,
+  modules/clipboard_manager_widget.py, modules/config_manager.py. Это и есть
+  «0 правок call-sites вне монолита» из конвенции Step 6.
+- Заявленный дифф (то, что разрешено менять): (1) 6 делегатов 44639–44696;
+  (2) строка импорта 421; (3) конструктор сервиса в __init__ 6301–6309;
+  (4) перепривязка сервиса 6668–6676 (обоснована в 2.3б — без неё теряется
+  семантика «путь читается в момент вызова»); (5) новый модуль целиком.
+  Ничего за пределами этого списка в коде не менялось.
+- Документация, обновлённая этим батчем: этот отчёт, промпт S2.1,
+  PROJECT_STATUS.md, EXTRACTION_PLAN.md (статус Step 7 + раздел S2.1),
+  audits/batch7s21_*.
+
+════════════════════════════════════════════════════════════════════════════════
+6. СЛЕДУЮЩИЙ ШАГ (S2.2) И ОТКРЫТЫЕ ВОПРОСЫ
+════════════════════════════════════════════════════════════════════════════════
+6.1 S2.2 «general + общий reading» — 4 метода / 153 строки. Границы пересчитаны
+    AST на этом дереве (audits/batch7s21_remaining_ast.txt), документированные
+    номера после S2.1 устарели:
+      _load_general_settings_from_file   44897–44936   40 строк   (→ _load_settings_section)
+      save_general_settings              44938–44943    6 строк   (→ _save_settings_section)
+      load_general_settings              44542–44638   97 строк   SPLIT (~35 присваиваний
+                                                                  self.<attr> + load_llm_settings
+                                                                  остаются в монолите; SPLIT-делегат)
+      load_clipboard_privacy_settings    44704–44713   10 строк   (→ _load_settings_section)
+    save_clipboard_privacy_settings (44715–44736, 22) — НЕ переносится (решение V3:
+    живой refresh виджета), остаётся целиком в монолите.
+    Сервис уже готов принять эти методы: им нужен только settings_dir (и log), все
+    внутренние вызовы пойдут в 6 перенесённых методов S2.1 без изменений.
+6.2 ОТКРЫТО ПЕРЕД S2.2 (не блокирует S2.1, блокирует S2.2 — из EXTRACTION_PLAN):
+    раздел 1.4 отчёта Stage 1 описал 7 duck-typed обращений load_general_settings как
+    `getattr(self, 'load_general_settings', lambda: {})()`; независимый аудит Б1
+    оспаривает это для Supervertaler.py:1809 (highlight_termbase_matches) и
+    modules/quicktrans.py:302–303 (hasattr-guard на parent()-цепочке /
+    parent_app). Требуется ПРЯМАЯ цитата кода этих двух мест до старта S2.2.
+    Поправка инвентаря «_save_unified_settings fan-in = 12, не 11» подтверждена
+    измерением (см. 3.5).
+6.3 ОСТАТОК STAGE 2 (границы там же, в audits/batch7s21_remaining_ast.txt):
+    S2.3 LLM/proxy/provider/api keys — 10 методов / 150 строк (★ ровно на границе
+    конвенции 10 методов живого чек-листа — отметить в S2.3 явно);
+    S2.4 языки/диктовка/словарь/спеллчек-IO — 7 / 126; S2.5 recent + миграции — 5 / 263.
+    Вне Step 7 (решения владельца): save_clipboard_privacy_settings 44715–44736,
+    save_dictation_settings 44962–45016, load_language_settings 45242–45263,
+    тир C (get_autocorrect_settings 44640–44651, recent 32258–32450,
+    load_font_sizes_from_preferences 45289–45375).
+6.4 ЧТО ОСТАЛОСЬ НЕСДЕЛАННЫМ ПО ИНФРАСТРУКТУРЕ (наблюдения, не блокеры):
+    - Ветки разошлись: локальный main (043da2a) отстаёт от origin/main (5f4d5f0,
+      «Add files via upload» с двумя документами) — координатору решить, делать ли
+      rebase/pull перед push; код в обоих коммитах идентичен.
+    - Предсуществующий краш teardown (0xC0000005) в offscreen-прогонах — кандидат
+      в VALIDATION_BACKLOG.
+    - Stage-каталог и worktree сохраняются для отладки:
+      D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\
+      (+ head-wt на 043da2a; удалять worktree — по решению координатора).
+
+════════════════════════════════════════════════════════════════════════════════
+7. КОММИТ БАТЧА
+════════════════════════════════════════════════════════════════════════════════
+Один коммит: код переноса + делегаты + проводка + промпт S2.1 + этот отчёт +
+аудиты batch7s21_* + обновления PROJECT_STATUS.md и EXTRACTION_PLAN.md.
+Родитель: 043da2a. Не пушился (расхождение с origin/main — см. 6.4).
+

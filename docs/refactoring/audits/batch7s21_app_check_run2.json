@@ -1,0 +1,117 @@
+{
+ "C1_service_attr": {
+  "ok": true,
+  "value": [
+   "modules.settings_service",
+   "SettingsService",
+   "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings"
+  ]
+ },
+ "C2_settings_dir_identity": {
+  "ok": true,
+  "value": {
+   "delegate": "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings",
+   "original_expression": "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings",
+   "equal": true
+  }
+ },
+ "C3_unified_path_identity": {
+  "ok": true,
+  "value": {
+   "delegate": "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings\\settings.json",
+   "equal": true
+  }
+ },
+ "C4_main_68357_call": {
+  "ok": true,
+  "value": {
+   "kind": "dict",
+   "n_keys": 6,
+   "start_minimized_to_tray": false
+  }
+ },
+ "C5_delegate_equals_service": {
+  "ok": true,
+  "value": {
+   "ui_section_equal": true,
+   "unified_equal": true,
+   "unified_path_equal": true
+  }
+ },
+ "C6_no_cache_4_calls_4_opens": {
+  "ok": true,
+  "value": {
+   "calls": 4,
+   "opens_of_settings_json": 4
+  }
+ },
+ "C7_voice_tab_duck_typed": {
+  "ok": true,
+  "value": {
+   "widget": "modules.voice_tab.VoiceTab",
+   "getattr_load_callable": true,
+   "getattr_save_callable": true,
+   "_set_dictation_keys_returned": true,
+   "service_save_called": true,
+   "captured_ui_dictation_probe": "marker"
+  }
+ },
+ "C8_clipboard_duck_typed": {
+  "ok": true,
+  "value": {
+   "widget": "modules.clipboard_manager_widget.ClipboardManagerWidget",
+   "_resolve_paste_method": "auto",
+   "value_via_delegate_features_section": null,
+   "service_save_called": true,
+   "captured_paste_method": "auto"
+  }
+ },
+ "C9_save_general_settings_reaches_service": {
+  "ok": true,
+  "value": {
+   "section": "general",
+   "n_keys": 1
+  }
+ },
+ "C10_roundtrip_identical_data": {
+  "ok": true,
+  "value": {
+   "sha256_before": "752e19bbd37f631451347203bcb737a8db7361277cd4d8bc9367de5a20272de3",
+   "sha256_after": "752e19bbd37f631451347203bcb737a8db7361277cd4d8bc9367de5a20272de3",
+   "bytes_identical": true,
+   "sections_after": [
+    "api_keys",
+    "features",
+    "general",
+    "ui",
+    "usage_statistics_asked",
+    "usage_statistics_enabled"
+   ],
+   "readback_equal": true
+  }
+ },
+ "C11_service_rebind_on_path_change": {
+  "ok": true,
+  "value": {
+   "service_dir_after_change": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s21\\run-001\\reinit_test_user_data\\workbench\\settings",
+   "delegate_dir_after_change": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s21\\run-001\\reinit_test_user_data\\workbench\\settings",
+   "delegate_path_is_temp": true,
+   "marker_read_from_temp": "temp-dir",
+   "reinit_log_errors": [],
+   "temp_file_features_after_write": {
+    "_s21_write": true
+   },
+   "service_dir_restored": "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings",
+   "delegate_dir_restored_is_production": true,
+   "prod_ui_readable_after_restore": true
+  }
+ },
+ "C12_prod_settings_sha_unchanged": {
+  "ok": true,
+  "value": {
+   "sha256_start": "752e19bbd37f631451347203bcb737a8db7361277cd4d8bc9367de5a20272de3",
+   "sha256_end": "752e19bbd37f631451347203bcb737a8db7361277cd4d8bc9367de5a20272de3",
+   "unchanged": true
+  }
+ }
+}

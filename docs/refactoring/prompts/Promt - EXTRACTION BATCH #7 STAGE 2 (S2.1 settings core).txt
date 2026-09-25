@@ -1,0 +1,60 @@
+## ПЕРЕНОС S2.1 — Settings Service, ядро API (Batch #7 Stage 2, под-батч 1/5)
+
+РОЛЬ: Ты выполняешь перенос кода (не разведку, не аудит). Разведка границ
+уже сделана Б2 — используй её результаты ниже вместо повторного AST-обхода.
+
+Этап 1 — базовая линия:
+- git rev-parse HEAD; если отличается от 5f4d5f0823ba1ac5135a9a5ffad8a9418d259e92 —
+  указать новый SHA и продолжить (разведка Б2 актуальна, если за это время не
+  трогали строки 44639–44682, 8 метрик или файлы modules/termbase_entry_editor.py,
+  modules/voice_tab.py, modules/clipboard_manager_widget.py — если трогали, стоп
+  и доложить координатору).
+- Зафиксировать: SHA256-манифест всех .py, py_compile, 8 метрик (как в прошлых
+  батчах).
+
+Этап 2 — перенос (6 методов, 39 строк, Supervertaler.py:44639–44682, блок
+непрерывный, посторонних def внутри нет):
+  _get_settings_dir            44639–44641
+  _get_unified_settings_path   44643–44645
+  _load_unified_settings       44647–44661
+  _save_unified_settings       44663–44672
+  _load_settings_section       44674–44676
+  _save_settings_section       44678–44682
+
+1. Создать modules/settings_service.py, класс SettingsService. Конструктор —
+   явный settings_dir (+ опц. log callback), НЕ через ConfigManager (см.
+   EXTRACTION_PLAN.md, Step 7, V1). Перенести все 6 методов как методы этого
+   класса. Внутренние вызовы между ними (_get_settings_dir →
+   _get_unified_settings_path → _save_unified_settings/_load_unified_settings/
+   _load_settings_section/_save_settings_section — они и так все друг друга не
+   вызывают напрямую кроме _get_settings_dir, см. трассировку Б2) сохранить как
+   self.-вызовы внутри нового класса.
+2. На SupervertalerQt добавить self.settings_service = SettingsService(...) в
+   __init__ (место и точный settings_dir — как сейчас резолвит оригинальный
+   _get_settings_dir; НЕ придумывать новую логику резолва).
+3. На месте всех 6 методов оставить ТОНКИЕ ДЕЛЕГАТЫ с исходными именами и
+   сигнатурами, форвардящие на self.settings_service. Это не опционально —
+   как минимум ради Supervertaler.py:68357 (main(), безусловный вызов
+   window._load_settings_section("ui") при старте — без делегата приложение не
+   запустится) и ради двух ещё не перенесённых методов (_migrate_settings_to_unified
+   зовёт _get_settings_dir; _migrate_voice_dictation_default_off зовёт
+   _save_settings_section — оба остаются в монолите до S2.5).
+4. NOT-MOVE: modules/termbase_entry_editor.py:121/131/134 (self._load_unified_settings/
+   _save_unified_settings/_load_settings_section внутри TermbaseEntryEditor(QDialog))
+   — это на другом классе, метода там не было и не будет, поведение (AttributeError,
+   проглатываемый try/except) не трогать, в фан-ин не считать.
+
+Этап 3 — валидация (Step 7 конвенция, живой чек-лист по сценариям +
+"передача смены" при смене модели в процессе):
+- Запуск приложения (проверка main():68357 напрямую).
+- Сохранение/загрузка unified settings через UI (General settings tab).
+- Проверка getattr-guarded путей: modules/voice_tab.py (_load/_save_unified_settings),
+  modules/clipboard_manager_widget.py (_load/_save_settings_section) — оба должны
+  теперь реально находить методы через self._parent_app, а не проваливаться в
+  default getattr.
+- py_compile, SHA256-манифест (кроме settings_service.py и Supervertaler.py),
+  8 метрик, смоук-тест.
+- Раздел "Непокрытые проверки" — обязателен.
+
+ФОРМАТ ОТЧЁТА: как в прошлых батчах Step 7 (структура 1.1–1.N + NOT-MOVE +
+Непокрытые проверки + подтверждение отсутствия правок кода вне заявленного диффа).

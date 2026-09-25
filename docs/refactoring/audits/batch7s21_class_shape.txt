@@ -1,0 +1,5 @@
+﻿HEAD   : class 6054-62458, methods=819, members=839, kinds={'Assign': 19, 'Expr': 1, 'FunctionDef': 819}
+WORKTREE: class 6055-62472, methods=819, members=839, kinds={'Assign': 19, 'Expr': 1, 'FunctionDef': 819}
+method names only in HEAD    : []
+method names only in WORKTREE: []
+same count of method names   : True

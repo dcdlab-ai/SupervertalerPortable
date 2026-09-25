@@ -1,0 +1,43 @@
+=== 1. MONOLITH AST ===
+SupervertalerQt: 6055-62472, direct methods = 819, members = 839
+DUPES: ['closeEvent', 'show_about']
+_get_settings_dir              lines 44668-44671 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+_get_unified_settings_path     lines 44673-44676 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+_load_unified_settings         lines 44678-44681 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+_save_unified_settings         lines 44683-44686 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+_load_settings_section         lines 44688-44691 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+_save_settings_section         lines 44693-44696 ( 4) stmts=2 forwards_to_service=True signature_identical=True
+DELEGATES OK: 6/6
+
+=== 2. SERVICE AST ===
+classes in module: ['SettingsService']
+SettingsService: 50-113, methods = ['__init__', '_get_settings_dir', '_get_unified_settings_path', '_load_unified_settings', '_save_unified_settings', '_load_settings_section', '_save_settings_section']
+missing methods: []
+__init__ signature head: def __init__(self, settings_dir: Path, ... log: Optional[Callable[[str], None]] = None
+module top-level imports: ['json', 'pathlib', 'typing']
+
+=== 3. VERBATIM TRANSFER (snapshot from git HEAD vs service) ===
+_get_settings_dir              DIFF (3 -> 3 lines), differing lines:
+    line 3:
+      HEAD: '        return self.user_data_path / "workbench" / "settings"'
+      now : '        return self.settings_dir'
+_get_unified_settings_path     VERBATIM  (3 lines)
+_load_unified_settings         VERBATIM  (15 lines)
+_save_unified_settings         VERBATIM  (10 lines)
+_load_settings_section         VERBATIM  (3 lines)
+_save_settings_section         VERBATIM  (5 lines)
+VERBATIM: 5/6 (expected 5/6; _get_settings_dir has the documented injection)
+
+=== 4. MOVED BODIES GONE FROM MONOLITH ===
+'settings_dir.mkdir(parents=True, exist_ok=True)': 2 occurrence(s) in monolith (want 0)
+'for section in ("api_keys", "general", "ui", "features"):': 0 occurrence(s) in monolith (want 0)
+'settings_file = self._get_unified_settings_path()': 0 occurrence(s) in monolith (want 0)
+'all_settings[section] = section_data': 0 occurrence(s) in monolith (want 0)
+
+=== 5. DEFINITION INVENTORY REPO-WIDE ===
+_get_settings_dir              defs=['Supervertaler.py:44668', 'modules/settings_service.py:70']
+_get_unified_settings_path     defs=['Supervertaler.py:44673', 'modules/settings_service.py:74']
+_load_unified_settings         defs=['Supervertaler.py:44678', 'modules/settings_service.py:78']
+_save_unified_settings         defs=['Supervertaler.py:44683', 'modules/settings_service.py:94']
+_load_settings_section         defs=['Supervertaler.py:44688', 'modules/settings_service.py:105']
+_save_settings_section         defs=['Supervertaler.py:44693', 'modules/settings_service.py:109']

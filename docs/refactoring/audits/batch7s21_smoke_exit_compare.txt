@@ -1,0 +1,4 @@
+﻿=== load comparison (same svproj, same user data, different code) ===
+WORKTREE(S2.1)_EXIT=-1073741819
+HEAD_043DA2A_EXIT=-1073741819
+LOAD_COMPARE_DONE

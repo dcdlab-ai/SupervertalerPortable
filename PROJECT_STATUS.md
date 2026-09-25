@@ -4,7 +4,7 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-24 (Batch #7 Stage 1) • **Текущий шаг:** Step 7 — Stage 1 (инвентаризация, read-only) выполнен; СТОП — ждать решения владельца по V1–V4 отчёта, монолит 68 386 строк
+**Обновлено:** 2026-09-25 (Batch #7 Stage 2, под-батч S2.1) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API» выполнен (`modules/settings_service.py` + 6 делегатов), дальше S2.2 (general + общий reading, 4 метода / 153 строки); монолит 68 400 строк
 
 ## Кратко: где мы находимся
 
@@ -13,14 +13,16 @@
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
-По **Step 7** выполнен **Stage 1 (Batch #7, read-only инвентаризация, 24.09.2026)**:
-состав уточнён до 35 методов / 830 строк (было «~25» в плане, «~46» у координатора),
-риски картированы (fan-in `load_general_settings` 61, дукт-тайпед-обращения из
-`modules/` к приватным именам, дубликаты владельца `settings.json`). Перенос
-(Stage 2) не начат — ждёт решения владельца по V1–V4.
-Дальше — Step 7 Stage 2+ только по решению владельца. Среда,
-тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед любой
-работой).
+По **Step 7** выполнен **Stage 1 (Batch #7, read-only инвентаризация, 24.09.2026)**,
+решения по V1–V4 приняты, и **Stage 2 начат**: под-батч **S2.1 «ядро API»**
+(25.09.2026) перенёс 6 методов / 39 строк в новый `modules/settings_service.py`
+(класс `SettingsService` с явным `settings_dir` + опц. `log`) и оставил в монолите
+6 тонких делегатов; монолит 68 386 → **68 400** строк, 8 метрик без изменений,
+живой offscreen-прогон приложения — 13/13 PASS. Состав Stage 2 после V1–V4 —
+32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5).
+Дальше — **S2.2** (general + общий reading: 4 метода / 153 строки) отдельным промптом.
+Среда, тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед
+любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
 
@@ -33,11 +35,57 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | 🔄 Stage 1 выполнен (read-only инвентаризация 24.09.2026); Stage 2 не начат — ждёт решения владельца по V1–V4 | Batch #7 Stage 1 (read-only): отчёт `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt` |
+| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» выполнен 25.09.2026** — `modules/settings_service.py` + 6 тонких делегатов; осталось S2.2–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.1).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt` и `batch7s21_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 Stage 2 — под-батч S2.1 закрыт (Batch #7 Stage 2, 25.09.2026)
+
+**S2.1 выполнен** (база HEAD `043da2a`, монолит 68 386 → **68 400** строк, `git diff
+--numstat` 47/33 по одному файлу). Отчёт:
+`docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.1).txt`; промпт:
+`docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.1 settings core).txt`;
+аудиты: `docs/refactoring/audits/batch7s21_*` (манифест до/после + сравнение, counts,
+callsites, verify, class_shape, snapshot_index, remaining_ast, app_check_run{1,2,3},
+smoke-*) и `not_moved_methods_batch7stage2s21_snapshot.txt`.
+
+**Что сделано:** новый класс `SettingsService` (`modules/settings_service.py`,
+113 строк; конструктор с ЯВНЫМ `settings_dir` + опц. `log`, без ConfigManager) с
+6 методами ядра (`_get_settings_dir`, `_get_unified_settings_path`,
+`_load_unified_settings`, `_save_unified_settings`, `_load_settings_section`,
+`_save_settings_section`; 5 тел перенесены БАЙТ-В-БАЙТ, 1 строка — инъекция пути).
+В монолите на их месте — 6 тонких делегатов (44639–44696) с исходными именами и
+сигнатурами, строка импорта (421), конструктор сервиса в `__init__` (6301–6309) и
+ПЕРЕПРИВЯЗКА сервиса первым оператором `_reinitialize_with_new_data_path()`
+(6668–6676) — без неё смена каталога данных (`user_data_path` переприсваивается в
+6630/6934/22859, все три ведут в этот метод) оставила бы делегаты и ещё не
+перенесённые миграции на старом пути.
+
+**Валидация:** py_compile OK (144 файла); 8 метрик 1211/18/35/24/24/0/85/2 — без
+изменений; манифест 143→144 (changed=1, added=1, removed=0); живой offscreen-прогон
+приложения — **13/13 PASS** (main():68370 `window._load_settings_section("ui")`,
+getattr-пути `modules/voice_tab.py` и `modules/clipboard_manager_widget.py`,
+save-путь General-вкладки, полный цикл save→файл→load→окно на КОПИИ user_data,
+перепривязка при смене каталога; «4 вызова = 4 открытия файла» — кэша нет);
+смоук save/load OK (LOAD_OK и на S2.1, и на HEAD-worktree; краш 0xC0000005 на
+teardown идентичен на обоих — предсуществующий, вне скоупа). Непокрытые проверки —
+раздел 4 отчёта (главные: настоящий клик Save в модальном диалоге не нажимался;
+полный человеческий цикл «изменить каждую вкладку → перезапуск» — после S2.2–S2.4).
+
+**Дальше — S2.2 «general + общий reading», 4 метода / 153 строки** (границы
+пересчитаны AST после S2.1 — `docs/refactoring/audits/batch7s21_remaining_ast.txt`):
+`load_general_settings` 44542–44638 (97 строк, SPLIT — применение 35 атрибутов
+остаётся в монолите), `_load_general_settings_from_file` 44897–44936 (40),
+`save_general_settings` 44938–44943 (6), `load_clipboard_privacy_settings`
+44704–44713 (10); `save_clipboard_privacy_settings` 44715–44736 — НЕ переносится
+(V3). Открытый вопрос перед стартом S2.2 (из EXTRACTION_PLAN.md): прямая цитата кода
+дукт-тайпед-обращений `load_general_settings` в `Supervertaler.py:1809` и
+`modules/quicktrans.py:302–303` (спор Б1: `getattr(self, …)` или hasattr-guard).
+Если за время паузы строки 44542–44943 или файлы `modules/{voice_tab,
+clipboard_manager_widget,termbase_entry_editor}.py` трогали — границы и метрики
+пересчитать AST заново перед переносом.
+
 ## Что дальше: Step 7 — Stage 1 закрыт (Batch #7 Stage 1, 24.09.2026, read-only)
 
 **Stage 1 выполнен** (HEAD `b5c46e7`, монолит 68 386 строк, sha256 блоба

@@ -1,0 +1,14 @@
+NOT-MOVE S2.1 — modules/termbase_entry_editor.py
+working tree sha256 = f31f519787c5c17f02b7dc2e71d3f185ae82c0b8d17b73e0bbcbc2a686ef1e92
+HEAD blob    sha256 = f31f519787c5c17f02b7dc2e71d3f185ae82c0b8d17b73e0bbcbc2a686ef1e92
+identical to HEAD   = True
+class               = TermbaseEntryEditor (36-1824), methods=35
+methods of the 6 S2.1 names defined on this class: []
+
+_load_termbase_selections 116-124 (9 lines) sha256=5c94266caeeaa4099764f5f762ff1fe10f4619714eaf73b296cb28f9e42ce5cc
+_save_termbase_selections 126-136 (11 lines) sha256=4c83995950654aed7962f0a9087ce5bf1eb526cadf9ddb487cc30d497b9efe3c
+
+verbatim calls of the 6 S2.1 names in this file:
+    121: prefs = self._load_settings_section("ui")
+    131: all_settings = self._load_unified_settings()
+    134: self._save_unified_settings(all_settings)
