@@ -1,0 +1,468 @@
+ОТЧЁТ Batch #7 Stage 2, под-батч S2.2 — Settings Service: general + чтение
+clipboard-настроек (перенос 3 методов / 56 строк в modules/settings_service.py)
+════════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-26. Ветка main. Режим: ACTIVE REFACTOR (перенос, не разведка).
+База: HEAD 25627c9 (потомок ожидавшегося 3e5c100c — см. 1.1). Промпт: «ПЕРЕНОС
+S2.2 — Settings Service, general + clipboard reading (Batch #7 Stage 2,
+под-батч 2/5)»; сохранён как
+docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.2 general).txt.
+Разведка Б2 принята как есть; пересчитаны только границы и callsites на этом
+дереве (1.2/1.4). Артефакты: docs/refactoring/audits/batch7s22_*; рабочие
+прогоны — D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s22\run-001\
+(скрипты, снапшоты, JSON-результаты, логи; head-wt — worktree HEAD 25627c9).
+
+ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 400 → 68 373 строк (−27; git --numstat 23/50 по
+одному файлу, все 5 неравных регионов — заявленные правки), сервис 113 → 197
+строк, 3 тонких делегата на месте тел (сигнатуры байт-в-байт, включая
+ОБЯЗАТЕЛЬНЫЙ аргумент у save_general_settings), 8 метрик без изменений,
+py_compile OK, живой прогон приложения — 9/9 PASS (offscreen), смоук save/load
+OK, манифест — изменено ровно 2 .py (ожидаемые).
+
+════════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 1 — БАЗОВАЯ ЛИНИЯ И СООТВЕТСТВИЕ РАЗВЕДКЕ Б2
+════════════════════════════════════════════════════════════════════════════════
+1.1 ЭТАП 0 ВЫПОЛНЕН, HEAD — ПОТОМОК 3e5c100c
+- `git fetch origin` выполнен. `git merge-base --is-ancestor 3e5c100c HEAD`
+  → ANCESTOR_OK (не STOP).
+- `git rev-parse HEAD` = 25627c945d3783c698c9fb2dd2de35f22bf48983
+  («Add S2.1 range manifest check … (docs only)») — то есть ровно на ОДИН коммит
+  впереди ожидавшегося 3e5c100c0c1a5a5dff9a2e74e74ec9cb4c0ece9e; это потомок, а
+  не расхождение, как и допускает промпт.
+- Проверка актуальности разведки Б2: `git diff --stat 3e5c100c HEAD` — РОВНО
+  один файл, и это документ:
+  `docs/refactoring/audits/batch7s21_range_manifest_check.txt | 31 +`
+  Ни одного .py в расхождении нет → границы/номера строк из Б2 и из
+  `audits/batch7s21_remaining_ast.txt` на этом дереве АКТУАЛЬНЫ (и, как видно из
+  1.2, совпали с промптом цифра-в-цифру). Рабочее дерево на старте было чистым
+  (`git status --short` — пусто).
+- Квирк окружения (зафиксировано, чтобы не искали причину заново): git отказывался
+  работать с репозиторием — «detected dubious ownership… owned by ROOT/Dmitry, but
+  the current user is ROOT/AIAssistant4». Глобальные настройки НЕ менялись (по
+  AGENTS.md «не менять глобальную среду ради задачи»): все git-команды выполнялись
+  с процесс-локальным `-c safe.directory=E:/Dev/SupervertalerPortable`, а скрипты
+  стейджа передают тот же флаг в `git show`.
+
+1.2 ГРАНИЦЫ БЛОКА (AST) + СНАПШОТЫ — СОВПАЛИ С ПРОМПТОМ 1:1
+- AST по документу из `git show HEAD:Supervertaler.py` (68 400 строк, класс
+  SupervertalerQt 6055–62472, 819 прямых методов) — скрипт snapshot_block_s22.py,
+  артефакт audits/batch7s22_snapshot_index.txt:
+    MOVE    _load_general_settings_from_file  44897–44936 (40 строк) stmts=9
+            sha256 блока b615f4f048185674f7a60d476c3a7e3bca9c93dd37c8d21dfda03f14a52cd11e
+    MOVE    load_clipboard_privacy_settings   44704–44713 (10 строк) stmts=2
+            sha256 7cfb6b6d160767b8c66f7ca0cd50d62bf4e4e2d4f92cd92268904c053f57e5d5
+    MOVE    save_general_settings             44938–44943  (6 строк) stmts=2
+            sha256 7ac90ae56cb7a23e76eee9a06010f8353f6d429605118dd3ce004ba75e783752
+    NOTMOVE load_general_settings             44542–44638 (97 строк) stmts=43
+            sha256 889b9f9566bb8ed9fd83142b2822a23680bbdaf42d9d7e2830cf66e2847ab1ba
+  Три MOVE-блока вместе — 56 строк, sha256
+  7a262d45c219a0e82f8a9e4527adadd1672853e07166ed37b074aa0994c2003f; тела
+  сохранены в run-001\snapshot\<имя>.txt.
+- «Чистота» блоков (не на глаз): каждый метод — ПРЯМОЙ ребёнок класса, вложенных
+  def/class внутри нет (`nested defs=[]` для всех трёх), до/после — ровно одна
+  пустая строка (gap 2), посторонних `def` между 44700 и 44950 нет: список
+  «def-строк» = [44704, 44715, 44738, 44830, 44897, 44938, 44945] — то есть
+  внутри каждого блока def только свой собственный. Соседи:
+    _load_general_settings_from_file: после _migrate_to_workbench_layout, до save_general_settings
+    load_clipboard_privacy_settings : после _save_settings_section, до save_clipboard_privacy_settings
+    save_general_settings            : после _load_general_settings_from_file, до load_dictation_settings
+
+1.3 ЗАВИСИМОСТИ ТЕЛ — НИ ОДНОГО ЛИШНЕГО АТРИБУТА ОКНА (стоп-условие НЕ наступило)
+Измерено AST (analyze_s22.py, §2; audits/batch7s22_analysis.txt) — множество
+`self.<attr>` внутри каждого переносимого тела:
+    _load_general_settings_from_file  → ['_load_settings_section']
+    load_clipboard_privacy_settings   → ['_load_settings_section', 'log']
+    save_general_settings             → ['_save_settings_section', 'log']
+Все три имени уже есть в SettingsService (`_load_settings_section`,
+`_save_settings_section`) или в его конструкторе (`log`). ВЫВОД: новый параметр
+конструктора НЕ нужен, останавливаться и докладывать координатору не пришлось —
+перенос выполнен тем же способом, что S2.1 (явный settings_dir + опц. log).
+Для контраста: NOT-MOVE `load_general_settings` имеет 41 `self.<attr>`
+(35 присваиваемых атрибутов окна + `load_llm_settings` + свои вызовы) — это и
+есть причина SPLIT, тело осталось в монолите целиком (2.4).
+
+════════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════════════════════
+2.1 REJECTED-АЛЬТЕРНАТИВЫ (не изобретать заново)
+- Отделять IO-часть `load_general_settings` в сервис НЕЛЬЗЯ/НЕ НУЖНО: V3-требование
+  SPLIT из плана выполнено ИНАЧЕ — тело целиком осталось в монолите (NOT-MOVE), а
+  его внутренний вызов ушёл в делегат. Ничего в теле не менялось (2.4/3.1).
+- Вариант «service.save_general_settings(settings=None) с default, чтобы заодно
+  починить баг двух сайтов» — ОТВЕРГНУТ: промпт требует сохранить TypeError-
+  поведение; починка = изменение наблюдаемого поведения вне скоупа переноса
+  (кандидат в VALIDATION_BACKLOG, см. 4/N4).
+- Переносить `save_clipboard_privacy_settings` — нет (V3: живому refresh нужны
+  Qt-объекты; в сервисе оказался бы виджет). Проверено живьём, что он по-прежнему
+  определён именно в монолите (3.2, C8: `save_clipboard_privacy_settings_file =
+  "Supervertaler.py"`).
+
+2.2 МОДУЛЬ СЕРВИСА (modules/settings_service.py: 113 → 197 строк)
+Добавлено три метода; тела перенесены ВЕРБАТИМ (проверка построчным сравнением
+сервис-метода со снапшотом HEAD-блоба: 3/3 VERBATIM, 3.1). Порядок в файле
+повторяет порядок монолита (load_clipboard_privacy_settings →
+_load_general_settings_from_file → save_general_settings). Перед ними —
+объявленный блок-комментарий на 14 строк (что перенесено; почему внутренние
+self-вызовы теперь резолвятся в методы класса; почему `settings` без default;
+почему save_clipboard_privacy_settings не поехал); докстринг модуля дополнен
+абзацем про S2.2 (8 строк) — итого +84 строки (git --numstat 84/0).
+Внутренние вызовы перенесённых тел — это вызовы методов ЭТОГО ЖЕ класса (в
+монолите те же выражения шли через его одноимённые делегаты):
+    self._load_settings_section("general")     → _load_unified_settings() → чтение файла
+    self._save_settings_section("general", …)  → _load_unified_settings()+_save_unified_settings()
+    self.log(...)                              → тот же колбэк окна
+Семантика «файл открывается заново на каждый вызов» не тронута (кэшей не
+добавлено) — измерено на живом окне: 3 вызова = 3 открытия settings.json (3.2, C5).
+
+2.3 ДЕЛЕГАТЫ (3, с исходными именами и сигнатурами; стоят ТОЧНО на месте тел)
+    _load_general_settings_from_file   44903–44909 (7 строк)  → self.settings_service._load_general_settings_from_file()
+    save_general_settings              44911–44916 (6 строк)  → self.settings_service.save_general_settings(settings)
+    load_clipboard_privacy_settings    44711–44719 (9 строк)  → self.settings_service.load_clipboard_privacy_settings()
+Все три: 2 statement'а (докстринг + return/вызов), ПЕРВАЯ строка (сигнатура)
+байт-в-байт как в HEAD-снапшоте (verify_s22.py: `signature_identical=True`,
+`forwards=True` для всех трёх → DELEGATES OK: 3/3). Докстринг каждого делегата —
+исходный текст ПЛЮС строки «(Тонкий делегат: SettingsService.…, Batch #7 Stage 2
+S2.2)» и перечень обязательных потребителей; текст исходного докстринга не
+потерян ни в одном из трёх.
+ОСОБО ПРО БАГ: у делегата `save_general_settings` сигнатура оставлена БЕЗ default
+— AST-проверка verify_s22.py §2: `positional args = ['self', 'settings']`,
+`defaults = []`, `vararg/kwarg = None/None` → `TypeError-on-no-arg semantics
+preserved: True`. То есть вызов `save_general_settings()` без аргумента падает
+ровно так же, как падал до переноса (3.3).
+
+2.4 NOT-MOVE — `load_general_settings` 44542–44638: КОД НЕ ТРОНУТ ВООБЩЕ
+- Тело метода БАЙТ-В-БАЙТ идентично снапшоту HEAD (`byte-identical to HEAD
+  snapshot: True`, 97 строк, sha256 889b9f95…): verify_s22.py §6.
+- Его собственный внутренний вызов `self._load_general_settings_from_file()` —
+  ровно 1 вхождение, тело строки не менялось; вызов продолжает работать ЧЕРЕЗ
+  НОВЫЙ ДЕЛЕГАТ (в этом и состояло V3-требование SPLIT: отдельного разбиения
+  тела на IO/не-IO часть не делалось, оно не нужно).
+- Проверено живьём: `w.load_general_settings()` возвращает dict из 8 ключей и всё
+  так же расставляет атрибуты окна (3.2, C4/C8 — `auto_propagate_exact_matches`
+  и `auto_fill_100_matches` выставлены).
+- Второй NOT-MOVE — `save_clipboard_privacy_settings` (44721–44742 в новом
+  дереве, 22 строки): не переносился и не менялся (см. 2.1 и 3.2/C8).
+
+2.5 ЗАЯВЛЕННЫЙ ДИФФ (7 правок в 2 файлах) И ЕГО ПОСТРОЧНЫЙ РАЗБОР
+difflib-замер по ВСЕМ неравным регионам между HEAD-блобом и деревом
+(line_accounting_s22.py; audits/batch7s22_line_accounting.txt) — регионов РОВНО 5,
+и все 5 принадлежат объявленным правкам (шестого, незаявленного, нет):
+    A. комментарий-шапка делегатов (44667–44670)                    +4
+    B. комментарий clipboard-секции (44707–44709)                   +3
+    C. делегат load_clipboard_privacy_settings (44715–44719)        −1
+       (10 строк тела → 9 строк делегата)
+    D. делегат _load_general_settings_from_file (44904–44909)      −33
+       (40 строк тела → 7 строк делегата)
+    E. делегат save_general_settings (44912–44916)                  +0
+       (6 строк тела → 6 строк делегата)
+    ИТОГО по Supervertaler.py                                     −27  == фактический рост (assert True)
+Второй файл — modules/settings_service.py: +84 / −0 (3 метода + комментарий +
+абзац докстринга).
+Методическая деталь (чтобы цифры не выглядели противоречивыми): `git diff
+--numstat` даёт 23/50, а не 24/51 — сигнатура и первая строка докстринга каждого
+делегата остались контекстом, поэтому git дробит замены иначе; итог −27 от этого
+не меняется (сходится по всем 5 регионам).
+
+2.6 ОСТАЛЬНОЙ КОД НЕ ТРОГАЛСЯ
+- modules/clipboard_manager_widget.py, modules/voice_tab.py,
+  modules/termbase_entry_editor.py, modules/config_manager.py и все прочие .py —
+  SHA256 идентичны HEAD (см. §5: манифест — changed=2, added=0, removed=0).
+- Номера строк во всём, что ниже 44943, сдвинулись ровно на −27 (тот же сдвиг у
+  SuperlookupTab: 64729→64702, 66780→66753, 66823→66796) — это тоже контроль
+  «правок вне диффа»: если бы делегаты были вставлены не на месте тел, сдвиг был
+  бы другим или неоднородным.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════════════════════
+3.1 AST / СТРУКТУРНАЯ ПРОВЕРКА (verify_s22.py; audits/batch7s22_verify_out.txt)
+- SupervertalerQt: 6055–62472 / 819 методов / 839 членов ДО → 6055–62445 / 819 / 839
+  ПОСЛЕ (span −27 == строкам, ушедшим в делегаты). Множество имён методов до и
+  после ИДЕНТИЧНО (`method-name sets identical: True`) — ничего не потеряно и не
+  переименовано; DUPES: ['closeEvent', 'show_about'] — предсуществующие.
+- Делегаты: `forwards=True` и `signature_identical=True` для всех 3 → 3/3.
+  Сигнатура save_general_settings: args = ['self','settings'], defaults = [] → OK.
+- Сервис: единственный класс SettingsService (60–197), методы
+  ['__init__', 6×S2.1, 'load_clipboard_privacy_settings' 140–149,
+   '_load_general_settings_from_file' 151–190, 'save_general_settings' 192–197],
+  `missing: []`, импорты только stdlib ('json', 'pathlib', 'typing').
+- ВЕРБАТИМ-ПЕРЕНОС: 3/3 VERBATIM (построчное сравнение сервис-метода со снапшотом
+  HEAD): 40/10/6 строк, sha256 совпадают со значениями 1.2
+  (b615f4f0…/7cfb6b6d…/7ac90ae5…). Отличий нет ни в докстрингах, ни в
+  комментариях тел («Merge with defaults…», «Migrate termview_*…» — всё на месте).
+- ПЕРЕНЕСЁННЫЕ ТЕЛА ИСЧЕЗЛИ ИЗ МОНОЛИТА: `'glossary_term_error': 'hand'` — 0,
+  `_tv_migrations = {` — 0, `'termview_font_bold': 'termlens_font_bold'` — 0,
+  `settings = self._load_settings_section("general")` — 0,
+  `get('clipboard_privacy', {}) or {}` — 0,
+  `self._save_settings_section("general", settings)` — 0 вхождений.
+- NOT-MOVE: `load_general_settings` 44542–44638 — byte-identical True; внутренний
+  вызов делегата — ровно 1 вхождение.
+- ИНВЕНТАРЬ ОПРЕДЕЛЕНИЙ ПО РЕПОЗИТОРИЮ (AST, walk): каждое из трёх имён имеет
+  РОВНО ДВА определения — делегат в Supervertaler.py и метод в
+  modules/settings_service.py (третьей копии нигде нет); `load_general_settings` —
+  ровно одно (в монолите).
+
+
+3.2 ЖИВОЙ ПРОГОН ПРИЛОЖЕНИЯ (offscreen; QDialog.exec → Rejected; драйвер
+    app_check_s22.py). Итог: PASS=9 / FAIL=0 (ALL_CHECKS_PASS); JSON —
+    audits/batch7s22_app_check_run2.json; лог — batch7s22_app_check_run2.txt.
+  C1  self.settings_service = modules.settings_service.SettingsService, у него
+      присутствуют все три метода (callable=True); settings_dir =
+      …\Supervertaler\workbench\settings (фактический путь этой машины).
+  C2  Делегат == сервис по значению (`equal: true`); объединение с дефолтами не
+      потерялось (8 ключей; restore_last_project / grid_font_size=11 /
+      results_compare_font_size=9 на месте, sound_effects_map из 5 ключей);
+      миграционные ключи termview_* в результате отсутствуют (переименованы).
+  C3  load_clipboard_privacy_settings: dict; delegate == service (equal: true);
+      пустая секция features даёт {} (как и раньше — виджет применит свои дефолты).
+  C4  Потребители `_load_general_settings_from_file` через делегат:
+      `w.load_general_settings()` → dict, 8 ключей; `w.get_effective_import_options()`
+      → 6+ ключей (бывший путь 44315 — теперь через делегат);
+      `auto_fill_100_matches` на окне выставлен.
+  C5  КЭША НЕТ: 3 вызова `_load_general_settings_from_file()` = РОВНО 3 открытия
+      settings.json (счётчик на builtins.open).
+  C6  GETATTR-ПУТЬ modules/clipboard_manager_widget.py:771 на РЕАЛЬНОМ виджете:
+      `getattr(parent, 'load_clipboard_privacy_settings', None)` → callable=True;
+      с инструментированным (instance-level) перехватчиком видно, что загрузчик
+      РЕАЛЬНО ВЫЗВАН 1 раз (не провал в None); `_privacy` совпал с дефолтами.
+      Негативный контроль: с подставным parent-объектом без метода `_privacy`
+      остаётся == DEFAULT_PRIVACY (то есть ветка загрузчика действительно
+      отличает «метод есть» от «метода нет»).
+  C7  БАГ ВОСПРОИЗВЕДЁН, НЕ ПОЧИНЕН (см. 3.3).
+  C8  ПОЛНЫЙ ЦИКЛ НА КОПИИ user_data (temp-каталог, НЕ продовый файл):
+      сервис перепривязан (`service_points_at_temp: true`); чтение через делегат
+      вернуло file-value (grid_font_size=12) при живом дефолте (9);
+      `save_general_settings(<dict>)` записал general (grid_font_size=15,
+      `_s22_probe`), при этом api_keys и «чужая» верхнеуровневая секция
+      usage_statistics_asked СОХРАНЕНЫ (5 секций в файле);
+      корректный guarded-путь SuperlookupTab (эквивалент 64702:
+      `mw.save_general_settings(settings)` с аргументом) записал ключ;
+      `load_general_settings()` применил значения к окну; РЕАЛЬНЫЙ
+      ClipboardManagerWidget, поднятый на temp-каталоге, через getattr подхватил
+      МАРКЕР из файла (`capture_enabled: false`, `widget_capture_enabled_is_False:
+      true`), а неизвестный ключ отфильтрован по DEFAULT_PRIVACY
+      (`unknown_key_filtered_out: true`); `save_clipboard_privacy_settings`
+      по-прежнему определён в Supervertaler.py; в логе окна за цикл — 0 ошибок
+      (`log_errors_during_cycle: []`); после возврата пути сервис снова смотрит в
+      продовый каталог.
+  C9  Продовый settings.json за весь прогон НЕ изменился: sha256 start == end
+      (fa1385da9756f66f26267ab827511c3458b12357b642433cc62d272376c3df2c).
+      Бэкап файла снят до прогона (run-001\prod_settings_backup.json).
+
+3.3 ПРЕД-СУЩЕСТВУЮЩИЙ БАГ `save_general_settings()` — ВОСПРОИЗВЕДЁН, НЕ ПОЧИНЕН
+(а) В дереве S2.2 (app_check C7): `hasattr(w, 'general_settings')` = False (то
+    есть баг сегодня спит); прямой вызов без аргумента →
+    `TypeError: SupervertalerQt.save_general_settings() missing 1 required
+    positional argument: 'settings'`; вызов сервис-метода без аргумента → такой
+    же TypeError от SettingsService; ДОСЛОВНОЕ выражение из баговых сайтов
+    (`if w and hasattr(w, 'general_settings'): w.save_general_settings()`) при
+    искусственно «оживлённом» guard-атрибуте → тот же TypeError. Продовый файл
+    этим путём не тронут (TypeError возникает до тела метода).
+(б) ДО/ПОСЛЕ (worktree HEAD 25627c9, скрипт bug_head_probe.py; артефакты
+    batch7s22_bug_head_probe.{json,txt}): в HEAD-дереве ровно то же —
+    `hasattr_general_settings: false`, сигнатура `(settings: Dict[str, Any])`,
+    `plain_no_arg` = `TypeError: SupervertalerQt.save_general_settings() missing 1
+    required positional argument: 'settings'`, `exact_site_with_guard` = тот же
+    TypeError; `save_general_settings(<dict>)` в обоих деревьях работает.
+    → Поведение консервировано БИТ-В-БИТ (текст ошибки совпадает посимвольно).
+(в) Побочный эффект пробы (документирую честно): проба (б) вызывала
+    `save_general_settings({...})`, а это пишет в ОБЩИЙ продовый user-data (см.
+    AGENTS.md «user-data isolation»), поэтому general-секция продового
+    settings.json получила служебный ключ. Он НЕМЕДЛЕННО удалён восстановлением
+    файла из бэкапа, снятого до пробы; контроль — sha256 файла после
+    восстановления ==
+    fa1385da9756f66f26267ab827511c3458b12357b642433cc62d272376c3df2c
+    (совпадает со «start» прогона C9). Итоговое состояние продовых настроек — как
+    до S2.2; единственный ключ, который приложение дописывает САМО, —
+    ui.voice_dictation_opt_in_reset_applied из миграции
+    `_migrate_voice_dictation_default_off` (предсуществующая и идемпотентная:
+    45148–45149 «already migrated → return»; к S2.2 отношения не имеет).
+
+3.4 СМОУК-ТЕСТ (2 процесса, tools/batch_validation/smoke_project.py)
+- save → `SAVE_OK 6584` (файл 6584 байта в стейдж-каталоге), exit code 0,
+  versioned backup отработал штатно.
+- load (отдельный процесс) → `LOAD_OK S22Smoke 7 Segment 1 source` (имя и 7
+  сегментов совпали, ассерты прошли), лог — batch7s22_smoke_load.txt.
+- ДО/ПОСЛЕ тем же .svproj и теми же данными (worktree HEAD vs рабочее дерево,
+  smoke_root.py + load_compare_s22.ps1): оба — `LOAD_OK …` + `REACHED_END`,
+  exit code 0 и там, и там (одинаково).
+
+3.5 МЕТРИКИ / МАНИФЕСТ / КОМПИЛЯЦИЯ / НЕПРОДОВЫЕ ФАЙЛЫ
+- py_compile всех .py — COMPILE_OK (144 файла) до и после.
+- 8 метрик: 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 — ИДЕНТИЧНЫ до и после
+  (baseline_counts и counts_after побайтово совпадают:
+  batch7s22_baseline_counts.txt == batch7s22_counts_after.txt).
+- SHA256-манифест (144 .py): changed = РОВНО 2 (Supervertaler.py
+  20419b6a3e292ae39eb5d23cc45c180e1c2166a461ec7d3928bba7607a554f69 →
+  80993e2fbb1705312c7b9f4d4e0b2fcdf550460f5b5e4944bae70f8533707122;
+  modules/settings_service.py 4c6831417f0acba1e28bf23212a570d60bfafe6781effb1a702cfd7e927dc442
+  → 02914e1fc3e699408fa3989f5990c03faddf45133cf498644696d049cbe8c98b),
+  added = 0, removed = 0 (batch7s22_manifest_cmp.txt).
+
+
+════════════════════════════════════════════════════════════════════════════════
+4. НЕПОКРЫТЫЕ ПРОВЕРКИ (обязательный раздел; честно, без «зелёного» умолчания)
+════════════════════════════════════════════════════════════════════════════════
+N1. НАЖМЕНИЕ КНОПОК В UI НЕ ВЫПОЛНЯЛОСЬ. Все модальные диалоги offscreen
+    блокируются (QDialog.exec замокан → Rejected), поэтому «Save/Apply» General-
+    вкладки, кнопка настроек clipboard-вкладки и т.п. не нажимались. Путь закрыт
+    двумя измеримыми косвенными способами: (а) вызов
+    `save_general_settings(<данные>)` и `load_general_settings()` на окне (C4/C8);
+    (б) полный цикл save→файл→load→окно→виджет на КОПИИ user_data (C8), включая
+    подхват маркера реальным ClipboardManagerWidget через getattr.
+N2. Clipboard privacy настроен не через UI, а МАРКЕРОМ В ФАЙЛЕ: включение/снятие
+    галочек в табе Settings и последующий вызов `save_clipboard_privacy_settings`
+    (он в монолите, V3) живьём не нажимались — проверена только цепочка чтения
+    (getattr → делегат → сервис → файл → виджет), а запись проверена для general
+    (`save_general_settings`), не для features.
+N3. GUI НЕ ОТОБРАЖАЛСЯ НА ЭКРАНЕ (QT_QPA_PLATFORM=offscreen): визуальная
+    отрисовка General-вкладки, локализованные подписи, темы, DPI не проверялись.
+N4. БАГ `save_general_settings()` НЕ ПОЧИНЕН И НЕ ДОСТИГАЕМ СЕГОДНЯ: guard
+    `hasattr(<окно>, 'general_settings')` всегда False, поэтому реальный UI-путь
+    (SuperlookupTab._show_autohotkey_setup_dialog / _browse_for_autohotkey) его не
+    исполняет. Проверено: воспроизведение TypeError прямым вызовом и дословным
+    выражением сайта при «оживлённом» guard-атрибуте, плюс идентичность поведения
+    на HEAD-worktree (3.3). Остаётся кандидатом в VALIDATION_BACKLOG как
+    ПРЕД-СУЩЕСТВУЮЩИЙ (не из S2.2): «два сайта в SuperlookupTab вызывают
+    save_general_settings() без аргумента; guard проверяет legacy-атрибут
+    general_settings, которого больше нет». Решение (чинить / удалить мёртвый код)
+    — за владельцем.
+N5. ВЕТКА ОШИБОК не воспроизводилась: `except Exception as e: self.log("⚠ Could
+    not save general settings: …")` и `except Exception as e: self.log("⚠ Could not
+    load clipboard privacy settings: …")` перенесены байт-в-байт, но сценарии
+    «диск только для чтения / битый JSON / ошибка dump» на живом окне не
+    подкладывались. (Косвенно: в C8 записано 0 предупреждений — только успешный
+    путь.)
+N6. ПОВРЕЖДЁННЫЙ/ЧАСТИЧНЫЙ settings.json не подкладывался (fallback
+    `_load_unified_settings` → 4 пустые секции и `_load_general_settings_from_file`
+    → дефолты перенесены байт-в-байт, но end-to-end не воспроизводились);
+    UTF-8/BOM-варианты не проверялись.
+N7. КОНКУРЕНТНОСТЬ/ОБРЫВ ЗАПИСИ: два процесса, пишущие settings.json, и обрыв
+    записи (atomic-rename нет — так было и до переноса) не проверялись.
+N8. РЕАЛЬНЫЙ ВВОД ПОЛЬЗОВАТЕЛЯ не воспроизводился: не набирался текст, не
+    вставлялся буфер обмена по-настоящему (проверялся только getattr-путь
+    загрузчика приватности, C6/C8).
+N9. ПОЛНЫЙ ЧЕЛОВЕЧЕСКИЙ ЦИКЛ «изменить каждую вкладку Settings → перезапуск
+    процесса → проверить» НЕ выполнялся: для этого нужны S2.3 (LLM/proxy/ключи) и
+    S2.4 (языки/диктовка), они ещё не перенесены. Для S2.2 закрыт доступный
+    поверхностный слой: 3 делегата, все 4 внутренних потребителя, getattr-путь
+    виджета, цикл на копии данных, повторный запуск процесса (смоук-тест — это
+    два РАЗНЫХ процесса: save и load).
+N10. НАГРУЗКА/ПРОИЗВОДИТЕЛЬНОСТЬ не замерялась (сколько открытий файла при сотнях
+    вызовов); проверено ровно отсутствие кэша: 3 вызова = 3 открытия (C5).
+N11. СБОРКИ И ДРУГИЕ ОС не проверялись (frozen/EXE, macOS, Linux).
+N12. АВТОМАТИЧЕСКИХ ТЕСТОВ В ПРОЕКТЕ НЕТ — все проверки S2.2 суть скриптовые
+    драйверы в стейдж-каталоге (в репозиторий входят только артефакты-аудиты).
+    Скрипты параметризованы (repo_root/out/stage) и переиспользуемы для S2.3+;
+    перенос их в tools/batch_validation — отдельным PR по решению владельца.
+N13. ПРЕДСУЩЕСТВУЮЩИЙ КРАШ НА ВЫХОДЕ в offscreen-прогонах (в S2.1 наблюдался
+    0xC0000005) в этом раунде НЕ воспроизвёлся: смоук-save и load завершились
+    exit code 0, а прогон на worktree HEAD дал тот же 0 — то есть поведение
+    «до/после» совпало, но сам факт краха не диагностировался (вне скоупа S2.2).
+N14. Продовые user-data ЗАТРАГИВАЛИСЬ дважды, оба раза контролируемо:
+    (а) приложение при старте само дописывает ui.voice_dictation_opt_in_reset_applied
+    (идемпотентная миграция, 3.3(в)); (б) проба HEAD-worktree записала служебный
+    ключ в general и запись была откачена из бэкапа с контрольным sha256.
+    Полностью изолированный прогон (отдельный `~/.supervertaler_config.json`) НЕ
+    делался — это ограничение методики, а не кода S2.2.
+
+
+════════════════════════════════════════════════════════════════════════════════
+5. ПОДТВЕРЖДЕНИЕ ОТСУТСТВИЯ ПРАВОК КОДА ВНЕ ЗАЯВЛЕННОГО ДИФФА
+════════════════════════════════════════════════════════════════════════════════
+- SHA256-манифест 144 → 144 файла: changed = РОВНО 2 (Supervertaler.py и
+  modules/settings_service.py — оба объявлены в §2.5), added = 0, removed = 0.
+  Ни один другой .py репозитория не изменён (в т.ч. modules/, tools/, scripts/,
+  okapi-sidecar/, translations/, user_data/).
+- difflib-замер по Supervertaler.py: неравных регионов ровно 5, все 5 —
+  объявленные правки (A–E из §2.5); сумма net −27 == фактическому изменению
+  размера файла (assert True). Незаявленной правки нет.
+- Внешние потребители — побайтово как в HEAD (SHA256 совпадают):
+  modules/clipboard_manager_widget.py (в частности строка 771),
+  modules/voice_tab.py, modules/termbase_entry_editor.py, modules/config_manager.py,
+  modules/quicktrans.py. Это и есть «0 правок call-sites вне монолита» из
+  конвенции Step 7.
+- Заявленный дифф (то, что разрешено менять и что реально изменено):
+  (1) 3 делегата в монолите (44711–44719, 44903–44909, 44911–44916);
+  (2) два блока комментариев (44667–44670, 44707–44709);
+  (3) 3 метода + блок-комментарий + абзац докстринга в
+  modules/settings_service.py.
+  Правок кода вне этого списка НЕТ: ни строки импорта, ни конструктора сервиса,
+  ни `_reinitialize_with_new_data_path` в S2.2 не трогались (проводка осталась
+  ровно такой, какой её сделал S2.1).
+- `git status` после работы: `M Supervertaler.py`, `M modules/settings_service.py`
+  + новые документы батча (промпт, отчёт, аудиты batch7s22_*) и обновления
+  PROJECT_STATUS.md / EXTRACTION_PLAN.md.
+
+════════════════════════════════════════════════════════════════════════════════
+6. NEXT STEP — S2.3 И ОТКРЫТЫЕ ВОПРОСЫ
+════════════════════════════════════════════════════════════════════════════════
+6.1 S2.3 «LLM / proxy / provider / api keys» — 10 методов / 150 строк:
+    load_llm_settings, save_llm_settings, load_proxy_settings, save_proxy_settings,
+    _get_proxy_url, _get_proxy_dict, load_provider_enabled_states,
+    save_provider_enabled_states, load_api_keys, save_api_keys.
+    ВАЖНО перед стартом: это РОВНО 10 методов — граница конвенции живого чек-листа
+    (≤10), отметить это в отчёте S2.3 явно. Fan-in ~116, из них ~10 вызовов идут из
+    modules/ (chat_backend, chat_view_widget, quicktrans, pdf_rescue) плюс ~10
+    строковых обращений — делегаты обязательны, и часть из них приватные
+    (`_get_proxy_url`, `_get_proxy_dict`).
+    Границы заново вывести AST на дереве S2.2 (документированные номера после
+    −27 уже сдвинуты; см. PROJECT_STATUS.md).
+6.2 ОТКРЫТЫЕ ПУНКТЫ, НЕ БЛОКИРУЮЩИЕ S2.3:
+    - VALIDATION_BACKLOG (пред-существующее, не из S2.2): два сайта
+      SuperlookupTab (теперь 66753 и 66796) зовут save_general_settings() без
+      аргумента; guard проверяет несуществующий атрибут general_settings → путь
+      мёртв; поведение законсервировано бит-в-бит, но решение «чинить или удалять»
+      — за владельцем (N4).
+    - Второй NOT-MOVE-остаток Stage 2 (V3, решения владельца):
+      save_clipboard_privacy_settings (44721–44742) остаётся в монолите; в
+      состав S2.3 его не включать.
+    - assets аудитов S2.1 и S2.2 в стейдж-каталоге сохраняются до решения
+      координатора (head-wt на 25627c9 — тоже; он понадобится для DO/POS-проб
+      S2.3).
+
+════════════════════════════════════════════════════════════════════════════════
+7. КОММИТ БАТЧА
+════════════════════════════════════════════════════════════════════════════════
+Один коммит: код переноса (3 метода в сервис + 3 делегата + 2 блока комментариев +
+абзац докстринга сервиса) + промпт S2.2 + этот отчёт + аудиты batch7s22_* +
+обновления PROJECT_STATUS.md и EXTRACTION_PLAN.md. Родитель: 25627c9.
+
+Проверка после коммита (обязательная, чтобы коммит не разошёлся с деревом):
+повторить manifest.py + counts.py + py_compile_all.py и сверить с
+manifest_after_batch7s22.txt / counts_after_batch7s22.txt (см. §3.5), а также
+verify_s22.py — все три должны дать те же значения (файлы перед коммитом не
+менялись, кроме документов).
+
+ПОСТ-КОММИТНАЯ ПРОВЕРКА — ВЫПОЛНЕНА, РАСХОЖДЕНИЙ НЕТ (коммит батча; его родитель
+— 25627c9, хеш см. `git log -1 --oneline`, §7):
+- `git status --short` — ПУСТО (дерево == коммит); `git diff HEAD --stat` — пусто.
+- Содержимое коммита совпадает с измеренными файлами побайтово (сравнение
+  `git show HEAD:<file>` с рабочей копией, sha256):
+    Supervertaler.py          80993e2fbb1705312c7b9f4d4e0b2fcdf550460f5b5e4944bae70f8533707122  EQUAL=True
+    modules/settings_service.py 02914e1fc3e699408fa3989f5990c03faddf45133cf498644696d049cbe8c98b  EQUAL=True
+- Повторный прогон тех же инструментов перед коммитом (артефакты run-001\
+  {py_compile,counts_final.txt,manifest_final.txt,manifest_final_cmp.txt,
+  verify_final.txt}): py_compile COMPILE_OK; counts_final.txt побайтово равен
+  counts_after_batch7s22.txt; manifest_final.txt против
+  manifest_after_batch7s22.txt → changed=0, added=0, removed=0; verify_s22.py —
+  DELEGATES OK 3/3, VERBATIM 3/3, signature «no default» True,
+  «byte-identical to HEAD snapshot: True», инвентарь определений 2/2/2/1.
+- Отчёт/промпт/аудиты закоммичены в один коммит батча (22 файла: 4 изменённых
+  .md/.py + 18 новых документов); родитель — 25627c9. Не пушился.
+
+════════════════════════════════════════════════════════════════════════════════
+МЕТРИКИ ПОДТВЕРЖДЕНИЯ (сводка чисел этого отчёта)
+════════════════════════════════════════════════════════════════════════════════
+монолит            68 400 → 68 373 строк (−27; байт 3 544 303 → 3 544 176)
+сервис               113 → 197 строк (+84), методы 7 → 10
+делегатов S2.2       3/3 forwards + signature_identical; VERBATIM 3/3
+NOT-MOVE             load_general_settings byte-identical; save_clipboard_privacy_settings не тронут
+8 метрик             1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 (до == после)
+py_compile           COMPILE_OK (144 файла)
+манифест             144 → 144; changed=2, added=0, removed=0
+живой прогон         PASS=9 / FAIL=0 (offscreen)
+смоук                SAVE_OK 6584 (exit 0), LOAD_OK S22Smoke 7 (LOAD_OK+REACHED_END на обоих деревьях)
+баг                  воспроизведён; поведение идентично HEAD-worktree (тот же текст TypeError)
+

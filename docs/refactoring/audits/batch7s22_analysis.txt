@@ -1,0 +1,156 @@
+=== 1. AST SPANS IN THE MONOLITH ===
+classes: 26
+module lines: 68400
+
+_load_general_settings_from_file: 1 class-level definition(s) in the monolith
+    SupervertalerQt: 44897-44936 (40 lines) stmts=9 decorators=0
+
+load_clipboard_privacy_settings: 1 class-level definition(s) in the monolith
+    SupervertalerQt: 44704-44713 (10 lines) stmts=2 decorators=0
+
+save_general_settings: 1 class-level definition(s) in the monolith
+    SupervertalerQt: 44938-44943 (6 lines) stmts=2 decorators=0
+
+load_general_settings: 1 class-level definition(s) in the monolith
+    SupervertalerQt: 44542-44638 (97 lines) stmts=43 decorators=0
+
+=== 2. self.<attr> ACCESSES INSIDE THE BODIES ===
+_load_general_settings_from_file class=SupervertalerQt lines 44897-44936 self.<attr>=['_load_settings_section']
+load_clipboard_privacy_settings  class=SupervertalerQt lines 44704-44713 self.<attr>=['_load_settings_section', 'log']
+save_general_settings            class=SupervertalerQt lines 44938-44943 self.<attr>=['_save_settings_section', 'log']
+load_general_settings            class=SupervertalerQt lines 44542-44638 self.<attr>=['_load_general_settings_from_file', 'auto_center_active_segment', 'auto_confirm_100_percent_matches', 'auto_confirm_overwrite_existing', 'auto_fill_100_matches', 'auto_fill_confirm', 'auto_generate_markdown', 'auto_insert_100_percent_matches', 'auto_propagate_confirm', 'auto_propagate_exact_matches', 'auto_propagate_on_confirm', 'auto_propagate_overwrite', 'autocorrect_enabled', 'autocorrect_rule_overrides', 'current_model', 'current_provider', 'debug_auto_export', 'debug_mode_enabled', 'disable_all_caches', 'enable_alternating_row_colors', 'enable_llm_matching', 'enable_smart_word_selection', 'enable_termbase_grid_highlighting', 'even_row_color', 'fuzzy_fixer_enabled', 'fuzzy_fixer_max_pct', 'fuzzy_fixer_min_pct', 'hide_outer_wrapping_tags', 'invisible_char_color', 'load_llm_settings', 'odd_row_color', 'precision_scroll_divisor', 'show_compare_panel', 'show_translation_results_pane', 'tabs_above_grid', 'termbase_dotted_color', 'termbase_hide_shorter_matches', 'termbase_highlight_style', 'tm_save_mode']
+
+=== 3. CALL SITES REPO-WIDE (AST Attribute calls + string refs) ===
+
+_load_general_settings_from_file
+  defs (1):
+    Supervertaler.py:44897  (def, enclosing=SupervertalerQt._load_general_settings_from_file)
+  calls (4):
+    Supervertaler.py:44545  in SupervertalerQt.load_general_settings  [self._load_general_settings_from_file(...)]  nargs=0
+    Supervertaler.py:41560  in SupervertalerQt._toggle_match_panel_tm_layout  [self._load_general_settings_from_file(...)]  nargs=0
+    Supervertaler.py:44507  in SupervertalerQt._create_file_types_settings_tab  [self._load_general_settings_from_file(...)]  nargs=0
+    Supervertaler.py:44315  in SupervertalerQt.get_effective_import_options  [self._load_general_settings_from_file(...)]  nargs=0
+  strrefs (0):
+
+load_clipboard_privacy_settings
+  defs (1):
+    Supervertaler.py:44704  (def, enclosing=SupervertalerQt.load_clipboard_privacy_settings)
+  calls (1):
+    Supervertaler.py:23488  in SupervertalerQt._create_clipboard_settings_tab  [self.load_clipboard_privacy_settings(...)]  nargs=0
+  strrefs (1):
+    modules/clipboard_manager_widget.py:771  in ClipboardManagerWidget._load_privacy_settings  [loader = getattr(self._parent_app, 'load_clipboard_privacy_settings', None)]
+
+save_general_settings
+  defs (1):
+    Supervertaler.py:44938  (def, enclosing=SupervertalerQt.save_general_settings)
+  calls (27):
+    Supervertaler.py:22396  in SupervertalerQt._save_mt_quick_lookup_settings  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:25520  in SupervertalerQt._save_user_identity_from_ui  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:26190  in SupervertalerQt._save_debug_settings_from_ui  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:26305  in SupervertalerQt._save_llm_settings_from_ui  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:26463  in SupervertalerQt._save_ai_settings_from_ui  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:26695  in SupervertalerQt._save_general_settings_from_ui  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:26896  in SupervertalerQt._save_view_settings_from_ui_impl  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:27055  in SupervertalerQt._apply_global_ui_font_scale  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:32594  in SupervertalerQt.import_document  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:33472  in SupervertalerQt.import_simple_txt  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:34380  in SupervertalerQt.import_folder_multifile  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:6743  in SupervertalerQt._show_first_run_welcome  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:22627  in SupervertalerQt._live_save_backup_settings  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:23790  in SupervertalerQt._persist_autocorrect_settings  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:27132  in SupervertalerQt._apply_ui_chrome_compactness  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:43596  in SupervertalerQt.set_termlens_position  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:43631  in SupervertalerQt._save_bottom_dock_active_tab  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:43645  in SupervertalerQt._on_match_top_tab_changed  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:44270  in SupervertalerQt.save_current_font_sizes  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:44511  in SupervertalerQt._create_file_types_settings_tab  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:41562  in SupervertalerQt._toggle_match_panel_tm_layout  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:56493  in SupervertalerQt._on_termlens_font_size_changed  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:60143  in SupervertalerQt.translate_batch  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:64729  in SuperlookupTab._on_landing_pref_changed  [mw.save_general_settings(...)]  nargs=1
+    Supervertaler.py:66823  in SuperlookupTab._browse_for_autohotkey  [self.main_window.save_general_settings(...)]  nargs=0
+    Supervertaler.py:6971  in SupervertalerQt._show_setup_wizard  [self.save_general_settings(...)]  nargs=1
+    Supervertaler.py:66780  in SuperlookupTab._show_autohotkey_setup_dialog  [self.main_window.save_general_settings(...)]  nargs=0
+  strrefs (1):
+    Supervertaler.py:64726  in SuperlookupTab._on_landing_pref_changed  [if mw and hasattr(mw, 'load_general_settings') and hasattr(mw, 'save_general_settings'):]
+
+load_general_settings
+  defs (1):
+    Supervertaler.py:44542  (def, enclosing=SupervertalerQt.load_general_settings)
+  calls (61):
+    Supervertaler.py:6480  in SupervertalerQt.__init__  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:6489  in SupervertalerQt.__init__  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:8306  in SupervertalerQt._setup_ollama_keepwarm  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:20845  in SupervertalerQt._create_ai_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:20846  in SupervertalerQt._create_ai_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22008  in SupervertalerQt._create_mt_quick_lookup_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22380  in SupervertalerQt._save_mt_quick_lookup_settings  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22488  in SupervertalerQt._create_backup_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22641  in SupervertalerQt._create_general_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:23804  in SupervertalerQt._create_view_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:25462  in SupervertalerQt._create_user_identity_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:25518  in SupervertalerQt._save_user_identity_from_ui  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26072  in SupervertalerQt._create_debug_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26186  in SupervertalerQt._save_debug_settings_from_ui  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26284  in SupervertalerQt._save_llm_settings_from_ui  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26420  in SupervertalerQt._save_ai_settings_from_ui  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26588  in SupervertalerQt._save_general_settings_from_ui  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:26758  in SupervertalerQt._save_view_settings_from_ui_impl  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:27050  in SupervertalerQt._apply_global_ui_font_scale  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:27104  in SupervertalerQt._get_global_ui_font_scale  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:27117  in SupervertalerQt._get_ui_chrome_compact  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:27872  in SupervertalerQt.create_grid_view_widget_for_home  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:28660  in SupervertalerQt.create_translation_grid  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:28934  in SupervertalerQt.create_assistance_panel  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:32085  in SupervertalerQt.restart_auto_backup_timer  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:32527  in SupervertalerQt.import_document  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:33379  in SupervertalerQt.import_simple_txt  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:33468  in SupervertalerQt.import_simple_txt  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:34274  in SupervertalerQt.import_folder_multifile  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:34376  in SupervertalerQt.import_folder_multifile  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:38066  in SupervertalerQt.get_translator_name  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:41429  in SupervertalerQt._create_match_panel  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:48232  in SupervertalerQt._schedule_delayed_lookup  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:6741  in SupervertalerQt._show_first_run_welcome  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:10289  in SupervertalerQt._quick_count_lang_pair  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22621  in SupervertalerQt._live_save_backup_settings  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:22744  in SupervertalerQt._create_general_settings_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:27130  in SupervertalerQt._apply_ui_chrome_compactness  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:28061  in SupervertalerQt.create_grid_view_widget_for_home  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:32042  in SupervertalerQt._maybe_make_versioned_backup  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:43593  in SupervertalerQt.set_termlens_position  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:43629  in SupervertalerQt._save_bottom_dock_active_tab  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:43643  in SupervertalerQt._on_match_top_tab_changed  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:43986  in SupervertalerQt._apply_row_color  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:44252  in SupervertalerQt.save_current_font_sizes  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:45292  in SupervertalerQt.load_font_sizes_from_preferences  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:45405  in SupervertalerQt.restore_last_project_if_enabled  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:56487  in SupervertalerQt._on_termlens_font_size_changed  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:58678  in SupervertalerQt.translate_current_segment  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:59344  in SupervertalerQt._build_quicklauncher_document_context  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:6319  in SupervertalerQt.__init__  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:7881  in SupervertalerQt.show_term_insert_popup  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:60141  in SupervertalerQt.translate_batch  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:1811  in ReadOnlyGridTextEditor.highlight_termbase_matches  [parent.load_general_settings(...)]  nargs=0
+    Supervertaler.py:5480  in PreTranslationWorker.run  [self.parent_app.load_general_settings(...)]  nargs=0
+    Supervertaler.py:6969  in SupervertalerQt._show_setup_wizard  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:55559  in SupervertalerQt._play_sound_effect  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:55568  in SupervertalerQt._play_sound_effect  [self.load_general_settings(...)]  nargs=0
+    Supervertaler.py:64712  in SuperlookupTab._load_superlookup_landing_pref  [mw.load_general_settings(...)]  nargs=0
+    Supervertaler.py:64727  in SuperlookupTab._on_landing_pref_changed  [mw.load_general_settings(...)]  nargs=0
+    modules/quicktrans.py:303  in QuickTransProviderMixin._load_mt_quick_settings  [self.parent_app.load_general_settings(...)]  nargs=0
+  strrefs (7):
+    Supervertaler.py:1810  in ReadOnlyGridTextEditor.highlight_termbase_matches  [elif hasattr(parent, 'load_general_settings'):]
+    Supervertaler.py:7881  in SupervertalerQt.show_term_insert_popup  [gen = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}]
+    Supervertaler.py:64711  in SuperlookupTab._load_superlookup_landing_pref  [if mw and hasattr(mw, 'load_general_settings'):]
+    Supervertaler.py:64726  in SuperlookupTab._on_landing_pref_changed  [if mw and hasattr(mw, 'load_general_settings') and hasattr(mw, 'save_general_settings'):]
+    Supervertaler.py:55559  in SupervertalerQt._play_sound_effect  [settings = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}]
+    Supervertaler.py:55568  in SupervertalerQt._play_sound_effect  [settings = self.load_general_settings() if hasattr(self, 'load_general_settings') else {}]
+    modules/quicktrans.py:302  in QuickTransProviderMixin._load_mt_quick_settings  [if hasattr(self.parent_app, 'load_general_settings'):]
+
+=== 4. TOTALS (what the report must quote) ===
+_load_general_settings_from_file defs=1 calls=4 (monolith=4, outside=0) strrefs=0
+load_clipboard_privacy_settings  defs=1 calls=1 (monolith=1, outside=0) strrefs=1
+save_general_settings            defs=1 calls=27 (monolith=27, outside=0) strrefs=1
+load_general_settings            defs=1 calls=61 (monolith=60, outside=1) strrefs=7
+      OUTSIDE modules/quicktrans.py:303  in QuickTransProviderMixin._load_mt_quick_settings  [self.parent_app.load_general_settings(...)]  nargs=0

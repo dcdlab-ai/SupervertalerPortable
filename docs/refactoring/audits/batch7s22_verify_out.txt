@@ -1,0 +1,45 @@
+=== 1. MONOLITH AST: SupervertalerQt ===
+HEAD   : 6055-62472 methods=819 members=839
+WORKTREE: 6055-62445 methods=819 members=839
+DUPES: ['closeEvent', 'show_about'] (expected the pre-existing pair)
+method-name sets identical: True
+_load_general_settings_from_file 44903-44909 (7 lines) stmts=2 forwards=True signature_identical=True
+load_clipboard_privacy_settings  44711-44719 (9 lines) stmts=2 forwards=True signature_identical=True
+save_general_settings            44911-44916 (6 lines) stmts=2 forwards=True signature_identical=True
+DELEGATES OK: 3/3
+
+=== 2. save_general_settings SIGNATURE (no default!) ===
+positional args = ['self', 'settings']
+defaults        = [] (must be empty)
+vararg/kwarg    = None/None (must be None/None)
+TypeError-on-no-arg semantics preserved: True
+
+=== 3. SERVICE AST ===
+classes: ['SettingsService']
+SettingsService: 60-197 methods=['__init__', '_get_settings_dir', '_get_unified_settings_path', '_load_unified_settings', '_save_unified_settings', '_load_settings_section', '_save_settings_section', 'load_clipboard_privacy_settings', '_load_general_settings_from_file', 'save_general_settings']
+missing: []
+module imports: ['json', 'pathlib', 'typing']
+
+=== 4. VERBATIM TRANSFER (HEAD snapshot vs service) ===
+_load_general_settings_from_file           VERBATIM (40 lines) sha256=b615f4f048185674f7a60d476c3a7e3bca9c93dd37c8d21dfda03f14a52cd11e
+load_clipboard_privacy_settings            VERBATIM (10 lines) sha256=7cfb6b6d160767b8c66f7ca0cd50d62bf4e4e2d4f92cd92268904c053f57e5d5
+save_general_settings                      VERBATIM (6 lines) sha256=7ac90ae56cb7a23e76eee9a06010f8353f6d429605118dd3ce004ba75e783752
+VERBATIM: 3/3
+
+=== 5. MOVED BODIES GONE FROM THE MONOLITH ===
+"'sound_effects_map'": 9 occurrence(s) in the monolith (want 0)
+"'termview_under_grid_visible'": 0 occurrence(s) in the monolith (want 0)
+'settings = self._load_settings_section("general")': 0 occurrence(s) in the monolith (want 0)
+"get('clipboard_privacy', {}) or {}": 0 occurrence(s) in the monolith (want 0)
+'self._save_settings_section("general", settings)': 0 occurrence(s) in the monolith (want 0)
+
+=== 6. NOT-MOVE load_general_settings vs HEAD ===
+span 44542-44638 (97 lines; HEAD 44542-44638 / 97 lines)
+byte-identical to HEAD snapshot: True
+own internal call still via delegate: 1 occurrence(s)
+
+=== 7. DEFINITION INVENTORY REPO-WIDE ===
+_load_general_settings_from_file defs=['Supervertaler.py:44903', 'modules/settings_service.py:151']
+load_clipboard_privacy_settings  defs=['Supervertaler.py:44711', 'modules/settings_service.py:140']
+save_general_settings            defs=['Supervertaler.py:44911', 'modules/settings_service.py:192']
+load_general_settings            defs=['Supervertaler.py:44542']

@@ -1,0 +1,8 @@
+{
+ "tree": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s22\\run-001\\head-wt",
+ "hasattr_general_settings": false,
+ "save_general_settings_signature": "(settings: Dict[str, Any])",
+ "plain_no_arg": "TypeError: SupervertalerQt.save_general_settings() missing 1 required positional argument: 'settings'",
+ "exact_site_with_guard": "TypeError: SupervertalerQt.save_general_settings() missing 1 required positional argument: 'settings'",
+ "with_arg": "OK (file written)"
+}

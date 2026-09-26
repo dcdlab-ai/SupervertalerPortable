@@ -1,0 +1,11 @@
+before=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s22\run-001\manifest_before_batch7s22.txt (144 files)
+after =D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s22\run-001\manifest_after_batch7s22.txt (144 files)
+changed (2):
+    Supervertaler.py
+        20419b6a3e292ae39eb5d23cc45c180e1c2166a461ec7d3928bba7607a554f69
+        80993e2fbb1705312c7b9f4d4e0b2fcdf550460f5b5e4944bae70f8533707122
+    modules/settings_service.py
+        4c6831417f0acba1e28bf23212a570d60bfafe6781effb1a702cfd7e927dc442
+        02914e1fc3e699408fa3989f5990c03faddf45133cf498644696d049cbe8c98b
+only-in-before / removed (0):
+only-in-after / added (0):

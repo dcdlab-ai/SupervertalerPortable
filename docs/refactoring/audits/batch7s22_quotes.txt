@@ -1,0 +1,64 @@
+QUOTE PACK S2.2 — call sites whose behaviour must stay bit-for-bit
+(line numbers are from the CURRENT working tree; located by pattern, not
+by the pre-edit numbers, because the delegates shifted every later line)
+==============================================================================
+
+--- match #1 of /self\.main_window\.save_general_settings\(\)\s*$/ at line 66753  (Supervertaler.py:66747-66755) ---
+ 66747 |         close_btn = QPushButton(self.tr("Close"))
+ 66748 |         def on_close():
+ 66749 |             # Save preference if checkbox is checked
+ 66750 |             if dont_show_cb.isChecked():
+ 66751 |                 if self.main_window and hasattr(self.main_window, 'general_settings'):
+ 66752 |                     self.main_window.general_settings['hide_autohotkey_dialog'] = True
+ 66753 |                     self.main_window.save_general_settings()
+ 66754 |             dialog.accept()
+ 66755 |         close_btn.clicked.connect(on_close)
+
+--- match #2 of /self\.main_window\.save_general_settings\(\)\s*$/ at line 66796  (Supervertaler.py:66790-66798) ---
+ 66790 |                 if result != QMessageBox.StandardButton.Yes:
+ 66791 |                     return
+ 66792 |             
+ 66793 |             # Save the path
+ 66794 |             if self.main_window and hasattr(self.main_window, 'general_settings'):
+ 66795 |                 self.main_window.general_settings['autohotkey_path'] = file_path
+ 66796 |                 self.main_window.save_general_settings()
+ 66797 |                 print(f"[Superlookup] Saved AutoHotkey path: {file_path}")
+ 66798 |             
+
+--- match #1 of /mw\.save_general_settings\(settings\)/ at line 64702  (Supervertaler.py:64696-64703) ---
+ 64696 |             return  # only react to the newly-selected button
+ 64697 |         try:
+ 64698 |             mw = self.main_window
+ 64699 |             if mw and hasattr(mw, 'load_general_settings') and hasattr(mw, 'save_general_settings'):
+ 64700 |                 settings = mw.load_general_settings() or {}
+ 64701 |                 settings[self.SUPERLOOKUP_LANDING_TAB_KEY] = value
+ 64702 |                 mw.save_general_settings(settings)
+ 64703 |         except Exception as e:
+
+--- match #1 of /getattr\(self\._parent_app, 'load_clipboard_privacy_settings'/ at line 771  (modules/clipboard_manager_widget.py:766-780) ---
+   766 |     def _load_privacy_settings(self):
+   767 |         """Pull the persisted privacy settings from the parent app, falling
+   768 |         back to defaults. Never raises: a settings problem must not stop the
+   769 |         clipboard tab from loading."""
+   770 |         try:
+   771 |             loader = getattr(self._parent_app, 'load_clipboard_privacy_settings', None)
+   772 |             if callable(loader):
+   773 |                 stored = loader() or {}
+   774 |                 merged = dict(self.DEFAULT_PRIVACY)
+   775 |                 merged.update({k: v for k, v in stored.items()
+   776 |                                if k in self.DEFAULT_PRIVACY})
+   777 |                 self._privacy = merged
+   778 |         except Exception as e:
+   779 |             print(f"[ClipboardManagerWidget] privacy settings load failed: {e}")
+   780 | 
+
+--- 5. does the window have the guard attribute at all? ---
+assignments to <window>.general_settings  : NONE
+all lines mentioning 'general_settings'    : 263 (none of them is an assignment to the window attribute)
+
+consequence: hasattr(window, 'general_settings') is False in the live app
+(measured: app_check C7 real_app_hasattr_general_settings=false), therefore
+both no-argument calls are DORMANT in the current code. With the guard
+satisfied, the exact call raises TypeError — the delegate in S2.2 keeps its
+mandatory positional argument, so the behaviour is identical to HEAD
+(measured on the HEAD worktree by bug_head_probe.py).

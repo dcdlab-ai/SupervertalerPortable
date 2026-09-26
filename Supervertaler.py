@@ -44664,6 +44664,10 @@ class SupervertalerQt(QMainWindow):
     # _migrate_voice_dictation_default_off — уходят в S2.5).
     # self.settings_service создаётся в __init__ и пересоздаётся при смене
     # каталога данных в _reinitialize_with_new_data_path().
+    # S2.2 добавил к ним ещё три делегата вне этого блока:
+    # load_clipboard_privacy_settings (44704), _load_general_settings_from_file
+    # и save_general_settings (рядом, у load_dictation_settings) — каждый стоит
+    # ТОЧНО на месте своего тела из HEAD.
 
     def _get_settings_dir(self) -> Path:
         """Возвращает путь к под-папке настроек.
@@ -44700,17 +44704,19 @@ class SupervertalerQt(QMainWindow):
     # ------------------------------------------------------------------
     # Kept in the "features" section rather than "ui": these are not display
     # preferences, they decide whether the clipboard is read at all.
+    # S2.2: чтение перенесено в modules/settings_service.py (одноимённый метод);
+    # save_clipboard_privacy_settings остаётся здесь ЦЕЛИКОМ (решение V3 —
+    # живому refresh виджета нужны Qt-объекты).
 
     def load_clipboard_privacy_settings(self) -> Dict[str, Any]:
         """Сохранённые настройки захвата/хранения/исключений буфера обмена.
                 Возвращает {} при отсутствии сохранённого, поэтому применяются
                 собственные дефолты виджета (захват включён — поведение
-                как до v1.10.369)."""
-        try:
-            return self._load_settings_section("features").get('clipboard_privacy', {}) or {}
-        except Exception as e:
-            self.log(f"⚠ Could not load clipboard privacy settings: {e}")
-            return {}
+                как до v1.10.369).
+        (Тонкий делегат: SettingsService.load_clipboard_privacy_settings,
+        Batch #7 Stage 2 S2.2. Обязателен для self 23488 и для
+        getattr(self._parent_app, ...) в modules/clipboard_manager_widget.py:771.)"""
+        return self.settings_service.load_clipboard_privacy_settings()
 
     def save_clipboard_privacy_settings(self, settings: Dict[str, Any]):
         """Сохраняет настройки приватности буфера обмена и немедленно
@@ -44895,52 +44901,19 @@ class SupervertalerQt(QMainWindow):
             print(f"[Layout] Warning: migration incomplete: {e}")
 
     def _load_general_settings_from_file(self) -> Dict[str, Any]:
-        """Загружает общие настройки из единого settings.json (секция general)."""
-
-        defaults = {
-            'restore_last_project': False,
-            'auto_propagate_exact_matches': True,
-            'auto_center_active_segment': True,  # Default to True (like memoQ/Trados)
-            'enable_sound_effects': False,
-            'sound_effects_map': {
-                'glossary_term_added': 'asterisk',
-                'glossary_created': 'asterisk',
-                'match_inserted': 'ok',
-                'glossary_term_duplicate': 'exclamation',
-                'glossary_term_error': 'hand'
-            },
-            'grid_font_size': 11,
-            'results_match_font_size': 9,
-            'results_compare_font_size': 9
-        }
-
-        settings = self._load_settings_section("general")
-        if not settings:
-            return defaults
-
-        # Merge with defaults to ensure all keys exist
-        result = defaults.copy()
-        result.update(settings)
-
-        # Migrate termview_* → termlens_* settings keys (v1.9.347+)
-        _tv_migrations = {
-            'termview_under_grid_visible': 'termlens_under_grid_visible',
-            'termview_font_family': 'termlens_font_family',
-            'termview_font_size': 'termlens_font_size',
-            'termview_font_bold': 'termlens_font_bold',
-        }
-        for old_key, new_key in _tv_migrations.items():
-            if old_key in result and new_key not in result:
-                result[new_key] = result.pop(old_key)
-
-        return result
+        """Загружает общие настройки из единого settings.json (секция general).
+        (Тонкий делегат: SettingsService._load_general_settings_from_file,
+        Batch #7 Stage 2 S2.2. Обязателен: кроме load_general_settings его зовут
+        _toggle_match_panel_tm_layout 41560, get_effective_import_options 44315 и
+        _create_file_types_settings_tab 44507.)"""
+        return self.settings_service._load_general_settings_from_file()
 
     def save_general_settings(self, settings: Dict[str, Any]):
-        """Сохраняет общие настройки в единый settings.json (секция general)."""
-        try:
-            self._save_settings_section("general", settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save general settings: {str(e)}")
+        """Сохраняет общие настройки в единый settings.json (секция general).
+        (Тонкий делегат: SettingsService.save_general_settings, Batch #7 Stage 2 S2.2)
+        Сигнатура оставлена БЕЗ default у settings: вызов без аргумента должен
+        и дальше падать TypeError-ом, как падал до переноса.)"""
+        self.settings_service.save_general_settings(settings)
 
     def load_dictation_settings(self) -> Dict[str, Any]:
         """Загружает настройки Voice."""

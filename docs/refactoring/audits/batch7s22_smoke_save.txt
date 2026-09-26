@@ -1,0 +1,63 @@
+# decoded as utf-16 (8676 bytes, 62 lines)
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: C:\Users\AIAssistant4\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: C:\Users\AIAssistant4\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] [Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[GlobalHotkeyManager] Registered ctrl+alt+l (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+c (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+shift+space (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+o (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+v (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[LOG] 💾 DEBUG: Saving 7 segments
+[LOG] 💾 Seg 1: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 2: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 3: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 4: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 5: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 6: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 7: target='EMPTY...', status=not_started
+[LOG] ✓ Saved project: s22_smoke.svproj
+[LOG] 💾 Versioned backup saved: s22_smoke_20260926-161101.svproj (every 1 saves)
+SAVE_OK 6584
+[Hotkeys] pynput hotkey manager stopped on exit

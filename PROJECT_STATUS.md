@@ -4,25 +4,28 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-25 (Batch #7 Stage 2, под-батч S2.1) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API» выполнен (`modules/settings_service.py` + 6 делегатов), дальше S2.2 (general + общий reading, 4 метода / 153 строки); монолит 68 400 строк
+**Обновлено:** 2026-09-26 (Batch #7 Stage 2, под-батч S2.2) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API» и S2.2 «general + clipboard reading» выполнены (`modules/settings_service.py` + 9 делегатов), дальше S2.3 (LLM/proxy/provider/api keys, 10 методов / 150 строк); монолит 68 373 строки
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **68 386**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **68 373**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
 По **Step 7** выполнен **Stage 1 (Batch #7, read-only инвентаризация, 24.09.2026)**,
-решения по V1–V4 приняты, и **Stage 2 начат**: под-батч **S2.1 «ядро API»**
-(25.09.2026) перенёс 6 методов / 39 строк в новый `modules/settings_service.py`
-(класс `SettingsService` с явным `settings_dir` + опц. `log`) и оставил в монолите
-6 тонких делегатов; монолит 68 386 → **68 400** строк, 8 метрик без изменений,
-живой offscreen-прогон приложения — 13/13 PASS. Состав Stage 2 после V1–V4 —
-32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5).
-Дальше — **S2.2** (general + общий reading: 4 метода / 153 строки) отдельным промптом.
-Среда, тестирование и валидация — по `AGENTS.md` (обязательно к прочтению перед
-любой работой).
+решения по V1–V4 приняты, и **Stage 2 идёт**: под-батч **S2.1 «ядро API»**
+(25.09.2026) перенёс 6 методов / 39 строк в новый `modules/settings_service.py`,
+под-батч **S2.2 «general + clipboard reading»** (26.09.2026) добавил туда ещё
+3 метода / 56 строк (`load_clipboard_privacy_settings`,
+`_load_general_settings_from_file`, `save_general_settings`) и оставил в монолите
+3 тонких делегата с исходными сигнатурами; монолит 68 400 → **68 373** строки,
+8 метрик без изменений, живой offscreen-прогон приложения — 9/9 PASS. Состав
+Stage 2 после V1–V4 — 32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей
+(S2.1–S2.5); закрыто 9 из 32 методов (S2.1 + S2.2).
+Дальше — **S2.3** (LLM/proxy/provider/api keys: 10 методов / 150 строк) отдельным
+промптом. Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
+прочтению перед любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
 
@@ -35,11 +38,69 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» выполнен 25.09.2026** — `modules/settings_service.py` + 6 тонких делегатов; осталось S2.2–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.1).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt` и `batch7s21_*.txt` |
+| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026) и S2.2 «general + clipboard reading» (26.09.2026) выполнены** — `modules/settings_service.py` + 9 тонких делегатов; осталось S2.3–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 Stage 2 — под-батч S2.2 закрыт (Batch #7 Stage 2, 26.09.2026)
+
+**S2.2 выполнен** (база HEAD `25627c9` — потомок `3e5c100c`; монолит 68 400 →
+**68 373** строки, −27: делегаты −34, комментарии +7; `git diff --numstat` 23/50).
+Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.2).txt`; промпт:
+`docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.2 general).txt`;
+аудиты: `docs/refactoring/audits/batch7s22_*` (манифест до/после + сравнение,
+counts, analysis, snapshot_index, verify, line_accounting, quotes, app_check_run2,
+bug_head_probe, smoke_save/load).
+
+**Что сделано:** в `modules/settings_service.py` (113 → 197 строк) добавлены три
+метода общего слоя ВЕРБАТИМ-переносом (sha256 тел совпадают со снапшотами HEAD):
+`load_clipboard_privacy_settings` 140–149, `_load_general_settings_from_file`
+151–190, `save_general_settings` 192–197. В монолите на месте их тел — три тонких
+делегата с исходными именами и сигнатурами: `load_clipboard_privacy_settings`
+44711–44719, `_load_general_settings_from_file` 44903–44909,
+`save_general_settings` 44911–44916. Новых параметров конструктора НЕ потребовалось:
+тела зависят только от `_load_settings_section` / `_save_settings_section` / `log`
+(измерено AST — §1.3 отчёта), т.е. всё уже есть в сервисе.
+
+**Сохранение бага бит-в-бит:** делегат `save_general_settings` оставлен БЕЗ default
+у обязательного `settings` (AST: `defaults = []`), поэтому вызов без аргумента
+падает тем же `TypeError`, что и до переноса. Проверено ДО/ПОСЛЕ на worktree HEAD
+25627c9 (`audits/batch7s22_bug_head_probe.*`) — текст ошибки совпадает посимвольно.
+Дополнительно выяснено (новое): оба баговых сайта (теперь 66753 и 66796,
+SuperlookupTab) защищены `hasattr(<окно>, 'general_settings')`, а такого атрибута в
+монолите НЕ СУЩЕСТВУЕТ → путь сегодня мёртв, баг спит (кандидат в
+VALIDATION_BACKLOG для решения владельца, НЕ из S2.2).
+
+**NOT-MOVE:** `load_general_settings` 44542–44638 (97 строк) — код не тронут
+вообще, байт-в-байт как в HEAD; его внутренний вызов
+`self._load_general_settings_from_file()` продолжает работать через делегат (это и
+есть выполнение V3-требования SPLIT — отдельного разделения тела не делалось).
+`save_clipboard_privacy_settings` (44721–44742) тоже остался в монолите (V3).
+
+**Валидация:** py_compile OK (144 файла); 8 метрик 1211/18/35/24/24/0/85/2 — до и
+после идентичны; манифест 144 → 144 (changed=2: `Supervertaler.py`
+80993e2f…, `modules/settings_service.py` 02914e1f…; added/removed = 0); difflib —
+ровно 5 неравных регионов, все заявленные, сумма −27 == изменению файла; живой
+offscreen-прогон приложения — **9/9 PASS** (делегаты == сервис, 4 внутренних
+потребителя, getattr-путь `modules/clipboard_manager_widget.py:771` с реальным
+виджетом и маркером из файла, полный цикл save→файл→load→окно→виджет на КОПИИ
+user_data, продовый settings.json побайтово не изменился, «3 вызова = 3 открытия»);
+смоук save/load OK (`SAVE_OK 6584`, `LOAD_OK S22Smoke 7`) и одинаково на обоих
+деревьях. Непокрытые проверки — §4 отчёта (главные: настоящие клики в модальных
+диалогах; запись clipboard-настроек через UI; полный человеческий цикл
+«изменить каждую вкладку → перезапуск» — после S2.3/S2.4; N14 — продовые user-data
+затрагивались дважды, оба раза контролируемо и откатано).
+
+**Дальше — S2.3 «LLM / proxy / provider / api keys», 10 методов / 150 строк**
+(ровно на границе конвенции ≤10 — отметить в отчёте явно):
+`load_llm_settings`, `save_llm_settings`, `load_proxy_settings`,
+`save_proxy_settings`, `_get_proxy_url`, `_get_proxy_dict`,
+`load_provider_enabled_states`, `save_provider_enabled_states`, `load_api_keys`,
+`save_api_keys`; fan-in ~116, ~10 вызовов из `modules/` + ~10 строковых, часть имён
+приватные. Границы вывести AST ЗАНОВО на дереве S2.2 (после −27 документированные
+номера сдвинуты).
+
 ## Что дальше: Step 7 Stage 2 — под-батч S2.1 закрыт (Batch #7 Stage 2, 25.09.2026)
 
 **S2.1 выполнен** (база HEAD `043da2a`, монолит 68 386 → **68 400** строк; прирост
@@ -75,8 +136,8 @@ teardown идентичен на обоих — предсуществующий
 раздел 4 отчёта (главные: настоящий клик Save в модальном диалоге не нажимался;
 полный человеческий цикл «изменить каждую вкладку → перезапуск» — после S2.2–S2.4).
 
-**Дальше — S2.2 «general + общий reading», 4 метода / 153 строки** (границы
-пересчитаны AST после S2.1 — `docs/refactoring/audits/batch7s21_remaining_ast.txt`):
+**Дальше — S2.2 «general + общий reading», 4 метода / 153 строки** — **ВЫПОЛНЕН
+26.09.2026, см. раздел S2.2 выше** (границы пересчитаны AST после S2.1 — `docs/refactoring/audits/batch7s21_remaining_ast.txt`):
 `load_general_settings` 44542–44638 (97 строк, SPLIT — применение 35 атрибутов
 остаётся в монолите), `_load_general_settings_from_file` 44897–44936 (40),
 `save_general_settings` 44938–44943 (6), `load_clipboard_privacy_settings`
@@ -300,6 +361,21 @@ dependencies}.txt`. Ожидание решения владельца (6 отк
   не меняет `currentRow` (было и на HEAD — проба `probe_head_vs_work.py`); в тест-харнессах
   резервный путь — `selectionModel().setCurrentIndex(...)`, а фокус-сдвиги
   `select_range_page_*` проверять по `selectedRanges()`.
+- **Delegates сохраняют сигнатуру БАЙТ-В-БАЙТ, включая обязательные аргументы**:
+  если до переноса метод требовал позиционный аргумент, делегат НЕ получает
+  `default` — иначе «заодно починенный» баг меняет наблюдаемое поведение вне
+  скоупа переноса. Проверять это AST-ом (`args.defaults == []`), а не глазами
+  (Batch #7 S2.2: `save_general_settings`, два пред-существующих сайта без
+  аргумента). Комплект проверки — сравнение поведения на `git worktree` HEAD.
+- **Guard-атрибут может быть мёртвым**: `hasattr(<окно>, 'general_settings')`
+  выглядит как защита, но такого атрибута в монолите нет вообще (0 присваиваний) →
+  путь не исполняется, и «баг» не воспроизводится из UI. Прежде чем писать
+  «пред-существующий баг срабатывает», проверять существование атрибута
+  измерением (`hasattr` на живом окне), а не по тексту guard.
+- **git в этом окружении**: репозиторий принадлежит другому пользователю
+  (`dubious ownership`), поэтому все команды запускать как
+  `git -c safe.directory=E:/Dev/SupervertalerPortable …` (в т.ч. из Python-скриптов
+  через `subprocess`), НЕ меняя глобальный git-config.
 - **Пользовательские данные** не следуют за cwd: `get_user_data_path()` резолвится от
   глобального `~/.supervertaler_config.json` — read-only пробы безопасны везде, smoke-тесты
   пишут в продакшн-данные.

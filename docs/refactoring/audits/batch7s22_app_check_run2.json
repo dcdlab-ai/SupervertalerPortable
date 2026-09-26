@@ -1,0 +1,158 @@
+{
+ "C1_service_methods": {
+  "ok": true,
+  "value": {
+   "module": "modules.settings_service",
+   "has_load_clipboard_privacy": true,
+   "has_load_general_from_file": true,
+   "has_save_general": true,
+   "settings_dir": "C:\\Users\\AIAssistant4\\Supervertaler\\workbench\\settings"
+  }
+ },
+ "C2_load_general_settings_from_file": {
+  "ok": true,
+  "value": {
+   "equal": true,
+   "n_keys": 8,
+   "defaults_present": {
+    "restore_last_project": true,
+    "grid_font_size": 11,
+    "results_compare_font_size": 9,
+    "sound_effects_map_keys": [
+     "glossary_created",
+     "glossary_term_added",
+     "glossary_term_duplicate",
+     "glossary_term_error",
+     "match_inserted"
+    ]
+   },
+   "termview_key_leaked": false
+  }
+ },
+ "C3_load_clipboard_privacy_settings": {
+  "ok": true,
+  "value": {
+   "delegate_type": "dict",
+   "equal_to_service": true,
+   "raw_section_value": {}
+  }
+ },
+ "C4_consumers_via_delegate": {
+  "ok": true,
+  "value": {
+   "load_general_settings_returns": "dict",
+   "load_general_settings_keys": 8,
+   "effective_import_options": [
+    "excel_drawings",
+    "excel_hidden",
+    "excel_sheet_names",
+    "ppt_comments",
+    "ppt_hidden",
+    "ppt_masters"
+   ],
+   "attr_auto_fill_100_matches_set": true
+  }
+ },
+ "C5_no_cache_semantics": {
+  "ok": true,
+  "value": {
+   "calls": 3,
+   "opens_of_settings_json": 3,
+   "no_cache_ok": true
+  }
+ },
+ "C6_clipboard_widget_getattr_path": {
+  "ok": true,
+  "value": {
+   "getattr_found_callable": true,
+   "default_privacy": {
+    "capture_enabled": true,
+    "auto_delete_enabled": false,
+    "auto_delete_minutes": 60,
+    "excluded_apps": []
+   },
+   "loader_invoked_times": 1,
+   "privacy_after_real_parent": {
+    "capture_enabled": true,
+    "auto_delete_enabled": false,
+    "auto_delete_minutes": 60,
+    "excluded_apps": []
+   },
+   "privacy_without_method_unchanged": true
+  }
+ },
+ "C7_bug_reproduced_not_fixed": {
+  "ok": true,
+  "value": {
+   "real_app_hasattr_general_settings": false,
+   "delegate_no_arg": "TypeError: SupervertalerQt.save_general_settings() missing 1 required positional argument: 'settings'",
+   "service_no_arg": "TypeError: SettingsService.save_general_settings() missing 1 required positional argument: 'settings'",
+   "exact_site_with_guard": "TypeError: SupervertalerQt.save_general_settings() missing 1 required positional argument: 'settings'",
+   "production_settings_untouched_by_bug_path": true
+  }
+ },
+ "C8_full_cycle_on_user_data_copy": {
+  "ok": true,
+  "value": {
+   "service_points_at_temp": true,
+   "grid_font_size_from_file": 12,
+   "default_still_merged": 9,
+   "general_after_save": {
+    "restore_last_project": false,
+    "auto_propagate_exact_matches": true,
+    "auto_center_active_segment": true,
+    "enable_sound_effects": false,
+    "sound_effects_map": {
+     "glossary_term_added": "asterisk",
+     "glossary_created": "asterisk",
+     "match_inserted": "ok",
+     "glossary_term_duplicate": "exclamation",
+     "glossary_term_error": "hand"
+    },
+    "grid_font_size": 15,
+    "results_match_font_size": 9,
+    "results_compare_font_size": 9,
+    "_s22_probe": "written-by-delegate"
+   },
+   "api_keys_preserved": {
+    "openai": "KEY-STAYS"
+   },
+   "extra_top_level_section_preserved": true,
+   "sections_after": [
+    "api_keys",
+    "features",
+    "general",
+    "ui",
+    "usage_statistics_asked"
+   ],
+   "landing_tab_written": "browser",
+   "window_attr_auto_propagate_exact_matches": true,
+   "window_attr_auto_fill_100_matches": true,
+   "window_attr_before_after": [
+    true,
+    true
+   ],
+   "widget_privacy_from_temp": {
+    "capture_enabled": false,
+    "auto_delete_enabled": false,
+    "auto_delete_minutes": 60,
+    "excluded_apps": []
+   },
+   "widget_capture_enabled_is_False": true,
+   "unknown_key_filtered_out": true,
+   "save_clipboard_privacy_settings_file": "Supervertaler.py",
+   "clipboard_privacy_keys_in_service_file": true,
+   "log_errors_during_cycle": [],
+   "service_back_to_production": true,
+   "prod_settings_sha_unchanged_by_cycle": true
+  }
+ },
+ "C9_prod_settings_sha_unchanged": {
+  "ok": true,
+  "value": {
+   "sha256_start": "fa1385da9756f66f26267ab827511c3458b12357b642433cc62d272376c3df2c",
+   "sha256_end": "fa1385da9756f66f26267ab827511c3458b12357b642433cc62d272376c3df2c",
+   "unchanged": true
+  }
+ }
+}

@@ -1,0 +1,24 @@
+HEAD blob bytes=3544303 lines=68400
+SupervertalerQt: 6055-62472, direct methods=819
+
+contiguity / cleanliness of the three MOVE blocks:
+  _load_general_settings_from_file prev=_migrate_to_workbench_layout (gap 2 lines) next=save_general_settings (gap 2 lines) nested defs=[]
+  load_clipboard_privacy_settings  prev=_save_settings_section (gap 8 lines) next=save_clipboard_privacy_settings (gap 2 lines) nested defs=[]
+  save_general_settings            prev=_load_general_settings_from_file (gap 2 lines) next=load_dictation_settings (gap 2 lines) nested defs=[]
+
+MOVE    _load_general_settings_from_file 44897-44936 (40 lines) stmts=9 sha256=b615f4f048185674f7a60d476c3a7e3bca9c93dd37c8d21dfda03f14a52cd11e
+        first line = '    def _load_general_settings_from_file(self) -> Dict[str, Any]:'
+        last  line = '        return result'
+MOVE    load_clipboard_privacy_settings  44704-44713 (10 lines) stmts=2 sha256=7cfb6b6d160767b8c66f7ca0cd50d62bf4e4e2d4f92cd92268904c053f57e5d5
+        first line = '    def load_clipboard_privacy_settings(self) -> Dict[str, Any]:'
+        last  line = '            return {}'
+MOVE    save_general_settings            44938-44943 (6 lines) stmts=2 sha256=7ac90ae56cb7a23e76eee9a06010f8353f6d429605118dd3ce004ba75e783752
+        first line = '    def save_general_settings(self, settings: Dict[str, Any]):'
+        last  line = '            self.log(f"⚠ Could not save general settings: {str(e)}")'
+NOTMOVE load_general_settings            44542-44638 (97 lines) stmts=43 sha256=889b9f9566bb8ed9fd83142b2822a23680bbdaf42d9d7e2830cf66e2847ab1ba
+        first line = '    def load_general_settings(self) -> Dict[str, Any]:'
+        last  line = '        return settings'
+
+combined MOVE blocks: 56 lines (expected 40+10+6=56), sha256=7a262d45c219a0e82f8a9e4527adadd1672853e07166ed37b074aa0994c2003f
+
+stray 'def ' lines between 44700 and 44950 in HEAD: [44704, 44715, 44738, 44830, 44897, 44938, 44945]

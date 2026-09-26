@@ -1,0 +1,36 @@
+HEAD = 68400 строк, рабочее дерево = 68373 строк, итог = -27
+
+[insert] A: комментарий-шапка делегатов
+    HEAD 44667-44666 (0 строк)  ->  дерево 44667-44670 (4 строк)   net = +4
+      + # S2.2 добавил к ним ещё три делегата вне этого блока:
+      + # load_clipboard_privacy_settings (44704), _load_general_settings_from_file
+      + … (всего 4)
+
+[insert] B: комментарий clipboard-секции
+    HEAD 44703-44702 (0 строк)  ->  дерево 44707-44709 (3 строк)   net = +3
+      + # S2.2: чтение перенесено в modules/settings_service.py (одноимённый метод);
+      + # save_clipboard_privacy_settings остаётся здесь ЦЕЛИКОМ (решение V3 —
+      + … (всего 3)
+
+[replace] C: делегат load_clipboard_privacy_settings
+    HEAD 44708-44713 (6 строк)  ->  дерево 44715-44719 (5 строк)   net = -1
+      + return self.settings_service.load_clipboard_privacy_settings()
+
+[replace] D: делегат _load_general_settings_from_file
+    HEAD 44898-44936 (39 строк)  ->  дерево 44904-44909 (6 строк)   net = -33
+      + return self.settings_service._load_general_settings_from_file()
+
+[replace] E: делегат save_general_settings
+    HEAD 44939-44943 (5 строк)  ->  дерево 44912-44916 (5 строк)   net = +0
+      + self.settings_service.save_general_settings(settings)
+
+СУММА net по всем неравным регионам = -27   (совпадает с ростом файла: True)
+число неравных регионов = 5
+
+СВОДКА ПО МЕСТАМ ПРАВКИ (net строк):
+    A: комментарий-шапка делегатов           +4
+    B: комментарий clipboard-секции          +3
+    C: делегат load_clipboard_privacy_settings -1
+    D: делегат _load_general_settings_from_file -33
+    E: делегат save_general_settings         +0
+    ИТОГО (Supervertaler.py)                 -27
