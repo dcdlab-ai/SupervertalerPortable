@@ -414,7 +414,7 @@ manifest_after.txt / counts_after.txt (§3.4), а также verify_s23.py --liv
   py_compile COMPILE_OK; counts_postcommit.txt побайтово равен counts_after.txt
   (8 метрик 1211/18/35/24/24/0/85/2); manifest_postcommit.txt против
   manifest_after.txt → changed=0, added=0, removed=0.
-- Коммит батча: 19 файлов (4 изменённых .md/.py + 15 новых документов: промпт,
+- Коммит батча: 19 файлов (5 изменённых .md/.py + 14 новых документов: промпт,
   отчёт, 12 аудитов, JSON app-check). Не пушился.
 - ЦЕПОЧКА ХЕШЕЙ И ПРАВОК ПОСЛЕ ПЕРВОГО КОММИТА (фиксирую честно, чтобы читатель не
   запутался): первый коммит батча был 8b2a7f7; далее ТРИ `git commit --amend`,
