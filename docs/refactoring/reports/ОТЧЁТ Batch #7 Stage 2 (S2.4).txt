@@ -1,0 +1,620 @@
+ОТЧЁТ Batch #7 Stage 2, под-батч S2.4 — Settings Service: язык + спеллчек
+(перенос 4 методов / 47 строк в modules/settings_service.py)
+════════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-27. Ветка main. Режим: ACTIVE REFACTOR (перенос, не разведка).
+База: HEAD f600e00d1e36f9584fd2b9e757e650550eb2a6d4 РОВНО (см. 1.1). Промпт:
+«ПЕРЕНОС S2.4 — Settings Service, язык + спеллчек (Batch #7 Stage 2, под-батч
+4/5)»; сохранён как
+docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.4 languages-spellcheck).txt.
+Разведка Б2 (границы 4 методов) принята; пересчитаны AST только границы,
+кластеры, зависимости и callsites на этом дереве (1.2/1.3/1.4). Артефакты:
+docs/refactoring/audits/batch7s24_*; рабочий прогон —
+D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\
+(скрипты, снапшоты 12 блоков, JSON, логи; head-wt — worktree HEAD f600e00).
+
+ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 285 → 68 274 строк (−11; git --numstat 27/38 по
+одному файлу, difflib — ровно 4 неравных региона, сумма −11), сервис 368 → 451
+строк (+83), 4 тонких делегата на месте тел (сигнатуры байт-в-байт), 8 метрик
+без изменений, py_compile OK, живой прогон — 11/11 PASS + отдельный перезапуск
+4/4 PASS (offscreen; вкладка Language Pair через РЕАЛЬНЫЙ обработчик кнопки,
+тумблер spellcheck через РЕАЛЬНЫЙ обработчик меню и кнопки, цепочка
+settings.json → делегат → self.target_language → start_voice_dictation
+проверена), смоук save/load EXIT=0 на обоих деревьях, манифест — изменено
+ровно 2 .py (ожидаемые).
+ГЛАВНОЕ ОТЛИЧИЕ ОТ S2.1–S2.3 (стоп-условие «зависимость от состояния окна»
+СРАБОТАЛО): из 4 тел два чистые (перенесены ВЕРБАТИМ), а два читают/пишут
+состояние ОКНА (`source_language`/`target_language`, `spellcheck_enabled`) и
+перенесены SPLIT-ом: файловая часть — в сервис, запись/чтение состояния окна —
+в тонком делегате (разбор в 1.3 и 2.1).
+════════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0/1 — БАЗОВАЯ ЛИНИЯ И СООТВЕТСТВИЕ РАЗВЕДКЕ Б2
+════════════════════════════════════════════════════════════════════════════════
+1.1 ЭТАП 0 ВЫПОЛНЕН, HEAD — РОВНО f600e00
+- `git fetch origin` выполнен. `git merge-base --is-ancestor f600e00d… HEAD` →
+  OK (exit 0, не STOP); `git rev-parse HEAD` = f600e00d1e36f9584fd2b9e757e650550eb2a6d4
+  — совпадает с ожидавшимся символ-в-символ (в отличие от S2.2/S2.3, где HEAD был
+  на один коммит впереди — здесь ни потомков, ни расхождения).
+- Рабочее дерево на старте было чистым (`git status --short` — пусто) → рабочая
+  копия == HEAD, поэтому манифест «до» снят прямо с дерева, без worktree.
+- Квирк окружения №1 (как в S2.2/S2.3): git падал с «detected dubious ownership
+  in repository … owned by ROOT/Dmitry, but the current user is ROOT/AIAssistant1».
+  Глобальные настройки НЕ менялись (AGENTS.md: не менять глобальную среду ради
+  задачи): все git-команды — с процесс-локальным
+  `-c safe.directory=E:/Dev/SupervertalerPortable`.
+- Квирк окружения №2 (НОВОЕ, влияет на смысл §3.6): в этой сессии сменился
+  пользователь (в S2.3 был ROOT/AIAssistant, теперь ROOT/AIAssistant1), и для него
+  НЕ существует файла-указателя `%APPDATA%\Supervertaler\config.json`.
+  `get_user_data_path()` отработал по ветке «автовосстановление» и вернул
+  `C:\Users\AIAssistant1\Supervertaler` (свежий, практически пустой каталог), а не
+  прежний `D:\_old\Supervertaler-Portable\Supervertaler`. Приложение печатает это
+  первой строкой лога: `[Data Paths] User data: C:\Users\AIAssistant1\Supervertaler`.
+  Вывод: «продовым» каталогом для проверки §3.6 в этом прогоне является именно он;
+  ни один файл из `D:\_old\…` этим прогоном не тронут.
+
+1.2 ГРАНИЦЫ БЛОКА (AST) + СНАПШОТЫ — СОВПАЛИ С ПРОМПТОМ 1:1
+- AST по `git show HEAD:Supervertaler.py` (68 286 строк с завершающим \n, то есть
+  wc -l 68 285; класс SupervertalerQt 6055–62357, 819 прямых методов) — скрипт
+  snapshot_s24.py, артефакт audits/batch7s24_snapshot_index.txt:
+    КЛАСТЕР A (44991–45248; между двумя MOVE — 7 посторонних def, см. ниже):
+      MOVE _load_language_pair_from_disk     44991–45008 (18) stmts=3 nested=[]
+           sha256 2701e5885548ccd19a727dbb5c1583e93ce5b4d312902617055c2f738ec0a7a4
+      MOVE save_language_settings            45238–45248 (11) stmts=2 nested=[]
+           sha256 393920b0c6984bfb2c86f3e5b2e7b5605d7cc7d19364af615cbcadee528b1db6
+    КЛАСТЕР B (52249–52267, смежные — единственный полностью чистый кластер):
+      MOVE _save_spellcheck_settings         52249–52258 (10) stmts=2 nested=[]
+           sha256 ba07614065fdd3fc2b9e39687ca0f8a40f22d5dfe56fe1cae647ff9716b6a08c
+      MOVE _load_spellcheck_settings         52260–52267  (8) stmts=2 nested=[]
+           sha256 6f91af0cd2154f35172e259927deb5458013df4135ee067d1eac30fdca1b7e14
+  Все четыре размера (18/11/10/8) и все четыре диапазона совпали с промптом
+  цифра-в-цифру; вложенных def/class ни в одном блоке нет (`nested=[]`).
+- «6 посторонних методов между двумя MOVE окна A» — ПОДТВЕРЖДЕНО AST, а не на глаз:
+  между `_load_language_pair_from_disk` (конец 45008) и `save_language_settings`
+  (начало 45238) стоят ровно 7 прямых def, из которых 6 — не входящие в Step 7
+  соседи, а 7-й — NOT-MOVE `load_language_settings` (названный в промпте отдельно):
+    load_voice_vocabulary_settings 45016–45054 (39) | save_voice_vocabulary_settings
+    45056–45079 (24) | build_voice_initial_prompt 45081–45106 (26) |
+    open_termbases_tab 45108–45128 (21) | _migrate_voice_dictation_default_off
+    45130–45161 (32) | _collect_voice_dictation_termbase_terms 45163–45213 (51)
+    || load_language_settings 45215–45236 (22)  ← NOT-MOVE
+  Между `_load_language_pair_from_disk` и первым соседом — 7 строк (комментарий-баннер
+  «Voice dictation vocabulary biasing» 45010–45014 + 2 пустые). Соседи окна B: до
+  52249 — `_toggle_spellcheck_from_button` (52204–52247), после 52267 —
+  `_refresh_all_highlighters` (52269–…); посторонних def внутри кластера B нет вообще.
+- NOT-MOVE-диапазоны (все 8 найдены AST самостоятельно, включая
+  `load_dictation_settings`, которого в окне A промпта не было):
+    load_dictation_settings                   44918–44933 (16)  ← найден repo-wide
+    load_voice_vocabulary_settings            45016–45054 (39)
+    save_voice_vocabulary_settings            45056–45079 (24)
+    build_voice_initial_prompt                45081–45106 (26)
+    open_termbases_tab                        45108–45128 (21)
+    _migrate_voice_dictation_default_off      45130–45161 (32)
+    _collect_voice_dictation_termbase_terms   45163–45213 (51)
+    load_language_settings                    45215–45236 (22)
+  Тела всех 12 блоков (4 MOVE + 8 NOT-MOVE) сохранены в run-001\snapshot\<имя>.py
+  с sha256; 8 NOT-MOVE-снапшотов использованы как байт-эталон до/после (3.5).
+- Перевод строк: и блоб, и рабочая копия — чистый LF (CR-байт 0), поэтому sha256
+  снапшотов сравнимы с телами сервиса напрямую, без EOL-артефактов.
+
+1.3 ЗАВИСИМОСТИ ТЕЛ — СТОП-УСЛОВИЕ СРАБОТАЛО У 2 ИЗ 4 (SPLIT), У 2 — ЧИСТО
+Измерено AST (analyze_s24.py; артефакт audits/batch7s24_deps_before.txt), множество
+`self.<attr>` внутри каждого переносимого тела с разделением Load/Store:
+    _load_language_pair_from_disk  loaded=['_load_settings_section']
+                                   STORED=['source_language','target_language']
+                                   NOT on SettingsService: ['source_language',
+                                                            'target_language']
+                                   → SPLIT
+    save_language_settings         loaded=['_load_unified_settings',
+                                           '_save_unified_settings','log']
+                                   stored=[] → ВЕРБАТИМ-переносим
+    _save_spellcheck_settings      loaded=['_load_unified_settings',
+                                           '_save_unified_settings','log',
+                                           'spellcheck_enabled']
+                                   stored=[]; NOT on SettingsService:
+                                   ['spellcheck_enabled'] → SPLIT
+    _load_spellcheck_settings      loaded=['_load_settings_section'] → ВЕРБАТИМ
+ВЫВОД: у двух тел есть ровно одна «лишняя» зависимость каждое — состояние ОКНА
+(атрибуты, которых у сервиса нет и быть не должно). В S2.1/S2.2/S2.3 такой
+зависимости не было вовсе (там все тела ходили только через уже имеющиеся
+`_load/_save_settings_section`, `_load/_save_unified_settings`, `log`), поэтому
+здесь применён SPLIT — тот же приём, который Stage 1 (§1.9/A2 findings) предписывал
+для UI-переплетённых методов (`load_language_settings`, `save_dictation_settings`):
+файловая часть уходит в сервис, эффект на окно остаётся в делегате.
+Замер `__init__` (тот же анализатор) подтвердил ограничение промпта фактически:
+    вызовов _load_language_pair_from_disk в __init__: [6348]
+    STORES source_language/target_language в __init__: [6242, 6243]
+    LOADS  source_language/target_language в __init__: []  ← ни одного, т.е.
+    «до любого кода, который мог бы прочитать пару» выполняется и в HEAD, и после
+    переноса (проверено ещё раз на готовом дереве, 3.1/3.6).
+- НОВЫХ ПАРАМЕТРОВ КОНСТРУКТОРА СЕРВИСА НЕ ПОТРЕБОВАЛОСЬ (как и в S2.2/S2.3):
+  `SettingsService(settings_dir, log)` без изменений; `__init__` окна и
+  `_reinitialize_with_new_data_path` не менялись.
+- Единственная внешняя (не-`self`) зависимость тел — встроенная функция `print`
+  (диагностика `[LangSettings] …` в stdout): оставлена на месте, без изменений.
+  Модульные `json`/`Path` сервиса уже были; добавлен ровно один импорт-символ —
+  `Tuple` из `typing` (нужен для аннотации нового возвращаемого типа).
+
+1.4 CALLSITES ДО (репозиторий) — КЛАССИФИКАЦИЯ ИЗ ПРОМПТА ПОДТВЕРЖДЕНА
+- Полный список: весь репозиторий (`git grep` по `*.py` + regex-счётчик
+  callsite_counts.py; артефакт audits/batch7s24_callsites_head.txt). ВСЕ 4 имени
+  встречаются ТОЛЬКО в `Supervertaler.py` (внешних потребителей в `modules/` нет
+  ни у одного из четырёх — в отличие от S2.1–S2.3, где были getattr/hasattr-сайты):
+    _load_language_pair_from_disk — 1 вызов: `__init__` 6348 (+ def-строка + упоминание
+      в докстринге load_language_settings 45220) = 3 вхождения;
+    save_language_settings        — 2 вызова: 20811 (_create_language_pair_tab) и
+      45254 (_save_language_settings_from_ui) = 3;
+    _save_spellcheck_settings     — 2 вызова: 52199 (_toggle_spellcheck) и
+      52246 (_toggle_spellcheck_from_button) = 3;
+    _load_spellcheck_settings     — 1 вызов: 27258 (create_grid_view_widget) = 3
+      (плюс ссылка в комментарии 6403 — текстом, не вызовом).
+- `load_dictation_settings` (NOT-MOVE) имеет внешних ПТУК-ТАЙПЕД-читателей в
+  `modules/voice_tab.py` (getattr-строки 736 и 781) и внутренних в монолите
+  (24753, 25168, 54293, 54310, 54351, 54456, 54560, 54704) — все они остались
+  работать, потому что метод не тронут (3.5) и сервис его не забирал.
+- АСИММЕТРИЯ API (промпт просил не чинить) — В ПРОМПТЕ НЕТОЧНО, фактическое
+  разделение 2/2, а не 1/3: whole-file API (`_load_unified_settings`/
+  `_save_unified_settings`) используют `save_language_settings` И
+  `_save_spellcheck_settings`; секционный `_load_settings_section("ui")` —
+  `_load_language_pair_from_disk` И `_load_spellcheck_settings`. Перенесено КАК
+  ЕСТЬ, паттерн не унифицировался; на поведение это не влияет (оба API — уже
+  делегаты на этом HEAD, читают/пишут один и тот же файл теми же штатными
+  средствами с той же семантикой «без кэша»).
+
+════════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════════════════════
+2.1 REJECTED-АЛЬТЕРНАТИВЫ (не изобретать заново)
+- «Перенести `_load_language_pair_from_disk` ВЕРБАТИМ, как в S2.3» — ОТВЕРГНУТО:
+  тело пишет `self.source_language`/`self.target_language`. В сервисе эти записи
+  попали бы в объект СЕРВИСА, окно осталось бы со старыми (жёстко заданными
+  English/Dutch) значениями — то есть ровно тот баг, ради которого метод и
+  существует (см. его докстринг). Это молчаливая регрессия Language Pair,
+  поэтому применён SPLIT.
+- «Оставить запись атрибутов в сервисе через колбэк/ссылку на окно» (передать
+  объект окна или setter-колбэк в сервис) — ОТВЕРГНУТО: сервис стал бы владеть
+  ссылкой на QWidget-окно (ровно то, из-за чего в S2.2 `save_clipboard_privacy_settings`
+  оставлен в монолите по решению V3).
+- «Сделать сервисный метод без возврата, а печать строк — в делегате» — ОТВЕРГНУТО
+  как косметика: тело содержит свои `print`-диагностики, убирать их из переносимого
+  текста значило бы править больше, чем необходимо.
+- «Починить/унифицировать асимметрию whole-file/секционного API» — ЗАПРЕЩЕНО
+  промптом и не делалось (1.4).
+- «Добавить `default`/`*args` в сигнатуру сервисного `_save_spellcheck_settings`» —
+  ОТВЕРГНУТО: у сервиса ровно один потребитель (делегат окна), который всегда
+  передаёт `self.spellcheck_enabled`; маскировать отсутствие аргумента нечем и
+2.2 МОДУЛЬ СЕРВИСА (modules/settings_service.py: 368 → 451 строк, +83)
+Добавлено четыре метода; порядок в файле повторяет порядок монолита
+(_load_language_pair_from_disk 402–419 → save_language_settings 421–431 →
+_save_spellcheck_settings 433–442 → _load_spellcheck_settings 444–451).
+Структура прироста (git --numstat 84/1 по файлу): 47 строк тел + блок-комментарий
+на 25 строк перед ними + абзац докстринга модуля (8 строк) + 3 пустые
+разделительные строки + 1 изменённая строка импорта (`typing` + `Tuple`).
+- ДВА ТЕЛА ПЕРЕНЕСЕНЫ ВЕРБАТИМ, БАЙТ-В-БАЙТ (2/2, проверка построчным сравнением
+  сервис-метода со снапшотом HEAD; 3.1): `save_language_settings` (11 строк,
+  sha256 393920b0…) и `_load_spellcheck_settings` (8 строк, sha256 6f91af0c…).
+- ДВА ТЕЛА ПЕРЕНЕСЕНЫ С ОДНОЙ ЗАДОКУМЕНТИРОВАННОЙ ПРАВКОЙ КАЖДОЕ (2/2
+  «эквивалентно снапшоту + заявленные правки»; полный построчный diff — в
+  audits/batch7s24_verify_out.txt, §2.3 отчёта):
+  * `_load_language_pair_from_disk` (18 строк → 18 строк, правок −3/+3):
+    – def-строке ДОБАВЛЕНА аннотация возвращаемого типа:
+      `def _load_language_pair_from_disk(self)` →
+      `def _load_language_pair_from_disk(self) -> Optional[Tuple[str, str]]`;
+    – УДАЛЕНЫ две строки записи состояния окна
+      `self.source_language = src` / `self.target_language = tgt`;
+    – ДОБАВЛЕН `return src, tgt` сразу после сохранённой печати
+      `[LangSettings] Loaded from settings.json: {src} → {tgt}`;
+    – в ветке `except` после сохранённой печати
+      `[LangSettings] Load failed, keeping defaults: {e!r}` ДОБАВЛЕН `return None`
+      (в исходном теле функция просто «падала» в конец без записи — семантика
+      «атрибуты не тронуты» воспроизведена через None, см. 2.3).
+  * `_save_spellcheck_settings` (10 строк → 10 строк, правок −2/+2):
+    – `def _save_spellcheck_settings(self)` → `def _save_spellcheck_settings(self,
+      enabled: bool)`;
+    – `'enabled': self.spellcheck_enabled` → `'enabled': enabled`.
+    Иных отличий нет: ни докстринги, ни комментарии, ни порядок строк внутри тел
+    не менялись (индентация вставленных `return` совпадает с блоками `try`/`except`).
+- Внутренние `self.*`-вызовы перенесённых тел резолвятся в методы ЭТОГО класса
+  (в монолите те же выражения шли через одноимённые делегаты): проверено
+  автоматически в 3.1 («unresolved: NONE»), то есть состояние окна в сервис не
+  просочилось ни одной строкой.
+- Абзац докстринга модуля и блок-комментарий перед методами описывают S2.4:
+  что перенесено, почему два тела SPLIT (и почему атрибуты окна остаются в
+  делегате), почему асимметрия API сохранена «как есть», и что единственный
+  вызов `_load_language_pair_from_disk` — монолитный `__init__` 6348 — оставлен
+  на месте.
+
+2.3 ЧТО ИМЕННО СТАЛО ДЕЛЕГАТАМИ (4/4, сигнатуры байт-в-байт)
+Тела — 36 строк вместо 47 (Δ −11); у каждого делегата исходная def-строка +
+исходный докстринг с дописанным примечанием «(Тонкий делегат: SettingsService.<имя>,
+Batch #7 Stage 2 S2.4 …)» + форвардящий код:
+  _load_language_pair_from_disk 44991–45007 (17 строк)
+      language_pair = self.settings_service._load_language_pair_from_disk()
+      if language_pair is not None:
+          self.source_language, self.target_language = language_pair
+    ← запись атрибутов окна остаётся ЗДЕСЬ и выполняется ТОЛЬКО при не-None
+      результате; делегат ничего не возвращает (как и исходное тело — `return`
+      в нём отсутствовал, поэтому `delegate_return` = None).
+  save_language_settings 45237–45242 (6 строк)
+      return self.settings_service.save_language_settings(source_lang, target_lang)
+  _save_spellcheck_settings 52243–52249 (7 строк)
+      return self.settings_service._save_spellcheck_settings(self.spellcheck_enabled)
+  _load_spellcheck_settings 52251–52256 (6 строк)
+      return self.settings_service._load_spellcheck_settings()
+Проверено автоматически (verify_s24.py --live): sig_identical=True и forwards=True
+для 4/4, тело каждого делегата построчно равно ожидаемому; сигнатуры
+`_save_spellcheck_settings()` и `_load_language_pair_from_disk()` у ОКНА сохранены
+без аргументов и без возвращаемых аннотаций (внешние/внутренние сайты не менялись).
+
+2.4 УЧЁТ СТРОК (difflib, head-wt ↔ WORK) — 4 РЕГИОНА, СУММА −11 == ФАКТУ
+Артефакт audits/batch7s24_line_accounting.txt:
+  replace head[44997:45008] work[44997:45007] dh=12 dw=11 delta=-1   ← _load_language_pair_from_disk
+  replace head[45239:45248] work[45238:45242] dh=10 dw=5  delta=-5   ← save_language_settings
+  replace head[52250:52258] work[52244:52249] dh=9  dw=6  delta=-3   ← _save_spellcheck_settings
+  replace head[52261:52267] work[52252:52256] dh=7  dw=5  delta=-2   ← _load_spellcheck_settings
+  unequal regions = 4     sum(delta) = −11  == net −11 (True)
+Неравных регионов РОВНО 4 — по одному на метод; каждый начинается со строки
+докстринга (def-строка осталась контекстом, потому и не попала в регион).
+Методическая деталь (чтобы числа не выглядели противоречивыми): `git diff
+--numstat` даёт 27/38, а НЕ 47/…, по той же причине, что и в S2.2/S2.3 — git дробит
+замены по контексту; важно, что все 4 региона перечислены и их сумма сходится с
+фактическим изменением файла (68 285 → 68 274). Второй файл:
+modules/settings_service.py 368 → 451 (+83), numstat 84/1 (1 удалённая строка —
+заменённая строка импорта `typing`).
+
+2.5 ОСТАЛЬНОЙ КОД НЕ ТРОГАЛСЯ + НИ ОДИН CALLSITE НЕ ПОТЕРЯН
+- SHA256-манифест 144 → 144: changed = РОВНО 2 (Supervertaler.py
+  4279e6de90e0163ff7673812eb1ddf090635dcde1f01d9e208638e0790a4fd5d →
+  0854f8990feea017d0e8c2c81bc3321bebe5af1962ab10ad301794e9c1ee66a3;
+  modules/settings_service.py
+  714662f2b47618c5a58523cbdf1795773ebb056a88ac8cf7b966f0664546a26f →
+  6778e9e7c6a37bd329c3b5bd6e1b0cf695d89f2e5ead59c6c1adee71b9a75636), added = 0,
+  removed = 0 (audits/batch7s24_manifest_cmp.txt). Ни один другой .py не изменён.
+- ВНЕШНИХ CALLSITE ВООБЩЕ НЕТ (1.4), поэтому сравнение «per-file counts» тривиально:
+  до переноса 4 имени встречались в 1 файле (Supervertaler.py), после — в 2
+  (плюс сам сервис; все вхождения в сервисе — новые определения/примечания,
+  audits/batch7s24_callsites_{head,work}.txt).
+- AST-сверка callsites ПО ОБЛАСТИ ВИДИМОСТИ (callsites_ast_cmp.py vs head-wt;
+  audits/batch7s24_callsites_ast_cmp.txt): из 6 ключей HEAD НИ ОДИН не исчез
+  (only-in-HEAD = 0), count-mismatch = 0; в WORK появились ровно 4 новых ключа
+  вида `<name>.<name>` — это собственная форвардящая строка делегата внутри его же
+  области видимости. Дополнительно сверены атрибуты состояния (`source_language`,
+  `target_language`, `spellcheck_enabled`) по принципу load/store и по объемлющей
+  функции: РАЗЛИЧИЙ НЕТ (store в `__init__` 6242/6243, store в делегате
+  `_load_language_pair_from_disk`, load в делегате `_save_spellcheck_settings` —
+  всё на своих местах с теми же счётчиками).
+  VERDICT: «OK — every call site outside the 4 moved bodies is preserved».
+- Номера строк НИЖЕ кластера B сдвинулись ровно на −11 (например SuperlookupTab
+  целиком), номера ВЫШЕ 44991 (в т.ч. `__init__` 6348 и все 3 форвардящих сайта
+════════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════════════════════
+3.1 БАЗОВАЯ ЛИНИЯ (Этап 1) И СТРУКТУРНАЯ ПРОВЕРКА (verify_s24.py --live)
+- Базовая линия, снятая ДО правок (audits/batch7s24_baseline_counts.txt,
+  batch7s24_manifest_before.txt): py_compile COMPILE_OK (144 файла); 8 метрик
+  1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2; манифест 144 файла.
+- SupervertalerQt до переноса: 6055–62357, 819 прямых методов; SettingsService
+  60–368.
+- ПОСЛЕ переноса (verify --live, audits/batch7s24_verify_out.txt) — CHECKS 37/37,
+  RESULT OK:
+    * сервис: 4 имени, у каждого ровно 1 определение (402–419 / 421–431 / 433–442 /
+      444–451), порядок совпадает с порядком монолита (True);
+    * VERBATIM 2/2 (save_language_settings, _load_spellcheck_settings) + DOC-EDIT 2/2
+      (`_load_language_pair_from_disk` diff −3/+3, `_save_spellcheck_settings`
+      diff −2/+2 — именно те строки, что заявлены в 2.2, ни одной лишней);
+    * `self.*` внутри перенесённых тел: unresolved = NONE (состояние окна не
+      просочилось);
+    * делегаты 4/4: signature byte-identical (def-строка сравнена со первой строкой
+      HEAD-снапшота), тело == ожидаемому, forwards = True;
+    * NOT-MOVE 8/8 byte_identical_to_HEAD=True (диапазоны пересчитаны AST в WORK,
+      не по документу);
+    * вызов в `__init__`: HEAD [6348] == WORK [6348], строка 6348 =
+      `self._load_language_pair_from_disk()`; LOADS source/target в `__init__` = []
+      (то есть «до любого кода, читающего пару» выполняется и после переноса);
+    * инвентарь определений repo-wide: у каждого из 4 имён РОВНО 2 def
+      (монолит + сервис), ни одной третьей копии; у 8 NOT-MOVE имён — ровно 1 def
+      (в монолите, 3.5);
+    * порядок «загрузка пары раньше восстановления проекта» не нарушен структурно:
+      `restore_last_project_if_enabled` по-прежнему вызывается ПОЗЖЕ (45362 > 6348),
+      как и в HEAD.
+
+3.2 ЖИВОЙ ПРОГОН, ПРОЦЕСС 1 (offscreen; QDialog.exec → Rejected;
+    QMessageBox.warning/information/critical → заглушки; драйвер app_check_s24.py).
+    Итог: PASS=11 / FAIL=0 (ALL_CHECKS_PASS); JSON — audits/batch7s24_app_check_run1.json,
+    лог — batch7s24_app_check_run1.txt.
+  C1  сервис: `modules.settings_service.SettingsService`, все 4 метода callable,
+      settings_dir = каталог арендатора.
+  C2  SPLIT подтверждён ЖИВЬЁМ: прямой вызов сервиса вернул пару ['Spanish','German']
+      и НЕ тронул атрибуты окна (`service_touched_window_attrs: false`), а делегат
+      вслед за этим записал их в окно (`after_delegate: ['Spanish','German']`,
+      `values_from_file: true`).
+  C3  ВЕТКА ИСКЛЮЧЕНИЯ: при искусственном падении `_load_settings_section` делегат
+      вернул None и НЕ изменил атрибуты окна (`pair_after_failure: ['KEEP-SRC',
+      'KEEP-TGT']`, `untouched: true`) — ровно как исходное тело; в stdout попала
+      сохранённая диагностика `[LangSettings] Load failed, keeping defaults:
+      RuntimeError('S24-FORCED-FAILURE')`.
+  C4  Пустой settings.json (секция ui без language_settings) → пара ['English','Dutch']
+      (дефолты тела) и они же в окне.
+  C5  Полный цикл spellcheck на КОПИИ user_data: окно True → файл true; окно False →
+      файл false; прямой вызов сервиса с enabled=True/False → файл true/false
+      (ПАРАМЕТР ДЕЙСТВИТЕЛЬНО УПРАВЛЯЕТ ЗАПИСЬЮ, окно не читается); сервисный метод
+      возвращает None; `_load_spellcheck_settings()` читает ровно записанное; соседние
+      секции (api_keys openai, general batch_size, ui language_settings) сохранены.
+  C6  Кэша нет: 3 вызова `_load_spellcheck_settings` = 3 открытия settings.json.
+  C7  РЕАЛЬНЫЕ ПОЛЬЗОВАТЕЛЬСКИЕ ОБРАБОТЧИКИ (это и есть «вкладка Language Pair» и
+      «тумблер spellcheck»), с настоящими QComboBox:
+        `_save_language_settings_from_ui(src='English', tgt='Polish')` → окно
+        English/Polish и ровно это же в файле;
+        `_toggle_spellcheck_from_button(True/False)` и `_toggle_spellcheck()` →
+        файл всегда равен состоянию окна (`persisted_matches_window_always: true`;
+        в логе видно реальный бэкенд: «✓ Spellcheck enabled for Polish (backend:
+        pyspellchecker (pl_PL))» и «✗ Spellcheck disabled»).
+      То есть боевые пути, которые и вызывают два перенесённых сохранятеля,
+      отработали без правок в сайте.
+  C8  NOT-MOVE голосовой кластер жив: `load_dictation_settings()` → dict с ключом
+      language='Auto (use project target language)', `load_voice_vocabulary_settings()`
+      → dict, `build_voice_initial_prompt()` → str, `load_language_settings` callable.
+  C9  Инвентарь определений (AST, 3.1) — по всему репозиторию.
+  C10 Перезапускаемый каталог изолированно подготовлен: Language Pair = English→Polish,
+      spellcheck enabled=true записаны в
+      run-001\restart_user_data\workbench\settings\settings.json через реальные
+      обработчики.
+  C11 Каталог данных вернулся на исходный; его settings.json побайтово не изменился
+      за прогон (sha256 start == end, 3.6).
+
+3.3 ПЕРЕЗАПУСК, ПРОЦЕСС 2 — ОТДЕЛЬНЫЙ ИНТЕРПРЕТАТОР, ТОТ ЖЕ КАТАЛОГ ДАННЫХ
+    (драйвер restart_check_s24.py; PASS=4 / FAIL=0; JSON —
+    audits/batch7s24_restart_check.json, лог — batch7s24_restart_check.txt).
+    Изоляция: в НОВОМ процессе ПЕРЕД созданием окна подменён резолвер
+    `Supervertaler.get_user_data_path` → `run-001\restart_user_data` (процесс
+    приложения, а не только settings-слой: печать показывает
+    `[Data Paths] User data: D:\Temp\…\restart_user_data`). Реальный
+    файл-указатель `%APPDATA%\Supervertaler\config.json` при этом НЕ менялся
+    (R1: `prod_pointer_untouched: true` — байты до/после идентичны).
+  R1  Свежий процесс видит ровно изолированный каталог
+      (`is_temp_restart_dir: true`, `service_dir_correct: true`).
+  R2  ЯЗЫКОВАЯ ПАРА ПЕРЕЖИЛА ПЕРЕЗАПУСК: окно после старта имеет
+      source_language='English', target_language='Polish' — ровно то, что записал
+      процесс 1, и то, что лежит в файле (`matches_file: true`); повторный вызов
+      сервисного метода в новом процессе согласован (`service_reload_agrees: true`).
+      Это и есть проверка «смена языков → сохранение → перезапуск → сохранённое
+      подхватилось»: загрузку выполняет ПЕРЕНЕСЁННЫЙ `_load_language_pair_from_disk`,
+      вызванный из `__init__` 6348.
+  R3  SPELLCHECK ПЕРЕЖИЛ ПЕРЕЗАПУСК: `spellcheck_enabled` после старта == значение
+      из файла (true == true; `matches_file: true`); чтение через делегат даёт то же.
+      (Читающая сторона здесь — NOT-MOVE `load_language_settings` 6483, которая читает
+      тот же ключ `ui.spellcheck_settings.enabled`, что пишет перенесённый
+      `_save_spellcheck_settings`; цикл «тумблер → перезапуск» замкнут.)
+  R4  ГОЛОСОВОЙ ДИКТАНТ В РЕЖИМЕ «Auto (use project target language)»: при
+      dictation_settings['language'] == 'Auto (use project target language)'
+      `start_voice_dictation()` читает `self.target_language` (переживший перезапуск
+      Polish) и передаёт в поток код 'pl'
+      (`restarted_lang_code: 'pl'`, `model_name: 'base'`, `duration: 5`); контроль
+      «Russian» → 'ru'; режим «Auto-detect (Whisper picks per utterance)» → 'auto'
+      (сентинел автодетекта не сломан). Цепочка
+      settings.json → перенесённый загрузчик → self.target_language → lang_code
+      диктовки подтверждена целиком.
+      Методическая деталь: поток Whisper подменён стендом (`sv.QuickDictationThread`),
+      а `load_dictation_settings`/`load_voice_vocabulary_settings`/
+      `build_voice_initial_prompt` на время проверки заменены минимальными заглушками —
+      проверяется ИМЕННО передача языка, а не распознавание (см. §4, п. 44).
+
+3.4 NOT-MOVE БАЙТ-В-БАЙТ (Верификатор А) — 8/8
+Все 8 соседей из NOT-MOVE-списка промпта (включая `load_dictation_settings`,
+найденный самостоятельно) сверены с их HEAD-снапшотами как СТРОКИ в рабочем дереве
+(диапазоны в WORK пересчитаны AST, а не взяты из документа):
+    load_dictation_settings 44918–44933 · load_voice_vocabulary_settings 45015–45053 ·
+    save_voice_vocabulary_settings 45055–45078 · build_voice_initial_prompt 45080–45105 ·
+    open_termbases_tab 45107–45127 · _migrate_voice_dictation_default_off 45129–45160 ·
+    _collect_voice_dictation_termbase_terms 45162–45212 · load_language_settings
+    45214–45235  → byte_identical_to_HEAD = True (8/8).
+Ни одна строка этих тел не тронута (единственное, что в них «изменилось» —
+абсолютные номера строки ниже кластера A на −1…−5, что и есть след переноса).
+
+3.5 МЕТРИКИ, МАНИФЕСТ, py_compile (до == после)
+- py_compile ALL: COMPILE_OK (144 файла) — и на базовой линии, и после переноса.
+- 8 базовых метрик: 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 — файлы
+  audits/batch7s24_baseline_counts.txt и batch7s24_counts_after.txt ПОБАЙТОВО РАВНЫ
+  (проверено сравнением содержимого, а не значений отдельных строк).
+- SHA256-манифест: 144 → 144, changed = 2 (ровно ожидаемые), added = 0, removed = 0
+  (2.5). «Кроме settings_service.py и Supervertaler.py» — не изменён НИ ОДИН .py.
+- Итоговые хеши файлов: Supervertaler.py 0854f8990feea017d0e8c2c81bc3321bebe5af1962ab10ad301794e9c1ee66a3
+  (3 542 691 байт, 68 274 строки); modules/settings_service.py
+  6778e9e7c6a37bd329c3b5bd6e1b0cf695d89f2e5ead59c6c1adee71b9a75636 (25 429 байт,
+  451 строка).
+
+3.6 ИЗОЛЯЦИЯ ПОЛЬЗОВАТЕЛЬСКИХ ДАННЫХ (что именно тронуто)
+- Все функциональные проверки (C2–C10) шли на КОПИЯХ каталога данных в стейдже
+  (`empty_user_data`, `main_user_data`, `restart_user_data`), продовый settings.json
+  не менялся: sha256 start == end (C11), 1 байт-в-байт.
+- Смоук-save пишет проект и его versioned-бэкапы в РЕАЛЬНЫЙ (резолвящийся) каталог
+  данных текущего пользователя — для этой сессии это `C:\Users\AIAssistant1\Supervertaler`
+  (см. 1.1, квирк №2). Это ожидаемое поведение инструмента
+  (`tools/batch_validation/smoke_project.py`, см. AGENTS.md), а не побочный эффект
+  S2.4; подробно — §4, ссылка на п. 43.
+- Файл-указатель `%APPDATA%\Supervertaler\config.json` создан ОДИН раз ветвью
+  автовосстановления `get_user_data_path()` в процессе 1 (это документированный
+  побочный эффект самой функции) и процессом 2 не менялся (R1).
+
+3.7 СМОУК-ТЕСТ (два процесса, оба дерева) — EXIT=0
+Артефакт audits/batch7s24_smoke_exit.txt (драйвер smoke_exit.ps1 с -Wait, чтобы
+получить ИМЕННО код возврата):
+    work    root=E:\Dev\SupervertalerPortable                     EXIT=0  LOAD_OK S24Smoke 4 …
+    head-wt root=D:\Temp\…\batch7_stage2_s24\run-001\head-wt      EXIT=0  LOAD_OK S24Smoke 4 …
+Save-прогон (work): `SAVE_OK 4042` + `REACHED_END` + `EXIT=0`. То есть проект,
+сохранённый деревом ПОСЛЕ переноса, читается одинаково и рабочим деревом, и
+worktree HEAD — расхождения поведения на этом контуре нет.
+
+════════════════════════════════════════════════════════════════════════════════
+4. НЕПОКРЫТЫЕ ПРОВЕРКИ (обязательный раздел)
+════════════════════════════════════════════════════════════════════════════════
+Формат: (что / почему не прогнано / риск / как проверить руками). Дубли со сквозными
+пунктами реестра даны ССЫЛКОЙ, новых строк под них не заводится (правило промпта,
+разбор S2.3 §4/M10).
+
+4.1 НОВЫЙ ПУНКТ, ЗАВОДИТСЯ В РЕЕСТР (VALIDATION_BACKLOG.md → п. 44)
+  44 — ГОЛОСОВОЙ ДИКТАНТ С РЕАЛЬНЫМ АУДИО (Whisper/faster-whisper) в режиме
+      «Auto (use project target language)». Что не проверено: фактическое
+      распознавание речи и подстановка языка в декодер. Почему не прогнано: в
+      headless-среде нет микрофона/аудио, а сам поток распознавания требует
+      модели. Что ПРОВЕРЕНО вместо этого: вся цепочка до потока — R4 (§3.3)
+      подтверждает, что переживший перезапуск `self.target_language` доходит до
+      аргумента `language` потока диктовки ('pl' / 'ru' / 'auto'); сам поток при
+      этом подменён стендом. Риск: LOW — перенесённые методы в этой цепочке только
+      ЧИТАЮТ файл настройки; `start_voice_dictation` и `load_dictation_settings`
+      не тронуты (3.4). Как проверить руками: включить диктовку в живой сборке с
+      проектом на польском/русском, произнести фразу, убедиться, что язык
+      распознавания совпадает с целевым языком проекта.
+
+4.2 ССЫЛКИ НА СУЩЕСТВУЮЩИЕ ПУНКТЫ РЕЕСТРА (без новых строк)
+  - Полный человеческий цикл «изменить КАЖДУЮ вкладку → перезапуск → проверить»
+    (Validation плана Step 7): в S2.4 закрыт для вкладки Language Pair и тумблера
+    spellcheck (C7 + R2/C10), остальные вкладки — вне состава под-батча. См. п. 17
+    (процессный пункт; после S2.4 остаётся S2.5).
+  - Конкурентная запись settings.json / обрыв записи: не моделировалось, atomic-rename
+    по-прежнему нет. См. п. 15.
+  - Визуальная отрисовка (вкладка Language Pair, подчёркивания спеллчека, DPI/подписи):
+    offscreen. См. п. 12.
+  - Повреждённый/частичный settings.json (UTF-8/BOM) для двух перенесённых загрузчиков:
+    fallback не подкладывался. См. п. 14 (и п. 28/36 того же смысла).
+  - Ветки ошибок записи (`⚠ Could not save language settings` /
+    `⚠ Could not save spellcheck settings`): сценарий «диск только для чтения /
+    ошибка dump» не воспроизводился (в прогоне 0 таких предупреждений). См. п. 27.
+  - Нагрузка/производительность (сколько раз открывается файл): замерялось только
+    отсутствие кэша (3 вызова = 3 открытия). См. п. 19.
+  - Сборки/другие ОС (в т.ч. поведение при EXE и в portable-сборке). См. п. 20.
+  - Автотесты для settings-IO. См. п. 21.
+  - Продовые user-data и смоук-артефакты: в этой сессии резолвится свежий каталог
+    `C:\Users\AIAssistant1\Supervertaler` (1.1, квирк №2), settings.json не изменён
+    (C11), указатель процессом 2 не тронут (R1). См. п. 43.
+  - Смена каталога данных (Settings → Change…, визард первого запуска) и миграции:
+    не нажимались; ветка `_needs_data_location_dialog = True` вообще НЕ вызывает
+    `_load_language_pair_from_disk` (вызов под этим guard-ом — так и в HEAD,
+    поведение не менялось). См. п. 13 (MOOT) и п. 18.
+  - Первый запуск приложения с реальным диалогом выбора каталога данных: см. п. 13.
+
+4.3 ПРОАНАЛИЗИРОВАНО И ОСОЗНАННО ПРИНЯТО (пункт реестра НЕ заводится)
+  - ПОРЯДОК «print → return → запись атрибутов» в `_load_language_pair_from_disk`:
+    в исходном теле было «запись `self.source_language`/`self.target_language` , затем
+    печать»; после SPLIT-а печать происходит внутри сервиса ДО возврата пары, а
+    атрибуты окна пишет делегат сразу после. Порядок stdout относительно записи
+    атрибутов формально изменён, но НЕНАБЛЮДАЕМ: единственный вызов метода —
+    `__init__` 6348, до входа в event loop, конкурентного наблюдателя нет,
+    а результат (значения атрибутов в момент возврата) совпадает при любом порядке.
+    Пункт реестра не заводится: отличие выявлено, объяснено и не требует действий —
+    это не «непроверенный сценарий», а свойство SPLIT-разделения, требуемого промптом.
+  - КОНТРАКТ СЕРВИСНОГО `_save_spellcheck_settings(enabled: bool)`: у него ровно один
+    потребитель (делегат окна), аргумент обязателен по смыслу SPLIT-а. Вызов без
+    аргумента упал бы TypeError-ом — но такого сайта нет ни в репозитории, ни в
+    планах (проверено грепом repo-wide, 1.4). Пункт реестра не заводится.
+  - МИКРО-ВЕТКА «print бросает исключение (сломанный stdout)»: в исходном теле при
+    таком падении оба атрибута уже были записаны, в новом — не записаны (исключение
+    перехватывается и печатается «keeping defaults»). Практически недостижимо
+    (печать первой диагностики уже произошла выше по тому же потоку); принято
+    осознанно как часть SPLIT-семантики.
+
+════════════════════════════════════════════════════════════════════════════════
+5. ДОКУМЕНТЫ, ОБНОВЛЁННЫЕ В ЭТОМ БАТЧЕ (с раскрытием правок)
+════════════════════════════════════════════════════════════════════════════════
+- PROJECT_STATUS.md: шапка (текущий шаг, число строк монолита), таблица прогресса
+  Step 7, новый раздел «Что дальше: … S2.4 закрыт» с фактическими AST-границами и
+  разделом «Непокрытые проверки»-ссылками. Прежний раздел «S2.3 закрыт» сохранён
+  ниже как история.
+- EXTRACTION_PLAN.md: в блоке Step 7 к статусу S2.3 добавлен статус S2.4 (те же
+  измеренные числа, что здесь). ОТДЕЛЬНО РАСКРЫВАЮ ДВЕ ФАКТИЧЕСКИЕ ПОПРАВКИ:
+  (1) состав «S2.4 = 9 методов» из плана/Stage 1 на этом шаге НЕ выполнялся
+      целиком: координатор исключил голосовую часть (`load_dictation_settings`,
+      `save_dictation_settings`, `load/save_voice_vocabulary_settings`,
+      `load_language_settings`) из S2.4 — в этом под-батче перенесены 4 метода
+      (языковая пара + spellcheck-IO), голосовые остаются на следующий шаг;
+  (2) утверждение промпта «остальные 3 кандидата используют
+      `_load_settings_section("ui")`» неверно: фактическое разделение API — 2/2
+      (см. 1.4). Оба факта зафиксированы и в отчёте, и в плане, чтобы следующий
+      под-батч не считал по неверной цифре.
+- VALIDATION_BACKLOG.md: новый раздел «Batch #7 Stage 2 (S2.4)» — один новый пункт
+  (44, голосовой диктант с реальным аудио) и ссылки на существующие пункты вместо
+  дублей. Нумерация продолжена с 44 (39–42 в реестре намеренно отсутствуют по
+  решению S2.3, номер 43 занят).
+- Кода в этих документах, кроме перечисленного, не правилось; ни один .py кроме
+  двух ожидаемых не менялся (2.5).
+
+════════════════════════════════════════════════════════════════════════════════
+6. КОММИТ БАТЧА
+════════════════════════════════════════════════════════════════════════════════
+Один коммит: код переноса (4 метода в сервис + 4 делегата + блок-комментарий +
+абзац докстринга сервиса + импорт `Tuple`) + промпт S2.4 + этот отчёт + аудиты
+batch7s24_* + обновления PROJECT_STATUS.md / EXTRACTION_PLAN.md /
+VALIDATION_BACKLOG.md.
+
+Проверка после коммита (обязательная, чтобы коммит не разошёлся с деревом):
+повторить manifest.py + counts.py + py_compile_all.py + verify_s24.py --live и
+сверить с batch7s24_manifest_after.txt / batch7s24_counts_after.txt /
+batch7s24_verify_out.txt — файлы .py перед коммитом не менялись, поэтому все
+значения должны совпасть; затем проверить `git status --short` (пусто) и
+побайтовое равенство `git show HEAD:<file>` рабочей копии для двух файлов.
+
+ПРЕД-КОММИТНЫЙ ПРОГОН ИНСТРУМЕНТОВ — ВЫПОЛНЕН, РАСХОЖДЕНИЙ НЕТ
+(артефакты run-001\{counts_precommit.txt, manifest_precommit.txt,
+manifest_precommit_cmp.txt, verify_precommit.txt}): py_compile COMPILE_OK;
+counts_precommit.txt побайтово равен counts_after.txt (и baseline_counts.txt);
+manifest_precommit.txt против manifest_after.txt → changed=0, added=0, removed=0;
+verify_s24.py --live → CHECKS 37/37 RESULT OK.
+
+ПОСТ-КОММИТНАЯ ПРОВЕРКА (коммит батча, родитель — f600e00d1e36f9584fd2b9e757e650550eb2a6d4 РОВНО):
+- `git rev-parse HEAD` = коммит «Extract language-pair + spellcheck settings IO
+  into modules/settings_service.py (Batch #7 Stage 2, S2.4)»; его родитель —
+  f600e00d1e36f9584fd2b9e757e650550eb2a6d4 (то есть база Этапа 0, без лишних
+  коммитов между). Точный хеш см. `git log -1 --oneline` — он менялся при
+  `--amend` (см. ниже «ЦЕПОЧКА ХЕШЕЙ»).
+- `git status --short` — ПУСТО (дерево == коммит); `git diff HEAD --stat` — пусто.
+- В коммите 25 файлов: 2 изменённых .py + 3 обновлённых .md + промпт + отчёт +
+  18 новых аудитов batch7s24_* (+ JSON-и app/restart-check).
+- Содержимое коммита совпадает с измеренными файлами побайтово (сравнение
+  `git show HEAD:<file>` с рабочей копией, sha256; артефакт verify_commit_s24.py):
+    Supervertaler.py            0854f8990feea017d0e8c2c81bc3321bebe5af1962ab10ad301794e9c1ee66a3
+                                committed == expected: True; equal_raw=True; equal_normalized=True
+    modules/settings_service.py 6778e9e7c6a37bd329c3b5bd6e1b0cf695d89f2e5ead59c6c1adee71b9a75636
+                                committed == expected: True; equal_raw=True; equal_normalized=True
+- Повторный прогон инструментов ПОСЛЕ коммита (артефакты run-001\
+  {counts_postcommit.txt, manifest_postcommit.txt, manifest_postcommit_cmp.txt,
+  verify_postcommit.txt}): py_compile COMPILE_OK (144 файла);
+  counts_postcommit.txt побайтово равен counts_after.txt И baseline_counts.txt
+  (8 метрик 1211/18/35/24/24/0/85/2 неизменны); manifest_postcommit.txt против
+  manifest_after.txt → changed=0, added=0, removed=0; verify_s24.py --live →
+  CHECKS 37/37 RESULT OK. Ни один .py после измерений не менялся.
+- ЦЕПОЧКА ХЕШЕЙ КОММИТА (фиксирую честно, чтобы читатель не сверял хеши вслепую, как
+  и в S2.3): первый коммит батча — `ede874b`; далее ТРИ `git commit --amend`, каждый
+  — ТОЛЬКО текст отчёта (ни один .py не менялся; после каждого шага повторный
+  манифест: changed=0 по .py, а `git diff --numstat HEAD~1 HEAD -- '*.py'` даёт те
+  же 27/38 и 84/1):
+    (1) добавлен этот раздел пост-коммитной проверки (ede874b → 47ff11f);
+    (2) в раздел добавлена сама цепочка + строка «коммит» в сводке метрик
+        (47ff11f → …);
+    (3) исправлена одна формулировка в §2.2 (было «снята аннотация/сигнатура» —
+        стало «def-строке добавлена аннотация возвращаемого типа»);
+    (4) удалены лишние пустые строки в конце файла (косметика).
+  Хеш ФИНАЛЬНОГО коммита см. `git log -1 --oneline`; .py-содержимое идентично во всех
+  состояниях (проверено `git show HEAD:` + sha256 против измеренных значений).
+- Не пушился.
+- Квирк line-endings (как в S2.3): два новых текстовых файла (промпт и отчёт)
+  были созданы редактором с CRLF; перед коммитом приведены к LF (правило
+  `.gitattributes`: `* text=auto eol=lf`), поэтому в коммите и в дереве они LF и
+  `git status` после коммита чистый. Никакие .py этим не затрагивались (они и
+  раньше были LF: CR-байт 0).
+
+════════════════════════════════════════════════════════════════════════════════
+МЕТРИКИ ПОДТВЕРЖДЕНИЯ (сводка чисел этого отчёта)
+════════════════════════════════════════════════════════════════════════════════
+монолит            68 285 → 68 274 строк (−11; байт 3 544 176 → 3 542 691)
+сервис               368 → 451 строка (+83), методов 20 → 24
+делегатов S2.4       4/4 signature_identical + forwards; ВЕРБАТИМ 2/2,
+                     документированная правка 2/2 (diff −3/+3 и −2/+2)
+NOT-MOVE             8/8 byte-identical (включая load_dictation_settings)
+callsites            внешних нет; AST only-in-HEAD = 0, count-mismatch = 0
+8 метрик             1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 (до == после, файлы побайтово равны)
+py_compile           COMPILE_OK (144 файла)
+манифест             144 → 144; changed=2, added=0, removed=0
+живой прогон         PASS=11 / FAIL=0 (процесс 1, offscreen)
+перезапуск           PASS=4 / FAIL=0 (процесс 2, отдельный интерпретатор, temp user_data)
+голосовой диктант    lang_code 'pl' / 'ru' / 'auto' — цепочка target_language доказана
+смоук                work EXIT=0 (SAVE_OK 4042; LOAD_OK S24Smoke 4), head-wt EXIT=0 (LOAD_OK S24Smoke 4)
+учёт строк           difflib: 4 региона, sum(delta) = −11 == net (assert True)
+коммит               см. `git log -1 --oneline` (родитель f600e00d…; 25 файлов; не пушился)

@@ -1,0 +1,2 @@
+work root=E:\Dev\SupervertalerPortable EXIT=0 LOAD_OK S24Smoke 4 Segment 1 source | REACHED_END
+head-wt root=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\head-wt EXIT=0 LOAD_OK S24Smoke 4 Segment 1 source | REACHED_END

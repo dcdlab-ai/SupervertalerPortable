@@ -48,11 +48,19 @@ SupervertalerQt сохраняет 6 тонких одноимённых дел�
 монолите, как и ``save_clipboard_privacy_settings`` — но его внутренний вызов
 ``self._load_general_settings_from_file()`` идёт через одноимённый делегат и не
 менялся.
+
+Под-батч S2.4 (тот же Stage 2) добавил языковую пару и спеллчек-IO:
+``_load_language_pair_from_disk`` (в сервисе читает файл и возвращает пару
+источник/перевод, запись атрибутов окна делает одноимённый делегат),
+``save_language_settings`` (ВЕРБАТИМ), ``_save_spellcheck_settings`` (в
+сервисе принимает ``enabled`` аргументом, делегат передаёт
+``self.spellcheck_enabled``; тело иначе ВЕРБАТИМ) и
+``_load_spellcheck_settings`` (ВЕРБАТИМ).
 """
 
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Tuple
 
 __all__ = ["SettingsService"]
 
@@ -366,3 +374,78 @@ class SettingsService:
     def save_api_keys(self, api_keys: Dict[str, str]):
         """Сохраняет API-ключи в единый файл настроек."""
         self._save_settings_section("api_keys", api_keys)
+
+    # ------------------------------------------------------------------
+    # Языковая пара + спеллчек (Batch #7 Stage 2, под-батч S2.4)
+    # ------------------------------------------------------------------
+    # Из четырёх перенесённых тел два ушли ВЕРБАТИМ (save_language_settings,
+    # _load_spellcheck_settings), два потребовали SPLIT по состоянию окна:
+    #   * _load_language_pair_from_disk больше НЕ пишет
+    #     self.source_language / self.target_language — метод возвращает пару
+    #     (src, tgt), а на исключении None; запись атрибутов делает делегат
+    #     окна и только при не-None результате (иначе атрибуты остаются
+    #     нетронутыми, как и в исходном теле);
+    #   * _save_spellcheck_settings больше НЕ читает self.spellcheck_enabled —
+    #     значение приходит аргументом enabled, делегат окна передаёт туда
+    #     свой self.spellcheck_enabled.
+    # Внутренние вызовы self._load_settings_section, self._load_unified_settings,
+    # self._save_unified_settings и self.log резолвятся в методы ЭТОГО класса
+    # (в монолите те же выражения шли через его одноимённые делегаты), поэтому
+    # наблюдаемое поведение то же — включая отсутствие кэша (файл открывается
+    # заново на каждый вызов, см. докстринг модуля).
+    # Асимметрия API сохранена КАК ЕСТЬ (не унифицируется по инициативе
+    # переноса): save_language_settings и _save_spellcheck_settings пишут через
+    # whole-file API (_load_unified_settings / _save_unified_settings), а
+    # _load_language_pair_from_disk и _load_spellcheck_settings читают через
+    # секционный _load_settings_section("ui").
+
+    def _load_language_pair_from_disk(self) -> Optional[Tuple[str, str]]:
+        """Читает только языковую пару источник/перевод из settings.json.
+        
+                Должно выполняться ДО построения UI вкладки Language Pair, иначе
+                комбобоксы заполняются устаревшими жёстко заданными дефолтами
+                (English / Dutch). Вызывается рано в __init__, где spellcheck
+                и log могут ещё не существовать, поэтому здесь их не трогаем."""
+        defaults = ('English', 'Dutch')
+        try:
+            prefs = self._load_settings_section("ui")
+            lang_settings = prefs.get('language_settings', {}) or {}
+            src = lang_settings.get('source_language') or defaults[0]
+            tgt = lang_settings.get('target_language') or defaults[1]
+            print(f"[LangSettings] Loaded from settings.json: {src} → {tgt}")
+            return src, tgt
+        except Exception as e:
+            print(f"[LangSettings] Load failed, keeping defaults: {e!r}")
+            return None
+
+    def save_language_settings(self, source_lang: str, target_lang: str):
+        """Сохраняет языковые настройки в предпочтения."""
+        try:
+            all_settings = self._load_unified_settings()
+            all_settings.setdefault("ui", {})['language_settings'] = {
+                'source_language': source_lang,
+                'target_language': target_lang
+            }
+            self._save_unified_settings(all_settings)
+        except Exception as e:
+            self.log(f"⚠ Could not save language settings: {str(e)}")
+
+    def _save_spellcheck_settings(self, enabled: bool):
+        """Сохраняет настройки проверки орфографии в предпочтения."""
+        try:
+            all_settings = self._load_unified_settings()
+            all_settings.setdefault("ui", {})['spellcheck_settings'] = {
+                'enabled': enabled
+            }
+            self._save_unified_settings(all_settings)
+        except Exception as e:
+            self.log(f"⚠ Could not save spellcheck settings: {e}")
+
+    def _load_spellcheck_settings(self):
+        """Загружает настройки проверки орфографии из предпочтений."""
+        try:
+            prefs = self._load_settings_section("ui")
+            settings = prefs.get('spellcheck_settings', {})
+            return settings.get('enabled', False)
+        except:
+            return False

@@ -1,0 +1,185 @@
+{
+ "C1_service_contract": {
+  "ok": true,
+  "value": {
+   "module": "modules.settings_service",
+   "all_4_callable": true,
+   "settings_dir": "C:\\Users\\AIAssistant1\\Supervertaler\\workbench\\settings"
+  }
+ },
+ "C2_language_pair_split_semantics": {
+  "ok": true,
+  "value": {
+   "service_return": [
+    "Spanish",
+    "German"
+   ],
+   "service_touched_window_attrs": false,
+   "delegate_return": null,
+   "after_delegate": [
+    "Spanish",
+    "German"
+   ],
+   "values_from_file": true
+  }
+ },
+ "C3_language_pair_exception_path": {
+  "ok": true,
+  "value": {
+   "delegate_return": null,
+   "pair_after_failure": [
+    "KEEP-SRC",
+    "KEEP-TGT"
+   ],
+   "untouched": true,
+   "printed_failure_line": true,
+   "stdout": "[LangSettings] Load failed, keeping defaults: RuntimeError('S24-FORCED-FAILURE')"
+  }
+ },
+ "C4_defaults_when_no_language_settings": {
+  "ok": true,
+  "value": {
+   "service_return": [
+    "English",
+    "Dutch"
+   ],
+   "window_pair": [
+    "English",
+    "Dutch"
+   ],
+   "is_default": true
+  }
+ },
+ "C5_spellcheck_roundtrip": {
+  "ok": true,
+  "value": {
+   "file_after_window_true": true,
+   "file_after_window_false": false,
+   "service_return_none": null,
+   "file_after_service_true": true,
+   "load_returns_true": true,
+   "file_after_service_false": false,
+   "load_returns_false": false,
+   "sibling_sections_kept": true
+  }
+ },
+ "C6_no_cache_semantics": {
+  "ok": true,
+  "value": {
+   "calls": 3,
+   "opens_of_settings_json": 3,
+   "no_cache_ok": true
+  }
+ },
+ "C7_real_ui_handlers": {
+  "ok": true,
+  "value": {
+   "ui_saver_window_pair": [
+    "English",
+    "Polish"
+   ],
+   "ui_saver_persisted": {
+    "source_language": "English",
+    "target_language": "Polish"
+   },
+   "save_language_settings_callable_ok": true,
+   "button_on_window": true,
+   "button_on_persisted": true,
+   "button_off_window": false,
+   "button_off_persisted": false,
+   "menu_window": true,
+   "menu_persisted": true,
+   "persisted_matches_window_always": true,
+   "log_tail": [
+    "✓ Spellcheck enabled for Polish (backend: pyspellchecker (pl_PL))",
+    "✗ Spellcheck disabled",
+    "✓ Spellcheck enabled for Polish (backend: pyspellchecker (pl_PL))"
+   ]
+  }
+ },
+ "C8_notmove_voice_cluster_alive": {
+  "ok": true,
+  "value": {
+   "dictation_settings_type": "dict",
+   "dictation_language_default": "Auto (use project target language)",
+   "voice_vocabulary_type": "dict",
+   "build_voice_initial_prompt_type": "str",
+   "load_language_settings_callable": true
+  }
+ },
+ "C9_definition_inventory": {
+  "ok": true,
+  "value": {
+   "moved": {
+    "_load_language_pair_from_disk": [
+     "Supervertaler.py:44991",
+     "modules/settings_service.py:402"
+    ],
+    "save_language_settings": [
+     "Supervertaler.py:45237",
+     "modules/settings_service.py:421"
+    ],
+    "_save_spellcheck_settings": [
+     "Supervertaler.py:52243",
+     "modules/settings_service.py:433"
+    ],
+    "_load_spellcheck_settings": [
+     "Supervertaler.py:52251",
+     "modules/settings_service.py:444"
+    ]
+   },
+   "not_move": {
+    "_collect_voice_dictation_termbase_terms": [
+     "Supervertaler.py:45162"
+    ],
+    "_migrate_voice_dictation_default_off": [
+     "Supervertaler.py:45129"
+    ],
+    "build_voice_initial_prompt": [
+     "Supervertaler.py:45080"
+    ],
+    "load_dictation_settings": [
+     "Supervertaler.py:44918"
+    ],
+    "load_language_settings": [
+     "Supervertaler.py:45214"
+    ],
+    "load_voice_vocabulary_settings": [
+     "Supervertaler.py:45015"
+    ],
+    "open_termbases_tab": [
+     "Supervertaler.py:45107"
+    ],
+    "save_voice_vocabulary_settings": [
+     "Supervertaler.py:45055"
+    ]
+   }
+  }
+ },
+ "C10_seed_restart_dir": {
+  "ok": true,
+  "value": {
+   "restart_settings_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s24\\run-001\\restart_user_data\\workbench\\settings\\settings.json",
+   "persisted_language_settings": {
+    "source_language": "English",
+    "target_language": "Polish"
+   },
+   "persisted_spellcheck": {
+    "enabled": true
+   },
+   "window_pair_before_exit": [
+    "English",
+    "Polish"
+   ]
+  }
+ },
+ "C11_prod_settings_sha_unchanged": {
+  "ok": true,
+  "value": {
+   "sha256_start": "f2e279d3f801ec2ab6a7e5ea3d816dfa654e436eb4bc344b10bb25073d7c5116",
+   "sha256_end": "f2e279d3f801ec2ab6a7e5ea3d816dfa654e436eb4bc344b10bb25073d7c5116",
+   "unchanged": true,
+   "service_back_to_production": true
+  }
+ }
+}

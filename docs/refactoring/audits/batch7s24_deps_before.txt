@@ -1,0 +1,31 @@
+file: E:\Dev\SupervertalerPortable\Supervertaler.py
+
+_load_language_pair_from_disk  44991-45008 (18 lines)
+    self.<attr> loaded : ['_load_settings_section']
+    self.<attr> stored : ['source_language', 'target_language']
+    NOT on SettingsService: ['source_language', 'target_language']
+    -> verdict: SPLIT (window state must stay in the delegate)
+
+save_language_settings  45238-45248 (11 lines)
+    self.<attr> loaded : ['_load_unified_settings', '_save_unified_settings', 'log']
+    self.<attr> stored : []
+    NOT on SettingsService: []
+    -> verdict: VERBATIM-MOVABLE
+
+_save_spellcheck_settings  52249-52258 (10 lines)
+    self.<attr> loaded : ['_load_unified_settings', '_save_unified_settings', 'log', 'spellcheck_enabled']
+    self.<attr> stored : []
+    NOT on SettingsService: ['spellcheck_enabled']
+    -> verdict: SPLIT (window state must stay in the delegate)
+
+_load_spellcheck_settings  52260-52267 (8 lines)
+    self.<attr> loaded : ['_load_settings_section']
+    self.<attr> stored : []
+    NOT on SettingsService: []
+    -> verdict: VERBATIM-MOVABLE
+
+__init__ 6067-6542
+    calls to _load_language_pair_from_disk: [6348]
+    window.source_language/target_language STORES in __init__: [6242, 6243]
+    window.source_language/target_language LOADS  in __init__: []
+    LOADS before the call: []

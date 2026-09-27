@@ -1,0 +1,16 @@
+head=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\head-wt\Supervertaler.py  call-keys=6  attr-keys=65
+work=E:\Dev\SupervertalerPortable\Supervertaler.py  call-keys=10  attr-keys=65
+
+--- calls ---
+only-in-HEAD (0):
+only-in-WORK (4):
+    _load_language_pair_from_disk._load_language_pair_from_disk x1
+    _load_spellcheck_settings._load_spellcheck_settings x1
+    _save_spellcheck_settings._save_spellcheck_settings x1
+    save_language_settings.save_language_settings x1
+count-mismatch (0):
+
+--- window attributes (load/store) per enclosing function ---
+  (only differences listed; identical = no line)
+
+VERDICT: OK - every call site outside the 4 moved bodies is preserved

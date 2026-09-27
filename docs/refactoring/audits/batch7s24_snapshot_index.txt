@@ -1,0 +1,63 @@
+HEAD Supervertaler.py: lines=68286 SupervertalerQt=6055-62357 direct_methods=819
+
+[window inventory]
+  range 44890-45270:
+    OTHER _load_general_settings_from_file           44903-44909 (  7)  gap_to_next=1
+    OTHER save_general_settings                      44911-44916 (  6)  gap_to_next=1
+    OTHER load_dictation_settings                    44918-44933 ( 16)  gap_to_next=1
+    OTHER save_dictation_settings                    44935-44989 ( 55)  gap_to_next=1
+    MOVE  _load_language_pair_from_disk              44991-45008 ( 18)  gap_to_next=7
+    OTHER load_voice_vocabulary_settings             45016-45054 ( 39)  gap_to_next=1
+    OTHER save_voice_vocabulary_settings             45056-45079 ( 24)  gap_to_next=1
+    OTHER build_voice_initial_prompt                 45081-45106 ( 26)  gap_to_next=1
+    OTHER open_termbases_tab                         45108-45128 ( 21)  gap_to_next=1
+    OTHER _migrate_voice_dictation_default_off       45130-45161 ( 32)  gap_to_next=1
+    OTHER _collect_voice_dictation_termbase_terms    45163-45213 ( 51)  gap_to_next=1
+    OTHER load_language_settings                     45215-45236 ( 22)  gap_to_next=1
+    MOVE  save_language_settings                     45238-45248 ( 11)  gap_to_next=1
+    OTHER _save_language_settings_from_ui            45250-45260 ( 11)  gap_to_next=1
+    OTHER load_font_sizes_from_preferences           45262-45348 ( 87)  gap_to_next=1
+  range 52240-52275:
+    MOVE  _save_spellcheck_settings                  52249-52258 ( 10)  gap_to_next=1
+    MOVE  _load_spellcheck_settings                  52260-52267 (  8)  gap_to_next=1
+    OTHER _refresh_all_highlighters                  52269-52304 ( 36)  gap_to_next=1
+
+[between the two window-A targets] 7 defs: ['load_voice_vocabulary_settings', 'save_voice_vocabulary_settings', 'build_voice_initial_prompt', 'open_termbases_tab', '_migrate_voice_dictation_default_off', '_collect_voice_dictation_termbase_terms', 'load_language_settings']
+
+MOVE     _load_language_pair_from_disk 44991-45008 (18 lines) stmts=3 nested=[]
+     sha256 2701e5885548ccd19a727dbb5c1583e93ce5b4d312902617055c2f738ec0a7a4
+
+MOVE     save_language_settings 45238-45248 (11 lines) stmts=2 nested=[]
+     sha256 393920b0c6984bfb2c86f3e5b2e7b5605d7cc7d19364af615cbcadee528b1db6
+
+MOVE     _save_spellcheck_settings 52249-52258 (10 lines) stmts=2 nested=[]
+     sha256 ba07614065fdd3fc2b9e39687ca0f8a40f22d5dfe56fe1cae647ff9716b6a08c
+
+MOVE     _load_spellcheck_settings 52260-52267 (8 lines) stmts=2 nested=[]
+     sha256 6f91af0cd2154f35172e259927deb5458013df4135ee067d1eac30fdca1b7e14
+
+NOT_MOVE load_dictation_settings 44918-44933 (16 lines) stmts=3 nested=[]
+     sha256 dcf8f8c39db9cbe3228cd30cf670607f102905f9f73ce636233b99492a4e83a9
+
+NOT_MOVE load_voice_vocabulary_settings 45016-45054 (39 lines) stmts=3 nested=[]
+     sha256 11acf067ab886dfcec7af8fbd15726684f15d6041b3e73e2c73e019495eaa269
+
+NOT_MOVE save_voice_vocabulary_settings 45056-45079 (24 lines) stmts=2 nested=[]
+     sha256 ca56e02e220ae3b58269b246d421195171a96a8439c71b135d6c956f604e7789
+
+NOT_MOVE build_voice_initial_prompt 45081-45106 (26 lines) stmts=6 nested=[]
+     sha256 07ae2e7dc6603c7c8f738b49068a58ff4e10ee27303e7521180c48bd63acb7bd
+
+NOT_MOVE open_termbases_tab 45108-45128 (21 lines) stmts=4 nested=[]
+     sha256 f871ee409881d3518cf4c289ee7720e10ff698e8943d741c8531071facfea2a3
+
+NOT_MOVE _migrate_voice_dictation_default_off 45130-45161 (32 lines) stmts=2 nested=[]
+     sha256 a69b96b048aa2b104b3db9f8a189cea1181f661236ae217a3126cd6f82a274e4
+
+NOT_MOVE _collect_voice_dictation_termbase_terms 45163-45213 (51 lines) stmts=7 nested=[]
+     sha256 97c4bd7d6f25f43dd34d1565e74beeda5ec9b6f27e9fedfb01452141de67da14
+
+NOT_MOVE load_language_settings 45215-45236 (22 lines) stmts=2 nested=[]
+     sha256 fc424858a594144cc1b610c4ff1f7f8c59a7d829fceca69925586670759ed903
+
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\snapshot_index.json (12 blocks)

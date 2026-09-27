@@ -1,0 +1,10 @@
+head lines = 68285
+work lines = 68274
+net        = -11
+unequal regions (head_range -> work_range, delta, first line dropped):
+  replace head[44997:45008] work[44997:45007] dh=12 dw=11 delta=-1 | и log могут ещё не существовать, поэтому здесь их не трогаем."""
+  replace head[45239:45248] work[45238:45242] dh=10 dw=5 delta=-5 | """Сохраняет языковые настройки в предпочтения."""
+  replace head[52250:52258] work[52244:52249] dh=9 dw=6 delta=-3 | """Сохраняет настройки проверки орфографии в предпочтения."""
+  replace head[52261:52267] work[52252:52256] dh=7 dw=5 delta=-2 | """Загружает настройки проверки орфографии из предпочтений."""
+unequal regions = 4
+sum(delta) = -11  == net? True

@@ -1,0 +1,52 @@
+=== 1. service inventory ===
+  _load_language_pair_from_disk      defs=1 402-419
+  save_language_settings             defs=1 421-431
+  _save_spellcheck_settings          defs=1 433-442
+  _load_spellcheck_settings          defs=1 444-451
+  order ['_load_language_pair_from_disk', 'save_language_settings', '_save_spellcheck_settings', '_load_spellcheck_settings']
+  == monolith order: True
+=== 2. verbatim / documented-edit ===
+  DOC-EDIT _load_language_pair_from_disk    matches-documented-edit=True diff -3/+3
+      -    def _load_language_pair_from_disk(self):
+      -            self.source_language = src
+      -            self.target_language = tgt
+      +    def _load_language_pair_from_disk(self) -> Optional[Tuple[str, str]]:
+      +            return src, tgt
+      +            return None
+  VERBATIM save_language_settings           True
+  DOC-EDIT _save_spellcheck_settings        matches-documented-edit=True diff -2/+2
+      -    def _save_spellcheck_settings(self):
+      -                'enabled': self.spellcheck_enabled
+      +    def _save_spellcheck_settings(self, enabled: bool):
+      +                'enabled': enabled
+  VERBATIM _load_spellcheck_settings        True
+  strict-verbatim 2/2 + documented-edit 2/2
+=== 3. self.* resolution inside service bodies ===
+  window-state leakage: NONE (OK)
+=== 4. delegates (monolith) ===
+  _load_language_pair_from_disk      sig_identical=True body_ok=True forwards=True (44991-45007, 17 lines)
+  save_language_settings             sig_identical=True body_ok=True forwards=True (45237-45242, 6 lines)
+  _save_spellcheck_settings          sig_identical=True body_ok=True forwards=True (52243-52249, 7 lines)
+  _load_spellcheck_settings          sig_identical=True body_ok=True forwards=True (52251-52256, 6 lines)
+=== 5. NOT-MOVE byte-identity (work ranges re-derived by AST) ===
+  load_dictation_settings                  44918-44933 byte_identical_to_HEAD=True
+  load_voice_vocabulary_settings           45015-45053 byte_identical_to_HEAD=True
+  save_voice_vocabulary_settings           45055-45078 byte_identical_to_HEAD=True
+  build_voice_initial_prompt               45080-45105 byte_identical_to_HEAD=True
+  open_termbases_tab                       45107-45127 byte_identical_to_HEAD=True
+  _migrate_voice_dictation_default_off     45129-45160 byte_identical_to_HEAD=True
+  _collect_voice_dictation_termbase_terms  45162-45212 byte_identical_to_HEAD=True
+  load_language_settings                   45214-45235 byte_identical_to_HEAD=True
+  NOT-MOVE intact: 8/8
+=== 6. __init__ call site of _load_language_pair_from_disk ===
+  HEAD calls [6348], WORK calls [6348]
+  line 6348 in WORK: 'self._load_language_pair_from_disk()'
+  source/target LOADS in __init__: [] (all after 6348: True)
+=== 7. repo-wide definition inventory ===
+  _load_language_pair_from_disk      2 defs: ['Supervertaler.py:44991', 'modules/settings_service.py:402']
+  save_language_settings             2 defs: ['Supervertaler.py:45237', 'modules/settings_service.py:421']
+  _save_spellcheck_settings          2 defs: ['Supervertaler.py:52243', 'modules/settings_service.py:433']
+  _load_spellcheck_settings          2 defs: ['Supervertaler.py:52251', 'modules/settings_service.py:444']
+
+CHECKS 37/37
+RESULT OK

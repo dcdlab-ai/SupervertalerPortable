@@ -1,0 +1,3 @@
+file	_load_language_pair_from_disk	save_language_settings	_save_spellcheck_settings	_load_spellcheck_settings
+Supervertaler.py	3	3	3	3
+TOTAL	3	3	3	3

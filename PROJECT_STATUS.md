@@ -4,12 +4,12 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-27 (Batch #7 Stage 2, под-батч S2.3) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API», S2.2 «general + clipboard reading» и S2.3 «LLM/proxy/provider/api keys» выполнены (`modules/settings_service.py` + 19 делегатов), дальше S2.4 (языки/диктовка/словарь/спеллчек, 9 методов); монолит 68 285 строк
+**Обновлено:** 2026-09-27 (Batch #7 Stage 2, под-батч S2.4) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API», S2.2 «general + clipboard reading», S2.3 «LLM/proxy/provider/api keys» и S2.4 «языковая пара + spellcheck-IO» выполнены (`modules/settings_service.py` + 23 делегата), дальше S2.5 (голосовая часть S2.4 + recent-projects + миграции); монолит 68 274 строки
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **68 285**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **68 274**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
@@ -28,10 +28,23 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 `save_api_keys`) и оставил в монолите 10 тонких делегатов с исходными сигнатурами
 (включая приватные `_get_proxy_url`/`_get_proxy_dict`); монолит 68 373 → **68 285**
 строк (−88), 8 метрик без изменений, живой offscreen-прогон — 14/14 PASS (в т.ч.
-прямой тест 5 НЕЗАЩИЩЁННЫХ вызовов `PreTranslationWorker`). Состав Stage 2 после
-V1–V4 — 32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5); закрыто
-19 из 32 методов (S2.1 + S2.2 + S2.3).
-Дальше — **S2.4** (языки/диктовка/словарь/спеллчек: 9 методов) отдельным промптом.
+прямой тест 5 НЕЗАЩИЩЁННЫХ вызовов `PreTranslationWorker`). Под-батч
+**S2.4 «языковая пара + spellcheck-IO»** (27.09.2026) перенёс ещё 4 метода / 47
+строк (`_load_language_pair_from_disk`, `save_language_settings`,
+`_save_spellcheck_settings`, `_load_spellcheck_settings`) и оставил 4 тонких
+делегата; это ПЕРВЫЙ под-батч Stage 2, где сработало стоп-условие «зависимость от
+состояния окна»: 2 тела чистые (ВЕРБАТИМ), а 2 перенесены SPLIT-ом (запись
+`self.source_language`/`target_language` и чтение `self.spellcheck_enabled`
+остались в делегатах, сервис принимает/возвращает значения); монолит 68 285 →
+**68 274** строки (−11), 8 метрик без изменений, живой offscreen-прогон — 11/11 PASS
+плюс отдельный процесс-перезапуск 4/4 PASS. Состав Stage 2 после V1–V4 — 32 метода
+(6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5); закрыто 23 из 32 методов
+(S2.1 + S2.2 + S2.3 + S2.4), в S2.4 координатор исключил голосовую часть
+(`load_dictation_settings`, `save_dictation_settings`,
+`load/save_voice_vocabulary_settings`, `load_language_settings`) — она остаётся на
+следующий шаг вместе с S2.5.
+Дальше — **S2.5**: голосовая часть + `load/save_recent_projects` + две миграции,
+отдельным промптом; границы вывести AST заново (после −11 номера ниже 52249 сместились).
 Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
 прочтению перед любой работой).
 
@@ -46,11 +59,87 @@ V1–V4 — 32 метода (6 A + 26 B) / ~731 строка, 5 под-батч�
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026), S2.2 «general + clipboard reading» (26.09.2026) и S2.3 «LLM/proxy/provider/api keys» (27.09.2026) выполнены** — `modules/settings_service.py` + 19 тонких делегатов; осталось S2.4–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2/S2.3: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`, `…Stage 2 (S2.3).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt`, `batch7s23_*.txt` |
+| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026), S2.2 «general + clipboard reading» (26.09.2026), S2.3 «LLM/proxy/provider/api keys» (27.09.2026) и S2.4 «языковая пара + spellcheck-IO» (27.09.2026) выполнены** — `modules/settings_service.py` + 23 тонких делегата; осталось S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2/S2.3/S2.4: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`, `…Stage 2 (S2.3).txt`, `…Stage 2 (S2.4).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt`, `batch7s23_*.txt`, `batch7s24_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 Stage 2 — под-батч S2.4 закрыт (Batch #7 Stage 2, 27.09.2026)
+
+**S2.4 выполнен** (база HEAD `f600e00` РОВНО — ни потомков, ни расхождения; монолит
+68 285 → **68 274** строки, −11; `git diff --numstat` 27/38, difflib — ровно 4
+региона, сумма −11 == изменению файла). Перенесены 4 метода / 47 строк в
+`modules/settings_service.py` (368 → 451 строка; методы 20 → 24) —
+`_load_language_pair_from_disk` (402–419), `save_language_settings` (421–431),
+`_save_spellcheck_settings` (433–442), `_load_spellcheck_settings` (444–451).
+**Это первый под-батч Stage 2, где сработало стоп-условие «зависимость от состояния
+окна»:** два тела перенесены ВЕРБАТИМ (`save_language_settings`,
+`_load_spellcheck_settings`), а два — SPLIT-ом (документированная правка −3/+3 и
+−2/+2): сервисный `_load_language_pair_from_disk` больше не пишет
+`self.source_language`/`target_language`, а ВОЗВРАЩАЕТ пару (на исключении — None),
+и атрибуты окна пишет тонкий делегат (только при не-None результате);
+сервисный `_save_spellcheck_settings(enabled)` больше не читает
+`self.spellcheck_enabled` — значение передаёт делегат. В монолите — 4 тонких
+делегата с исходными сигнатурами (4/4 signature_identical + forwards).
+Ограничение промпта выполнено: единственный вызов `_load_language_pair_from_disk`
+остался в `__init__` на строке 6348 (LOADS `source_language`/`target_language` в
+`__init__` = 0, проверено AST и до, и после).
+
+**Живой прогон (offscreen) — 11/11 PASS + отдельный процесс-перезапуск 4/4 PASS:**
+- SPLIT подтверждён живьём: прямой вызов сервиса вернул пару и НЕ тронул атрибуты
+  окна; делегат записал их; на искусственном исключении атрибуты остались
+  нетронутыми, а сохранённая диагностика `[LangSettings] Load failed…` попала в stdout.
+- Вкладка Language Pair проверена через РЕАЛЬНЫЙ обработчик
+  `_save_language_settings_from_ui` (настоящие QComboBox); тумблер spellcheck — через
+  РЕАЛЬНЫЕ `_toggle_spellcheck_from_button` и `_toggle_spellcheck` (в логе виден бэкенд
+  `pyspellchecker (pl_PL)`); файл всегда равен состоянию окна.
+- Перезапуск в ОТДЕЛЬНОМ интерпретаторе на изолированном каталоге данных (резолвер
+  `get_user_data_path` подменён до создания окна): языковая пара и spellcheck
+  подхватились из файла, а голосовой диктант в режиме «Auto (use project target
+  language)» получил `language='pl'` из пережившего перезапуск `self.target_language`
+  (контроль: 'ru'; автодетект → 'auto').
+- Ровно 4 метода-соседа не тронуты байт-в-байт (8 NOT-MOVE-блоков, включая
+  `load_dictation_settings`, найденный AST repo-wide); 8 метрик 1211/18/35/24/24/0/85/2
+  без изменений (файлы до/после побайтово равны); манифест changed=2, added=0, removed=0;
+  смоук save/load — `EXIT=0` и на рабочем дереве, и на worktree HEAD.
+
+Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.4).txt`; промпт:
+`docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.4 languages-spellcheck).txt`;
+аудиты: `docs/refactoring/audits/batch7s24_*` (снапшот-индекс 12 блоков,
+deps-load/store, manifest-compare, line-accounting, callsites AST-compare,
+per-file counts, verify 37/37, app-check JSON+лог, restart JSON+лог, smoke-exit).
+Непокрытые проверки — раздел 4 отчёта (новый пункт реестра один: **п. 44** —
+голосовой диктант с реальным аудио; остальное дано ссылками на п. 12/13/14/15/17/18/
+19/20/21/27/43, чтобы не дублировать сквозные пункты).
+
+**РАСКРЫТИЕ ДВУХ ФАКТИЧЕСКИХ ПОПРАВОК** (обе занесены в `EXTRACTION_PLAN.md`):
+1) состав «S2.4 = 9 методов / ~203 строки» на этом шаге НЕ выполнялся целиком —
+   координатор исключил голосовую часть, поэтому под-батч = 4 метода / 47 строк;
+2) утверждение промпта «остальные 3 кандидата используют
+   `_load_settings_section("ui")`» неверно: разделение API фактическое 2/2
+   (`save_language_settings` и `_save_spellcheck_settings` пишут через whole-file
+   API, два оставшихся читают секционным). Асимметрия сохранена «как есть».
+
+**Дальше — S2.5 «голосовая часть + recent-projects + миграции», 10 методов / ~419 строк.**
+Границы ПЕРЕСЧИТАНЫ AST на этом дереве (после переноса −11; номера ниже 52 249
+сместились, ниже 44 991 — тоже):
+    load_recent_projects                    32326–32388 (63)
+    save_recent_projects                    32390–32400 (11)
+    _migrate_settings_to_unified            44744–44834 (91)
+    _migrate_to_workbench_layout            44836–44901 (66)
+    load_dictation_settings                 44918–44933 (16)   ← голосовая часть
+    save_dictation_settings                 44935–44989 (55)   ← SPLIT (QMessageBox)
+    load_voice_vocabulary_settings          45015–45053 (39)   ← голосовая часть
+    save_voice_vocabulary_settings          45055–45078 (24)   ← голосовая часть
+    _migrate_voice_dictation_default_off    45129–45160 (32)   ← 3-я миграция
+    load_language_settings                  45214–45235 (22)   ← SPLIT (TagHighlighter +
+                                                                  spellcheck_manager)
+NOT-MOVE-остаток (не переносить без решения владельца):
+`load_general_settings` 44542–44638 (97), `save_clipboard_privacy_settings`
+44721–44742 (22), `get_autocorrect_settings` 44640–44651 (12, тир C),
+`load_font_sizes_from_preferences` 45256–45342 (87, тир C — ссылается на классы
+монолита). После S2.5 будет закрыто 33 из 33 методов Stage 2 (23 закрыто S2.1–S2.4).
+
 ## Что дальше: Step 7 Stage 2 — под-батч S2.3 закрыт (Batch #7 Stage 2, 27.09.2026)
 
 **S2.3 выполнен** (база HEAD `7a2de37` — потомок `4c7ad680`; монолит 68 373 →
@@ -88,9 +177,10 @@ line-accounting, callsites AST-compare, per-file counts, verify, app-check JSON+
 Непокрытые проверки — раздел 4 отчёта (M1–M13; главные: реальный сетевой вызов LLM/MT,
 настоящие клики в модальных окнах Settings, полный человеческий цикл — после S2.4/S2.5).
 
-**Дальше — S2.4 «языки / диктовка / словарь / спеллчек», 9 методов / ~203 строки.**
-Границы вывести AST ЗАНОВО на дереве S2.3 (после сдвига −88 участки ниже 61146 уже
-неверны). После S2.3 всего перенесено 19 из 32 методов Stage 2.
+**Дальше — S2.4 «языки / диктовка / словарь / спеллчек», 9 методов / ~203 строки** —
+**ВЫПОЛНЕН, см. раздел S2.4 ВЫШЕ** (код перенесён по 4 методам вместо 9: голосовая
+часть вынесена в S2.5 решением координатора). Границы были выведены AST ЗАНОВО
+(после сдвига −88). После S2.3 в Stage 2 было перенесено 19 из 32 методов.
 
 ## Что дальше: Step 7 Stage 2 — под-батч S2.2 закрыт (Batch #7 Stage 2, 26.09.2026)
 

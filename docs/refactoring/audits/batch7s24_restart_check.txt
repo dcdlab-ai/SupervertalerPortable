@@ -1,0 +1,72 @@
+[stage] restart settings file: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\restart_user_data\workbench\settings\settings.json
+[stage] seeded ui.language_settings = {'source_language': 'English', 'target_language': 'Polish'}
+[stage] seeded ui.spellcheck_settings = {'enabled': True}
+[USER MODE] Using 'user_data/' folder
+instantiating a FRESH SupervertalerQt against the temp data dir ...
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\restart_user_data
+[LangSettings] Loaded from settings.json: English → Polish
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\restart_user_data\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] [Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[GlobalHotkeyManager] Registered ctrl+alt+l (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+c (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+shift+space (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+o (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+v (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] ✓ Spellcheck initialized for Polish
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+instantiated
+PASS R1_fresh_process_resolves_temp_dir: {"user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s24\\run-001\\restart_user_data", "is_temp_restart_dir": true, "settings_service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s24\\run-001\\restart_user_data\\workbench\\settings", "service_dir_correct": true, "prod_pointer_untouched": true}
+[LangSettings] Loaded from settings.json: English → Polish
+PASS R2_language_pair_survives_restart: {"source_language": "English", "target_language": "Polish", "expected": {"source_language": "English", "target_language": "Polish"}, "matches_file": true, "service_reload_agrees": true}
+PASS R3_spellcheck_survives_restart: {"spellcheck_enabled_after_restart": true, "expected_from_file": true, "matches_file": true, "delegate_read": true}
+[LOG] 🔍 DEBUG: has_thread=True, thread_exists=False, thread_running=False, is_recording=False
+[LOG] ▶️ Starting dictation thread (local Whisper model=base, language=pl, duration=5s)...
+[LOG] 🔍 DEBUG: has_thread=True, thread_exists=False, thread_running=False, is_recording=False
+[LOG] ▶️ Starting dictation thread (local Whisper model=base, language=ru, duration=5s)...
+[LOG] 🔍 DEBUG: has_thread=True, thread_exists=False, thread_running=False, is_recording=False
+[LOG] ▶️ Starting dictation thread (local Whisper model=base, language=auto, duration=5s)...
+PASS R4_voice_dictation_auto_target_language: {"restarted_target_language": "Polish", "restarted_lang_code": "pl", "control_russian_lang_code": "ru", "autodetect_lang_code": "auto", "model_name": "base", "duration": 5, "chain_ok": true}
+
+SUMMARY: PASS=4 FAIL=0
+ALL_CHECKS_PASS
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\restart_check.json
+[Hotkeys] pynput hotkey manager stopped on exit

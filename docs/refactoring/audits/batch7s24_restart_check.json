@@ -1,0 +1,46 @@
+{
+ "R1_fresh_process_resolves_temp_dir": {
+  "ok": true,
+  "value": {
+   "user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s24\\run-001\\restart_user_data",
+   "is_temp_restart_dir": true,
+   "settings_service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s24\\run-001\\restart_user_data\\workbench\\settings",
+   "service_dir_correct": true,
+   "prod_pointer_untouched": true
+  }
+ },
+ "R2_language_pair_survives_restart": {
+  "ok": true,
+  "value": {
+   "source_language": "English",
+   "target_language": "Polish",
+   "expected": {
+    "source_language": "English",
+    "target_language": "Polish"
+   },
+   "matches_file": true,
+   "service_reload_agrees": true
+  }
+ },
+ "R3_spellcheck_survives_restart": {
+  "ok": true,
+  "value": {
+   "spellcheck_enabled_after_restart": true,
+   "expected_from_file": true,
+   "matches_file": true,
+   "delegate_read": true
+  }
+ },
+ "R4_voice_dictation_auto_target_language": {
+  "ok": true,
+  "value": {
+   "restarted_target_language": "Polish",
+   "restarted_lang_code": "pl",
+   "control_russian_lang_code": "ru",
+   "autodetect_lang_code": "auto",
+   "model_name": "base",
+   "duration": 5,
+   "chain_ok": true
+  }
+ }
+}

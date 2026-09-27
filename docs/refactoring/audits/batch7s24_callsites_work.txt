@@ -1,0 +1,4 @@
+file	_load_language_pair_from_disk	save_language_settings	_save_spellcheck_settings	_load_spellcheck_settings
+Supervertaler.py	5	5	5	5
+modules/settings_service.py	4	4	4	4
+TOTAL	9	9	9	9

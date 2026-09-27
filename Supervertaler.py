@@ -44994,18 +44994,17 @@ class SupervertalerQt(QMainWindow):
                 Должно выполняться ДО построения UI вкладки Language Pair, иначе
                 комбобоксы заполняются устаревшими жёстко заданными дефолтами
                 (English / Dutch). Вызывается рано в __init__, где spellcheck
-                и log могут ещё не существовать, поэтому здесь их не трогаем."""
-        defaults = ('English', 'Dutch')
-        try:
-            prefs = self._load_settings_section("ui")
-            lang_settings = prefs.get('language_settings', {}) or {}
-            src = lang_settings.get('source_language') or defaults[0]
-            tgt = lang_settings.get('target_language') or defaults[1]
-            self.source_language = src
-            self.target_language = tgt
-            print(f"[LangSettings] Loaded from settings.json: {src} → {tgt}")
-        except Exception as e:
-            print(f"[LangSettings] Load failed, keeping defaults: {e!r}")
+                и log могут ещё не существовать, поэтому здесь их не трогаем.
+        (Тонкий делегат: SettingsService._load_language_pair_from_disk, Batch #7 Stage 2 S2.4.
+        SPLIT: сервис читает файл и возвращает пару
+        (src, tgt), а на исключении None; запись self.source_language /
+        self.target_language остаётся ЗДЕСЬ и выполняется только при не-None
+        результате, поэтому на исключении атрибуты окна остаются нетронутыми,
+        как и в исходном теле. Единственный вызов — __init__ 6348 — оставлен
+        на этом же месте (до любого кода, читающего языковую пару).)"""
+        language_pair = self.settings_service._load_language_pair_from_disk()
+        if language_pair is not None:
+            self.source_language, self.target_language = language_pair
 
     # =========================================================
     # Voice dictation vocabulary biasing (v1.10.26 issue: Whisper
@@ -45236,16 +45235,11 @@ class SupervertalerQt(QMainWindow):
             print(f"[LangSettings] Spellcheck init failed: {e!r}")
 
     def save_language_settings(self, source_lang: str, target_lang: str):
-        """Сохраняет языковые настройки в предпочтения."""
-        try:
-            all_settings = self._load_unified_settings()
-            all_settings.setdefault("ui", {})['language_settings'] = {
-                'source_language': source_lang,
-                'target_language': target_lang
-            }
-            self._save_unified_settings(all_settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save language settings: {str(e)}")
+        """Сохраняет языковые настройки в предпочтения.
+        (Тонкий делегат: SettingsService.save_language_settings, Batch #7 Stage 2 S2.4.
+        Обязателен: self-вызовы 20811 и
+        _save_language_settings_from_ui (45254 в HEAD).)"""
+        return self.settings_service.save_language_settings(source_lang, target_lang)
     
     def _save_language_settings_from_ui(self, source_combo, target_combo):
         """Сохраняет языковые настройки из интерфейса."""
@@ -52247,24 +52241,19 @@ class SupervertalerQt(QMainWindow):
         self._refresh_all_highlighters()
 
     def _save_spellcheck_settings(self):
-        """Сохраняет настройки проверки орфографии в предпочтения."""
-        try:
-            all_settings = self._load_unified_settings()
-            all_settings.setdefault("ui", {})['spellcheck_settings'] = {
-                'enabled': self.spellcheck_enabled
-            }
-            self._save_unified_settings(all_settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save spellcheck settings: {e}")
+        """Сохраняет настройки проверки орфографии в предпочтения.
+        (Тонкий делегат: SettingsService._save_spellcheck_settings, Batch #7 Stage 2 S2.4.
+        SPLIT: сервис принимает enabled аргументом, сюда передаётся
+        self.spellcheck_enabled окна. Обязателен: self-вызовы
+        52199 (_toggle_spellcheck) и 52246 (_toggle_spellcheck_from_button).)"""
+        return self.settings_service._save_spellcheck_settings(self.spellcheck_enabled)
 
     def _load_spellcheck_settings(self):
-        """Загружает настройки проверки орфографии из предпочтений."""
-        try:
-            prefs = self._load_settings_section("ui")
-            settings = prefs.get('spellcheck_settings', {})
-            return settings.get('enabled', False)
-        except:
-            return False
+        """Загружает настройки проверки орфографии из предпочтений.
+        (Тонкий делегат: SettingsService._load_spellcheck_settings, Batch #7 Stage 2 S2.4.
+        Обязателен: self-вызов 27258
+        (create_grid_view_widget / spellcheck_enabled).)"""
+        return self.settings_service._load_spellcheck_settings()
 
     def _refresh_all_highlighters(self):
         """Обновляет синтаксические подсветки только в ВИДИМЫХ строках
