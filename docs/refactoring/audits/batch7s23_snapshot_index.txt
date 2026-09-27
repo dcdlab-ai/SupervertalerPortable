@@ -1,0 +1,52 @@
+HEAD Supervertaler.py: lines=68374 SupervertalerQt=6055-62445
+
+[cluster inventory]
+  range 56960-57100:
+    MOVE  load_llm_settings 56974-57012 (39 lines)
+    MOVE  save_llm_settings 57014-57021 (8 lines)
+    MOVE  load_proxy_settings 57027-57043 (17 lines)
+    MOVE  save_proxy_settings 57045-57052 (8 lines)
+    MOVE  _get_proxy_url 57054-57076 (23 lines)
+    MOVE  _get_proxy_dict 57078-57085 (8 lines)
+    OTHER _apply_gemini_proxy 57087-57098 (12 lines)
+    OTHER _get_active_custom_profile 57100-57127 (28 lines)
+  range 57255-57315:
+    MOVE  load_provider_enabled_states 57270-57296 (27 lines)
+    MOVE  save_provider_enabled_states 57298-57305 (8 lines)
+    OTHER update_warning_banner 57307-57326 (20 lines)
+  range 61210-61245:
+    MOVE  load_api_keys 61222-61230 (9 lines)
+    MOVE  save_api_keys 61232-61234 (3 lines)
+    OTHER get_ai_inject_glossary_terms 61236-61250 (15 lines)
+
+MOVE load_llm_settings 56974-57012 (39 lines) stmts=3
+     sha256 1fa91dd06c0369b0f6ea6c05149e44bddce76d7584c68536cd029ded600e484a
+
+MOVE save_llm_settings 57014-57021 (8 lines) stmts=2
+     sha256 70779499a0bf46ccf045f864c51d6a1032a0663371da75c99f690b8b46e31333
+
+MOVE load_proxy_settings 57027-57043 (17 lines) stmts=3
+     sha256 279e10cef5cfd287e43eb153960c066d9a2dcf0b6a6aafd9032e5d0d1b9de9a3
+
+MOVE save_proxy_settings 57045-57052 (8 lines) stmts=2
+     sha256 1a7ae268d044a3903a07e804eec90988c21812285d66bc5c5e977ff9f7d849ee
+
+MOVE _get_proxy_url 57054-57076 (23 lines) stmts=2
+     sha256 ff05565e6df99b335e99674221a97f48faec46618420be2e9864c3ebbdde6157
+
+MOVE _get_proxy_dict 57078-57085 (8 lines) stmts=4
+     sha256 64d28e65b797ffcd5ba5f7f77fb32b376988efd357ee82db2b377998a1e89e1c
+
+MOVE load_provider_enabled_states 57270-57296 (27 lines) stmts=3
+     sha256 04dc964a0989be4f0a25d3222c0f5c3a0b810d96d53ae08498968f92b3d9777e
+
+MOVE save_provider_enabled_states 57298-57305 (8 lines) stmts=2
+     sha256 923ddb5a37d78ef7cf243d17ce81c0be8fd597bc4839e490e788366e61681f9d
+
+MOVE load_api_keys 61222-61230 (9 lines) stmts=4
+     sha256 a053d94ad5b07c51f3cd03fb0be96b5d541218ef269ad4f16730beaab9c2c154
+
+MOVE save_api_keys 61232-61234 (3 lines) stmts=2
+     sha256 cc5e232ea49693824f272753628ea113cea14e5fa601f10bb3c7ae3908ae34f5
+
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\snapshot_index.json (10 methods)

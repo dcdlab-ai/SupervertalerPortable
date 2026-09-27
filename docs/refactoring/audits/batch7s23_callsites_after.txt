@@ -1,0 +1,190 @@
+Supervertaler.py:5637:             api_keys = self.parent_app.load_api_keys()
+Supervertaler.py:5660:             api_keys = self.parent_app.load_api_keys()
+Supervertaler.py:5730:             api_keys = self.parent_app.load_api_keys()
+Supervertaler.py:5943:             api_keys = self.parent_app.load_api_keys()
+Supervertaler.py:5995:             api_keys = self.parent_app.load_api_keys()
+Supervertaler.py:8257:             settings = self.load_llm_settings()
+Supervertaler.py:8337:                 settings = self.load_llm_settings()
+Supervertaler.py:11454:         from modules.llm_clients import load_api_keys
+Supervertaler.py:11455:         return load_api_keys()
+Supervertaler.py:11740:                     llm_settings = self.load_llm_settings()
+Supervertaler.py:18501:             settings = self.load_llm_settings()
+Supervertaler.py:18504:             api_keys = self.load_api_keys()
+Supervertaler.py:20843:         settings = self.load_llm_settings()
+Supervertaler.py:20844:         enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:21383:         current_keys = self.load_api_keys()
+Supervertaler.py:21468:         proxy_settings = self.load_proxy_settings()
+Supervertaler.py:21887:         enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:21933:         current_keys = self.load_api_keys()
+Supervertaler.py:22010:         api_keys = self.load_api_keys()
+Supervertaler.py:22011:         enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:22071:         _mt_settings = self.load_llm_settings()
+Supervertaler.py:22327:         llm_settings = self.load_llm_settings()
+Supervertaler.py:22410:             llm_settings = self.load_llm_settings()
+Supervertaler.py:22413:             self.save_llm_settings(llm_settings)
+Supervertaler.py:24767:                     api_keys = self.load_api_keys()
+Supervertaler.py:26231:     def _save_llm_settings_from_ui(self, openai_radio, claude_radio, gemini_radio, ollama_radio,
+Supervertaler.py:26265:         self.save_llm_settings(new_settings)
+Supervertaler.py:26279:         existing = self.load_provider_enabled_states()
+Supervertaler.py:26281:         self.save_provider_enabled_states(enabled_states)
+Supervertaler.py:26359:         existing_settings = self.load_llm_settings()
+Supervertaler.py:26390:         self.save_llm_settings(new_settings)
+Supervertaler.py:26408:         existing = self.load_provider_enabled_states()
+Supervertaler.py:26410:         self.save_provider_enabled_states(enabled_states)
+Supervertaler.py:26481:         self._save_api_keys_from_ui()
+Supervertaler.py:26492:             self.save_proxy_settings(proxy_settings)
+Supervertaler.py:26499:     def _save_api_keys_from_ui(self):
+Supervertaler.py:26510:         self.save_api_keys(api_keys)
+Supervertaler.py:26515:         self._save_api_keys_from_ui()
+Supervertaler.py:26526:         existing = self.load_provider_enabled_states()
+Supervertaler.py:26528:         self.save_provider_enabled_states(enabled_states)
+Supervertaler.py:44620:         llm_settings = self.load_llm_settings()
+Supervertaler.py:47405:         settings = self.load_llm_settings()
+Supervertaler.py:47560:         api_keys = self.load_api_keys()
+Supervertaler.py:47582:             http_proxy=self._get_proxy_url() if provider != 'gemini' else None,
+Supervertaler.py:54588:                 api_keys = self.load_api_keys()
+Supervertaler.py:56974:     def load_llm_settings(self) -> Dict[str, str]:
+Supervertaler.py:56976:         (Тонкий делегат: SettingsService.load_llm_settings, Batch #7 Stage 2 S2.3.
+Supervertaler.py:56979:         return self.settings_service.load_llm_settings()
+Supervertaler.py:56981:     def save_llm_settings(self, settings: Dict[str, str]):
+Supervertaler.py:56983:         (Тонкий делегат: SettingsService.save_llm_settings, Batch #7 Stage 2 S2.3.
+Supervertaler.py:56985:         return self.settings_service.save_llm_settings(settings)
+Supervertaler.py:56991:     def load_proxy_settings(self) -> Dict[str, Any]:
+Supervertaler.py:56993:         (Тонкий делегат: SettingsService.load_proxy_settings, Batch #7 Stage 2 S2.3.
+Supervertaler.py:56994:         Обязателен: self-вызовы 21468 / 26359; через _get_proxy_url — все MT-сайты.)"""
+Supervertaler.py:56995:         return self.settings_service.load_proxy_settings()
+Supervertaler.py:56997:     def save_proxy_settings(self, proxy_settings: Dict[str, Any]):
+Supervertaler.py:56999:         (Тонкий делегат: SettingsService.save_proxy_settings, Batch #7 Stage 2 S2.3.
+Supervertaler.py:57001:         return self.settings_service.save_proxy_settings(proxy_settings)
+Supervertaler.py:57003:     def _get_proxy_url(self) -> Optional[str]:
+Supervertaler.py:57008:         (Тонкий делегат: SettingsService._get_proxy_url, Batch #7 Stage 2 S2.3.
+Supervertaler.py:57011:         return self.settings_service._get_proxy_url()
+Supervertaler.py:57013:     def _get_proxy_dict(self) -> Optional[Dict[str, str]]:
+Supervertaler.py:57017:         (Тонкий делегат: SettingsService._get_proxy_dict, Batch #7 Stage 2 S2.3.
+Supervertaler.py:57020:         return self.settings_service._get_proxy_dict()
+Supervertaler.py:57027:         url = self._get_proxy_url()
+Supervertaler.py:57043:             settings = self.load_llm_settings()
+Supervertaler.py:57067:             settings = self.load_llm_settings()
+Supervertaler.py:57078:             settings = self.load_llm_settings()
+Supervertaler.py:57111:             api_keys = self.load_api_keys()
+Supervertaler.py:57116:             http_proxy = self._get_proxy_url() if hasattr(self, '_get_proxy_url') else None
+Supervertaler.py:57188:                 settings = self.load_llm_settings()
+Supervertaler.py:57202:         http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+Supervertaler.py:57205:     def load_provider_enabled_states(self) -> Dict[str, bool]:
+Supervertaler.py:57207:         (Тонкий делегат: SettingsService.load_provider_enabled_states, Batch #7 Stage 2 S2.3.
+Supervertaler.py:57210:         return self.settings_service.load_provider_enabled_states()
+Supervertaler.py:57212:     def save_provider_enabled_states(self, states: Dict[str, bool]):
+Supervertaler.py:57214:         (Тонкий делегат: SettingsService.save_provider_enabled_states, Batch #7 Stage 2 S2.3.
+Supervertaler.py:57216:         return self.settings_service.save_provider_enabled_states(states)
+Supervertaler.py:58454:         settings = self.load_llm_settings()
+Supervertaler.py:58464:             api_keys = self.load_api_keys()  # Key is optional for custom endpoints
+Supervertaler.py:58467:             api_keys = self.load_api_keys()
+Supervertaler.py:59023:         settings = self.load_llm_settings()
+Supervertaler.py:59029:             api_keys = self.load_api_keys() or {}
+Supervertaler.py:59351:         settings = self.load_llm_settings()
+Supervertaler.py:59356:         api_keys = self.load_api_keys()
+Supervertaler.py:59388:             http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+Supervertaler.py:59620:         settings = self.load_llm_settings()
+Supervertaler.py:59626:             api_keys = self.load_api_keys() or {}
+Supervertaler.py:59653:             http_proxy=self._get_proxy_url() if provider != 'gemini' else None,
+Supervertaler.py:59796:             api_keys = self.load_api_keys()
+Supervertaler.py:59797:             settings = self.load_llm_settings()
+Supervertaler.py:59857:             api_keys = self.load_api_keys()
+Supervertaler.py:59858:             enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:59916:             settings = self.load_llm_settings()
+Supervertaler.py:60426:             http_proxy=self._get_proxy_url() if translation_provider_name != 'gemini' else None,
+Supervertaler.py:60540:         api_keys = self.load_api_keys()
+Supervertaler.py:60544:         settings = self.load_llm_settings()
+Supervertaler.py:60548:         enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:60578:                 http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+Supervertaler.py:60668:         api_keys = self.load_api_keys()
+Supervertaler.py:60673:         enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:60794:                 api_keys = self.load_api_keys()
+Supervertaler.py:60829:             response = requests.post(url, params=params, timeout=10, proxies=self._get_proxy_dict())
+Supervertaler.py:60848:                 api_keys = self.load_api_keys()
+Supervertaler.py:60854:             translator = deepl.Translator(api_key, proxy=self._get_proxy_dict())
+Supervertaler.py:60921:             api_keys = self.load_api_keys()
+Supervertaler.py:60962:             response = requests.post(endpoint, params=params, headers=headers, json=body, timeout=10, proxies=self._get_proxy_dict())
+Supervertaler.py:60979:             api_keys = self.load_api_keys()
+Supervertaler.py:61035:             api_keys = self.load_api_keys()
+Supervertaler.py:61071:             response = requests.post(url, headers=headers, json=data, timeout=10, proxies=self._get_proxy_dict())
+Supervertaler.py:61088:             api_keys = self.load_api_keys()
+Supervertaler.py:61119:             response = requests.get(url, params=params, timeout=10, proxies=self._get_proxy_dict())
+Supervertaler.py:61133:     def load_api_keys(self) -> Dict[str, str]:
+Supervertaler.py:61135:         (Тонкий делегат: SettingsService.load_api_keys, Batch #7 Stage 2 S2.3.
+Supervertaler.py:61137:         5637 / 5660 / 5730 / 5943 / 5995 (self.parent_app.load_api_keys(), без
+Supervertaler.py:61140:         return self.settings_service.load_api_keys()
+Supervertaler.py:61142:     def save_api_keys(self, api_keys: Dict[str, str]):
+Supervertaler.py:61144:         (Тонкий делегат: SettingsService.save_api_keys, Batch #7 Stage 2 S2.3.
+Supervertaler.py:61145:         Обязателен: self-вызов 26510 (_save_api_keys_from_ui).)"""
+Supervertaler.py:61146:         return self.settings_service.save_api_keys(api_keys)
+Supervertaler.py:61896:             api_keys = self.load_api_keys()
+Supervertaler.py:61897:             enabled_providers = self.load_provider_enabled_states()
+Supervertaler.py:62070:                 api_keys = self.load_api_keys()
+Supervertaler.py:62074:                 settings = self.load_llm_settings()
+Supervertaler.py:62087:                             http_proxy=self._get_proxy_url()
+Supervertaler.py:62129:                             http_proxy=self._get_proxy_url()
+Supervertaler.py:62218:                 api_keys = self.load_api_keys()
+Supervertaler.py:62224:                 settings = self.load_llm_settings()
+Supervertaler.py:62243:                             http_proxy=self._get_proxy_url()
+Supervertaler.py:62284:                             http_proxy=self._get_proxy_url()
+Supervertaler.py:63119:             if hasattr(self.main_window, 'load_api_keys'):
+Supervertaler.py:63120:                 api_keys = self.main_window.load_api_keys()
+Supervertaler.py:63121:             if hasattr(self.main_window, 'load_provider_enabled_states'):
+Supervertaler.py:63122:                 enabled_providers = self.main_window.load_provider_enabled_states()
+Supervertaler.py:63191:         if hasattr(self.main_window, 'load_api_keys'):
+Supervertaler.py:63192:             api_keys = self.main_window.load_api_keys()
+Supervertaler.py:63193:         if hasattr(self.main_window, 'load_provider_enabled_states'):
+Supervertaler.py:63194:             enabled_providers = self.main_window.load_provider_enabled_states()
+modules/chat_backend.py:18: from modules.llm_clients import LLMClient, load_api_keys
+modules/chat_backend.py:100:             if hasattr(self._parent_app, 'load_api_keys'):
+modules/chat_backend.py:101:                 api_keys = self._parent_app.load_api_keys()
+modules/chat_backend.py:103:                 api_keys = load_api_keys()
+modules/chat_backend.py:139:                     settings = (self._parent_app.load_llm_settings()
+modules/chat_backend.py:140:                                 if hasattr(self._parent_app, 'load_llm_settings') else None)
+modules/chat_backend.py:149:                     if provider != 'gemini' and hasattr(self._parent_app, '_get_proxy_url'):
+modules/chat_backend.py:150:                         http_proxy = self._parent_app._get_proxy_url()
+modules/chat_view_widget.py:708:             from modules.llm_clients import LLMClient, load_api_keys
+modules/chat_view_widget.py:711:             if hasattr(parent_app, 'load_api_keys'):
+modules/chat_view_widget.py:712:                 api_keys = parent_app.load_api_keys()
+modules/chat_view_widget.py:714:                 api_keys = load_api_keys()
+modules/chat_view_widget.py:737:                 settings = (parent_app.load_llm_settings()
+modules/chat_view_widget.py:738:                             if hasattr(parent_app, 'load_llm_settings') else None)
+modules/chat_view_widget.py:744:                 if provider_key != 'gemini' and hasattr(parent_app, '_get_proxy_url'):
+modules/chat_view_widget.py:745:                     http_proxy = parent_app._get_proxy_url()
+modules/llm_clients.py:43: def load_api_keys() -> Dict[str, str]:
+modules/llm_clients.py:1864:         api_keys = load_api_keys()
+modules/llm_clients.py:1901:         api_keys = load_api_keys()
+modules/pdf_rescue_Qt.py:42:             parent_app: Reference to the main application (needs .load_api_keys() method or .api_keys attribute)
+modules/pdf_rescue_Qt.py:53:         if hasattr(parent_app, 'load_api_keys'):
+modules/pdf_rescue_Qt.py:55:             self.api_keys = parent_app.load_api_keys()
+modules/pdf_rescue_Qt.py:1749:         def load_api_keys(self):
+modules/quicktrans.py:323:         if hasattr(self.parent_app, 'load_api_keys'):
+modules/quicktrans.py:324:             api_keys = self.parent_app.load_api_keys()
+modules/quicktrans.py:325:         if hasattr(self.parent_app, 'load_provider_enabled_states'):
+modules/quicktrans.py:326:             enabled_providers = self.parent_app.load_provider_enabled_states()
+modules/quicktrans.py:370:                 llm_settings = (self.parent_app.load_llm_settings()
+modules/quicktrans.py:371:                                 if hasattr(self.parent_app, 'load_llm_settings') else {})
+modules/quicktrans.py:437:             from modules.llm_clients import LLMClient, load_api_keys
+modules/quicktrans.py:439:             if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, 'load_api_keys'):
+modules/quicktrans.py:440:                 api_keys = self.parent_app.load_api_keys()
+modules/quicktrans.py:442:                 api_keys = load_api_keys()
+modules/quicktrans.py:454:                 llm_settings = self.parent_app.load_llm_settings() if hasattr(self.parent_app, 'load_llm_settings') else None
+modules/settings_service.py:205:     # self._save_unified_settings, self.log, self.load_api_keys,
+modules/settings_service.py:206:     # self.load_proxy_settings и self._get_proxy_url резолвятся в методы
+modules/settings_service.py:210:     def load_llm_settings(self) -> Dict[str, str]:
+modules/settings_service.py:238:                 api_keys = self.load_api_keys() if hasattr(self, 'load_api_keys') else {}
+modules/settings_service.py:250:     def save_llm_settings(self, settings: Dict[str, str]):
+modules/settings_service.py:259:     def load_proxy_settings(self) -> Dict[str, Any]:
+modules/settings_service.py:277:     def save_proxy_settings(self, proxy_settings: Dict[str, Any]):
+modules/settings_service.py:286:     def _get_proxy_url(self) -> Optional[str]:
+modules/settings_service.py:292:             ps = self.load_proxy_settings()
+modules/settings_service.py:310:     def _get_proxy_dict(self) -> Optional[Dict[str, str]]:
+modules/settings_service.py:314:         url = self._get_proxy_url()
+modules/settings_service.py:319:     def load_provider_enabled_states(self) -> Dict[str, bool]:
+modules/settings_service.py:347:     def save_provider_enabled_states(self, states: Dict[str, bool]):
+modules/settings_service.py:356:     def load_api_keys(self) -> Dict[str, str]:
+modules/settings_service.py:366:     def save_api_keys(self, api_keys: Dict[str, str]):
+modules/trados_bridge_client.py:10:      pointer that llm_clients.load_api_keys() reads).
+modules/trados_bridge_client.py:52:     Mirror the resolution rules used by ``llm_clients.load_api_keys`` so this
+modules/unified_prompt_manager_qt.py:30: from modules.llm_clients import LLMClient, load_api_keys

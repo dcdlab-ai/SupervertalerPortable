@@ -1,0 +1,180 @@
+[USER MODE] Using 'user_data/' folder
+instantiating SupervertalerQt ...
+[Data Paths] User data: D:\_old\Supervertaler-Portable\Supervertaler
+[LangSettings] Loaded from settings.json: English → Russian
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 1 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 7 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/bonsai-27b
+[LOG] [ChatBackend] Loaded 0 messages
+[LOG] ✓ Attachment directories initialized: D:\_old\Supervertaler-Portable\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (unset)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+instantiated
+settings.json = D:\_old\Supervertaler-Portable\Supervertaler\workbench\settings\settings.json
+sha256(start) = 3e9940b3ce7d634879262e11398a2903f919a5f9cf368f9fdf4c3dd3e1c18522
+PASS C1_service_methods: {"module": "modules.settings_service", "all_10_callable": true, "settings_dir": "D:\\_old\\Supervertaler-Portable\\Supervertaler\\workbench\\settings"}
+PASS C2_delegate_equals_service: {"load_llm_settings": true, "load_proxy_settings": true, "load_provider_enabled_states": true, "load_api_keys": true}
+[Settings] Migrating to unified settings/settings.json ...
+[Settings] Migration complete: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\empty_user_data\workbench\settings\settings.json
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C3_defaults_on_empty_copy: {"llm_provider": "openai", "llm_openai_model": "gpt-5.5", "llm_n_keys": 11, "proxy_enabled": false, "proxy_port": 8080, "provider_n_keys": 13, "all_providers_true": true, "api_keys_empty": true}
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C4_proxy_chain_via_delegate: {"enabled_from_file": true, "url": "http://user%20name:p%40ss@proxy.local:3128", "url_has_encoded_space": true, "url_has_encoded_at": true, "dict": {"http": "http://user%20name:p%40ss@proxy.local:3128", "https": "http://user%20name:p%40ss@proxy.local:3128"}, "dict_matches": true}
+PASS C4b_proxy_disabled_none: {"url_when_disabled": null, "dict_when_disabled": null}
+PASS C5_google_to_gemini_migration: {"openai": "KEY-OPENAI", "gemini": "KEY-GOOGLE", "google_still_present": true, "migration_applied": true}
+PASS C6_no_cache_semantics: {"calls": 3, "opens_of_settings_json": 3, "no_cache_ok": true}
+PASS C7_write_roundtrip_on_copy: {"llm_openai_model": "S23-WRITTEN", "proxy_port": 9999, "provider_mymemory": true, "api_keys": {"openai": "KEY-OPENAI", "google": "KEY-GOOGLE", "gemini": "KEY-GOOGLE", "deepl": "KEY-DEEPL"}, "foreign_top_section_kept": true, "general_kept": {"batch_size": 20}, "sections": ["api_keys", "features", "general", "ui", "usage_statistics_asked"], "implied_defaults_not_persisted": false, "log_errors_during_c7": []}
+🚀 _translate_batch_with_llm: Starting batch of 1 segments
+🚀 Languages: en → nl
+❌ AutoTagger error on #1: 'NoneType' object has no attribute 'get_autotagger_template'
+🚀 _translate_batch_with_llm: Starting batch of 1 segments
+🚀 Languages: en → nl
+PASS C8_preTranslationWorker_unguarded_sites: {"mt_result": "[MT en->nl] Hello <1>world</1>", "mt_calls": 1, "llm_result": "[FAKE-TRANSLATION]", "llm_calls": 1, "batch_result_type": "list", "batch_calls": 1, "single_result": "[FAKE-TRANSLATION]", "single_calls": 1, "autotag_result": "None", "autotag_calls": 1, "run_completed": true, "run_success_errors": {"success": 0, "errors": 1}, "run_calls": 1, "negative_control": "AttributeError: '_NoDelegate' object has no attribute 'load_api_keys'"}
+PASS C9a_chat_guarded_expressions: {"hasattr": {"load_api_keys": true, "load_llm_settings": true, "_get_proxy_url": true, "load_provider_enabled_states": true}, "api_keys_from_guard": ["deepl", "gemini", "google", "openai"], "llm_settings_from_guard_provider": "openai", "proxy_from_guard": "http://user%20name:p%40ss@proxy.local:9999"}
+PASS C9b_chatbackend_init_llm_client: {"llm_client_set": true, "client_class": "LLMClient", "conversation_file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s23\\run-001\\chat_conversation_s23.json"}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C10_superlookup_provider_states_path: {"result": [], "load_api_keys_calls": 1, "load_provider_enabled_states_calls": 1}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C11_prod_settings_sha_unchanged: {"sha256_start": "3e9940b3ce7d634879262e11398a2903f919a5f9cf368f9fdf4c3dd3e1c18522", "sha256_end": "3e9940b3ce7d634879262e11398a2903f919a5f9cf368f9fdf4c3dd3e1c18522", "unchanged": true, "service_back_to_production": true}
+PASS C12_definition_inventory: {"load_llm_settings": ["Supervertaler.py:56974", "modules/settings_service.py:210"], "save_llm_settings": ["Supervertaler.py:56981", "modules/settings_service.py:250"], "load_proxy_settings": ["Supervertaler.py:56991", "modules/settings_service.py:259"], "save_proxy_settings": ["Supervertaler.py:56997", "modules/settings_service.py:277"], "_get_proxy_url": ["Supervertaler.py:57003", "modules/settings_service.py:286"], "_get_proxy_dict": ["Supervertaler.py:57013", "modules/settings_service.py:310"], "load_provider_enabled_states": ["Supervertaler.py:57205", "modules/settings_service.py:319"], "save_provider_enabled_states": ["Supervertaler.py:57212", "modules/settings_service.py:347"], "load_api_keys": ["Supervertaler.py:61133", "modules/llm_clients.py:43", "modules/pdf_rescue_Qt.py:1749", "modules/settings_service.py:356"], "save_api_keys": ["Supervertaler.py:61142", "modules/settings_se
+
+SUMMARY: PASS=14 FAIL=0
+ALL_CHECKS_PASS
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\app_check_run1.json
+[Hotkeys] pynput hotkey manager stopped on exit

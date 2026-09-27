@@ -1,0 +1,15 @@
+head lines = 68373
+work lines = 68285
+net        = -88
+unequal regions (head_range -> work_range, delta, first line dropped):
+  replace head[56975:57012] work[56975:56979] dh=38 dw=5 delta=-33 | """Загружает настройки LLM из предпочтений пользователя."""
+  replace head[57015:57021] work[56982:56985] dh=7 dw=4 delta=-3 | """Сохраняет настройки LLM в предпочтения пользователя."""
+  replace head[57028:57043] work[56992:56995] dh=16 dw=4 delta=-12 | """Загружает настройки HTTP-прокси из единого хранилища настроек."""
+  replace head[57046:57052] work[56998:57001] dh=7 dw=4 delta=-3 | """Сохраняет настройки HTTP-прокси в единое хранилище настроек."""
+  replace head[57058:57076] work[57007:57011] dh=19 dw=5 delta=-14 | Формат:  http://[user:pass@]host:port"""
+  replace head[57081:57085] work[57016:57020] dh=5 dw=5 delta=+0 | на библиотеке requests."""
+  replace head[57271:57296] work[57206:57210] dh=26 dw=5 delta=-21 | """Загружает состояния включённости провайдеров из предпочтений пользо
+  replace head[57299:57305] work[57213:57216] dh=7 dw=4 delta=-3 | """Сохраняет состояния включённости провайдеров в предпочтения пользов
+  replace head[61223:61230] work[61134:61140] dh=8 dw=7 delta=-1 | """Загружает API-ключи из единого файла настроек."""
+  replace head[61233:61234] work[61143:61146] dh=2 dw=4 delta=+2 | """Сохраняет API-ключи в единый файл настроек."""
+sum(delta) = -88  == net? True

@@ -1,0 +1,15 @@
+VERBATIM load_llm_settings              True
+VERBATIM save_llm_settings              True
+VERBATIM load_proxy_settings            True
+VERBATIM save_proxy_settings            True
+VERBATIM _get_proxy_url                 True
+VERBATIM _get_proxy_dict                True
+VERBATIM load_provider_enabled_states   True
+VERBATIM save_provider_enabled_states   True
+VERBATIM load_api_keys                  True
+VERBATIM save_api_keys                  True
+service methods: 20; target defs unique: True
+self.* resolution inside moved bodies: OK
+delegates: signature_identical 10/10, forwards 10/10
+service VERBATIM 10/10
+RESULT OK

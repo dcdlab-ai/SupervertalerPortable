@@ -4,12 +4,12 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-26 (Batch #7 Stage 2, под-батч S2.2) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API» и S2.2 «general + clipboard reading» выполнены (`modules/settings_service.py` + 9 делегатов), дальше S2.3 (LLM/proxy/provider/api keys, 10 методов / 150 строк); монолит 68 373 строки
+**Обновлено:** 2026-09-27 (Batch #7 Stage 2, под-батч S2.3) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API», S2.2 «general + clipboard reading» и S2.3 «LLM/proxy/provider/api keys» выполнены (`modules/settings_service.py` + 19 делегатов), дальше S2.4 (языки/диктовка/словарь/спеллчек, 9 методов); монолит 68 285 строк
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **68 373**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **68 285**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
@@ -20,11 +20,19 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 3 метода / 56 строк (`load_clipboard_privacy_settings`,
 `_load_general_settings_from_file`, `save_general_settings`) и оставил в монолите
 3 тонких делегата с исходными сигнатурами; монолит 68 400 → **68 373** строки,
-8 метрик без изменений, живой offscreen-прогон приложения — 9/9 PASS. Состав
-Stage 2 после V1–V4 — 32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей
-(S2.1–S2.5); закрыто 9 из 32 методов (S2.1 + S2.2).
-Дальше — **S2.3** (LLM/proxy/provider/api keys: 10 методов / 150 строк) отдельным
-промптом. Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
+8 метрик без изменений, живой offscreen-прогон приложения — 9/9 PASS; под-батч
+**S2.3 «LLM/proxy/provider/api keys»** (27.09.2026) перенёс ещё 10 методов / 150
+строк (`load_llm_settings`, `save_llm_settings`, `load_proxy_settings`,
+`save_proxy_settings`, `_get_proxy_url`, `_get_proxy_dict`,
+`load_provider_enabled_states`, `save_provider_enabled_states`, `load_api_keys`,
+`save_api_keys`) и оставил в монолите 10 тонких делегатов с исходными сигнатурами
+(включая приватные `_get_proxy_url`/`_get_proxy_dict`); монолит 68 373 → **68 285**
+строк (−88), 8 метрик без изменений, живой offscreen-прогон — 14/14 PASS (в т.ч.
+прямой тест 5 НЕЗАЩИЩЁННЫХ вызовов `PreTranslationWorker`). Состав Stage 2 после
+V1–V4 — 32 метода (6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5); закрыто
+19 из 32 методов (S2.1 + S2.2 + S2.3).
+Дальше — **S2.4** (языки/диктовка/словарь/спеллчек: 9 методов) отдельным промптом.
+Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
 прочтению перед любой работой).
 
 ## Прогресс по шагам EXTRACTION_PLAN.md
@@ -38,11 +46,52 @@ Stage 2 после V1–V4 — 32 метода (6 A + 26 B) / ~731 строка,
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026) и S2.2 «general + clipboard reading» (26.09.2026) выполнены** — `modules/settings_service.py` + 9 тонких делегатов; осталось S2.3–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt` |
+| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026), S2.2 «general + clipboard reading» (26.09.2026) и S2.3 «LLM/proxy/provider/api keys» (27.09.2026) выполнены** — `modules/settings_service.py` + 19 тонких делегатов; осталось S2.4–S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2/S2.3: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`, `…Stage 2 (S2.3).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt`, `batch7s23_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 Stage 2 — под-батч S2.3 закрыт (Batch #7 Stage 2, 27.09.2026)
+
+**S2.3 выполнен** (база HEAD `7a2de37` — потомок `4c7ad680`; монолит 68 373 →
+**68 285** строк, −88; `git diff --numstat` 47/135, difflib — ровно 10 регионов,
+сумма −88 == изменению файла). Перенесены 10 методов / 150 строк в
+`modules/settings_service.py` (197 → 368 строк; методы 10 → 20) — `load_llm_settings`
+(в сервисе 210–248), `save_llm_settings` (250–257), `load_proxy_settings` (259–275),
+`save_proxy_settings` (277–284), `_get_proxy_url` (286–308), `_get_proxy_dict`
+(310–317), `load_provider_enabled_states` (319–345), `save_provider_enabled_states`
+(347–354), `load_api_keys` (356–364), `save_api_keys` (366–368). Тела — ВЕРБАТИМ
+(10/10, sha256 == снапшотам HEAD); новых параметров конструктора не потребовалось
+(единственные внешние зависимости — методы самого сервиса + stdlib `urllib.parse`);
+в монолите — 10 тонких делегатов с исходными сигнатурами (10/10
+signature_identical + forwards), приватные имена `_get_proxy_url`/`_get_proxy_dict`
+сохранены. `_get_api_keys` (11452) НЕ трогался (сторонний
+`modules/llm_clients.load_api_keys`).
+
+**Риск-приоритеты закрыты прямыми тестами (offscreen, 14/14 PASS):**
+- ★ RISK #1 — ПЯТЬ НЕЗАЩИЩЁННЫХ вызовов `PreTranslationWorker`
+  (`self.parent_app.load_api_keys()` без guard): 5637, 5660, 5730, 5943, 5995 —
+  все пять вызваны под фейковым LLMClient; счётчик на СЕРВИСНОМ методе доказал
+  цепочку делегат→сервис; плюс полный `wk.run()`; негативный контроль показал
+  AttributeError без делегата.
+- RISK #2 — hasattr-guarded сайты LLM-чата: реальный `ChatBackend(w, …)` поднял LLMClient
+  через guard; «тихого» провала в дефолт нет.
+- SuperlookupTab-сайт (`_perform_mt_lookup`) — оба делегата реально вызваны.
+- Дефолты на пустом файле, цепочка прокси (с percent-encoding), миграция
+  google→gemini, отсутствие кэша (3 вызова = 3 открытия), цикл записи на КОПИИ
+  user_data (соседние секции сохранены), продовый settings.json sha не изменился.
+
+Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.3).txt`; промпт:
+`docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.3 llm-proxy-keys).txt`;
+аудиты: `docs/refactoring/audits/batch7s23_*` (снапшот-индекс, manifest-compare,
+line-accounting, callsites AST-compare, per-file counts, verify, app-check JSON+лог).
+Непокрытые проверки — раздел 4 отчёта (M1–M13; главные: реальный сетевой вызов LLM/MT,
+настоящие клики в модальных окнах Settings, полный человеческий цикл — после S2.4/S2.5).
+
+**Дальше — S2.4 «языки / диктовка / словарь / спеллчек», 9 методов / ~203 строки.**
+Границы вывести AST ЗАНОВО на дереве S2.3 (после сдвига −88 участки ниже 61146 уже
+неверны). После S2.3 всего перенесено 19 из 32 методов Stage 2.
+
 ## Что дальше: Step 7 Stage 2 — под-батч S2.2 закрыт (Batch #7 Stage 2, 26.09.2026)
 
 **S2.2 выполнен** (база HEAD `25627c9` — потомок `3e5c100c`; монолит 68 400 →

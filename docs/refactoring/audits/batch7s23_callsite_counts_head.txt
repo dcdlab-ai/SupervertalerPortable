@@ -1,0 +1,10 @@
+file	load_llm_settings	save_llm_settings	load_proxy_settings	save_proxy_settings	_get_proxy_url	_get_proxy_dict	load_provider_enabled_states	save_provider_enabled_states	load_api_keys	save_api_keys
+Supervertaler.py	25	4	3	2	15	6	15	4	40	2
+modules/chat_backend.py	2	0	0	0	2	0	0	0	4	0
+modules/chat_view_widget.py	2	0	0	0	2	0	0	0	4	0
+modules/llm_clients.py	0	0	0	0	0	0	0	0	3	0
+modules/pdf_rescue_Qt.py	0	0	0	0	0	0	0	0	4	0
+modules/quicktrans.py	4	0	0	0	0	0	2	0	6	0
+modules/trados_bridge_client.py	0	0	0	0	0	0	0	0	2	0
+modules/unified_prompt_manager_qt.py	0	0	0	0	0	0	0	0	1	0
+TOTAL	33	4	3	2	19	6	17	4	64	2

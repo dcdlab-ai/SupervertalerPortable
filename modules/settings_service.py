@@ -195,3 +195,174 @@ class SettingsService:
             self._save_settings_section("general", settings)
         except Exception as e:
             self.log(f"⚠ Could not save general settings: {str(e)}")
+
+    # ------------------------------------------------------------------
+    # LLM / proxy / provider-state / API keys (Batch #7 Stage 2, S2.3)
+    # ------------------------------------------------------------------
+    # Тела перенесены из SupervertalerQt ВЕРБАТИМ (единственная правка —
+    # адрес). Внутренние вызовы self._load_settings_section,
+    # self._save_settings_section, self._load_unified_settings,
+    # self._save_unified_settings, self.log, self.load_api_keys,
+    # self.load_proxy_settings и self._get_proxy_url резолвятся в методы
+    # ЭТОГО класса (в монолите те же выражения шли через его делегаты),
+    # поэтому наблюдаемое поведение то же (см. докстринг модуля: кэша нет).
+
+    def load_llm_settings(self) -> Dict[str, str]:
+        """Загружает настройки LLM из предпочтений пользователя."""
+        defaults = {
+            'provider': 'openai',
+            'openai_model': 'gpt-5.5',
+            'claude_model': 'claude-sonnet-5',
+            'gemini_model': 'gemini-3.1-flash-lite',
+            'ollama_model': 'translategemma:12b',
+            'custom_openai_model': '',
+            'custom_openai_endpoint': '',
+            'custom_openai_profiles': [],
+            'custom_openai_active_profile': '',
+            # Custom MT endpoint(s): a dedicated, separate set of OpenAI-compatible
+            # endpoints used as MT engines (e.g. a local MT proxy), independent of
+            # the AI custom endpoint above so MT and AI can point at different
+            # services at the same time.
+            'custom_mt_profiles': [],
+            'custom_mt_active_profile': ''
+        }
+
+        try:
+            prefs = self._load_settings_section("ui")
+            saved = prefs.get('llm_settings', defaults)
+            # Ensure new keys exist for older configs
+            for k, v in defaults.items():
+                saved.setdefault(k, v)
+            # Auto-migrate: old single-field config → profiles
+            if not saved.get('custom_openai_profiles') and saved.get('custom_openai_endpoint'):
+                api_keys = self.load_api_keys() if hasattr(self, 'load_api_keys') else {}
+                saved['custom_openai_profiles'] = [{
+                    'name': 'Custom Endpoint',
+                    'endpoint': saved['custom_openai_endpoint'],
+                    'model': saved.get('custom_openai_model', ''),
+                    'api_key': api_keys.get('custom_openai', '')
+                }]
+                saved['custom_openai_active_profile'] = 'Custom Endpoint'
+            return saved
+        except:
+            return defaults
+
+    def save_llm_settings(self, settings: Dict[str, str]):
+        """Сохраняет настройки LLM в предпочтения пользователя."""
+        try:
+            all_settings = self._load_unified_settings()
+            all_settings.setdefault("ui", {})['llm_settings'] = settings
+            self._save_unified_settings(all_settings)
+        except Exception as e:
+            self.log(f"⚠ Could not save LLM settings: {str(e)}")
+
+    def load_proxy_settings(self) -> Dict[str, Any]:
+        """Загружает настройки HTTP-прокси из единого хранилища настроек."""
+        defaults = {
+            'enabled': False,
+            'host': '',
+            'port': 8080,
+            'username': '',
+            'password': '',
+        }
+        try:
+            ui = self._load_settings_section("ui")
+            saved = ui.get('proxy_settings', defaults)
+            for k, v in defaults.items():
+                saved.setdefault(k, v)
+            return saved
+        except Exception:
+            return defaults
+
+    def save_proxy_settings(self, proxy_settings: Dict[str, Any]):
+        """Сохраняет настройки HTTP-прокси в единое хранилище настроек."""
+        try:
+            all_settings = self._load_unified_settings()
+            all_settings.setdefault("ui", {})['proxy_settings'] = proxy_settings
+            self._save_unified_settings(all_settings)
+        except Exception as e:
+            self.log(f"⚠ Could not save proxy settings: {str(e)}")
+
+    def _get_proxy_url(self) -> Optional[str]:
+        """Возвращает полностью сформированную строку URL прокси для requests/
+                httpx или None, если прокси выключен или не настроен.
+        
+                Формат:  http://[user:pass@]host:port"""
+        try:
+            ps = self.load_proxy_settings()
+            if not ps.get('enabled'):
+                return None
+            host = ps.get('host', '').strip()
+            port = ps.get('port', 8080)
+            if not host:
+                return None
+            username = ps.get('username', '').strip()
+            password = ps.get('password', '').strip()
+            if username:
+                from urllib.parse import quote
+                creds = f"{quote(username, safe='')}:{quote(password, safe='')}@"
+            else:
+                creds = ''
+            return f"http://{creds}{host}:{port}"
+        except Exception:
+            return None
+
+    def _get_proxy_dict(self) -> Optional[Dict[str, str]]:
+        """Возвращает словарь прокси в стиле requests {"http": ...,
+                "https": ...} или None. Используется вызовами MT-сервисов
+                на библиотеке requests."""
+        url = self._get_proxy_url()
+        if not url:
+            return None
+        return {"http": url, "https": url}
+
+    def load_provider_enabled_states(self) -> Dict[str, bool]:
+        """Загружает состояния включённости провайдеров из предпочтений пользователя."""
+        defaults = {
+            'llm_openai': True,
+            'llm_claude': True,
+            'llm_gemini': True,
+            'llm_mistral': True,
+            'llm_openrouter': True,
+            'llm_ollama': True,
+            'llm_custom_openai': True,
+            'mt_google_translate': True,
+            'mt_deepl': True,
+            'mt_microsoft': True,
+            'mt_amazon': True,
+            'mt_modernmt': True,
+            'mt_mymemory': True
+        }
+
+        try:
+            prefs = self._load_settings_section("ui")
+            saved = prefs.get('provider_enabled_states', defaults)
+            # Ensure new keys exist for older configs
+            for k, v in defaults.items():
+                saved.setdefault(k, v)
+            return saved
+        except:
+            return defaults
+
+    def save_provider_enabled_states(self, states: Dict[str, bool]):
+        """Сохраняет состояния включённости провайдеров в предпочтения пользователя."""
+        try:
+            all_settings = self._load_unified_settings()
+            all_settings.setdefault("ui", {})['provider_enabled_states'] = states
+            self._save_unified_settings(all_settings)
+        except Exception as e:
+            self.log(f"⚠ Could not save provider enabled states: {str(e)}")
+
+    def load_api_keys(self) -> Dict[str, str]:
+        """Загружает API-ключи из единого файла настроек."""
+        api_keys = self._load_settings_section("api_keys")
+
+        # Migrate legacy 'google' key to canonical 'gemini' key
+        if api_keys.get('google') and not api_keys.get('gemini'):
+            api_keys['gemini'] = api_keys['google']
+
+        return api_keys
+
+    def save_api_keys(self, api_keys: Dict[str, str]):
+        """Сохраняет API-ключи в единый файл настроек."""
+        self._save_settings_section("api_keys", api_keys)

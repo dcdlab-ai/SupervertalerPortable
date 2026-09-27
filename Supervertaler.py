@@ -56972,117 +56972,52 @@ class SupervertalerQt(QMainWindow):
             )
     
     def load_llm_settings(self) -> Dict[str, str]:
-        """Загружает настройки LLM из предпочтений пользователя."""
-        defaults = {
-            'provider': 'openai',
-            'openai_model': 'gpt-5.5',
-            'claude_model': 'claude-sonnet-5',
-            'gemini_model': 'gemini-3.1-flash-lite',
-            'ollama_model': 'translategemma:12b',
-            'custom_openai_model': '',
-            'custom_openai_endpoint': '',
-            'custom_openai_profiles': [],
-            'custom_openai_active_profile': '',
-            # Custom MT endpoint(s): a dedicated, separate set of OpenAI-compatible
-            # endpoints used as MT engines (e.g. a local MT proxy), independent of
-            # the AI custom endpoint above so MT and AI can point at different
-            # services at the same time.
-            'custom_mt_profiles': [],
-            'custom_mt_active_profile': ''
-        }
-
-        try:
-            prefs = self._load_settings_section("ui")
-            saved = prefs.get('llm_settings', defaults)
-            # Ensure new keys exist for older configs
-            for k, v in defaults.items():
-                saved.setdefault(k, v)
-            # Auto-migrate: old single-field config → profiles
-            if not saved.get('custom_openai_profiles') and saved.get('custom_openai_endpoint'):
-                api_keys = self.load_api_keys() if hasattr(self, 'load_api_keys') else {}
-                saved['custom_openai_profiles'] = [{
-                    'name': 'Custom Endpoint',
-                    'endpoint': saved['custom_openai_endpoint'],
-                    'model': saved.get('custom_openai_model', ''),
-                    'api_key': api_keys.get('custom_openai', '')
-                }]
-                saved['custom_openai_active_profile'] = 'Custom Endpoint'
-            return saved
-        except:
-            return defaults
+        """Загружает настройки LLM из предпочтений пользователя.
+        (Тонкий делегат: SettingsService.load_llm_settings, Batch #7 Stage 2 S2.3.
+        Обязателен: ~30 внутренних self-вызовов и hasattr-guard сайты
+        modules/chat_backend.py:139, chat_view_widget.py:737, quicktrans.py:370/454.)"""
+        return self.settings_service.load_llm_settings()
     
     def save_llm_settings(self, settings: Dict[str, str]):
-        """Сохраняет настройки LLM в предпочтения пользователя."""
-        try:
-            all_settings = self._load_unified_settings()
-            all_settings.setdefault("ui", {})['llm_settings'] = settings
-            self._save_unified_settings(all_settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save LLM settings: {str(e)}")
+        """Сохраняет настройки LLM в предпочтения пользователя.
+        (Тонкий делегат: SettingsService.save_llm_settings, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызовы 22413 / 26265 / 26390 (сохранение LLM-настроек из UI).)"""
+        return self.settings_service.save_llm_settings(settings)
 
     # -----------------------------------------------------------------------
     # PROXY SETTINGS
     # -----------------------------------------------------------------------
 
     def load_proxy_settings(self) -> Dict[str, Any]:
-        """Загружает настройки HTTP-прокси из единого хранилища настроек."""
-        defaults = {
-            'enabled': False,
-            'host': '',
-            'port': 8080,
-            'username': '',
-            'password': '',
-        }
-        try:
-            ui = self._load_settings_section("ui")
-            saved = ui.get('proxy_settings', defaults)
-            for k, v in defaults.items():
-                saved.setdefault(k, v)
-            return saved
-        except Exception:
-            return defaults
+        """Загружает настройки HTTP-прокси из единого хранилища настроек.
+        (Тонкий делегат: SettingsService.load_proxy_settings, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызовы 21468 / 26359; через _get_proxy_url — все MT-сайты.)"""
+        return self.settings_service.load_proxy_settings()
 
     def save_proxy_settings(self, proxy_settings: Dict[str, Any]):
-        """Сохраняет настройки HTTP-прокси в единое хранилище настроек."""
-        try:
-            all_settings = self._load_unified_settings()
-            all_settings.setdefault("ui", {})['proxy_settings'] = proxy_settings
-            self._save_unified_settings(all_settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save proxy settings: {str(e)}")
+        """Сохраняет настройки HTTP-прокси в единое хранилище настроек.
+        (Тонкий делегат: SettingsService.save_proxy_settings, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызов 26492 (сохранение настроек прокси из UI).)"""
+        return self.settings_service.save_proxy_settings(proxy_settings)
 
     def _get_proxy_url(self) -> Optional[str]:
         """Возвращает полностью сформированную строку URL прокси для requests/
                 httpx или None, если прокси выключен или не настроен.
         
-                Формат:  http://[user:pass@]host:port"""
-        try:
-            ps = self.load_proxy_settings()
-            if not ps.get('enabled'):
-                return None
-            host = ps.get('host', '').strip()
-            port = ps.get('port', 8080)
-            if not host:
-                return None
-            username = ps.get('username', '').strip()
-            password = ps.get('password', '').strip()
-            if username:
-                from urllib.parse import quote
-                creds = f"{quote(username, safe='')}:{quote(password, safe='')}@"
-            else:
-                creds = ''
-            return f"http://{creds}{host}:{port}"
-        except Exception:
-            return None
+                Формат:  http://[user:pass@]host:port
+        (Тонкий делегат: SettingsService._get_proxy_url, Batch #7 Stage 2 S2.3.
+        Обязателен: ~13 внутренних self-вызовов и hasattr-guard сайты
+        modules/chat_backend.py:149, chat_view_widget.py:744.)"""
+        return self.settings_service._get_proxy_url()
 
     def _get_proxy_dict(self) -> Optional[Dict[str, str]]:
         """Возвращает словарь прокси в стиле requests {"http": ...,
                 "https": ...} или None. Используется вызовами MT-сервисов
-                на библиотеке requests."""
-        url = self._get_proxy_url()
-        if not url:
-            return None
-        return {"http": url, "https": url}
+                на библиотеке requests.
+        (Тонкий делегат: SettingsService._get_proxy_dict, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызовы 60918 / 60943 / 61051 / 61160 / 61208
+        (MT-сервисы на библиотеке requests).)"""
+        return self.settings_service._get_proxy_dict()
 
     def _apply_gemini_proxy(self):
         """Применяет (или убирает) прокси для Google Gemini установкой/снятием
@@ -57268,41 +57203,17 @@ class SupervertalerQt(QMainWindow):
         return LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy)
 
     def load_provider_enabled_states(self) -> Dict[str, bool]:
-        """Загружает состояния включённости провайдеров из предпочтений пользователя."""
-        defaults = {
-            'llm_openai': True,
-            'llm_claude': True,
-            'llm_gemini': True,
-            'llm_mistral': True,
-            'llm_openrouter': True,
-            'llm_ollama': True,
-            'llm_custom_openai': True,
-            'mt_google_translate': True,
-            'mt_deepl': True,
-            'mt_microsoft': True,
-            'mt_amazon': True,
-            'mt_modernmt': True,
-            'mt_mymemory': True
-        }
-
-        try:
-            prefs = self._load_settings_section("ui")
-            saved = prefs.get('provider_enabled_states', defaults)
-            # Ensure new keys exist for older configs
-            for k, v in defaults.items():
-                saved.setdefault(k, v)
-            return saved
-        except:
-            return defaults
+        """Загружает состояния включённости провайдеров из предпочтений пользователя.
+        (Тонкий делегат: SettingsService.load_provider_enabled_states, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызовы и hasattr-guard сайты modules/quicktrans.py:325,
+        63209/63281 (main_window).)"""
+        return self.settings_service.load_provider_enabled_states()
 
     def save_provider_enabled_states(self, states: Dict[str, bool]):
-        """Сохраняет состояния включённости провайдеров в предпочтения пользователя."""
-        try:
-            all_settings = self._load_unified_settings()
-            all_settings.setdefault("ui", {})['provider_enabled_states'] = states
-            self._save_unified_settings(all_settings)
-        except Exception as e:
-            self.log(f"⚠ Could not save provider enabled states: {str(e)}")
+        """Сохраняет состояния включённости провайдеров в предпочтения пользователя.
+        (Тонкий делегат: SettingsService.save_provider_enabled_states, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызовы 26281 / 26410 / 26528 (сохранение состояний из UI).)"""
+        return self.settings_service.save_provider_enabled_states(states)
     
     def update_warning_banner(self):
         """Показывает/скрывает баннер предупреждения по настройке allow_replace_in_source."""
@@ -61220,18 +61131,19 @@ class SupervertalerQt(QMainWindow):
             return f"[MyMemory error: {str(e)}]"
     
     def load_api_keys(self) -> Dict[str, str]:
-        """Загружает API-ключи из единого файла настроек."""
-        api_keys = self._load_settings_section("api_keys")
-
-        # Migrate legacy 'google' key to canonical 'gemini' key
-        if api_keys.get('google') and not api_keys.get('gemini'):
-            api_keys['gemini'] = api_keys['google']
-
-        return api_keys
+        """Загружает API-ключи из единого файла настроек.
+        (Тонкий делегат: SettingsService.load_api_keys, Batch #7 Stage 2 S2.3.
+        ОБЯЗАТЕЛЕН: 5 НЕЗАЩИЩЁННЫХ вызовов PreTranslationWorker
+        5637 / 5660 / 5730 / 5943 / 5995 (self.parent_app.load_api_keys(), без
+        hasattr/getattr) + десятки self/guarded-сайтов; без делегата ядро перевода
+        падает AttributeError-ом.)"""
+        return self.settings_service.load_api_keys()
 
     def save_api_keys(self, api_keys: Dict[str, str]):
-        """Сохраняет API-ключи в единый файл настроек."""
-        self._save_settings_section("api_keys", api_keys)
+        """Сохраняет API-ключи в единый файл настроек.
+        (Тонкий делегат: SettingsService.save_api_keys, Batch #7 Stage 2 S2.3.
+        Обязателен: self-вызов 26510 (_save_api_keys_from_ui).)"""
+        return self.settings_service.save_api_keys(api_keys)
 
     def get_ai_inject_glossary_terms(self) -> list:
         """Возвращает термы глоссариев с включённым AI-inject для текущего

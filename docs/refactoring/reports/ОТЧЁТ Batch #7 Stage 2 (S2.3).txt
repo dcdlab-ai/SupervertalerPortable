@@ -1,0 +1,451 @@
+ОТЧЁТ Batch #7 Stage 2, под-батч S2.3 — Settings Service: LLM / proxy /
+provider-state / api_keys (перенос 10 методов / 150 строк в modules/settings_service.py)
+════════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-27. Ветка main. Режим: ACTIVE REFACTOR (перенос, не разведка).
+База: HEAD 7a2de37 (потомок ожидавшегося 4c7ad680 — см. 1.1). Промпт: «ПЕРЕНОС
+S2.3 — Settings Service, LLM/proxy/provider/api keys (Batch #7 Stage 2, под-батч
+3/5)»; сохранён как
+docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.3 llm-proxy-keys).txt.
+Разведка Б2 (границы 10 методов) принята; пересчитаны только границы/кластеры и
+callsites на этом дереве (1.2/1.4). Артефакты: docs/refactoring/audits/batch7s23_*;
+рабочий прогон — D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\
+(скрипты, снапшоты, JSON, логи; head-wt — worktree HEAD 7a2de37).
+
+ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 373 → 68 285 строк (−88; git --numstat 47/135 по
+одному файлу, difflib — ровно 10 неравных регионов, сумма −88), сервис 197 → 368
+строк (+171), 10 тонких делегатов на месте тел (сигнатуры байт-в-байт, все
+приватные имена сохранены), 8 метрик без изменений, py_compile OK, живой прогон
+приложения — 14/14 PASS (offscreen, включая прямой тест 5 НЕЗАЩИЩЁННЫХ вызовов
+PreTranslationWorker), смоук save/load OK (exit 0 на обоих деревьях), манифест —
+изменено ровно 2 .py (ожидаемые).
+
+════════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0/1 — БАЗОВАЯ ЛИНИЯ И СООТВЕТСТВИЕ РАЗВЕДКЕ Б2
+════════════════════════════════════════════════════════════════════════════════
+1.1 ЭТАП 0 ВЫПОЛНЕН, HEAD — ПОТОМОК 4c7ad680
+- `git fetch origin` выполнен. `git merge-base --is-ancestor 4c7ad680 HEAD`
+  → ANCESTOR_OK (exit 0, не STOP).
+- `git rev-parse HEAD` = 7a2de3764046441de241a87a11a8b37ef69d59ff — ровно на ОДИН
+  коммит впереди ожидавшегося 4c7ad680f29bec791cf16661ffe89e74345f97b7:
+  7a2de37 «docs: add Batch #7 S2.1/S2.2 validation backlog entries» — потомок, а не
+  расхождение (как и допускает промпт). Единственное расхождение — документ
+  VALIDATION_BACKLOG.md; ни одного .py в нём нет, поэтому границы Б2 актуальны.
+- Рабочее дерево на старте было чистым (`git status --short` — пусто).
+- Квирк окружения: PowerShell не принимает `&&`/`||`; ancestry-проверка выполнена
+  через `if ($?) { OK } else { STOP }`.
+
+1.2 ГРАНИЦЫ БЛОКА (AST) + СНАПШОТЫ — СОВПАЛИ С ПРОМПТОМ 1:1
+- AST по документу из `git show HEAD:Supervertaler.py` (68 373 строки, класс
+  SupervertalerQt 6055–62445): три кластера непрерывны, посторонних def внутри нет,
+  размеры цифра-в-цифру как в промпте (скрипт snapshot_s23.py, артефакт
+  audits/batch7s23_snapshot_index.txt):
+    КЛАСТЕР 1 (56974–57085):
+      MOVE load_llm_settings              56974–57012 (39 строк) stmts=3
+           sha256 1fa91dd06c0369b0f6ea6c05149e44bddce76d7584c68536cd029ded600e484a
+      MOVE save_llm_settings              57014–57021 (8) stmts=2
+           sha256 70779499a0bf46ccf045f864c51d6a1032a0663371da75c99f690b8b46e31333
+      MOVE load_proxy_settings            57027–57043 (17) stmts=3
+           sha256 279e10cef5cfd287e43eb153960c066d9a2dcf0b6a6aafd9032e5d0d1b9de9a3
+      MOVE save_proxy_settings            57045–57052 (8) stmts=2
+           sha256 1a7ae268d044a3903a07e804eec90988c21812285d66bc5c5e977ff9f7d849ee
+      MOVE _get_proxy_url                 57054–57076 (23) stmts=2
+           sha256 ff05565e6df99b335e99674221a97f48faec46618420be2e9864c3ebbdde6157
+      MOVE _get_proxy_dict                57078–57085 (8) stmts=4
+           sha256 64d28e65b797ffcd5ba5f7f77fb32b376988efd357ee82db2b377998a1e89e1c
+      OTHER _apply_gemini_proxy           57087–57098 — НЕ трогается
+      OTHER _get_active_custom_profile    57100–57127 — НЕ трогается
+      (между save_llm_settings и load_proxy_settings стоит только шапка-комментарий
+       «# PROXY SETTINGS» 57023–57025 — осталась на месте)
+    КЛАСТЕР 2 (57270–57305):
+      MOVE load_provider_enabled_states   57270–57296 (27) stmts=3
+           sha256 04dc964a0989be4f0a25d3222c0f5c3a0b810d96d53ae08498968f92b3d9777e
+      MOVE save_provider_enabled_states   57298–57305 (8) stmts=2
+           sha256 923ddb5a37d78ef7cf243d17ce81c0be8fd597bc4839e490e788366e61681f9d
+      OTHER update_warning_banner         57307–57326 — НЕ трогается
+    КЛАСТЕР 3 (61222–61234):
+      MOVE load_api_keys                  61222–61230 (9) stmts=4
+           sha256 a053d94ad5b07c51f3cd03fb0be96b5d541218ef269ad4f16730beaab9c2c154
+      MOVE save_api_keys                  61232–61234 (3) stmts=2
+           sha256 cc5e232ea49693824f272753628ea113cea14e5fa601f10bb3c7ae3908ae34f5
+      OTHER get_ai_inject_glossary_terms  61236–61250 — НЕ трогается
+- Исключение из промпта соблюдено: `_get_api_keys` 11452–11455 (делегирует к
+  стороннему `modules/llm_clients.load_api_keys()`) НЕ трогался.
+- Тела сохранены в run-001\snapshot\<name>.py + snapshot_index.json. Контроль
+  базовой линии: sha256 рабочей копии Supervertaler.py на старте =
+  80993e2fbb1705312c7b9f4d4e0b2fcdf550460f5b5e4944bae70f8533707122 (== манифест до).
+- Перевод строк: и блоб, и рабочая копия — чистый LF (CR = 0), поэтому sha256
+  снапшотов (LF) сравнимы с телами сервиса напрямую, без EOL-артефактов.
+
+1.3 ЗАВИСИМОСТИ ПЕРЕНЕСЁННЫХ ТЕЛ — НОВЫХ ПАРАМЕТРОВ НЕ ПОТРЕБОВАЛОСЬ
+- Проверка «зависимость от self.<qt-атрибут> кроме уже имеющегося в сервисе»
+  (как в S2.1/S2.2): все внутренние обращения 10 тел — только
+  `self._load_settings_section` / `self._save_settings_section` /
+  `self._load_unified_settings` / `self._save_unified_settings` / `self.log`,
+  плюс `self.load_api_keys` (в load_llm_settings), `self.load_proxy_settings`
+  (в _get_proxy_url) и `self._get_proxy_url` (в _get_proxy_dict) — все три
+  определены в ЭТОМ ЖЕ классе-сервисе. Проверено автоматически
+  (verify_s23.py: «self.* resolution inside moved bodies: OK»). Конструктор
+  сервиса, `__init__` окна и `_reinitialize_with_new_data_path` НЕ менялись.
+- Единственная внешняя зависимость тел — stdlib (`from urllib.parse import quote`
+  внутри _get_proxy_url); модульные `json`/`Path` сервиса уже есть. Ничего
+  добавлять не пришлось.
+
+1.4 CALLSITES ДО (репозиторий) — КЛАССИФИКАЦИЯ ИЗ ПРОМПТА ПОДТВЕРЖДЕНА
+- Полный список — audits/batch7s23_callsites_after.txt (и per-file
+  batch7s23_callsite_counts_{head,work}.txt). Классификация из промпта:
+  1) load_api_keys — ПЯТЬ НЕЗАЩИЩЁННЫХ вызовов PreTranslationWorker
+     `api_keys = self.parent_app.load_api_keys()` (без hasattr/getattr):
+     Supervertaler.py 5637 (_translate_with_mt), 5660 (_translate_with_llm),
+     5730 (_translate_batch_with_llm), 5943 (_translate_single_with_llm),
+     5995 (_autotag_segment_llm). Эти строки лежат ВЫШЕ кластера 1 (56974), поэтому
+     их номера после переноса НЕ сместились.
+  2) load_llm_settings / _get_proxy_url — внешние hasattr-guarded сайты:
+     modules/chat_backend.py:139/149-150, modules/chat_view_widget.py:737/744-745,
+     modules/quicktrans.py:370-371/454.
+  3) load_provider_enabled_states — внешние guarded сайты modules/quicktrans.py:325-326
+     и SuperlookupTab (63209/63281 в HEAD → 63121/63193 после переноса).
+- `_get_api_keys` (11452) делегирует к `modules.llm_clients.load_api_keys()` — это
+  отдельный, не тронутый путь (сам метод байт-в-байт как в HEAD).
+
+════════════════════════════════════════════════════════════════════════════════
+2. ЭТАП 2 — ПЕРЕНОС
+════════════════════════════════════════════════════════════════════════════════
+2.1 ЧТО СДЕЛАНО (по шаблону S2.1/S2.2, БЕЗ нового дизайна)
+- modules/settings_service.py: после `save_general_settings` добавлен блок-комментарий
+  S2.3 (199–208) и 10 методов ВЕРБАТИМ (тела байт-в-байт == снапшотам HEAD):
+    load_llm_settings 210–248, save_llm_settings 250–257, load_proxy_settings 259–275,
+    save_proxy_settings 277–284, _get_proxy_url 286–308, _get_proxy_dict 310–317,
+    load_provider_enabled_states 319–345, save_provider_enabled_states 347–354,
+    load_api_keys 356–364, save_api_keys 366–368.
+- Supervertaler.py: на МЕСТЕ каждого тела — тонкий делегат с исходной сигнатурой
+  (def-строка байт-в-байт) и одной форвардящей строкой
+  `return self.settings_service.<name>(<args>)`. Шапка «# PROXY SETTINGS» (57023–57025
+  в HEAD) осталась на своём месте между делегатами save_llm_settings и
+  load_proxy_settings. Итоговые позиции делегатов (WORK-дерево):
+    load_llm_settings 56974–56979 (6), save_llm_settings 56981–56985 (5),
+    load_proxy_settings 56991–56995 (5), save_proxy_settings 56997–57001 (5),
+    _get_proxy_url 57003–57011 (9), _get_proxy_dict 57013–57020 (8),
+    load_provider_enabled_states 57205–57210 (6), save_provider_enabled_states
+    57212–57216 (5), load_api_keys 61133–61140 (8), save_api_keys 61142–61146 (5).
+- Докстринги делегатов: сохранён исходный текст + вписан абзац «(Тонкий делегат:
+  SettingsService.<name>, Batch #7 Stage 2 S2.3. <конкретные потребители>)», чтобы
+  каждый делегат был обоснован прямо в коде (как S2.2).
+- Ни один метод не был SPLIT-кандидатом (подтверждено Stage 1) — перенесены целиком.
+
+2.2 ГАРАНТИЯ ВЕРБАТИМ-ПЕРЕНОСА (механическая, не «на глаз»)
+- Перенос выполнял скрипт move_s23.py: тела извлекались из AST-границ и вставлялись
+  в сервис как есть (dedent не требовался — обе стороны на 4-пробельном уровне
+  методов класса); делегаты строились из ИСХОДНОЙ def-строки + исходного докстринга
+  + одной return-строки.
+- verify_s23.py (run-001\verify_live.txt, == audits/batch7s23_verify_out.txt):
+    VERBATIM 10/10 (сервис-метод построчно == снапшоту HEAD, sha256 совпадают),
+    service target defs unique: True,
+    self.* resolution inside moved bodies: OK,
+    delegates: signature_identical 10/10, forwards 10/10,
+    RESULT OK.
+- Побайтовое равенство рабочей копии и dry-run вывода переноса (linecmp.py):
+    Supervertaler.py 3 542 259 байт == Supervertaler.new.py (sha
+    4279e6de90e0163f…) IDENTICAL=True;
+    modules/settings_service.py 19 845 байт == settings_service.new.py (sha
+    714662f2b47618c5…) IDENTICAL=True.
+
+2.3 УЧЁТ СТРОК (difflib, head-wt ↔ WORK) — 10 РЕГИОНОВ, СУММА −88 == ФАКТУ
+Артефакт audits/batch7s23_line_accounting.txt:
+  replace head[56975:57012] work[56975:56979] dh=38 dw=5 delta=−33  ← load_llm_settings
+  replace head[57015:57021] work[56982:56985] dh=7  dw=4 delta=−3   ← save_llm_settings
+  replace head[57028:57043] work[56992:56995] dh=16 dw=4 delta=−12  ← load_proxy_settings
+  replace head[57046:57052] work[56998:57001] dh=7  dw=4 delta=−3   ← save_proxy_settings
+  replace head[57058:57076] work[57007:57011] dh=19 dw=5 delta=−14  ← _get_proxy_url
+  replace head[57081:57085] work[57016:57020] dh=5  dw=5 delta=+0   ← _get_proxy_dict
+  replace head[57271:57296] work[57206:57210] dh=26 dw=5 delta=−21  ← load_provider_enabled_states
+  replace head[57299:57305] work[57213:57216] dh=7  dw=4 delta=−3   ← save_provider_enabled_states
+  replace head[61223:61230] work[61134:61140] dh=8  dw=7 delta=−1   ← load_api_keys
+  replace head[61233:61234] work[61143:61146] dh=2  dw=4 delta=+2   ← save_api_keys
+  sum(delta) = −88  == net −88 (True)
+Неравных регионов РОВНО 10 — по одному на метод; каждый начинается со строки
+докстринга (def-строка осталась контекстом, потому и не попала в регион).
+Методическая деталь (чтобы цифры не выглядели противоречивыми): `git diff
+--numstat` даёт 47/135, а НЕ 62/150, потому что 10 def-строк и первые строки
+докстрингов остались контекстом — git дробит замены иначе; итог −88 от этого не
+меняется (сходится по всем 10 регионам). Положительная дельта у save_api_keys:
+его делегат (5 строк) длиннее исходного 3-строчного тела.
+
+2.4 ОСТАЛЬНОЙ КОД НЕ ТРОГАЛСЯ + НИ ОДИН CALLSITE НЕ ПОТЕРЯН
+- SHA256-манифест 144 → 144: changed = РОВНО 2 (Supervertaler.py
+  80993e2fbb1705312c7b9f4d4e0b2fcdf550460f5b5e4944bae70f8533707122 →
+  4279e6de90e0163ff7673812eb1ddf090635dcde1f01d9e208638e0790a4fd5d;
+  modules/settings_service.py 02914e1fc3e699408fa3989f5990c03faddf45133cf498644696d049cbe8c98b →
+  714662f2b47618c5a58523cbdf1795773ebb056a88ac8cf7b966f0664546a26f), added = 0,
+  removed = 0 (audits/batch7s23_manifest_cmp.txt). Ни один другой .py не изменён.
+- EXTERNAL CALLSITES ПОБАЙТОВО КАК В HEAD: per-file счётчик (regex, весь репозиторий)
+  показывает, что у ВСЕХ файлов modules/ (chat_backend.py, chat_view_widget.py,
+  quicktrans.py, llm_clients.py, pdf_rescue_Qt.py, trados_bridge_client.py,
+  unified_prompt_manager_qt.py) числа по каждому из 10 имён ИДЕНТИЧНЫ HEAD
+  (audits/batch7s23_callsite_counts_{head,work}.txt).
+- AST-сверка callsites ПО ОБЛАСТИ ВИДИМОСТИ (callsites_ast_cmp.py vs head-wt;
+  audits/batch7s23_callsites_ast_cmp.txt): из 91 ключей HEAD ровно 3 исчезли —
+  и ВСЕ ТРИ внутри перенесённых тел (`load_llm_settings.load_api_keys`,
+  `_get_proxy_url.load_proxy_settings`, `_get_proxy_dict._get_proxy_url`); в WORK
+  появились ровно 10 новых ключей вида `<name>.<name>` — это собственная
+  форвардящая строка делегата внутри его же области видимости. count-mismatch = 0.
+  VERDICT: «every call site outside the 10 moved bodies is preserved».
+
+════════════════════════════════════════════════════════════════════════════════
+3. ЭТАП 3 — ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════════════════════
+3.1 AST / СТРУКТУРНАЯ ПРОВЕРКА (verify_s23.py, --live)
+- SettingsService: 60–368 (было 60–197), методов 20 (было 10), 10 новых на месте.
+- SupervertalerQt: делегаты 10/10 — signature_identical True (10 def-строк
+  побайтово совпадают с HEAD-сигнатурами), forwards True (в теле каждого ровно
+  `self.settings_service.<name>(…)`).
+- ИНВЕНТАРЬ ОПРЕДЕЛЕНИЙ ПО РЕПОЗИТОРИЮ (AST walk, C12 живого прогона):
+  9 из 10 имён имеют РОВНО ДВА def (делегат в Supervertaler.py + метод в
+  modules/settings_service.py). Исключение — `load_api_keys`: 4 def, из которых
+  два — ПРЕД-СУЩЕСТВУЮЩИЕ и есть в HEAD: `modules/llm_clients.py:43` (функция
+  модуля) и `modules/pdf_rescue_Qt.py:1749` (вложенный метод класса). Проверено
+  ДО/ПОСЛЕ: в head-wt те же три def (61222, llm_clients:43, pdf_rescue_Qt:1749);
+  после — те же три + новый метод сервиса. Новых определений сверх делегата и
+  метода сервиса S2.3 НЕ добавил.
+- py_compile_all.py: COMPILE_OK (144 .py-файла).
+
+3.2 ЖИВОЙ ПРОГОН ПРИЛОЖЕНИЯ (offscreen; QDialog.exec → Rejected; драйвер
+    app_check_s23.py). Итог: PASS=14 / FAIL=0 (ALL_CHECKS_PASS); JSON —
+    audits/batch7s23_app_check_run1.json; лог — batch7s23_app_check_run1.txt.
+  C1  self.settings_service = modules.settings_service.SettingsService; все 10
+      методов callable=True; settings_dir реально = …\Supervertaler\workbench\settings.
+  C2  Делегат == сервис по значению для 4 загрузчиков (load_llm_settings,
+      load_proxy_settings, load_provider_enabled_states, load_api_keys) — все True.
+  C3  ДЕФОЛТЫ на ПУСТОЙ копии settings.json: llm provider=openai,
+      openai_model=gpt-5.5, 11 ключей; proxy enabled=false, port=8080;
+      13 состояний провайдеров, все True; api_keys == {}.
+  C4  ЦЕПОЧКА ПРОКСИ через делегаты: enabled из файла; _get_proxy_url вернул
+      «http://user%20name:p%40ss@proxy.local:3128» (percent-encoding username с
+      пробелом и password с @ → %40); _get_proxy_dict == {http, https} с тем же URL.
+  C4b Прокси выключен → _get_proxy_url() is None и _get_proxy_dict() is None.
+  C5  МИГРАЦИЯ google→gemini: при google=KEY-GOOGLE и отсутствии gemini
+      load_api_keys() вернул gemini=KEY-GOOGLE (legacy google сохранён).
+  C6  КЭША НЕТ: 3 вызова load_api_keys() = РОВНО 3 открытия settings.json
+      (счётчик на builtins.open).
+  C7  ЦИКЛ ЗАПИСИ НА КОПИИ user_data (temp-каталог, НЕ продовый файл):
+      save_llm_settings (openai_model=S23-WRITTEN), save_proxy_settings (port=9999),
+      save_provider_enabled_states (mt_mymemory=true), save_api_keys (deepl) —
+      всё записано в 5 секций; «чужая» верхнеуровневая секция usage_statistics_asked
+      и general={batch_size:20} СОХРАНЕНЫ (read-modify-write ui + замена api_keys);
+      0 предупреждений в логе окна за цикл.
+      Замечание (НЕ регрессия): load_llm_settings возвращает dict, куда уже
+      вмержены дефолты (saved.setdefault для 12 ключей), поэтому после
+      save_llm_settings дефолтные ключи (в т.ч. custom_mt_profiles) попадают в файл.
+      Это ВЕРБАТИМ-поведение HEAD (тело не менялось) — зафиксировано как есть.
+  C8  ★ РИСК #1 — 5 НЕЗАЩИЩЁННЫХ вызовов PreTranslationWorker (прямой тест ядра
+      перевода). LLMClient подменён фейком (сеть не нужна); счётчик стоит на
+      СЕРВИСНОМ load_api_keys, чтобы доказать всю цепочку делегат→сервис:
+        site 5637 _translate_with_mt           → mt_calls=1,  результат «[MT en->nl] …»;
+        site 5660 _translate_with_llm          → llm_calls=1, результат «[FAKE-TRANSLATION]»;
+        site 5730 _translate_batch_with_llm    → batch_calls=1, тип list;
+        site 5943 _translate_single_with_llm   → single_calls=1, «[FAKE-TRANSLATION]»;
+        site 5995 _autotag_segment_llm         → autotag_calls=1, возврат None
+                                                  (нет prompt_manager — но вызов БЫЛ);
+        полный пред-перевод wk2.run()           → run_completed=true, run_calls=1
+                                                  (success=0/errors=1 — фейк отдаёт
+                                                   одну строку, а не batch-формат;
+                                                   это ограничение фейка, не кода);
+        НЕГАТИВНЫЙ КОНТРОЛЬ: объект без метода → «AttributeError: '_NoDelegate'
+        object has no attribute 'load_api_keys'» — то есть без делегата путь упал бы.
+      ВЫВОД: делегат load_api_keys обязателен и работает во всех 5 необёрнутых
+      точках PreTranslationWorker + в run().
+  C9a РИСК #2 — hasattr-guarded сайты LLM-чата: hasattr(окно, 'load_api_keys'
+      /'load_llm_settings'/'_get_proxy_url'/'load_provider_enabled_states') — все True;
+      дословные guarded-выражения из modules/ вернули api_keys (deepl/gemini/google/
+      openai), llm provider=openai, proxy URL — то есть «тихого» провала в дефолт нет.
+  C9b РЕАЛЬНЫЙ ChatBackend(w, …) создан; init_llm_client() внутри него через
+      hasattr-guard поднял настоящий LLMClient (client_class=LLMClient).
+  C10 ВКЛАДКА SUPERLOOKUP: SuperlookupTab._perform_mt_lookup вызван на stand-in
+      {main_window=окно, mt_results_table} — оба делегата реально вызваны
+      (load_api_keys_calls=1, load_provider_enabled_states_calls=1), вернул [] (MT
+      выключены в копии → сетевых запросов нет). Это прямой тест guarded-сайта
+      63121/63193.
+  C11 Продовый settings.json за весь прогон НЕ изменился: sha256 start == end
+      (3e9940b3ce7d634879262e11398a2903f919a5f9cf368f9fdf4c3dd3e1c18522);
+      сервис после прогона снова смотрит в продовый каталог.
+  C12 Инвентарь определений (см. 3.1).
+  Замечание по протоколу: продовый каталог этой машины — общий
+  D:\_old\Supervertaler-Portable\Supervertaler (из глобального
+  ~/.supervertaler_config.json; user-data НЕ зависит от cwd, как предупреждает
+  AGENTS.md). Все записи S2.3 шли в КОПИЮ; продовый файл — read-only (C11).
+
+3.3 СМОУК-ТЕСТ save/load (два РАЗНЫХ процесса; stage-вариант smoke_root.py,
+    принимающий repo_root последним аргументом, чтобы тем же скриптом гонять и
+    working tree, и worktree HEAD)
+- SAVE (working tree): SAVE_OK 3198 (файл s23_smoke.svproj, 3198 байт).
+- LOAD (working tree):  «LOAD_OK s23smoke 3 Segment 1 source» + REACHED_END, EXIT=0.
+- LOAD (head-wt 7a2de37): «LOAD_OK s23smoke 3 Segment 1 source» + REACHED_END, EXIT=0.
+- Далее запущен отдельный замер кодов возврата (smoke_exit.ps1): WORK_EXIT=0,
+  HEAD_EXIT=0. Краш 0xC0000005 на выходе (периодически наблюдался в S2.1) в этом
+  прогоне НЕ воспроизвёлся ни на одном дереве; в stderr обоих процессов остался
+  только дамп faulthandler-таймера (teardown), код выхода — 0. Поведение до/после
+  идентично (см. VALIDATION_BACKLOG #30 — формулировать как intermittent).
+
+3.4 ИЗМЕРЕНИЯ ПОСЛЕ (на итоговом дереве; все артефакты в audits/)
+- py_compile_all.py: COMPILE_OK (144 .py-файла).
+- 8 метрик (counts.py): 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 — ИДЕНТИЧНЫ
+  базовой линии (audits/batch7s23_counts_after.txt ≡ batch7s23_baseline_counts.txt).
+  Никаких упоминаний метрик-паттернов в новых докстрингах/комментариях не
+  добавлено (проверено этим же счётчиком).
+- SHA256-манифест: 144 → 144; changed = 2 (см. 2.4), added = 0, removed = 0.
+- Объём монолита: 68 373 → 68 285 строк (−88; байт 3 544 176 → 3 542 259).
+- Объём сервиса: 197 → 368 строк (+171), методов 10 → 20.
+
+════════════════════════════════════════════════════════════════════════════════
+4. НЕПОКРЫТЫЕ ПРОВЕРКИ (ОБЯЗАТЕЛЬНЫЙ РАЗДЕЛ)
+════════════════════════════════════════════════════════════════════════════════
+M1. РЕАЛЬНЫЙ СЕТЕВОЙ ВЫЗОВ LLM/MT не выполнялся: во всех тестах LLMClient подменён
+    фейком, а MT-провайдеры выключены в копии. Проверялась именно цепочка
+    «PreTranslationWorker → делегат → сервис → файл настроек», а не ответы API.
+    Риск: LOW для S2.3 (тела вербатим, сетевую часть S2.3 не трогал). Как проверить:
+    прогнать Translate → Pre-translate с живым ключом.
+M2. НАСТОЯЩИЕ КЛИКИ В МОДАЛЬНЫХ ОКНАХ Settings (вкладки AI / MT / API keys) не
+    выполнялись: QDialog.exec замокан → Rejected. Проверены: вкладка API keys
+    косвенно через `_save_api_keys_from_ui`-путь (save_api_keys на копии, C7) и
+    реальные делегаты; сама кнопка Save в диалоге не нажималась. Риск: LOW
+    (делегаты == сервис, сигнатуры сохранены). Как проверить: открыть Settings,
+    вписать ключ, Save, убедиться, что settings.json обновился.
+M3. GUI НЕ ОТОБРАЖАЛСЯ НА ЭКРАНЕ (QT_QPA_PLATFORM=offscreen): визуальная отрисовка
+    вкладок AI/MT/API keys, локализованные подписи, темы, DPI не проверялись.
+M4. РЕАЛЬНЫЙ ПРОКСИ-ТРАФИК через _get_proxy_url/_get_proxy_dict не гонялся: функции
+    проверены на формирование URL/dict (в т.ч. percent-encoding), но фактическая
+    маршрутизация requests/httpx через прокси не подтверждалась. Риск: LOW
+    (тело вербатим). Как проверить: включить реальный прокси и выполнить MT-lookup.
+M5. ВЕТКА ОШИБОК `except: return defaults` (load_llm_settings/load_proxy_settings/
+    load_provider_enabled_states) и `except Exception: return None` (_get_proxy_url)
+    перенесены байт-в-байт, но сценарии «битый JSON / ошибка чтения» на живом окне
+    не подкладывались. Косвенно: C3 покрывает «отсутствующий файл»; в C7 — 0
+    предупреждений. Как проверить: подложить невалидный settings.json.
+M6. ПОВРЕЖДЁННЫЙ/ЧАСТИЧНЫЙ settings.json и UTF-8/BOM-варианты end-to-end не
+    воспроизводились (fallback `_load_unified_settings` → 4 пустые секции уже
+    проверен в S2.1/S2.2).
+M7. load_api_keys: 5-й сайт (_autotag_segment_llm) покрыт вызовом, но вернул None
+    (нет prompt_manager) — сам вызов делегата произошёл и посчитан (autotag_calls=1),
+    однако полный путь AutoTagger с осмысленным тегом не прогонялся.
+M8. ПОЛНЫЙ ПРОГОН run() с УСПЕШНЫМ batch-парсингом не выполнялся: фейк отдал одну
+    строку, а не batch-формат, поэтому run_success_errors={success:0, errors:1};
+    доказано отсутствие AttributeError и вызов делегата, но не разбор ответа LLM.
+M9. КОНКУРЕНТНОСТЬ/ОБРЫВ ЗАПИСИ settings.json (два процесса, частичная запись;
+    atomic-rename нет — как и до переноса) не проверялись.
+M10. ПОЛНЫЙ ЧЕЛОВЕЧЕСКИЙ ЦИКЛ «изменить каждую вкладку Settings → перезапуск →
+    проверить» НЕ выполнялся: для этого нужны S2.4 (языки/диктовка) и S2.5 (recent);
+    для S2.3 закрыт доступный слой — 10 делегатов, 4 загрузчика == сервис, дефолты,
+    цепочка прокси, миграция google→gemini, отсутствие кэша, цикл записи на копии,
+    RISK #1 (5 необёрнутых сайтов + run()), RISK #2 (chat), Superlookup-сайт.
+M11. СБОРКИ/ДРУГИЕ ОС (frozen/EXE, macOS, Linux) не проверялись.
+M12. АВТОМАТИЧЕСКИХ ТЕСТОВ В ПРОЕКТЕ НЕТ — проверки S2.3 суть скриптовые драйверы в
+    стейдж-каталоге (в репозиторий входят только аудиты). Скрипты параметризованы
+    (repo_root/out/stage) и переиспользуемы для S2.4+.
+M13. Продовые user-data в этом раунде НЕ записывались приложением (в отличие от
+    S2.2): старт окна + прогон C1–C12 не меняли продовый settings.json (C11
+    sha start == end). Смоук-save пишет versioned-бэкапы в общий продовый каталог —
+    это ожидаемое поведение инструмента (не относится к S2.3).
+
+════════════════════════════════════════════════════════════════════════════════
+5. ПОДТВЕРЖДЕНИЕ ОТСУТСТВИЯ ПРАВОК КОДА ВНЕ ЗАЯВЛЕННОГО ДИФФА
+════════════════════════════════════════════════════════════════════════════════
+- SHA256-манифест 144 → 144 файла: changed = РОВНО 2 (Supervertaler.py и
+  modules/settings_service.py — оба объявлены в §2), added = 0, removed = 0.
+  Ни один другой .py репозитория не изменён (modules/, tools/, scripts/,
+  okapi-sidecar/, translations/, user_data/).
+- difflib-замер по Supervertaler.py: неравных регионов ровно 10, все 10 — по одному
+  на перенесённый метод (делегаты); сумма net −88 == фактическому изменению размера
+  файла (assert True). Незаявленной правки нет.
+- AST-сверка callsites по области видимости: единственные исчезнувшие ключи — 3
+  внутренних self-вызова ПЕРЕНЕСЁННЫХ тел; count-mismatch = 0 (см. 2.4). То есть
+  ни один внешний (относительно перенесённых тел) call site не потерян и не изменён.
+- Заявленный дифф (то, что разрешено менять и что реально изменено):
+  (1) 10 делегатов в монолите (56974–57020 и 57205–57216 и 61133–61146);
+  (2) 10 методов + блок-комментарий S2.3 в modules/settings_service.py;
+  (3) докстринги делегатов (абзац «Тонкий делегат …» внутри уже существующих
+      докстрингов 10 методов).
+  Правок кода вне этого списка НЕТ: ни строки импорта, ни конструктора сервиса,
+  ни `_reinitialize_with_new_data_path`, ни `_get_api_keys`, ни одного шапки-комментария
+  «# PROXY SETTINGS» не трогались; шапка осталась на своём месте.
+- `git status` после работы: `M Supervertaler.py`, `M modules/settings_service.py`
+  + новые документы батча (промпт, отчёт, аудиты batch7s23_*) и обновления
+  PROJECT_STATUS.md / EXTRACTION_PLAN.md / VALIDATION_BACKLOG.md.
+
+════════════════════════════════════════════════════════════════════════════════
+6. NEXT STEP — S2.4 И ОТКРЫТЫЕ ВОПРОСЫ
+════════════════════════════════════════════════════════════════════════════════
+6.1 S2.4 — «языки / диктовка / словарь / спеллчек» (9 методов / ~203 строки).
+    Границы ЗАНОВО вывести AST на итоговом дереве S2.3: документированные номера
+    после сдвига −88 на участках ниже 61142 уже неверны. Промпт S2.4 писать по
+    образцу S2.3 (Этап 0/1/2/3, делегаты обязательны, риск-приоритеты). Отметить
+    в отчёте S2.4 явно, что после S2.3 делегатов в сервисе стало 10, а всего
+    перенесено 19 из 32 методов Stage 2.
+6.2 S2.5 — «recent + миграции» с валидацией на копии user_data.
+6.3 ОТКРЫТЫЕ ПУНКТЫ, НЕ БЛОКИРУЮЩИЕ S2.4:
+    - VALIDATION_BACKLOG M1–M13 (этот отчёт) — переносятся в реестр после приёмки.
+    - Пред-существующие: два сайта SuperlookupTab зовут save_general_settings() без
+      аргумента (guard на несуществующий атрибут) — поведение законсервировано
+      бит-в-бит, решение «чинить/удалять» — за владельцем (пункт #26 реестра).
+    - NOT-MOVE-остаток Stage 2: save_clipboard_privacy_settings (монолит) и
+      load_general_settings (монолит) — в состав S2.4 не включать.
+    - Аудиты S2.1–S2.3 в стейдж-каталоге сохраняются до решения координатора
+      (head-wt на 7a2de37 понадобится для DO/POS-проб S2.4).
+
+════════════════════════════════════════════════════════════════════════════════
+7. КОММИТ БАТЧА
+════════════════════════════════════════════════════════════════════════════════
+Один коммит: код переноса (10 методов в сервис + 10 делегатов + блок-комментарий
+сервиса) + промпт S2.3 + этот отчёт + аудиты batch7s23_* + обновления
+PROJECT_STATUS.md, EXTRACTION_PLAN.md и VALIDATION_BACKLOG.md. Родитель: 7a2de37.
+
+Проверка после коммита (обязательная, чтобы коммит не разошёлся с деревом):
+повторить manifest.py + counts.py + py_compile_all.py и сверить с
+manifest_after.txt / counts_after.txt (§3.4), а также verify_s23.py --live — все
+должны дать те же значения (файлы перед коммитом не менялись, кроме документов).
+
+ПОСТ-КОММИТНАЯ ПРОВЕРКА — ВЫПОЛНЕНА, РАСХОЖДЕНИЙ НЕТ (коммит батча — см.
+`git log -1 --oneline`; его родитель — 7a2de37):
+- `git status --short` — ПУСТО (дерево == коммит); `git diff HEAD --stat` — пусто.
+- Содержимое коммита совпадает с измеренными файлами побайтово (сравнение
+  `git show HEAD:<file>` с рабочей копией, sha256; артефакт verify_commit_s23.py):
+    Supervertaler.py           4279e6de90e0163ff7673812eb1ddf090635dcde1f01d9e208638e0790a4fd5d  equal_raw=True
+    modules/settings_service.py 714662f2b47618c5a58523cbdf1795773ebb056a88ac8cf7b966f0664546a26f  equal_raw=True
+- Повторный прогон инструментов ПОСЛЕ коммита (артефакты run-001\
+  {counts_postcommit.txt, manifest_postcommit.txt, manifest_postcommit_cmp.txt}):
+  py_compile COMPILE_OK; counts_postcommit.txt побайтово равен counts_after.txt
+  (8 метрик 1211/18/35/24/24/0/85/2); manifest_postcommit.txt против
+  manifest_after.txt → changed=0, added=0, removed=0.
+- Коммит батча: 19 файлов (4 изменённых .md/.py + 15 новых документов: промпт,
+  отчёт, 12 аудитов, JSON app-check). Не пушился.
+- ЦЕПОЧКА ХЕШЕЙ И ПРАВОК ПОСЛЕ ПЕРВОГО КОММИТА (фиксирую честно, чтобы читатель не
+  запутался): первый коммит батча был 8b2a7f7; далее ТРИ `git commit --amend`,
+  каждый — ТОЛЬКО документы/артефакты, ни один .py не менялся (после каждого шага
+  повторный манифест: changed=0 по .py):
+    (1) исправлена ОДНА строка отчёта — в §2.4 в цитате полного sha256
+        Supervertaler.py была опечатка (потеряна одна hex-цифра);
+    (2) добавлен этот раздел пост-коммитной проверки;
+    (3) два аудита (batch7s23_snapshot_index.txt, batch7s23_verify_out.txt) были
+        записаны PowerShell `Tee-Object` в UTF-16 (git видел их как Bin) —
+        перекодированы в UTF-8 LF (теперь i/lf w/lf), содержимое не изменилось.
+  Хеш финального коммита см. `git log -1 --oneline`; .py-содержимое идентично во
+  всех четырёх состояниях (проверено повторными манифестами и `git show HEAD:`).
+- Квирк окружения (зафиксировано, чтобы не искали причину заново): в середине сессии
+  сменился пользователь (ROOT/Dmitry → ROOT/AIAssistant), и git начал падать с
+  «detected dubious ownership in repository … owned by ROOT/Dmitry, but the current
+  user is ROOT/AIAssistant». Глобальные настройки НЕ менялись (по AGENTS.md «не
+  менять глобальную среду ради задачи»): все git-команды выполнялись с
+  процесс-локальным `-c safe.directory=E:/Dev/SupervertalerPortable` (тот же флаг
+  использует verify_commit_s23.py).
+
+════════════════════════════════════════════════════════════════════════════════
+МЕТРИКИ ПОДТВЕРЖДЕНИЯ (сводка чисел этого отчёта)
+════════════════════════════════════════════════════════════════════════════════
+монолит            68 373 → 68 285 строк (−88; байт 3 544 176 → 3 542 259)
+сервис               197 → 368 строк (+171), методы 10 → 20
+делегатов S2.3       10/10 signature_identical + forwards; VERBATIM 10/10
+callsites            внешние модули byte-identical; AST count-mismatch = 0
+8 метрик             1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 (до == после)
+py_compile           COMPILE_OK (144 файла)
+манифест             144 → 144; changed=2, added=0, removed=0
+живой прогон         PASS=14 / FAIL=0 (offscreen; RISK#1 = 5 необёрнутых сайтов + run())
+смоук                SAVE_OK 3198; LOAD_OK s23smoke 3 (EXIT=0 на обоих деревьях)
+учёт строк           difflib: 10 регионов, sum(delta) = −88 == net (assert True)

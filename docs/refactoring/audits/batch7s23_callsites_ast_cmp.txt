@@ -1,0 +1,20 @@
+head=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\head-wt\Supervertaler.py  keys=91
+work=E:\Dev\SupervertalerPortable\Supervertaler.py  keys=98
+only-in-HEAD (3):
+    _get_proxy_dict._get_proxy_url x1  <- inside a MOVED body (expected)
+    _get_proxy_url.load_proxy_settings x1  <- inside a MOVED body (expected)
+    load_llm_settings.load_api_keys x1  <- inside a MOVED body (expected)
+only-in-WORK (10):
+    _get_proxy_dict._get_proxy_dict x1
+    _get_proxy_url._get_proxy_url x1
+    load_api_keys.load_api_keys x1
+    load_llm_settings.load_llm_settings x1
+    load_provider_enabled_states.load_provider_enabled_states x1
+    load_proxy_settings.load_proxy_settings x1
+    save_api_keys.save_api_keys x1
+    save_llm_settings.save_llm_settings x1
+    save_provider_enabled_states.save_provider_enabled_states x1
+    save_proxy_settings.save_proxy_settings x1
+count-mismatch (0):
+
+VERDICT: OK — every call site outside the 10 moved bodies is preserved
