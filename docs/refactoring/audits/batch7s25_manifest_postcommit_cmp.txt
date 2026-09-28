@@ -1,0 +1,5 @@
+before=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\manifest_final.txt (144 files)
+after =D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\manifest_postcommit.txt (144 files)
+changed (0):
+only-in-before / removed (0):
+only-in-after / added (0):

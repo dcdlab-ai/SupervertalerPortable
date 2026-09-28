@@ -1,0 +1,58 @@
+﻿=== 1. service inventory ===
+  load_recent_projects     defs=1 490-552
+  save_recent_projects     defs=1 554-565
+  order ['load_recent_projects', 'save_recent_projects']
+  == monolith order: True
+  SettingsService methods total: 26
+=== 1b. service imports / no path caching ===
+  import os                                                    present=True
+  from datetime import datetime                                present=True
+  from typing import Any, Callable, Dict, List, Optional, Tuple present=True
+  self.recent_projects_file / self.user_data_path STOREs in service: NONE (OK - paths arrive as arguments)
+  self.<path> attribute uses in service: NONE (OK)
+=== 2. verbatim / documented-edit (moved bodies) ===
+  DOC-EDIT load_recent_projects     matches-documented-edit=True diff -4/+4
+      -    def load_recent_projects(self) -> List[Dict[str, str]]:
+      -        if not self.recent_projects_file.exists():
+      -                with open(self.recent_projects_file, 'r', encoding='utf-8') as f:
+      -                with open(self.recent_projects_file, 'r', encoding='latin-1') as f:
+      +    def load_recent_projects(self, recent_projects_file: Path) -> List[Dict[str, str]]:
+      +        if not recent_projects_file.exists():
+      +                with open(recent_projects_file, 'r', encoding='utf-8') as f:
+      +                with open(recent_projects_file, 'r', encoding='latin-1') as f:
+  DOC-EDIT save_recent_projects     matches-documented-edit=True diff -3/+4
+      -    def save_recent_projects(self, recent_projects: List[Dict[str, str]]):
+      -            self.user_data_path.mkdir(parents=True, exist_ok=True)
+      -            with open(self.recent_projects_file, 'w', encoding='utf-8') as f:
+      +    def save_recent_projects(self, recent_projects: List[Dict[str, str]],
+      +                             recent_projects_file: Path, user_data_path: Path):
+      +            user_data_path.mkdir(parents=True, exist_ok=True)
+      +            with open(recent_projects_file, 'w', encoding='utf-8') as f:
+  strict-verbatim 0/0 + documented-edit 2/2
+=== 3. self.* resolution inside service bodies ===
+  window-state leakage: NONE (OK)
+=== 4. delegates (monolith) ===
+  load_recent_projects     sig_identical=True body_ok=True forwards=True (32326-32336, 11 lines)
+  save_recent_projects     sig_identical=True body_ok=True forwards=True (32338-32350, 13 lines)
+=== 5. NOT-MOVE byte-identity (work ranges re-derived by AST) ===
+  add_to_recent_projects                   32258-32308 byte_identical_to_HEAD=True
+  _remove_from_recent_projects             32310-32324 byte_identical_to_HEAD=True
+  update_recent_projects_display           32352-32384 byte_identical_to_HEAD=True
+  clear_recent_projects                    32386-32400 byte_identical_to_HEAD=True
+  _migrate_settings_to_unified             44694-44784 byte_identical_to_HEAD=True
+  _migrate_to_workbench_layout             44786-44851 byte_identical_to_HEAD=True
+  _migrate_voice_dictation_default_off     45079-45110 byte_identical_to_HEAD=True
+  NOT-MOVE intact: 7/7
+=== 6. callers + path assignments untouched ===
+  update_recent_menu                 32215-32249 byte_identical_to_HEAD=True
+  restore_last_project_if_enabled    45318-45347 byte_identical_to_HEAD=True
+  _load_recent_project_with_resize   32251-32256 byte_identical_to_HEAD=True
+  __init__                           byte_identical_to_HEAD=True (6067-6542)
+  _reinitialize_with_new_data_path   byte_identical_to_HEAD=True (6665-6728)
+  path assignments (HEAD/WORK): 2/2
+=== 7. repo-wide definition inventory ===
+  load_recent_projects     2 defs: ['Supervertaler.py:32326', 'modules/settings_service.py:490']
+  save_recent_projects     2 defs: ['Supervertaler.py:32338', 'modules/settings_service.py:554']
+
+CHECKS 33/33
+RESULT OK

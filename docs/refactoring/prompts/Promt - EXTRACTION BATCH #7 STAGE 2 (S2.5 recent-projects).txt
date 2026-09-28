@@ -1,0 +1,93 @@
+## ПЕРЕНОС S2.5 — Settings Service, recent projects (Batch #7 Stage 2, под-батч 5/5)
+
+РОЛЬ: Ты выполняешь перенос кода (не разведку, не аудит). Разведка границ
+уже сделана Б2 на HEAD=1ef3c708400c8b490488a5708092134410dfbeca.
+
+Этап 0 — ОБЯЗАТЕЛЬНО перед всем остальным (обратный дрейф ловили 5 раз):
+  git fetch origin
+  git merge-base --is-ancestor 1ef3c708 HEAD && echo OK || echo STOP
+  Если STOP — git checkout origin/main (или pull) и повторить проверку.
+  Не читать и не трогать код, пока не OK.
+
+Этап 1 — базовая линия: SHA256-манифест всех .py (по git-блобам, не по
+рабочей копии — иначе CRLF/LF-артефакт), py_compile, 8 метрик.
+
+Этап 2 — перенос (2 метода, 74 строки, смежные), тонкие делегаты на
+SupervertalerQt, форвардящие на self.settings_service:
+  load_recent_projects   32326–32388 (63 строки), сигнатура: load() -> List[Dict[str,str]], без аргументов
+  save_recent_projects   32390–32400 (11 строк),  сигнатура: save(recent_projects) — 1 позиционный аргумент
+
+ОСОБЕННОСТЬ ЭТОГО ПОД-БАТЧА: эти методы НЕ работают через settings.json и
+не используют _load_settings_section/_load_unified_settings. Они напрямую
+открывают отдельный файл self.recent_projects_file
+(= <user_data_path>/workbench/settings/recent_projects.json). Решение
+координатора: делегат сам передаёт в сервис пути аргументами:
+  load: делегат передаёт self.recent_projects_file
+  save: делегат передаёт self.recent_projects_file и self.user_data_path
+Атрибуты читаются в делегате при КАЖДОМ вызове (как сейчас в оригинале), не
+кэшируются в сервисе. НЕ менять конструктор SettingsService и перепривязку
+сервиса в _reinitialize_with_new_data_path. Если окажется, что это
+невозможно без такой правки — остановиться и доложить координатору.
+Логирование — через уже существующий log-механизм сервиса (как в S2.2/S2.3),
+не через новый параметр.
+
+Перенести БЕЗ изменения поведения (перенос, не улучшение):
+  - open(..., encoding='utf-8'), при UnicodeDecodeError повтор с
+    encoding='latin-1' и предупреждением в лог;
+  - json.load; поддержка старого dict-формата и нового list-формата;
+  - в list-формате отбрасывание записей, у которых путь не существует
+    (os.path.exists) или не заканчивается на .svproj;
+  - save: self.user_data_path.mkdir(parents=True, exist_ok=True), затем
+    open(..., 'w', encoding='utf-8') и json.dump(indent=2,
+    ensure_ascii=False);
+  - обработка исключений — ровно как в оригинале, не добавлять и не убирать
+    try/except.
+В settings_service.py добавить только недостающие импорты (json, Path,
+datetime, os — проверить, что уже есть). Импорты в Supervertaler.py не
+убирать. Строку docstring в settings_service.py:17 (перечень атрибутов
+SupervertalerQt, «которые сервис не трогает», среди них recent_projects_file)
+привести в соответствие с новой реальностью.
+
+Присваивания self.recent_projects_file в __init__ (6430) и в
+_reinitialize_with_new_data_path (6721) НЕ трогать.
+
+СТРОГО NOT-MOVE (проверка байт-в-байт до/после, как в S2.1–S2.4):
+  add_to_recent_projects            32258–32308
+  _remove_from_recent_projects      32310–32324
+  update_recent_projects_display    32402–32434
+  clear_recent_projects             32436–32450
+  _migrate_settings_to_unified      44744–44834
+  _migrate_to_workbench_layout      44836–44901
+  _migrate_voice_dictation_default_off  45129–45160
+Также не трогать вызывающих: update_recent_menu (32219),
+restore_last_project_if_enabled (45377).
+
+Этап 3 — валидация (Step 7 конвенция; ТОЛЬКО на копии user_data):
+Скриптом, сравнивая результат делегата с прежней реализацией (как в
+прошлых батчах: worktree предыдущего коммита vs рабочее дерево), на КОПИИ
+user_data с подготовленными вариантами recent_projects.json:
+  а) list-формат: существующий .svproj + несуществующий путь + запись не
+     .svproj — фильтрация идентична;
+  б) старый dict-формат;
+  в) файл в latin-1 — сработал fallback и предупреждение в лог;
+  г) файла нет; д) битый JSON — поведение идентично прежнему;
+  е) save: кириллический путь, побайтовая идентичность вывода
+     (indent=2, ensure_ascii=False); директория user_data_path создаётся;
+  ж) переприсваивание self.recent_projects_file на другой файл — кандидаты
+     идут в новый файл (чтение атрибута при каждом вызове).
+Живой прогон: открыть/сохранить проект — он появился в меню недавних
+(update_recent_menu) и в списке недавних (update_recent_projects_display);
+перезапуск — запись сохранилась; удаление записи; clear recent projects;
+включить «восстанавливать последний проект при старте» и перезапустить
+(restore_last_project_if_enabled — это путь запуска приложения).
+py_compile, SHA256-манифест, 8 метрик, смоук-тест.
+Раздел «Непокрытые проверки» — обязателен; повторы уже открытых сквозных
+пунктов реестра оформлять ссылкой «См. п. N», не новой строкой.
+
+Документация в этом же коммите: PROJECT_STATUS.md и EXTRACTION_PLAN.md —
+S2.5 закрыт; в EXTRACTION_PLAN.md добавить итоговый блок Step 7: что вынесено
+(25 методов: S2.1 6, S2.2 3, S2.3 10, S2.4 4, S2.5 2) и что сознательно
+осталось в монолите и почему (V3-исключения, load_general_settings,
+голосовые методы, миграции, методы recent projects из тира C).
+
+ФОРМАТ ОТЧЁТА: как в S2.1–S2.4.

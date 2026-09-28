@@ -1,0 +1,86 @@
+{
+ "R1_fresh_process_resolves_to_copy": {
+  "ok": true,
+  "value": {
+   "user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data",
+   "resolved_to_copy": true,
+   "recent_projects_file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json",
+   "path_mapping_ok": true,
+   "service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings",
+   "service_dir_ok": true,
+   "config_pointer": "C:\\Users\\AIAssistant2\\AppData\\Roaming\\Supervertaler\\config.json",
+   "pointer_unchanged": true
+  }
+ },
+ "R2_recent_entry_survives_restart": {
+  "ok": true,
+  "value": {
+   "entries": [
+    [
+     "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj",
+     "S25 Beta"
+    ]
+   ],
+   "on_disk": [
+    [
+     "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj",
+     "S25 Beta"
+    ]
+   ],
+   "delegate_equals_service": true,
+   "entry_survived_restart": true,
+   "entry_path_exists": true,
+   "recent_file_rewritten_by_startup": true,
+   "seed_sha": "d66bc0bac848329c15379554062beb199038d4b3373a4f112e6d5b6bec63c8ce",
+   "after_sha": "49a6cb070e05ce75903ec90af1abb964d824d29e69da420d63291f7511f306f5"
+  }
+ },
+ "R3_project_auto_restored_at_startup": {
+  "ok": true,
+  "value": {
+   "current_project": "S25 Beta",
+   "segments": 3,
+   "auto_restored": true,
+   "flag_in_settings": true,
+   "project_file_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj",
+   "grid_rows": 3
+  }
+ },
+ "R4_menu_and_home_show_entry_after_restart": {
+  "ok": true,
+  "value": {
+   "menu_labels": [
+    "1. S25 Beta",
+    "Clear Recent Projects"
+   ],
+   "home_labels": [],
+   "menu_shows_project": true,
+   "home_shows_project": false
+  }
+ },
+ "R5_relocating_copy_structure": {
+  "ok": true,
+  "value": {
+   "copy_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\restart_user_data",
+   "copied_entries": [
+    "S25 Beta"
+   ],
+   "copied_restore_flag": true,
+   "copied_project_files_present": [
+    "Alpha.svproj",
+    "Beta.SVPROJ",
+    "S25 Alpha.svproj",
+    "S25 Beta.svproj"
+   ],
+   "copy_matches_main": true
+  }
+ },
+ "R6_no_production_writes": {
+  "ok": true,
+  "value": {
+   "writes_went_to": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data",
+   "prod_pointer_unchanged": true,
+   "restart_dir_recent_sha": "49a6cb070e05ce75903ec90af1abb964d824d29e69da420d63291f7511f306f5"
+  }
+ }
+}

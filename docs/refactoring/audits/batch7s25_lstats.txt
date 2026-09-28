@@ -1,0 +1,4 @@
+﻿  68274 lines  bytes= 3542691  CR=    0  D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\head_Supervertaler.py
+    451 lines  bytes=   25429  CR=    0  D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\head_settings_service.py
+  68224 lines  bytes= 3540879  CR=    0  E:\Dev\SupervertalerPortable\Supervertaler.py
+    565 lines  bytes=   32495  CR=    0  E:\Dev\SupervertalerPortable\modules\settings_service.py

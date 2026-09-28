@@ -1,0 +1,18 @@
+work = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\restart_work.json
+head = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\restart_headwt.json
+
+keys: work=45 head=45 common=45
+differing (1), of which expected API-probe deltas: 1
+only-in-work: 0 (0 expected API probes, 0 unexpected)
+only-in-head: 0 (0 expected API probes, 0 unexpected)
+
+--- differing keys (1) ---
+  [EXPECTED (direct service probe)] R2_recent_entry_survives_restart.value.delegate_equals_service
+      work=True
+      head='<ABSENT-before-S2.5>'
+
+--- keys present in only one tree ---
+
+expected differences  : 1
+unexpected differences: 0
+VERDICT: OK - every window-API observation is identical; the only deltas are the direct-service probes that exist only after the move

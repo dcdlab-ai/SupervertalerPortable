@@ -4,7 +4,7 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-27 (Batch #7 Stage 2, под-батч S2.4) • **Текущий шаг:** Step 7 — Stage 2 идёт: S2.1 «ядро API», S2.2 «general + clipboard reading», S2.3 «LLM/proxy/provider/api keys» и S2.4 «языковая пара + spellcheck-IO» выполнены (`modules/settings_service.py` + 23 делегата), дальше S2.5 (голосовая часть S2.4 + recent-projects + миграции); монолит 68 274 строки
+**Обновлено:** 2026-09-28 (Batch #7 Stage 2, под-батч S2.5 — STEP 7 ЗАКРЫТ) • **Текущий шаг:** Step 7 завершён: Stage 1 (read-only) + Stage 2 в пяти под-батчах (S2.1 «ядро API», S2.2 «general + clipboard reading», S2.3 «LLM/proxy/provider/api keys», S2.4 «языковая пара + spellcheck-IO», S2.5 «recent projects») — `modules/settings_service.py` 565 строк / 26 методов + 25 тонких делегатов; монолит **68 224** строки; дальше — Step 8 (Grid: render + match panel + comments UI)
 
 ## Кратко: где мы находимся
 
@@ -37,14 +37,22 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 `self.source_language`/`target_language` и чтение `self.spellcheck_enabled`
 остались в делегатах, сервис принимает/возвращает значения); монолит 68 285 →
 **68 274** строки (−11), 8 метрик без изменений, живой offscreen-прогон — 11/11 PASS
-плюс отдельный процесс-перезапуск 4/4 PASS. Состав Stage 2 после V1–V4 — 32 метода
-(6 A + 26 B) / ~731 строка, 5 под-батчей (S2.1–S2.5); закрыто 23 из 32 методов
-(S2.1 + S2.2 + S2.3 + S2.4), в S2.4 координатор исключил голосовую часть
-(`load_dictation_settings`, `save_dictation_settings`,
-`load/save_voice_vocabulary_settings`, `load_language_settings`) — она остаётся на
-следующий шаг вместе с S2.5.
-Дальше — **S2.5**: голосовая часть + `load/save_recent_projects` + две миграции,
-отдельным промптом; границы вывести AST заново (после −11 номера ниже 52249 сместились).
+плюс отдельный процесс-перезапуск 4/4 PASS. Под-батч **S2.5 «recent projects»**
+(28.09.2026) — ПОСЛЕДНИЙ в Stage 2 — перенёс ещё 2 метода / 74 строки
+(`load_recent_projects`, `save_recent_projects`) и оставил 2 тонких делегата; это
+первый под-батч, где перенесённые тела работают НЕ через `settings.json`, поэтому
+применён вариант **SPLIT-BY-ARGUMENT**: делегат читает `self.recent_projects_file`
+(и `self.user_data_path`) при КАЖДОМ вызове и передаёт их аргументами, сервис пути
+не хранит, конструктор сервиса не менялся; монолит 68 274 → **68 224** строки
+(−50), 8 метрик без изменений, живой offscreen-прогон — 16/16 PASS +
+процесс-перезапуск 6/6 PASS + клик по реальным пунктам меню 3/3 PASS, кросс-дерево
+(work против worktree предыдущего коммита) — 0 неожиданных расхождений. **Step 7
+закрыт целиком: 25 методов / ~366 строк перенесены (S2.1 6, S2.2 3, S2.3 10,
+S2.4 4, S2.5 2), голосовые методы, три миграции, `load_general_settings`,
+V3-исключения и тир C `recent_projects` (add/remove/display/clear) сознательно
+остались в монолите** — основания в итоговом блоке Step 7 `EXTRACTION_PLAN.md` и
+§5 отчёта S2.5.
+Дальше — **Step 8** (Grid: render + match panel + comments UI); Step 7 закрыт полностью.
 Среда, тестирование и валидация — по `AGENTS.md` (обязательно к
 прочтению перед любой работой).
 
@@ -59,11 +67,86 @@ Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`)
 | 4 | Чистые QThread-воркеры | ✅ выполнен | Batch #4 (этот коммит; `modules/workers/`); отчёт `docs/refactoring/reports/ОТЧЁТ Batch #4.txt` |
 | 5 | Undo-менеджер | ✅ выполнен | Batch #5 Stage 1 `c11e1bc` (инвентаризация) + Stage 2 (`modules/undo_manager.py`); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #5 Stage 1.txt` и `…Stage 2.txt` |
 | 6 | Grid: helpers/pagination/filters | ✅ выполнен (Step 6 закрыт целиком) | Batch #6 Stage 1 `c5a5da1`; Stage 2 `4ace504` (`modules/grid/helpers.py`, 16 функций + 17 делегатов); Stage 3 `26b998c` (`modules/grid/pagination.py`, 14 функций + 14 делегатов + 2 константы); Stage 4 (`modules/grid/filters.py`, 20 функций + 1 внутренняя + 20 делегатов); отчёты `docs/refactoring/reports/ОТЧЁТ Batch #6 Stage {1,2,3,4}.txt`; аудиты `docs/refactoring/audits/batch6_stage1_*.txt`, `*batch6stage{2,3,4}*` |
-| 7 | Settings service (IO-слой) | 🔄 Stage 2 идёт: **S2.1 «ядро API» (25.09.2026), S2.2 «general + clipboard reading» (26.09.2026), S2.3 «LLM/proxy/provider/api keys» (27.09.2026) и S2.4 «языковая пара + spellcheck-IO» (27.09.2026) выполнены** — `modules/settings_service.py` + 23 тонких делегата; осталось S2.5 | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2/S2.3/S2.4: отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1).txt`, `…Stage 2 (S2.2).txt`, `…Stage 2 (S2.3).txt`, `…Stage 2 (S2.4).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s21_*.txt`, `batch7s22_*.txt`, `batch7s23_*.txt`, `batch7s24_*.txt` |
+| 7 | Settings service (IO-слой) | ✅ выполнен (Stage 2 закрыт целиком) | Batch #7 Stage 1 (read-only) + Stage 2 S2.1/S2.2/S2.3/S2.4/S2.5: 25 методов / ~366 строк в `modules/settings_service.py` (565 строк, 26 методов) + 25 делегатов; отчёты `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 1.txt`, `…Stage 2 (S2.1…S2.5).txt`; findings `docs/refactoring/audits/step7_stage1_findings.md`; аудиты `docs/refactoring/audits/batch7_stage1_*.txt`, `batch7s2{1,2,3,4,5}_*.txt` |
 | 8 | Grid: render + match panel + comments UI | ⬜ не начат | — |
 | 9 | Мелкие изолированные фичи | ⬜ не начат | — |
 | 10 | Find&Replace + поиск | ⬜ не начат | — |
 | 11 | Импорт/Экспорт контроллеры | ⬜ не начат | — |
+## Что дальше: Step 7 Stage 2 — под-батч S2.5 закрыт, STEP 7 ЗАКРЫТ ЦЕЛИКОМ (28.09.2026)
+
+**S2.5 выполнен** (база HEAD `d4db217` — потомок базы разведки `1ef3c708`, дрейфа
+нет; монолит 68 274 → **68 224** строки, −50; difflib — ровно 2 неравных региона
+−52/+2, сумма −50 == изменению файла). Перенесены 2 метода / 74 строки в
+`modules/settings_service.py` (451 → 565 строк; методов 24 → 26) —
+`load_recent_projects` (сервис 490–552), `save_recent_projects` (сервис 554–565).
+**Это единственный под-батч Stage 2, где тела не ходят через `settings.json`**:
+они открывают отдельный `recent_projects.json`, поэтому применён вариант
+**SPLIT-BY-ARGUMENT** (решение координатора): делегат читает
+`self.recent_projects_file` при каждом вызове (в save — ещё и
+`self.user_data_path` для `mkdir`) и передаёт их аргументами; сервис пути НЕ
+хранит, конструктор `SettingsService` и перепривязка сервиса в
+`_reinitialize_with_new_data_path` не менялись (проверено AST: Store этих двух
+имён в сервисе = 0). Тела перенесены ВЕРБАТИМ, документированная правка — 3 и 2
+замены ссылок на пути (+ строка `def` в save разбита на две): diff −4/+4 и
+−3/+4. В монолите — 2 тонких делегата с исходными сигнатурами (2/2
+signature_identical + forwards, форвардинг идёт именованными аргументами путей).
+
+**Живой прогон (offscreen) — 16/16 PASS + перезапуск 6/6 PASS + клик по меню 3/3
+PASS + кросс-дерево 0 неожиданных расхождений:**
+- все пункты промпта а–ж закрыты фактически: list-формат с фильтрацией
+  (`os.path.exists` + `.svproj`, регистр расширения не важен, доставка
+  `name`/`last_opened`), старый dict-формат, latin-1-fallback с точной строкой
+  предупреждения, отсутствующий файл → [], битый JSON → [] с точной строкой
+  ошибки, save в кириллический путь с побайтовой идентичностью каноническому
+  `json.dumps(indent=2, ensure_ascii=False)` и созданием `user_data_path`,
+  ветка ошибки записи без исключения, переприсваивание `recent_projects_file` →
+  чтение/запись в новый файл и «нет кэша» (1 → 2 записи при внешней перезаписи);
+- живой прогон: проект сохранён/открыт реальными `save_project_to_file` и
+  `load_project` → появился в файле, в меню «Open Recent» («1. S25 Alpha») и в
+  списке недавних (панель подставлена — в сборке её нет, см. п. 45 реестра);
+  второй проект встал выше; удаление и `clear_recent_projects` (Yes/No) работают;
+  лимит `MAX_RECENT_PROJECTS=10` соблюдён; `restore_last_project_if_enabled`
+  восстанавливает самый свежий проект, а перезапуск в ОТДЕЛЬНОМ интерпретаторе
+  делает это на СТАРТЕ приложения (`__init__` 6486) — то есть проверен именно
+  путь запуска;
+- «прежняя реализация» — тот же драйвер в worktree `d4db217`: 16/16 PASS, и
+  сравнение JSON-листьев двух деревьев даёт 0 неожиданных расхождений (7
+  отличий — прямые вызовы сервиса, которых до переноса не существует).
+- 7 NOT-MOVE-блоков (4 метода тира C недавних + 3 миграции) — byte-identical;
+  `__init__`, `_reinitialize_with_new_data_path`, `update_recent_menu`,
+  `restore_last_project_if_enabled` — byte-identical; оба присваивания
+  `recent_projects_file` на месте (2/2).
+- манифест (по git-блобам): changed = ровно 2 (`Supervertaler.py` 0854f899… →
+  c0370685…, `modules/settings_service.py` 6778e9e7… → 5e582639…), added/removed
+  = 0; 8 метрик 1211/18/35/24/24/0/85/2 — файлы до/после побайтово равны;
+  py_compile COMPILE_OK; смоук save/load EXIT=0 на обоих деревьях.
+
+Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.5).txt`; промпт:
+`docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.5 recent-projects).txt`;
+аудиты: `docs/refactoring/audits/batch7s25_*` (снапшот-индекс 9 блоков,
+deps-load/store, manifest-before/after/cmp по git-блобам, line-accounting
+монолита и сервиса, callsites head/AST-cmp, path-attrs dump+cmp, verify 33/33,
+app-check work/head-wt/cmp, restart work/head-wt/cmp, menu work/head-wt/cmp,
+smoke-exit). Непокрытые проверки — §4 отчёта; новый пункт реестра **один: п. 45**
+(home-экран «Recent projects»: панель `recent_projects_layout` в сборке не
+создаётся, отрисовка проверена подставленным реальным `QVBoxLayout`; MOOT для
+текущей сборки), остальное — ссылками на п. 12/13/21/25/29/30/33/35/36/43/44,
+чтобы не дублировать сквозные пункты.
+
+**РАСКРЫТИЕ ФАКТИЧЕСКОГО СУЖЕНИЯ SCOPE (занесено и в `EXTRACTION_PLAN.md`):**
+план ожидал в S2.5 «голосовую часть S2.4 + recent-projects + миграции» — 10
+методов / ~419 строк, после чего «будет закрыто 33 из 33 методов Stage 2».
+Координатор переопределил под-батч: перенесены ТОЛЬКО `load/save_recent_projects`
+(2 метода / 74 строки), а голосовые методы (`load/save_dictation_settings`,
+`load/save_voice_vocabulary_settings`, `load_language_settings`) и три миграции
+(`_migrate_settings_to_unified`, `_migrate_to_workbench_layout`,
+`_migrate_voice_dictation_default_off`) промпт прямо отнёс к СТРОГО NOT-MOVE.
+Итог Step 7: **перенесено 25 методов** (S2.1 6, S2.2 3, S2.3 10, S2.4 4, S2.5 2),
+остальное осталось в монолите сознательно — основания в итоговом блоке Step 7
+`EXTRACTION_PLAN.md`
+
+## Что дальше: Step 7 Stage 2 — под-батч S2.4 закрыт (Batch #7 Stage 2, 27.09.2026)
+
 ## Что дальше: Step 7 Stage 2 — под-батч S2.4 закрыт (Batch #7 Stage 2, 27.09.2026)
 
 **S2.4 выполнен** (база HEAD `f600e00` РОВНО — ни потомков, ни расхождения; монолит

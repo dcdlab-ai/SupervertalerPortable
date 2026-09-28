@@ -1,0 +1,60 @@
+work = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\app_check_work.json
+head = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\app_check_headwt.json
+
+keys: work=184 head=168 common=164
+differing (7), of which expected API-probe deltas: 7
+only-in-work: 20 (20 expected API probes, 0 unexpected)
+only-in-head: 4 (4 expected API probes, 0 unexpected)
+
+--- differing keys (7) ---
+  [EXPECTED (direct service probe)] checks.C10_zh_path_arguments_no_cache.value.third_path_argument_honoured
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C1_contract_and_wiring.value.methods_callable.load_recent_projects
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C1_contract_and_wiring.value.methods_callable.save_recent_projects
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C2_a_list_format_filtering.value.service_matches_delegate
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C3_b_legacy_dict_format.value.service_matches_delegate
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C5_d_missing_file.value.service_matches_delegate
+      work=True
+      head=False
+  [EXPECTED (direct service probe)] checks.C6_e_broken_json.value.service_matches_delegate
+      work=True
+      head=False
+
+--- keys present in only one tree ---
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_read_third[0].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_read_third[0].name = 'via-service'
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_read_third[0].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ'
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_wrote_third[0].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_wrote_third[0].name = 'via-service'
+  [only-work] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_wrote_third[0].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[0].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[0].name = 'Alpha'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[0].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[1].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[1].name = 'Beta'
+  [only-work] EXPECTED checks.C2_a_list_format_filtering.value.service_direct[1].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[0].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[0].name = 'Alpha'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[0].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[1].name = 'KeptAsIs'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[1].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Notes.docx'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[2].last_opened = '<ISO>'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[2].name = 'Missing'
+  [only-work] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct[2].path = 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Missing.svproj'
+  [only-head] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_read_third = '<ABSENT-before-S2.5>'
+  [only-head] EXPECTED checks.C10_zh_path_arguments_no_cache.value.service_wrote_third = '<ABSENT-before-S2.5>'
+  [only-head] EXPECTED checks.C2_a_list_format_filtering.value.service_direct = '<ABSENT-before-S2.5>'
+  [only-head] EXPECTED checks.C3_b_legacy_dict_format.value.service_direct = '<ABSENT-before-S2.5>'
+
+expected differences  : 7
+unexpected differences: 0
+VERDICT: OK - every window-API observation is identical; the only deltas are the direct-service probes that exist only after the move

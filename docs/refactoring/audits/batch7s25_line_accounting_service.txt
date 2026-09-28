@@ -1,0 +1,12 @@
+head lines = 451
+work lines = 565
+net        = 114
+unequal regions (head_range -> work_range, delta, first line dropped):
+  replace head[17:20] work[17:24] dh=4 dw=8 delta=+4 | (``spellcheck_manager``, ``theme_manager``, ``recent_projects_file`` и
+  replace head[32:35] work[36:40] dh=4 dw=5 delta=+1 | ``window._load_settings_section("ui")`` из ``main()`` монолита. Ещё не
+  insert  head[59:58] work[64:70] dh=0 dw=7 delta=+7 | """
+  insert  head[62:61] work[74:75] dh=0 dw=2 delta=+2 | from pathlib import Path
+  replace head[63:63] work[77:77] dh=1 dw=1 delta=+0 | from typing import Any, Callable, Dict, Optional, Tuple
+  insert  head[452:451] work[466:565] dh=0 dw=100 delta=+100 | <eof>
+unequal regions = 6
+sum(delta) = +114  == net? True

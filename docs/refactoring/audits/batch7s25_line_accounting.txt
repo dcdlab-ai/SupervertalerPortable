@@ -1,0 +1,8 @@
+head lines = 68274
+work lines = 68224
+net        = -50
+unequal regions (head_range -> work_range, delta, first line dropped):
+  replace head[32327:32388] work[32327:32336] dh=62 dw=10 delta=-52 | """Загружает недавние проекты из файла."""
+  replace head[32391:32400] work[32339:32350] dh=10 dw=12 delta=+2 | """Сохраняет недавние проекты в файл."""
+unequal regions = 2
+sum(delta) = -50  == net? True

@@ -1,0 +1,19 @@
+head=D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\head_Supervertaler.py
+work=E:\Dev\SupervertalerPortable\Supervertaler.py
+
+--- store ---
+  (only differences listed; identical = no line)
+
+--- load ---
+  load_recent_projects.recent_projects_file: head=3 work=1
+  (only differences listed; identical = no line)
+
+--- checks ---
+  PASS HEAD load pattern == 3/1/1
+  PASS WORK load pattern == 1/1/1
+  PASS all other enclosing functions: loads identical HEAD == WORK
+  PASS stores identical everywhere HEAD == WORK
+  PASS WORK stores include _reinitialize_with_new_data_path:recent_projects_file x1
+  PASS WORK stores include __init__:recent_projects_file x1
+
+VERDICT: OK

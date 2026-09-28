@@ -1,0 +1,13 @@
+﻿HEAD: 8e07b09 Extract recent-projects IO into modules/settings_service.py (Batch #7 Stage 2, S2.5 - Stage 2/Step 7 closed)
+parent: d4db217e6522feffba6507d742f943311881bd15
+git status --short: ''
+git diff HEAD --stat: ''
+files in commit: 45
+Supervertaler.py
+  HEAD blob sha256  c0370685430514a39b1147a8b19a54fd615e06d225324fc4ba74e1dd8eaffe5c
+  committed == expected: True
+  equal to working copy (raw): True  (newline-normalized): True
+modules/settings_service.py
+  HEAD blob sha256  5e5826397f6794f741822dd5ca76846fd8ddff7b9eca33ebc0208e342ee015bf
+  committed == expected: True
+  equal to working copy (raw): True  (newline-normalized): True

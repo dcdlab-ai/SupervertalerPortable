@@ -1,0 +1,25 @@
+stray region: lines 598..624
+markers found: 8 of 8
+  fragment 1: '  остаются действительными для финального коммита.' lines=1 -> «МЕТРИКИ ПОДТВЕРЖДЕНИЯ (сводка чисел этог»
+  fragment 2: 'миграции, либо UI-операции над окном, либо голосовой' lines=1 -> «6. ПОСТ-КОММИТНАЯ ПРОВЕРКА»
+  fragment 3: '  * п. 29/30/31/32/33/34/37/38 (ввод, краш, LLM/MT, ' lines=3 -> «5. ИТОГ STEP 7 (Stage 2 ЗАКРЫТ ЭТИМ ПОД-»
+  fragment 4: 'деревьях), оба драйвера перезапущены — здесь приведе' lines=2 -> «4. НЕПОКРЫТЫЕ ПРОВЕРКИ (обязательный раз»
+  fragment 5: 'же, сколько в HEAD; ни одна функция, кроме двух пере' lines=2 -> «3.3 ФУНКЦИОНАЛЬНЫЙ ДРАЙВЕР (app_check_s2»
+  fragment 6: '     `_migrate_to_workbench_layout`) и сказано, что ' lines=3 -> «3. ВАЛИДАЦИЯ»
+  fragment 7: 'Supervertaler.py 0854f899… и modules/settings_servic' lines=3 -> «2. ПЕРЕНОС»
+  fragment 8: 'Тела всех 9 блоков (2 MOVE + 7 NOT-MOVE) сохранены в' lines=3 -> «1.3 ЗАВИСИМОСТИ ТЕЛ — СТОП-УСЛОВИЕ «СОСТ»
+  insert at line 564 (before «══════════════════════════════════════════════════»)
+  insert at line 523 (before «══════════════════════════════════════════════════»)
+  insert at line 481 (before «══════════════════════════════════════════════════»)
+  insert at line 440 (before «══════════════════════════════════════════════════»)
+  insert at line 294 (before «3.3 ФУНКЦИОНАЛЬНЫЙ ДРАЙВЕР (app_check_s25.py) — 16»)
+  insert at line 249 (before «══════════════════════════════════════════════════»)
+  insert at line 161 (before «══════════════════════════════════════════════════»)
+  insert at line 100 (before «1.3 ЗАВИСИМОСТИ ТЕЛ — СТОП-УСЛОВИЕ «СОСТОЯНИЕ ОКНА»)
+
+lines 624 -> 614
+lost lines: 0
+added lines: 0
+content preserved: True
+ends with the metrics block: True (last line: '                     45 файлов; не пушился)')
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\report_tails_fixed.txt

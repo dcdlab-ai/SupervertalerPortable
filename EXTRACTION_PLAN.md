@@ -356,6 +356,97 @@ NOT-MOVE: `load_general_settings` 44542–44638 (97 строк) — код не 
 Живой offscreen-прогон — **11/11 PASS** + отдельный **процесс-перезапуск 4/4 PASS**: вкладка Language Pair проверена через РЕАЛЬНЫЙ `_save_language_settings_from_ui` (настоящие QComboBox), тумблер spellcheck — через РЕАЛЬНЫЕ `_toggle_spellcheck_from_button` и `_toggle_spellcheck` (в логе бэкенд `pyspellchecker (pl_PL)`); файл всегда равен состоянию окна; перезапуск в новом интерпретаторе на изолированном каталоге данных подтвердил, что языковая пара и spellcheck подхватываются из файла, а голосовой диктант в режиме «Auto (use project target language)» получает `language='pl'` из пережившего перезапуск `self.target_language` (контроль 'ru', автодетект 'auto'); продовый settings.json за прогон не изменился; смоук save/load — EXIT=0 на обоих деревьях.
 Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.4).txt`; аудиты `docs/refactoring/audits/batch7s24_*` (раздел «Непокрытые проверки» — один новый пункт п. 44, переведён в MOOT docs-follow-up'ом: Voice-виджет удаляется в Batch #8; остальное — ссылки на п. 12/13/14/15/17/18/19/20/21/27).
 СЛЕДУЮЩИЙ ПОД-БАТЧ: **S2.5 «голосовая часть S2.4 + recent-projects + миграции» — 10 методов / ~419 строк**: `load_recent_projects` 32326–32388 (63), `save_recent_projects` 32390–32400 (11), `load_dictation_settings` 44918–44933 (16), `save_dictation_settings` 44935–44989 (55, SPLIT — `QMessageBox`), `load_voice_vocabulary_settings` 45015–45053 (39), `save_voice_vocabulary_settings` 45055–45078 (24), `_migrate_settings_to_unified` 44744–44834 (91), `_migrate_to_workbench_layout` 44836–44901 (66), `_migrate_voice_dictation_default_off` 45129–45160 (32), `load_language_settings` 45214–45235 (22, SPLIT — `TagHighlighter`+`spellcheck_manager`). Границы выведены AST ЗАНОВО на дереве S2.4 (после сдвига −11; участки ниже 52249 и ниже 44991 сместились). NOT-MOVE-остаток: `load_general_settings` 44542–44638, `save_clipboard_privacy_settings` 44721–44742, тир C — `get_autocorrect_settings` 44640–44651 и `load_font_sizes_from_preferences` 45256–45342. После S2.5 будет закрыто 33 из 33 методов Stage 2.
+→ ПРОГНОЗ НЕ ПОДТВЕРДИЛСЯ (см. «ИТОГ Step 7 — ЗАКРЫТ ЦЕЛИКОМ» ниже): координатор сузил S2.5 до `load/save_recent_projects`, поэтому Step 7 закрыт на 25 методах, а голосовая часть и три миграции остались в монолите осознанно.
+#### ИТОГ Step 7 — ЗАКРЫТ ЦЕЛИКОМ (Batch #7 Stage 2, под-батч S2.5, 2026-09-28)
+**Под-батч S2.5 «recent projects» выполнен** (база HEAD `d4db217` — потомок базы
+разведки `1ef3c708`, дрейфа нет). Перенесены 2 метода / 74 строки в
+`modules/settings_service.py`: `load_recent_projects` (монолит 32326–32388 → сервис
+490–552) и `save_recent_projects` (32390–32400 → сервис 554–565); в монолите — 2
+тонких делегата с исходными сигнатурами (32326–32336 и 32338–32350). Это
+единственные методы сервиса, работающие НЕ через `settings.json`: они читают/пишут
+отдельный `recent_projects.json`, поэтому применён **SPLIT-BY-ARGUMENT** — делегат
+читает `self.recent_projects_file` (в save — ещё и `self.user_data_path` для
+`mkdir`) при КАЖДОМ вызове и передаёт их аргументами; сервис пути не хранит,
+конструктор `SettingsService` и перепривязка сервиса в
+`_reinitialize_with_new_data_path` НЕ менялись (AST: Store этих имён в сервисе = 0;
+оба присваивания пути в монолите byte-identical). Тела перенесены ВЕРБАТИМ,
+документированная правка — 3 и 2 замены ссылок на пути (+ строка `def` в save
+разбита на две), diff −4/+4 и −3/+4.
+Измерения: монолит 68 274 → **68 224** строки (−50; difflib — ровно 2 неравных
+региона, −52/+2, сумма == изменению файла); сервис 451 → **565** строк (+114,
+6 регионов); py_compile COMPILE_OK (144 файла); 8 метрик
+1211/18/35/24/24/0/85/2 — файлы до/после побайтово равны; SHA256-манифест ПО
+GIT-БЛОБАМ 144 → 144 (changed = ровно 2: `Supervertaler.py` 0854f899… →
+c0370685…, `modules/settings_service.py` 6778e9e7… → 5e582639…; added/removed = 0).
+NOT-MOVE 7/7 byte-identical (`add_to_recent_projects`, `_remove_from_recent_projects`,
+`update_recent_projects_display`, `clear_recent_projects`,
+`_migrate_settings_to_unified`, `_migrate_to_workbench_layout`,
+`_migrate_voice_dictation_default_off`), вызывающие (`update_recent_menu`,
+`restore_last_project_if_enabled`) и `__init__`/`_reinitialize_with_new_data_path` —
+тоже byte-identical. Живой offscreen-прогон — **16/16 PASS** (все пункты а–ж
+промпта фактически: фильтрация list-формата, dict-формат, latin-1-fallback с
+точным предупреждением в лог, отсутствующий файл, битый JSON с точной строкой
+ошибки, save в кириллический путь с побайтовой идентичностью каноническому
+`json.dumps(indent=2, ensure_ascii=False)` + создание `user_data_path`, ветка
+ошибки записи без исключения, переприсваивание `recent_projects_file` и «нет
+кэша»), процесс-перезапуск **6/6 PASS** (в ДРУГОМ интерпретаторе: запись
+пережила перезапуск, меню её показывает, и `restore_last_project_if_enabled`
+восстановил проект НА СТАРТЕ приложения — `__init__` 6486), клик по РЕАЛЬНЫМ
+пунктам меню **3/3 PASS** (`QAction.trigger()` пункта «Open Recent» и
+«Clear Recent Projects» при Yes/No), кросс-дерево work против worktree `d4db217` —
+**0 неожиданных расхождений** (272 общих ключа; 7 отличий — прямые вызовы сервиса,
+которых до переноса не существует), смоук save/load EXIT=0 на обоих деревьях.
+Отчёт: `docs/refactoring/reports/ОТЧЁТ Batch #7 Stage 2 (S2.5).txt`; аудиты
+`docs/refactoring/audits/batch7s25_*`; реестр — новый пункт **45** (home-экран
+«Recent projects»: панель в сборке не создаётся; MOOT), остальное ссылками на
+п. 12/13/21/25/29/30/33/35/36/43/44.
+
+**ЧТО ВЫНЕСЕНО ЗА ВЕСЬ STEP 7 (25 методов / 366 строк):**
+    S2.1  «ядро API»            6 методов /  39 строк — конструктор + _get_settings_dir,
+         _get_unified_settings_path, _load/_save_unified_settings,
+         _load/_save_settings_section;
+    S2.2  «general + reading»   3 метода /  56 строк — load_clipboard_privacy_settings,
+         _load_general_settings_from_file, save_general_settings;
+    S2.3  «LLM/proxy/keys»     10 методов / 150 строк — load/save_llm_settings,
+         load/save_proxy_settings, _get_proxy_url, _get_proxy_dict,
+         load/save_provider_enabled_states, load/save_api_keys;
+    S2.4  «язык + спеллчек»     4 метода /  47 строк — _load_language_pair_from_disk,
+         save_language_settings, _save/_load_spellcheck_settings;
+    S2.5  «recent projects»     2 метода /  74 строки — load/save_recent_projects.
+Делегатов в монолите — 25 (по одному на метод, имена и сигнатуры исходные),
+`modules/settings_service.py` = 565 строк / 26 методов.
+
+**ЧТО СОЗНАТЕЛЬНО ОСТАЛОСЬ В МОНОЛИТЕ И ПОЧЕМУ:**
+  1. V3-исключения (решение владельца Stage 1): `save_clipboard_privacy_settings`
+     (живому refresh нужны Qt-объекты) и `load_general_settings` (97 строк: 2
+     строки IO + 35 присваиваний атрибутов окна, fan-in 61 call-site) — перенос
+     сделал бы сервис знающим про окно; оба остаются, их внутренние вызовы идут
+     через делегаты S2.1/S2.2.
+  2. Голосовые методы (`load/save_dictation_settings`,
+     `load/save_voice_vocabulary_settings`, `load_language_settings`) — исключены
+     координатором из S2.4/S2.5: Voice-виджет удаляется отдельным батчем
+     (Batch #8), перенос IO голосового слоя в сервис настроек перед удалением
+     смысла не имеет (реестр: п. 16/44 — MOOT).
+  3. Три миграции: `_migrate_settings_to_unified` (91), `_migrate_to_workbench_layout`
+     (66), `_migrate_voice_dictation_default_off` (32) — одноразовые, вызываются
+     только из `_reinitialize_with_new_data_path`, читают структуру каталогов и
+     (первая) repo-root; промпт S2.5 прямо отнёс их к СТРОГО NOT-MOVE. Остались
+     byte-identical, документация сервиса это фиксирует.
+  4. Тир C из домена недавних: `add_to_recent_projects`,
+     `_remove_from_recent_projects`, `update_recent_projects_display`,
+     `clear_recent_projects` — это UI/доменные операции над списком (QMenu,
+     QMessageBox, `self.current_project`, `MAX_RECENT_PROJECTS`), а не IO; они
+     остаются вызывающими двух делегатов S2.5. Туда же тир C
+     `get_autocorrect_settings` (динамический вход из `modules/autocorrect.py`) и
+     `load_font_sizes_from_preferences` (ссылается на классы монолита).
+
+**ПОПРАВКА К ПРОГНОЗУ S2.4:** предыдущий блок предсказывал, что S2.5 перенесёт
+10 методов / ~419 строк и «после S2.5 будет закрыто 33 из 33 методов Stage 2».
+Фактически координатор сузил под-батч до 2 методов / 74 строк (см. пункты 2 и 3
+выше), поэтому Step 7 закрыт на **25 методах**, а голосовая часть и миграции
+остаются в монолите осознанно. Это не «невыполненный план», а решение scope,
+зафиксированное в отчёте S2.5 (§5) и в `PROJECT_STATUS.md`.
+
 
 ## Step 8 — Grid: render + match panel + comments UI
 

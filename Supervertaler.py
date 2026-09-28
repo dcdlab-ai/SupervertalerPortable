@@ -32324,80 +32324,30 @@ class SupervertalerQt(QMainWindow):
             self.log(f"Could not remove '{file_path}' from recent projects: {e}")
 
     def load_recent_projects(self) -> List[Dict[str, str]]:
-        """Загружает недавние проекты из файла."""
-        if not self.recent_projects_file.exists():
-            return []
-        
-        try:
-            # Try UTF-8 first, fall back to latin-1 if it fails
-            try:
-                with open(self.recent_projects_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-            except UnicodeDecodeError:
-                self.log(f"⚠ UTF-8 decoding failed for recent projects, trying latin-1...")
-                with open(self.recent_projects_file, 'r', encoding='latin-1') as f:
-                    data = json.load(f)
-            
-            # Handle both old dict format and new list format
-            if isinstance(data, dict):
-                # Old format: convert to list
-                recent = []
-                for key, value in data.items():
-                    if isinstance(value, list):
-                        # Extract path and name from old list format
-                        for item in value:
-                            if isinstance(item, dict):
-                                recent.append(item)
-                            else:
-                                # String path
-                                recent.append({
-                                    'path': str(item),
-                                    'name': Path(str(item)).stem,
-                                    'last_opened': datetime.now().isoformat()
-                                })
-                    elif isinstance(value, str):
-                        recent.append({
-                            'path': value,
-                            'name': Path(value).stem,
-                            'last_opened': datetime.now().isoformat()
-                        })
-                return recent
-            elif isinstance(data, list):
-                # New format: already a list
-                # Ensure all entries have required fields
-                normalized = []
-                for item in data:
-                    if isinstance(item, dict) and 'path' in item:
-                        # Ensure all required fields exist
-                        if 'name' not in item:
-                            item['name'] = Path(item['path']).stem
-                        if 'last_opened' not in item:
-                            item['last_opened'] = datetime.now().isoformat()
-                        # Only include if the file still exists AND is an actual
-                        # project file – this auto-purges any stray non-.svproj
-                        # entries (e.g. source documents) left by older builds.
-                        if (os.path.exists(item['path'])
-                                and str(item['path']).lower().endswith('.svproj')):
-                            normalized.append(item)
-                return normalized
-            
-            return []
-        
-        except Exception as e:
-            self.log(f"Error loading recent projects: {e}")
-            return []
+        """Загружает недавние проекты из файла.
+        (Тонкий делегат: SettingsService.load_recent_projects, Batch #7 Stage 2 S2.5.
+        SPLIT-BY-ARGUMENT: сервис не знает про этот путь —
+        self.recent_projects_file читается ЗДЕСЬ при КАЖДОМ вызове и уходит
+        аргументом (в сервисе не хранится и не кэшируется). Файл — отдельный
+        от settings.json. Обязателен: self-вызовы update_recent_menu 32219,
+        add_to_recent_projects 32271, _remove_from_recent_projects 32317,
+        update_recent_projects_display 32414,
+        restore_last_project_if_enabled 45377.)"""
+        return self.settings_service.load_recent_projects(self.recent_projects_file)
     
     def save_recent_projects(self, recent_projects: List[Dict[str, str]]):
-        """Сохраняет недавние проекты в файл."""
-        try:
-            # Ensure directory exists
-            self.user_data_path.mkdir(parents=True, exist_ok=True)
-            
-            with open(self.recent_projects_file, 'w', encoding='utf-8') as f:
-                json.dump(recent_projects, f, indent=2, ensure_ascii=False)
-        
-        except Exception as e:
-            self.log(f"Error saving recent projects: {e}")
+        """Сохраняет недавние проекты в файл.
+        (Тонкий делегат: SettingsService.save_recent_projects, Batch #7 Stage 2 S2.5.
+        SPLIT-BY-ARGUMENT: сервис принимает путь к файлу и user_data_path
+        аргументами; оба читаются ЗДЕСЬ при КАЖДОМ вызове (в сервисе не
+        хранятся и не кэшируются). Обязателен: self-вызовы
+        add_to_recent_projects 32304, _remove_from_recent_projects 32320,
+        clear_recent_projects 32446.)"""
+        return self.settings_service.save_recent_projects(
+            recent_projects,
+            recent_projects_file=self.recent_projects_file,
+            user_data_path=self.user_data_path,
+        )
     
     def update_recent_projects_display(self):
         """Обновляет отображение недавних проектов на главном экране."""

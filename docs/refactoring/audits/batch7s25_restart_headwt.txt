@@ -1,0 +1,89 @@
+[stage] restart user data = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\main_user_data
+[stage] seeded entries     = ['S25 Beta']
+[stage] restore_last_project = True
+[USER MODE] Using 'user_data/' folder
+instantiating a FRESH SupervertalerQt against the copied data dir ...
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\main_user_data
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\main_user_data\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] [Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[GlobalHotkeyManager] Registered ctrl+alt+l (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+c (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+shift+space (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+o (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+v (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 🔄 Restoring last project: S25 Beta.svproj
+[LOG] ✓ UI chrome: compact
+[LOG] ✓ Alternating row colors applied
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 1750481966080): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 2 (obj 1750481844368): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 3 (obj 1750481844688): target='EMPTY...', len=0, status=not_started
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 3 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] 📋 No active termbases saved for this project
+[LOG] 📋 Refreshing termbase list (project_id: 3333514007)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Refreshed termbase UI with restored activations
+[LOG] ✓ Spellcheck initialized for target language: nl (disabled)
+[LOG] ✓ Set Superlookup languages: en → nl
+[LOG] ✓ Loaded project: S25 Beta (3 segments)
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 3 segments...
+[LOG] ✅ Termbase batch worker complete: 3 segments in 0.00s (306900 seg/sec, 0 with matches)
+[LOG] 👁️  Termbase DB auto-refresh: watching supervertaler.db (2s debounce)
+[LOG] Auto backup enabled: every 5 minute(s)
+instantiated
+PASS R1_fresh_process_resolves_to_copy: {"user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data", "resolved_to_copy": true, "recent_projects_file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json", "path_mapping_ok": true, "service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings", "service_dir_ok": true, "config_pointer": "C:\\Users\\AIAssistant2\\AppData\\Roaming\\Supervertaler\\config.json", "pointer_unchanged": true}
+PASS R2_recent_entry_survives_restart: {"entries": [["D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj", "S25 Beta"]], "on_disk": [["D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj", "S25 Beta"]], "delegate_equals_service": "<ABSENT-before-S2.5>", "entry_survived_restart": true, "entry_path_exists": true, "recent_file_rewritten_by_startup": true, "seed_sha": "d1e9af3aa9e921b2f70f152d2268c967c756568c528f758f2582e9b83fc1ad60", "after_sha": "4ba3d392255eb10c7d750c1fe3c59f2267d2b0633aa39eeb33a26550a95d41bc"}
+PASS R3_project_auto_restored_at_startup: {"current_project": "S25 Beta", "segments": 3, "auto_restored": true, "flag_in_settings": true, "project_file_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj", "grid_rows": 3}
+PASS R4_menu_and_home_show_entry_after_restart: {"menu_labels": ["1. S25 Beta", "Clear Recent Projects"], "home_labels": [], "menu_shows_project": true, "home_shows_project": false}
+PASS R5_relocating_copy_structure: {"copy_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\restart_user_data", "copied_entries": ["S25 Beta"], "copied_restore_flag": true, "copied_project_files_present": ["Alpha.svproj", "Beta.SVPROJ", "S25 Alpha.svproj", "S25 Beta.svproj"], "copy_matches_main": true}
+PASS R6_no_production_writes: {"writes_went_to": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data", "prod_pointer_unchanged": true, "restart_dir_recent_sha": "4ba3d392255eb10c7d750c1fe3c59f2267d2b0633aa39eeb33a26550a95d41bc"}
+
+SUMMARY: PASS=6 FAIL=0
+ALL_CHECKS_PASS
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\restart_headwt.json
+[Hotkeys] pynput hotkey manager stopped on exit

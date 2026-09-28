@@ -1,0 +1,5 @@
+work_menu_exit=0 
+headwt_menu_exit=0 
+work_smoke_save_exit=0 
+work_smoke_load_exit=0 
+headwt_smoke_load_exit=0 

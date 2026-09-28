@@ -1,0 +1,331 @@
+{
+ "checks": {
+  "C1_contract_and_wiring": {
+   "ok": true,
+   "value": {
+    "service_module": "modules.settings_service",
+    "settings_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings",
+    "wiring": {
+     "user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data",
+     "recent_projects_file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json",
+     "service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings"
+    },
+    "expected_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json",
+    "path_matches_service_dir": true,
+    "methods_callable": {
+     "load_recent_projects": false,
+     "save_recent_projects": false
+    },
+    "service_has_path_attrs": [],
+    "home_layout_present_by_default": false,
+    "update_recent_projects_display_without_layout": null
+   }
+  },
+  "C2_a_list_format_filtering": {
+   "ok": true,
+   "value": {
+    "entries": [
+     {
+      "last_opened": "<ISO>",
+      "name": "Alpha",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"
+     },
+     {
+      "last_opened": "<ISO>",
+      "name": "Beta",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"
+     }
+    ],
+    "count": 2,
+    "service_matches_delegate": false,
+    "service_direct": "<ABSENT-before-S2.5>",
+    "kept": [
+     "Alpha.svproj",
+     "Beta.SVPROJ"
+    ],
+    "dropped": [
+     "Missing.svproj",
+     "Notes.docx"
+    ],
+    "logs": [],
+    "unsorted_name_defaulted": {
+     "last_opened": "<ISO>",
+     "name": "Beta",
+     "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"
+    }
+   }
+  },
+  "C3_b_legacy_dict_format": {
+   "ok": true,
+   "value": {
+    "entries": [
+     {
+      "last_opened": "<ISO>",
+      "name": "Alpha",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"
+     },
+     {
+      "name": "KeptAsIs",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Notes.docx"
+     },
+     {
+      "last_opened": "<ISO>",
+      "name": "Missing",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Missing.svproj"
+     }
+    ],
+    "count": 3,
+    "service_matches_delegate": false,
+    "service_direct": "<ABSENT-before-S2.5>",
+    "no_existence_filter_in_legacy_branch": "{True}",
+    "logs": []
+   }
+  },
+  "C4_c_latin1_fallback": {
+   "ok": true,
+   "value": {
+    "entries": [
+     {
+      "last_opened": "<ISO>",
+      "name": "Café naïve",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"
+     }
+    ],
+    "name_decoded": "Café naïve",
+    "latin1_roundtrip_ok": true,
+    "warning_logged": [
+     "⚠ UTF-8 decoding failed for recent projects, trying latin-1..."
+    ],
+    "all_logs": [
+     "⚠ UTF-8 decoding failed for recent projects, trying latin-1..."
+    ],
+    "file_bytes_are_latin1": true
+   }
+  },
+  "C5_d_missing_file": {
+   "ok": true,
+   "value": {
+    "entries": [],
+    "count": 0,
+    "service_matches_delegate": false,
+    "logs": [],
+    "file_still_absent": true
+   }
+  },
+  "C6_e_broken_json": {
+   "ok": true,
+   "value": {
+    "entries": [],
+    "count": 0,
+    "service_matches_delegate": false,
+    "error_logged": [
+     "Error loading recent projects: Expecting value: line 1 column 12 (char 11)"
+    ],
+    "logs": [
+     "Error loading recent projects: Expecting value: line 1 column 12 (char 11)"
+    ]
+   }
+  },
+  "C7_f1_save_bytes_cyrillic_path": {
+   "ok": true,
+   "value": {
+    "delegate_return": null,
+    "file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\данные_копия\\workbench\\settings\\recent_projects.json",
+    "raw_sha256": "0afd403743c2e7731932fcb07183780b74cc1de94d7b04a704ed83aa15579a06",
+    "canonical_text_equals_file": true,
+    "indent_two_and_non_ascii_preserved": true,
+    "eol": "CRLF",
+    "reload_entries": [
+     {
+      "last_opened": "<ISO>",
+      "name": "Альфа — тест",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"
+     }
+    ]
+   }
+  },
+  "C8_f2_user_data_dir_created": {
+   "ok": true,
+   "value": {
+    "user_data_existed_before": false,
+    "user_data_created_by_save": true,
+    "file_written": true,
+    "file_text": "[]",
+    "delegate_return": null
+   }
+  },
+  "C9_f3_save_failure_logged": {
+   "ok": true,
+   "value": {
+    "delegate_return": null,
+    "no_exception_raised": true,
+    "error_logged": [
+     "Error saving recent projects: [Errno 2] No such file or directory: 'D:\\\\Temp\\\\SupervertalerPortable\\\\refactoring\\\\batch7_stage2_s25\\\\run-001\\\\main_user_data\\\\nope\\\\recent_projects.json'"
+    ],
+    "file_written": false
+   }
+  },
+  "C10_zh_path_arguments_no_cache": {
+   "ok": true,
+   "value": {
+    "read_after_repoint": [
+     {
+      "last_opened": "<ISO>",
+      "name": "Beta",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"
+     }
+    ],
+    "recent_file_untouched": true,
+    "other_file_changed": true,
+    "other_file_content": [
+     {
+      "last_opened": "<ISO>",
+      "name": "to-other",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"
+     }
+    ],
+    "service_wrote_third": "<ABSENT-before-S2.5>",
+    "third_path_argument_honoured": false,
+    "other_file_untouched_by_service": true,
+    "service_read_third": "<ABSENT-before-S2.5>",
+    "counts_first_then_second_call": [
+     1,
+     2
+    ],
+    "no_cache_confirmed": true
+   }
+  },
+  "C11_live_open_shows_in_menu_and_home": {
+   "ok": true,
+   "value": {
+    "project_file_saved": true,
+    "loaded_project": [
+     "S25 Alpha",
+     3
+    ],
+    "recent_entries": [
+     {
+      "last_opened": "<ISO>",
+      "name": "S25 Alpha",
+      "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Alpha.svproj"
+     }
+    ],
+    "entry_count": 1,
+    "path_is_abs": true,
+    "name_is_project_name": [
+     "S25 Alpha"
+    ],
+    "menu_labels": [
+     "1. S25 Alpha",
+     "Clear Recent Projects"
+    ],
+    "home_labels": [
+     "BTN:📄 S25 Alpha"
+    ],
+    "home_layout_injected": true,
+    "menu_and_file_agree": true,
+    "home_and_file_agree": true
+   }
+  },
+  "C12_live_remove_entry": {
+   "ok": true,
+   "value": {
+    "order_newest_first": [
+     "S25 Beta",
+     "S25 Alpha"
+    ],
+    "newest_is_beta": true,
+    "after_remove": [
+     "S25 Beta"
+    ],
+    "remove_worked": true,
+    "menu_after_remove": [
+     "1. S25 Beta",
+     "Clear Recent Projects"
+    ],
+    "home_after_remove": [
+     "BTN:📄 S25 Alpha",
+     "BTN:📄 S25 Beta",
+     "BTN:📄 S25 Alpha",
+     "BTN:📄 S25 Beta"
+    ]
+   }
+  },
+  "C13_live_clear_recent_projects": {
+   "ok": true,
+   "value": {
+    "after_yes_entries": [],
+    "after_yes_menu": [
+     "No recent projects"
+    ],
+    "after_yes_home": [
+     "BTN:📄 S25 Alpha",
+     "BTN:📄 S25 Beta",
+     "BTN:📄 S25 Alpha",
+     "BTN:📄 S25 Beta",
+     "LBL:No recent projects"
+    ],
+    "empty_state_ok": true,
+    "after_no_entries_unchanged": true
+   }
+  },
+  "C14_live_max_recent_trim": {
+   "ok": true,
+   "value": {
+    "max_recent_projects": 10,
+    "entry_count_after_adds": 10,
+    "trimmed_to_max": true,
+    "newest_first_path": "proj11.svproj",
+    "menu_entries": 10,
+    "menu_trimmed_too": true
+   }
+  },
+  "C15_restore_last_project": {
+   "ok": true,
+   "value": {
+    "flag_off_restores_nothing": true,
+    "flag_on_project": "S25 Beta",
+    "flag_on_segments": 3,
+    "flag_on_log": [
+     "🔄 Restoring last project: S25 Beta.svproj"
+    ],
+    "flag_in_settings_json": true,
+    "recent_entry_names": [
+     "S25 Beta"
+    ]
+   }
+  },
+  "C16_production_untouched": {
+   "ok": true,
+   "value": {
+    "prod_user_data": "C:\\Users\\AIAssistant2\\Supervertaler",
+    "temp_copy": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data",
+    "temp_is_different_dir": true,
+    "prod_recent_file": "C:\\Users\\AIAssistant2\\Supervertaler\\workbench\\settings\\recent_projects.json",
+    "prod_recent_sha_before": null,
+    "prod_recent_sha_after": null,
+    "prod_recent_unchanged": true,
+    "config_pointer": "C:\\Users\\AIAssistant2\\AppData\\Roaming\\Supervertaler\\config.json",
+    "pointer_unchanged": true,
+    "window_points_at_temp": true
+   }
+  }
+ },
+ "seed": {
+  "restart_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\restart_user_data",
+  "seeded_recent": [
+   {
+    "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj",
+    "name": "S25 Beta",
+    "last_opened": "2026-09-28T16:39:13.281363"
+   }
+  ],
+  "seeded_restore_flag": true,
+  "project_files_present": [
+   "Alpha.svproj",
+   "Beta.SVPROJ",
+   "S25 Alpha.svproj",
+   "S25 Beta.svproj"
+  ]
+ }
+}

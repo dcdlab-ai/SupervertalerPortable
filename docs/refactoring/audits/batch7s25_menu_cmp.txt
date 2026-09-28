@@ -1,0 +1,15 @@
+work = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\menu_work.json
+head = D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\menu_headwt.json
+
+keys: work=18 head=18 common=18
+differing (0), of which expected API-probe deltas: 0
+only-in-work: 0 (0 expected API probes, 0 unexpected)
+only-in-head: 0 (0 expected API probes, 0 unexpected)
+
+--- differing keys (0) ---
+
+--- keys present in only one tree ---
+
+expected differences  : 0
+unexpected differences: 0
+VERDICT: OK - every window-API observation is identical; the only deltas are the direct-service probes that exist only after the move

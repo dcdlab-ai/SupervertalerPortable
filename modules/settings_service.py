@@ -14,10 +14,14 @@
 ``self.user_data_path / "workbench" / "settings"``. Окно пересоздаёт сервис в
 ``SupervertalerQt._reinitialize_with_new_data_path()`` — там же, где
 пересоздаются остальные зависящие от каталога данных менеджеры
-(``spellcheck_manager``, ``theme_manager``, ``recent_projects_file`` и др.), —
-поэтому смена каталога данных не оставляет делегатов на устаревшем пути
-(``user_data_path`` переприсваивается в трёх местах монолита, все три ведут в
-этот метод).
+(``spellcheck_manager``, ``theme_manager`` и др.), — поэтому смена каталога
+данных не оставляет делегатов на устаревшем пути (``user_data_path``
+переприсваивается в трёх местах монолита, все три ведут в этот метод).
+С ``recent_projects_file`` дело теперь обстоит иначе: с S2.5 его читает не
+только окно — путь к ``recent_projects.json`` передаётся в
+``load_recent_projects`` / ``save_recent_projects`` этого сервиса
+АРГУМЕНТОМ при каждом вызове (сервис его нигде не хранит), поэтому и здесь
+устаревших путей после смены каталога данных не остаётся.
 
 СЕМАНТИКА, КОТОРУЮ НЕЛЬЗЯ МЕНЯТЬ (Batch #7 Stage 1, §1.9): ни один метод не
 кэширует прочитанный JSON между вызовами — файл открывается заново на КАЖДЫЙ
@@ -29,10 +33,11 @@ SupervertalerQt сохраняет 6 тонких одноимённых дел�
 ``_save_settings_section``), поэтому все call sites продолжают работать без
 изменений — включая строковые (getattr) обращения из ``modules/``
 (``voice_tab.py``, ``clipboard_manager_widget.py``) и безусловный вызов
-``window._load_settings_section("ui")`` из ``main()`` монолита. Ещё не
-перенесённые методы монолита (``_migrate_settings_to_unified``,
-``_migrate_voice_dictation_default_off`` — уходят в S2.5) тоже ходят через
-делегаты.
+``window._load_settings_section("ui")`` из ``main()`` монолита. Оставшиеся
+в монолите методы (``_migrate_settings_to_unified``,
+``_migrate_to_workbench_layout``, ``_migrate_voice_dictation_default_off`` —
+по решению координатора в S2.5 не переносятся, см. итог Step 7 в
+``EXTRACTION_PLAN.md``) ходят через эти делегаты.
 
 Тела методов перенесены из монолита ВЕРБАТИМ. Единственная правка —
 ``_get_settings_dir`` возвращает ``self.settings_dir`` вместо
@@ -56,11 +61,20 @@ SupervertalerQt сохраняет 6 тонких одноимённых дел�
 сервисе принимает ``enabled`` аргументом, делегат передаёт
 ``self.spellcheck_enabled``; тело иначе ВЕРБАТИМ) и
 ``_load_spellcheck_settings`` (ВЕРБАТИМ).
+
+Под-батч S2.5 (последний в Stage 2) добавил недавние проекты:
+``load_recent_projects`` и ``save_recent_projects`` (тела ВЕРБАТИМ). Это
+единственные методы сервиса, которые НЕ ходят через ``settings.json``: они
+работают с отдельным файлом ``recent_projects.json``, поэтому путь к нему (и
+``user_data_path`` для ``mkdir``) приходит аргументом от делегата окна при
+каждом вызове, а сервис его не хранит и не кэширует.
 """
 
 import json
+import os
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 __all__ = ["SettingsService"]
 
@@ -449,3 +463,103 @@ class SettingsService:
             return settings.get('enabled', False)
         except:
             return False
+
+    # ------------------------------------------------------------------
+    # Недавние проекты (Batch #7 Stage 2, под-батч S2.5)
+    # ------------------------------------------------------------------
+    # Два последних метода Stage 2; тела перенесены из SupervertalerQt
+    # ВЕРБАТИМ. ОТЛИЧИЕ ОТ S2.1–S2.4: эти методы НЕ работают через
+    # settings.json и не используют _load_settings_section /
+    # _load_unified_settings — они открывают отдельный файл
+    # recent_projects.json, поэтому пути передаются АРГУМЕНТАМИ (решение
+    # координатора): делегат окна читает свой self.recent_projects_file при
+    # КАЖДОМ вызове и передаёт его в load; в save добавляется
+    # self.user_data_path (нужен для mkdir(parents=True, exist_ok=True)
+    # перед записью). Сервис эти пути НЕ хранит — ни в конструкторе, ни в
+    # полях, — поэтому кэша нет (см. докстринг модуля) и
+    # переприсваивание self.recent_projects_file / self.user_data_path в
+    # _reinitialize_with_new_data_path() сразу видно новым вызовам.
+    # Единственная правка тел — замена self.recent_projects_file /
+    # self.user_data_path на одноимённые параметры (3 и 2 места); строка
+    # def в save разделена на две. Обработка исключений и все ветви
+    # сохранены КАК ЕСТЬ: UnicodeDecodeError → повтор в latin-1 с
+    # предупреждением self.log, старый dict-формат, новый list-формат с
+    # фильтром os.path.exists + .svproj, отсутствующий файл → [], битый
+    # JSON → [] с self.log.
+
+    def load_recent_projects(self, recent_projects_file: Path) -> List[Dict[str, str]]:
+        """Загружает недавние проекты из файла."""
+        if not recent_projects_file.exists():
+            return []
+        
+        try:
+            # Try UTF-8 first, fall back to latin-1 if it fails
+            try:
+                with open(recent_projects_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            except UnicodeDecodeError:
+                self.log(f"⚠ UTF-8 decoding failed for recent projects, trying latin-1...")
+                with open(recent_projects_file, 'r', encoding='latin-1') as f:
+                    data = json.load(f)
+            
+            # Handle both old dict format and new list format
+            if isinstance(data, dict):
+                # Old format: convert to list
+                recent = []
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        # Extract path and name from old list format
+                        for item in value:
+                            if isinstance(item, dict):
+                                recent.append(item)
+                            else:
+                                # String path
+                                recent.append({
+                                    'path': str(item),
+                                    'name': Path(str(item)).stem,
+                                    'last_opened': datetime.now().isoformat()
+                                })
+                    elif isinstance(value, str):
+                        recent.append({
+                            'path': value,
+                            'name': Path(value).stem,
+                            'last_opened': datetime.now().isoformat()
+                        })
+                return recent
+            elif isinstance(data, list):
+                # New format: already a list
+                # Ensure all entries have required fields
+                normalized = []
+                for item in data:
+                    if isinstance(item, dict) and 'path' in item:
+                        # Ensure all required fields exist
+                        if 'name' not in item:
+                            item['name'] = Path(item['path']).stem
+                        if 'last_opened' not in item:
+                            item['last_opened'] = datetime.now().isoformat()
+                        # Only include if the file still exists AND is an actual
+                        # project file – this auto-purges any stray non-.svproj
+                        # entries (e.g. source documents) left by older builds.
+                        if (os.path.exists(item['path'])
+                                and str(item['path']).lower().endswith('.svproj')):
+                            normalized.append(item)
+                return normalized
+            
+            return []
+        
+        except Exception as e:
+            self.log(f"Error loading recent projects: {e}")
+            return []
+
+    def save_recent_projects(self, recent_projects: List[Dict[str, str]],
+                             recent_projects_file: Path, user_data_path: Path):
+        """Сохраняет недавние проекты в файл."""
+        try:
+            # Ensure directory exists
+            user_data_path.mkdir(parents=True, exist_ok=True)
+            
+            with open(recent_projects_file, 'w', encoding='utf-8') as f:
+                json.dump(recent_projects, f, indent=2, ensure_ascii=False)
+        
+        except Exception as e:
+            self.log(f"Error saving recent projects: {e}")

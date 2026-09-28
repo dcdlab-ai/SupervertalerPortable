@@ -1,0 +1,29 @@
+file: Supervertaler.py
+
+load_recent_projects  32326-32388 (63 lines)
+    self.<attr> loaded : ['log', 'recent_projects_file']
+    self.<attr> stored : []
+    NOT on SettingsService: ['recent_projects_file']
+      -> recent_projects_file: passed IN as an argument by the delegate (no service state, no caching)
+    -> verdict: SPLIT-BY-ARGUMENT
+
+save_recent_projects  32390-32400 (11 lines)
+    self.<attr> loaded : ['log', 'recent_projects_file', 'user_data_path']
+    self.<attr> stored : []
+    NOT on SettingsService: ['recent_projects_file', 'user_data_path']
+      -> recent_projects_file: passed IN as an argument by the delegate (no service state, no caching)
+      -> user_data_path: passed IN as an argument by the delegate (no service state, no caching)
+    -> verdict: SPLIT-BY-ARGUMENT
+
+module-level / builtin names used inside the two bodies:
+    ['Dict', 'Exception', 'List', 'Path', 'UnicodeDecodeError', 'data', 'datetime', 'dict', 'e', 'f', 'isinstance', 'item', 'json', 'key', 'list', 'normalized', 'open', 'os', 'recent', 'recent_projects', 'self', 'str', 'value']
+    required service imports among ['json', 'os', 'Path', 'datetime', 'List', 'Dict']: ['Dict', 'List', 'Path', 'datetime', 'json', 'os']
+
+self-calls of the two methods inside SupervertalerQt (HEAD):
+    load_recent_projects: ['update_recent_menu:32219', 'add_to_recent_projects:32271', '_remove_from_recent_projects:32317', 'update_recent_projects_display:32414', 'restore_last_project_if_enabled:45377']
+    save_recent_projects: ['add_to_recent_projects:32304', '_remove_from_recent_projects:32320', 'clear_recent_projects:32446']
+
+assignments of self.recent_projects_file / self.user_data_path in __init__ and _reinitialize_with_new_data_path (MUST NOT be touched):
+    __init__:6299 store self.user_data_path
+    __init__:6430 store self.recent_projects_file
+    _reinitialize_with_new_data_path:6721 store self.recent_projects_file

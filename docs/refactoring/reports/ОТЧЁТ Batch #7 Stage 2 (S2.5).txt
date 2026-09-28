@@ -1,0 +1,639 @@
+ОТЧЁТ Batch #7 Stage 2, под-батч S2.5 — Settings Service: недавние проекты
+(перенос 2 методов / 74 строк в modules/settings_service.py) — ПОСЛЕДНИЙ ПОД-БАТЧ
+════════════════════════════════════════════════════════════════════════════════
+Дата: 2026-09-28. Ветка main. Режим: ACTIVE REFACTOR (перенос, не разведка).
+База: HEAD d4db217e6522feffba6507d742f943311881bd15 РОВНО (см. 1.1). Промпт:
+«ПЕРЕНОС S2.5 — Settings Service, recent projects (Batch #7 Stage 2, под-батч
+5/5)»; сохранён как
+docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.5 recent-projects).txt.
+Разведка Б2 (границы 2 методов) принята; пересчитаны AST только границы,
+кластеры, зависимости и callsites на этом дереве (1.2/1.3/1.4). Артефакты:
+docs/refactoring/audits/batch7s25_*; рабочий прогон —
+D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\
+(скрипты, снапшоты 9 блоков, JSON, логи; head-wt — worktree HEAD d4db217).
+
+ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 274 → 68 224 строк (−50; difflib — ровно 2
+неравных региона −52/+2, сумма −50 == изменению файла), сервис 451 → 565 строк
+(+114), 2 тонких делегата на месте тел (сигнатуры байт-в-байт), 8 метрик без
+изменений (файлы побайтово равны), py_compile OK, живой прогон — 16/16 PASS +
+процесс-перезапуск 6/6 PASS + клик по реальным пунктам меню 3/3 PASS, кросс-дерево
+work vs worktree HEAD — 0 неожиданных расхождений из 272 общих ключей, смоук
+save/load EXIT=0 на обоих деревьях, манифест (по git-блобам) — изменено ровно
+2 .py (ожидаемые).
+ГЛАВНАЯ ОСОБЕННОСТЬ ПОД-БАТЧА (и причина отдельного решения координатора):
+эти два метода — единственные в сервисе, которые НЕ ходят через settings.json;
+они читают/пишут отдельный файл recent_projects.json. Поэтому вместо «сервис сам
+резолвит путь» выбран вариант SPLIT-BY-ARGUMENT: путь (а в save ещё и
+user_data_path для mkdir) читается В ДЕЛЕГАТЕ при КАЖДОМ вызове и передаётся
+аргументом; сервис пути не хранит, конструктор SettingsService и перепривязка
+сервиса в _reinitialize_with_new_data_path НЕ менялись (разбор — 1.3 и 2.1).
+ТЕЛА перенесены ВЕРБАТИМ с единственной механической правкой: 3 ссылки
+self.recent_projects_file → параметр recent_projects_file в load и 2 ссылки
+(self.recent_projects_file, self.user_data_path) в save + строка def в save
+перенесена на две строки (документированная правка, diff −4/+4 и −3/+4).
+СОЗНАТЕЛЬНОЕ СУЖЕНИЕ SCOPE: план ожидал в S2.5 «голосовую часть S2.4 +
+recent-projects + миграции» (10 методов / ~419 строк). Координатор переопределил
+под-батч: в S2.5 идут ТОЛЬКО load/save_recent_projects (2 метода / 74 строки), а
+голосовые методы и три миграции остаются в монолите (основания — §4 и итоговый
+блок Step 7 в EXTRACTION_PLAN.md).
+
+ПРИМЕЧАНИЕ О ЦЕЛОСТНОСТИ ЭТОГО ФАЙЛА (28.09.2026, после первого коммита батча):
+первая версия отчёта формировалась вставками по устаревшим номерам строк, из-за
+чего разделы оказались физически перемешаны (например, содержимое 3.3 лежало
+внутри 3.2, а 2.4 — после блока «МЕТРИКИ ПОДТВЕРЖДЕНИЯ»). Отчёт перезаписан
+заново в правильном порядке; полнота проверена автоматически: множества
+идентификаторов/чисел/путей старой и новой версии совпадают, потерянных строк —
+0 (артефакты run-001\report_scrambled_ref.txt и run-001\token_diff.txt).
+
+════════════════════════════════════════════════════════════════════════════════
+1. ЭТАП 0/1 — БАЗОВАЯ ЛИНИЯ И СООТВЕТСТВИЕ РАЗВЕДКЕ Б2
+════════════════════════════════════════════════════════════════════════════════
+
+1.1 ЭТАП 0 ВЫПОЛНЕН, HEAD — РОВНО d4db217
+- `git fetch origin` выполнен. `git merge-base --is-ancestor
+  1ef3c708400c8b490488a5708092134410dfbeca HEAD` → OK (exit 0, не STOP).
+  `git rev-parse HEAD` = d4db217e6522feffba6507d742f943311881bd15 — это коммит
+  «Batch #7 Stage 2 S2.4 follow-up: docs only», т.е. HEAD на один коммит впереди
+  базы разведки 1ef3c708 (как в S2.2/S2.3): потомок, расхождения нет.
+- Рабочее дерево на старте было чистым (`git status --short` — пусто) →
+  манифест «до» снят с git-блоба HEAD (см. 1.5), worktree понадобился только для
+  «прежней реализации» в §3.
+- Квирк окружения №1 (как в S2.2–S2.4): git периодически падал с «detected
+  dubious ownership in repository … owned by ROOT/Dmitry, but the current user is
+  ROOT/AIAssistant». Глобальные настройки НЕ менялись (AGENTS.md: не менять
+  глобальную среду ради задачи): все git-команды, выполняемые скриптами, идут с
+  процесс-локальным `-c safe.directory=E:/Dev/SupervertalerPortable`.
+- Квирк окружения №2 (влияет на смысл §3.6): текущий пользователь —
+  ROOT/AIAssistant, и его продовый каталог данных `C:\Users\AIAssistant\
+  Supervertaler` в этом прогоне практически пуст: `recent_projects.json` в нём
+  ОТСУТСТВУЕТ (sha до == sha после == None). Приложение печатает это первой
+  строкой лога (`[Data Paths] User data: C:\Users\AIAssistant\Supervertaler`).
+  Ни один файл из `D:\_old\Supervertaler-Portable\Supervertaler` этим прогоном не
+  тронут; вся функциональная валидация шла на КОПИИ user_data (§3.3).
+- Базовые измерения до правок: монолит 68 274 строки / 3 542 691 байт / CR=0;
+  сервис 451 строка / 25 429 байт / CR=0. py_compile всех .py → COMPILE_OK
+  (144 файла). 8 метрик: 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2.
+
+1.2 ГРАНИЦЫ БЛОКА (AST) + СНАПШОТЫ — СОВПАЛИ С ПРОМПТОМ 1:1
+Измерено AST по `git show HEAD:Supervertaler.py` (скрипт
+run-001\snapshot_s25.py; артефакты run-001\snap_out.txt →
+audits/batch7s25_snapshot_index.txt и run-001\snapshot_index.json,
+snap_out.txt = 9 блоков):
+    MOVE load_recent_projects              32326–32388 (63) stmts=3 nested=[]
+         sha256 7eb9f10c38177e75a8b39209ee98babd52a77a3e0ecd40c57cf24c587810126f
+    MOVE save_recent_projects              32390–32400 (11) stmts=2 nested=[]
+         sha256 e524a4db933a4ebc19234b98b211ed29200d7da27bd3b07042848dd7fba29642
+  Оба размера (63/11 = 74 строки) и оба диапазона совпали с промптом
+  цифра-в-цифру; вложенных def/class нет (`nested=[]`).
+  СМЕЖНОСТЬ ПОДТВЕРЖДЕНА AST, а не на глаз: между концом load (32388) и началом
+  save (32390) — 0 def и ровно 1 «сырая» строка (пустая 32389). Это единственный
+  полностью чистый кластер этого под-батча.
+Остальные методы того же окна (проверено AST, окно 32240–32460) — НЕ в составе:
+    _load_recent_project_with_resize       32251–32256 ( 6)  (UI-обёртка, вне Step 7)
+    add_to_recent_projects                 32258–32308 (51)  NOT-MOVE (тир C)
+    _remove_from_recent_projects           32310–32324 (15)  NOT-MOVE (тир C)
+    update_recent_projects_display         32402–32434 (33)  NOT-MOVE (тир C)
+    clear_recent_projects                  32436–32450 (15)  NOT-MOVE (тир C)
+и в двух дальних окнах:
+    _migrate_settings_to_unified           44744–44834 (91)  NOT-MOVE (миграция)
+    _migrate_to_workbench_layout           44836–44901 (66)  NOT-MOVE (миграция)
+    _migrate_voice_dictation_default_off   45129–45160 (32)  NOT-MOVE (миграция)
+Тела всех 9 блоков (2 MOVE + 7 NOT-MOVE) сохранены в
+run-001\snapshot\<имя>.py вместе с sha256; 7 NOT-MOVE-снапшотов использованы как
+байт-эталон до/после (3.5).
+
+1.3 ЗАВИСИМОСТИ ТЕЛ — СТОП-УСЛОВИЕ «СОСТОЯНИЕ ОКНА» РЕШЕНО АРГУМЕНТАМИ
+Измерено AST (run-001\analyze_s25.py; артефакт
+audits/batch7s25_deps_before.txt): множество `self.<attr>`-обращений каждого тела
+и пересечение с тем, что уже есть на SettingsService:
+    load_recent_projects  loaded=['log', 'recent_projects_file']
+                          stored=[]; NOT on SettingsService:
+                          ['recent_projects_file']            → SPLIT-BY-ARGUMENT
+    save_recent_projects  loaded=['log', 'recent_projects_file', 'user_data_path']
+                          stored=[]; NOT on SettingsService:
+                          ['recent_projects_file', 'user_data_path']
+                                                              → SPLIT-BY-ARGUMENT
+`self.log` есть на сервисе с S2.1 (log-колбэк конструктора) — логирование идёт
+через уже существующий механизм, новый параметр не вводился (выполнено
+ограничение промпта). Оба пути — НЕ настройки: это путь к отдельному файлу
+recent_projects.json и каталог данных для mkdir, поэтому (решение координатора)
+делегат читает их при КАЖДОМ вызове и передаёт аргументами; сервис не хранит их
+ни в конструкторе, ни в полях. Проверено машинно в §3.2 и §3.3 (C1: на сервисе
+нет ни `recent_projects_file`, ни `user_data_path`; в сервисе нет ни одного
+Store этих имён) — конструктор SettingsService и перепривязка сервиса в
+_reinitialize_with_new_data_path остались БАЙТ-В-БАЙТ как были.
+Импорты сервиса: до S2.5 в модуле были json, Path, typing — добавлены
+`import os`, `from datetime import datetime`, `List` в typing (артефакт
+audits/batch7s25_verify_out.txt, раздел 1b: все три присутствуют ровно 1 раз).
+Импорты в Supervertaler.py не убирались (проверки AST/manifest не фиксируют
+изменения блока импортов монолита: изменились ровно 2 региона, см. 2.3).
+
+1.4 CALLSITES (ГОЛОВА) И НЕ-ТРОГАЕМЫЕ ВЫЗЫВАЮЩИЕ
+Callsites делегатов (delegate-side inventory, run-001\analyze_s25.py):
+    load_recent_projects: update_recent_menu:32219, add_to_recent_projects:32271,
+                          _remove_from_recent_projects:32317,
+                          update_recent_projects_display:32414,
+                          restore_last_project_if_enabled:45377
+    save_recent_projects: add_to_recent_projects:32304,
+                          _remove_from_recent_projects:32320,
+                          clear_recent_projects:32446
+Все семь вызывающих входят в NOT-MOVE-набор этого под-батча (или являются их
+непосредственными соседями), поэтому проверены байт-в-байт (§3.5/3.6).
+Внешних callsites (вне Supervertaler.py) у этих двух имён нет вообще —
+единственные .py-вхождения в репозитории — сам монолит (regex-инвентарь:
+audits/batch7s25_callsites_head.txt; AST-инвентарь: verify_s25.py §7 — по 2
+определения на имя после переноса: делегат в монолите + метод сервиса).
+Присваивания пути, которые промпт запрещал трогать, подтверждены AST-историей:
+__init__:6299 store self.user_data_path (всего 2 Store user_data_path в __init__),
+__init__:6430 store self.recent_projects_file,
+_reinitialize_with_new_data_path:6721 store self.recent_projects_file — те же
+адреса и то же число в HEAD и в рабочем дереве (audits/batch7s25_path_attrs_cmp.txt:
+«stores identical everywhere HEAD == WORK»; сами методы __init__ и
+_reinitialize_with_new_data_path — byte-identical).
+
+1.5 БАЗОВАЯ ЛИНИЯ И МАНИФЕСТ ПО GIT-БЛОБАМ
+По требованию промпта манифест снят ПО GIT-БЛОБАМ, а не с рабочей копии
+(run-001\manifest_git.py: источник `HEAD` → `git cat-file blob HEAD:<path>`,
+источник `index` → `git cat-file blob :<path>`; индекс нормализует EOL через
+.gitattributes, поэтому сравнение «блоб HEAD против блоба индекса» артефактов
+CRLF/LF не даёт). Это оказалось не теоретической предосторожностью: в этом дереве
+4 .py лежат с CRLF, отличным от блоба (modules/grid/filters.py,
+modules/grid/pagination.py, modules/tag_manager.py, modules/undo_manager.py) —
+файловый манифест показал бы их «изменёнными» в каждом батче.
+    manifest_before.txt (144 .py, источник HEAD) → manifest_after.txt (144,
+    источник index) → cmp: changed = РОВНО 2, added = 0, removed = 0
+Базовые числа при этом совпадают с прежними батчами: 144 .py, sha256
+Supervertaler.py 0854f899… и modules/settings_service.py 6778e9e7… — те же
+значения, что зафиксировал S2.4 (HEAD этого под-батча = состояние «после S2.4»
+байт-в-байт).
+
+════════════════════════════════════════════════════════════════════════════════
+2. ПЕРЕНОС
+════════════════════════════════════════════════════════════════════════════════
+
+2.1 ЧТО ПЕРЕНЕСЕНО И КАК
+Инструмент переноса: run-001\move_s25.py — читает HEAD-вербатимные тела по
+AST-границам, применяет ТОЛЬКО документированные замены (EDITS), собирает
+сервисный блок, генерирует делегаты (исходная строка def сохраняется
+байт-в-байт, в докстринг дописывается примечание) и пишет сухой прогон
+Supervertaler.new.py / settings_service.new.py; после проверки (verify_s25.py
+без --live → 31/31 OK) файлы скопированы в дерево.
+Сервис (modules/settings_service.py, новый раздел «Недавние проекты», строка 466+):
+    load_recent_projects(self, recent_projects_file: Path) -> List[Dict[str, str]]
+    save_recent_projects(self, recent_projects: List[Dict[str, str]],
+                         recent_projects_file: Path, user_data_path: Path)
+Правки тел относительно HEAD-снапшотов (полный diff — в
+audits/batch7s25_verify_out.txt, раздел 2):
+  load (diff −4/+4): def-строка + параметр recent_projects_file;
+        `if not self.recent_projects_file.exists():` → `if not recent_projects_file.exists():`;
+        два `open(self.recent_projects_file, …)` (utf-8 и latin-1) → `open(recent_projects_file, …)`.
+  save (diff −3/+4): def-строка разбита на две (перенос строки по 79-символьной
+        конвенции файла) + два параметра; `self.user_data_path.mkdir(...)` →
+        `user_data_path.mkdir(...)`; `open(self.recent_projects_file, 'w', …)` →
+        `open(recent_projects_file, 'w', …)`.
+Больше НИЧЕГО не менялось: ровно эти строки и есть весь diff — всё остальное
+(включая пробелы в «пустых» строках внутри тел) перенесено байт-в-байт, что
+доказано построчным сравнением «снапшот + документированные замены == блок
+сервиса» (одинаково и на сухом прогоне, и на живом дереве: 33/33 OK).
+Сохранено КАК ЕСТЬ (не «улучшалось» переносом): try/except в обеих ветвях;
+повтор открытия с encoding='latin-1' при UnicodeDecodeError и предупреждение
+в лог (`⚠ UTF-8 decoding failed for recent projects, trying latin-1...`);
+поддержка старого dict-формата (в нём, в отличие от list-формата, НЕТ фильтра
+существования — это предсуществующее поведение, воспроизведено и совпало
+кросс-деревом, см. 3.3/C3); новый list-формат с отбрасыванием записей, у
+которых путь не существует или не заканчивается на .svproj (регистронезависимо),
+и с проставлением отсутствующих name/last_opened; `mkdir(parents=True,
+exist_ok=True)` перед записью; `json.dump(..., indent=2, ensure_ascii=False)`;
+отсутствующий файл → [] без записи в лог; битый JSON → [] с записью
+`Error loading recent projects: …`; ошибка записи → запись
+`Error saving recent projects: …` и возврат None (исключение не вылетает).
+
+2.2 ДЕЛЕГАТЫ (SupervertalerQt)
+Оба делегата стоят ТОЧНО на месте тел из HEAD, сигнатуры — байт-в-байт
+исходные (verify_s25.py §4: sig_identical=True для обоих):
+    load_recent_projects 32326–32336 (11 строк):
+        return self.settings_service.load_recent_projects(self.recent_projects_file)
+    save_recent_projects 32338–32350 (13 строк):
+        return self.settings_service.save_recent_projects(
+            recent_projects,
+            recent_projects_file=self.recent_projects_file,
+            user_data_path=self.user_data_path,
+        )
+Пути передаются ИМЕНОВАННЫМИ аргументами (осознанный выбор: два однотипных
+Path-параметра подряд позиционно легко перепутать; в S2.4, где переносилось
+значение-состояние, использовалась позиционная передача). Пути читаются в
+делегате при каждом вызове — сервис их не кэширует, поэтому переприсваивание
+self.recent_projects_file/self.user_data_path (в т.ч. в
+_reinitialize_with_new_data_path) видно следующему же вызову (проверено живьём:
+3.3/C10-ж и 3.4/R1).
+Обратное направление (сервис → монолит) отсутствует: в телах сервиса нет ни
+одного `self.<attr>`, кроме `self.log` и методов сервиса (verify_s25.py §3:
+window-state leakage = NONE).
+
+2.3 УЧЁТ СТРОК (измерено, не «по памяти»)
+Монолит (run-001\line_accounting.txt, difflib HEAD-блоб vs рабочая копия):
+    68 274 → 68 224 строки, net = −50
+    неравных регионов РОВНО 2 (по одному на метод):
+      replace head[32327:32388] work[32327:32336] dh=62 dw=10 delta=−52
+      replace head[32391:32400] work[32339:32350] dh=10 dw=12 delta=+2
+    sum(delta) = −50 == net (assert True)
+  Байты: 3 542 691 → 3 540 879 (−1 812), CR=0 до и после (LF сохранён).
+Сервис (run-001\line_accounting_service.txt):
+    451 → 565 строк, net = +114
+    6 неравных регионов: докстринг-фикс №1 +4, докстринг-фикс №2 +1,
+    абзац докстринга S2.5 +7, два импорта +2, строка typing +0 (заменена),
+    хвостовой блок +100 (раздел-комментарий + два метода + пустые строки).
+    sum(delta) = +114 == net (assert True)
+  Байты: 25 429 → 32 495 (+7 066).
+
+2.4 ДОКУМЕНТАЦИОННЫЕ ПРАВКИ (помимо переноса тел)
+Три правки, все — только текст; ни одна не меняет исполняемое поведение:
+  1) (ТРЕБОВАНИЕ ПРОМПТА) модульный докстринг сервиса, строка 17: из перечня
+     менеджеров, «которые сервис не трогает», убран `recent_projects_file`, и
+     добавлен абзац: с S2.5 путь к recent_projects.json передаётся в методы
+     сервиса АРГУМЕНТОМ при каждом вызове, сервис его нигде не хранит.
+  2) (вынужденная, иначе докстринг противоречил бы коду) абзац S2.1
+     «Ещё не перенесённые методы монолита (`_migrate_settings_to_unified`,
+     `_migrate_voice_dictation_default_off` — УХОДЯТ В S2.5)» приведён к
+     реальности: перечислены все три миграции (добавлен ранее не упомянутый
+     `_migrate_to_workbench_layout`) и сказано, что по решению координатора они
+     в S2.5 НЕ переносятся (см. итоговый блок Step 7 в EXTRACTION_PLAN.md).
+  3) добавлен абзац под-батча S2.5 (что перенесено и почему пути — аргументы).
+
+════════════════════════════════════════════════════════════════════════════════
+3. ВАЛИДАЦИЯ
+════════════════════════════════════════════════════════════════════════════════
+
+3.1 СТРУКТУРНАЯ ПРОВЕРКА (verify_s25.py --live) — 33/33 OK
+Артефакт: audits/batch7s25_verify_out.txt (плюс сухой прогон — 31/31 до
+применения). Состав (все проверки машинные):
+  1. Инвентарь сервиса: 26 методов (было 24), каждый из двух — ровно 1 раз,
+     порядок определений load→save == порядку в монолите.
+  2. ВЕРБАТИМ/документированная правка: load «снапшот + 4 замены == блок
+     сервиса» — True (diff −4/+4), save — True (diff −3/+4); строгий ВЕРБАТИМ
+     применим к 0 телам (оба требуют замены пути — это и есть решение
+     SPLIT-BY-ARGUMENT, а не отклонение).
+  3. Ни одного неразрешённого `self.*` в телах сервиса (кроме self.log и методов
+     сервиса) — «window-state leakage: NONE».
+  1b. Импорты: `import os`, `from datetime import datetime`, typing с List —
+     по 1 вхождению; Store self.recent_projects_file / self.user_data_path в
+     сервисе — 0 (пути приходят аргументами, кэша нет).
+  4. Делегаты: sig_identical = True (обе сигнатуры — исходные байт-в-байт),
+     body_ok = True, forwards = True; адреса 32326–32336 (11 строк) и
+     32338–32350 (13 строк).
+  5. NOT-MOVE: 7/7 байт-в-байт к HEAD-снапшотам (пересчитанные AST-диапазоны:
+     add_to_recent_projects 32258–32308, _remove_from_recent_projects
+     32310–32324, update_recent_projects_display 32352–32384,
+     clear_recent_projects 32386–32400, _migrate_settings_to_unified
+     44694–44784, _migrate_to_workbench_layout 44786–44851,
+     _migrate_voice_dictation_default_off 45079–45110 — смещения ожидаемые, от
+     −50 строк).
+  6. Вызывающие и запрещённые к правке методы: update_recent_menu,
+     restore_last_project_if_enabled, _load_recent_project_with_resize,
+     __init__, _reinitialize_with_new_data_path — byte-identical_to_HEAD = True;
+     число присваиваний пути 2/2 (HEAD и WORK).
+  7. Repo-wide: у каждого имени ровно 2 определения (делегат в монолите +
+     метод сервиса), внешних определений нет.
+
+3.2 КОНТРАКТ ПУТЕЙ (path_attrs_cmp.py) — 6/6 PASS
+Артефакты: audits/batch7s25_path_attrs_cmp.txt (проверки) и
+batch7s25_path_attrs_dump.txt (полный инвентарь load/store обоих путей по всем
+функциям класса, HEAD vs WORK). Единственное наблюдённое различие во всём
+инвентаре:
+    load load_recent_projects.recent_projects_file: head=3 work=1
+(тело читало путь трижды — exists + два open; делегат читает один раз и передаёт
+аргументом). Все прочие строки инвентаря совпали, включая: stores обоих путей
+идентичны (__init__ и _reinitialize_with_new_data_path не тронуты);
+save_recent_projects читает recent_projects_file x1 + user_data_path x1 — столько
+же, сколько в HEAD; ни одна функция, кроме двух перенесённых тел, не изменила
+счётчики.
+
+3.3 ФУНКЦИОНАЛЬНЫЙ ДРАЙВЕР (app_check_s25.py) — 16/16 PASS в рабочем дереве,
+    16/16 PASS в worktree HEAD, кросс-дерево: 0 неожиданных расхождений
+Изоляция (AGENTS.md «Full-app before/after probes and user-data isolation»):
+offscreen; QDialog.exec/QMessageBox замокированы; каталог данных — КОПИЯ
+продового (`run-001\main_user_data`, copytree), окно перепривязано через
+`w.user_data_path = копия; w._reinitialize_with_new_data_path()`; продовый
+каталог и указатель `%APPDATA%\Supervertaler\config.json` не изменялись
+(C16: prod_recent_unchanged = True, pointer_unchanged = True). «Прежняя
+реализация» получена запуском ТОГО ЖЕ скрипта в worktree HEAD d4db217
+(run-001\head-wt) — сравнение JSON-листьев скриптом app_check_cmp.py (с
+нормализацией volatile-значений: ISO-время и sha256 файлов, содержащих время).
+Покрытие пунктов промпта (а–ж) и живого прогона — 16 проверок, все PASS в обоих
+деревьях:
+  C1  контракт/подключение: методы сервиса существуют и вызываемы; путь окна ==
+      <копия>/workbench/settings/recent_projects.json == каталог сервиса; на
+      сервисе НЕТ атрибутов recent_projects_file/user_data_path; в этой сборке
+      home-экран (`recent_projects_layout`) не создаётся нигде — метод
+      update_recent_projects_display уходит в hasattr-guard (предсуществующее
+      состояние, метод вне состава S2.5; см. §4 п.45).
+  C2  (а) list-формат: файл из 5 записей (существующий .svproj, несуществующий
+      путь, существующий .docx, .svproj без name/last_opened, строка вместо
+      словаря) → оставлены РОВНО две записи: .svproj и .SVPROJ (регистр
+      расширения не важен), недостающие name/last_opened доставлены; результат
+      совпал с прежней реализацией (кросс-дерево) и с прямым вызовом сервиса.
+  C3  (б) старый dict-формат: три записи (строка в списке → словарь с
+      path/name/last_opened; готовый словарь — как есть, без доставки полей;
+      строковое значение → запись) — идентично HEAD, включая отсутствие фильтра
+      существования в этой ветви.
+  C4  (в) latin-1: файл с «Café naïve» в latin-1 → декодирование упало,
+      сработал fallback, в лог ушло ровно
+      `⚠ UTF-8 decoding failed for recent projects, trying latin-1...`,
+      результат — та же запись; строка и результат идентичны в двух деревьях.
+      (Байты файла проверены: 0xE9 на месте — файл действительно НЕ utf-8.)
+  C5  (г) файла нет: [] с обеих сторон, файл не создаётся, в лог — ничего.
+  C6  (д) битый JSON: [] и ровно `Error loading recent projects: Expecting
+      value: line 1 column 12 (char 11)` — та же строка, что в HEAD.
+  C7  (е1) save в кириллический путь (`…\данные_копия\workbench\settings\
+      recent_projects.json`): делегат вернул None, файл создан, содержимое
+      побайтово равно каноническому `json.dumps(..., indent=2,
+      ensure_ascii=False)` с переводом строк в CRLF (текстовый режим open('w')
+      на Windows — как и раньше); кириллица НЕ экранирована (\u0410 в файле
+      отсутствует, «Альфа» присутствует); sha256 файла
+      0afd403743c2e7731932fcb07183780b74cc1de94d7b04a704ed83aa15579a06 —
+      совпал с worktree HEAD (см. audits/batch7s25_app_check_*.json).
+  C8  (е2) каталог user_data_path создаётся: несуществовавший каталог после save
+      существует (mkdir(parents=True, exist_ok=True)), файл записан («[]»).
+  C9  (е3) ветка ошибки записи (родительского каталога нет): исключение НЕ
+      вылетает, в лог — `Error saving recent projects: [Errno 2] No such file or
+      directory: …`, файл не создан — идентично HEAD.
+  C10 (ж) чтение атрибутов при КАЖДОМ вызове: переприсваивание
+      w.recent_projects_file на другой файл → чтение из нового, старый файл не
+      изменён (sha), запись ушла в новый; прямой вызов сервиса с ТРЕТЬИМ путём
+      пишет именно туда (аргумент honoured) и читает оттуда же; «нет кэша»:
+      число записей 1 → (файл перезаписан снаружи) → 2.
+  C11 живой прогон «открыть проект»: проект сохранён на диск реальным
+      save_project_to_file, затем открыт реальным load_project → появился в файле
+      (абсолютный путь, имя проекта), в меню («1. S25 Alpha» + «Clear Recent
+      Projects») и в списке недавних (BTN:📄 S25 Alpha — панель подставлена, см.
+      C1/§4 п.45).
+  C12 второй проект → порядок «сначала новый» (S25 Beta, S25 Alpha); удаление
+      записи `_remove_from_recent_projects` → в файле и меню осталась вторая.
+  C13 clear_recent_projects: ответ Yes → файл [], меню «No recent projects»,
+      панель «No recent projects»; ответ No → список не изменён (проверены оба
+      ответа моком QMessageBox.question).
+  C14 лимит MAX_RECENT_PROJECTS=10: 12 добавлений через реальный
+      add_to_recent_projects → в файле и в меню ровно 10, первая — последняя
+      добавленная.
+  C15 restore_last_project_if_enabled: при флаге False проект не восстанавливается;
+      при True восстанавливается именно самый свежий (S25 Beta, 3 сегмента), в
+      логе `🔄 Restoring last project: S25 Beta.svproj`; флаг взят из реального
+      settings.json той же копии.
+  C16 продовые данные не тронуты.
+Кросс-дерево (audits/batch7s25_app_check_cmp.txt): 272 общих ключа, differing = 7
+(все 7 — прямые вызовы сервиса, которых в HEAD физически нет: service_direct /
+service_matches_delegate / service_third_path_argument_honoured),
+only-in-work = 20, only-in-head = 4 — все 24 тоже про эти же прямые пробы;
+UNEXPECTED = 0. То есть всё, что наблюдаемо через API ОКНА (делегаты, меню, файл,
+лог, возвращаемые значения), в двух деревьях идентично.
+ВАЖНО про шум: первые прогоны драйвера давали 23 «UNEXPECTED» — это был баг
+драйвера (он складывал в результат ВЕСЬ поток лога, включая строки старта с
+адресами объектов и id термбаз). Захват сужен до строк про recent projects
+(единственное, что эти методы вообще могут печатать); после этого расхождения
+исчезли. См. §4 и 3.5 про такой же урок в меню-драйвере.
+
+3.4 ПЕРЕЗАПУСК (restart_check_s25.py) — 6/6 PASS в обоих деревьях
+Процесс 2 — другой интерпретатор, тот же каталог данных, резолвер подменён ДО
+создания окна (`sv.get_user_data_path = lambda: копия`), т.е. проверяется
+настоящий путь запуска приложения.
+  R1 свежий процесс резолвит данные в копию; путь окна == копия/…/recent_projects.json;
+     каталог сервиса == копия/…/settings; указатель продового конфига не изменён.
+  R2 запись пережила перезапуск: в файле и через делегата — тот же проект, файл
+     проекта существует; делегат и прямой вызов сервиса дают один результат.
+  R3 восстановление на старте: `SupervertalerQt.__init__` (вызов 6486) →
+     restore_last_project_if_enabled → делегат load_recent_projects → load_project:
+     current_project = S25 Beta, 3 сегмента, grid заполнен.
+  R4 меню после перезапуска: «1. S25 Beta», «Clear Recent Projects».
+  R5 структурная проверка ПЕРЕНОСА каталога данных (restart_user_data): запись и
+     флаг restore переехали вместе с копией, .svproj на месте. Замечание честности:
+     recent_projects.json хранит АБСОЛЮТНЫЕ пути, поэтому живой перезапуск делался
+     на ТОЙ ЖЕ копии (main_user_data), а не на перенесённой — иначе записи
+     указывали бы на прежний каталог (предсуществующее поведение, к S2.5 не
+     относится).
+  R6 запись приложения шла в копию; продовый указатель не менялся.
+Кросс-дерево (audits/batch7s25_restart_cmp.txt): 45 общих ключей, differing = 1
+(delegate_equals_service: True в work против «<ABSENT-before-S2.5>» в HEAD —
+прямая проба сервиса), UNEXPECTED = 0.
+
+3.5 КЛИК ПО РЕАЛЬНЫМ ПУНКТАМ МЕНЮ (menu_action_check_s25.py) — 3/3 PASS в обоих
+    деревьях, кросс-дерево 0 расхождений
+  M1 `QAction.trigger()` первого пункта «Open Recent» (реальный путь
+     update_recent_menu → _load_recent_project_with_resize → load_project →
+     add_to_recent_projects) открывает проект из записи: current_project =
+     S25 Alpha, 3 сегмента, project_file_path = файл из записи, число записей не
+     растёт.
+  M2 пункт «Clear Recent Projects» при ответе No — список не изменён.
+  M3 тот же пункт при ответе Yes — список пуст, меню показывает «No recent
+     projects».
+Первая версия драйвера дала кросс-дереву 8 расхождений, и это оказалось БАГОМ
+ДРАЙВЕРА, а не кода: он «досеивал» файл только если тот пуст, поэтому work-прогон
+стартовал с записи S25 Beta, а head-wt — с Alpha (0 сегментов). Исправлено на
+детерминированное досеивание (один и тот же реальный S25 *.svproj в обоих
+деревьях), оба драйвера перезапущены — здесь приведены чистые числа,
+аудит-артефакты перезаписаны.
+
+3.6 МАНИФЕСТ / МЕТРИКИ / py_compile / AST-callsites
+  * SHA256-манифест по git-блобам: 144 → 144; changed = 2, added = 0, removed = 0
+      Supervertaler.py            0854f899… → c0370685430514a39b1147a8b19a54fd615e06d225324fc4ba74e1dd8eaffe5c
+      modules/settings_service.py 6778e9e7… → 5e5826397f6794f741822dd5ca76846fd8ddff7b9eca33ebc0208e342ee015bf
+  * 8 метрик: файлы baseline_counts.txt и counts_after.txt ПОБАЙТОВО равны
+    (sha256 39c9decfae09cb36f7950d8ffb9d2ed7a4450c5129f04e1b8d43468f20169be9
+    у обоих), значения 1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2.
+  * py_compile всех .py после правок → COMPILE_OK (144 файла); AST обоих
+    изменённых файлов парсится (отдельно проверено на сухом прогоне:
+    NEW_FILES_COMPILE_OK).
+  * AST-сверка callsites делегатов (callsites_ast_cmp.py): call-keys 10 == 10,
+    attr-keys 65 == 65, only-in-HEAD = 0, only-in-WORK = 0, count-mismatch = 0 →
+    «VERDICT: OK — every call site outside the moved bodies is preserved».
+  * Структурный AST-инвентарь: verify_s25.py §1/§7 — 26 методов сервиса, у
+    каждого из двух имён ровно 2 определения repo-wide.
+
+3.7 СМОУК-ТЕСТ (2 процесса, save → load)
+run-001\smoke_exit.txt: work_smoke_save_exit=0 (SAVE_OK 4042),
+work_smoke_load_exit=0 (LOAD_OK S25Smoke 4 «Segment 1 source»),
+headwt_smoke_load_exit=0 (LOAD_OK S25Smoke 4) — смоук-проект, записанный рабочим
+деревом, читается обоими деревьями, EXIT=0 везде. Живой прогон дополнительно
+зафиксировал метрику scale-инвариантности: в smoke-проекте 4 сегмента, в
+функциональном драйвере — 3; ни один recent-вызов не зависит от размера проекта.
+
+════════════════════════════════════════════════════════════════════════════════
+4. НЕПОКРЫТЫЕ ПРОВЕРКИ (обязательный раздел)
+════════════════════════════════════════════════════════════════════════════════
+
+4.1 ЧТО НЕ ПОКРЫТО В ЭТОМ ПОД-БАТЧЕ
+  * (НОВЫЙ ПУНКТ РЕЕСТРА — п. 45) Home-экран «Recent projects»: в этой сборке
+    панель `recent_projects_layout` не создаётся нигде в коде, поэтому
+    `update_recent_projects_display` (NOT-MOVE, байт-в-байт) всегда выходит по
+    hasattr-guard. Отрисовка списка недавних проверена только с ПОДСТАВЛЕННЫМ
+    реальным QVBoxLayout (C11/C13: BTN:📄 S25 Alpha и LBL:No recent projects).
+    Реальный home-экран не проверялся, потому что его в сборке нет.
+    Статус: MOOT для текущей сборки (нечего отрисовывать), активируется при
+    возврате панели в код. См. п. 25/33.
+  * Модальность диалога подтверждения `clear_recent_projects`: QMessageBox.question
+    замокирован (Yes и No проверены оба — C13), но реальное модальное окно и
+    нажатие кнопки мышью не воспроизводились. См. п. 12/13/24 (модальные окна и
+    Save/Apply в UI) — это сквозной пункт, повторно не заводится.
+  * Реальный crash-сценарий на выходе offscreen-прогонов (0xC0000005 при teardown)
+    не наблюдался ни в одном из 10 процессов этого прогона (приложение завершалось
+    штатно, EXIT=0 у смоуков), но и специально не воспроизводился.
+    См. п. 30.
+  * Автотестов settings-IO по-прежнему нет: драйверы S2.5 — сценарные скрипты в
+    stage-каталоге, в репозиторий не входят (кроме самих аудитов).
+    См. п. 21 — повторно не заводится.
+  * Продовые user-data: приложение в этом раунде продовый recent_projects.json
+    НЕ меняло (в каталоге пользователя AIAssistant его вообще нет) и конфигурационный
+    указатель не менялся (C16/R6 — True/True). Смоук-save, как и раньше, пишет
+    versioned-бэкапы в общий каталог данных — ожидаемое поведение.
+    См. п. 43 — повторно не заводится.
+  * Голосовые методы и три миграции остались в монолите (см. §5), поэтому
+    голосовая цепочка этим под-батчем вообще не затрагивалась: п. 44 к S2.5 не
+    относится (в S2.4 он закрыт как MOOT).
+
+4.2 ЧТО ИЗ РЕЕСТРА ПРОВЕРЕНО ЭТИМ ПОД-БАТЧОМ (закрытие по факту)
+  * п. 35 «Ветки ошибок (`except: return defaults` / `return None`), битый JSON /
+    ошибка чтения на живом окне» — для recent-projects закрыт ФАКТИЧЕСКИ: битый
+    JSON (C6: [] + точная строка лога), отсутствующий файл (C5), ошибка записи
+    (C9: точная строка лога, исключение не вылетает), позитивные ветви (C2/C3/C4).
+  * п. 36 «Повреждённый/частичный файл, UTF-8/BOM» — частично: повреждённый JSON
+    и НЕ-utf8-файл (latin-1) проверены; BOM в recent_projects.json не проверялся
+    (в коде BOM не обрабатывается — это предсуществующее поведение, перенос его
+    не менял).
+  * п. 29/30/31/32/33/34/37/38 (ввод, краш, LLM/MT, диалоги настроек, прокси,
+    autotag, batch-парсинг) — не относятся к перенесённым телам: оба метода не
+    ходят ни в сеть, ни в LLM, ни в UI-диалоги, кроме NOT-MOVE clear-диалога.
+
+════════════════════════════════════════════════════════════════════════════════
+5. ИТОГ STEP 7 (Stage 2 ЗАКРЫТ ЭТИМ ПОД-БАТЧОМ)
+════════════════════════════════════════════════════════════════════════════════
+Внесено в modules/settings_service.py за весь Stage 2 — 25 методов:
+    S2.1  6 методов /  39 строк — ядро API (конструктор + _get_settings_dir,
+          _get_unified_settings_path, _load/_save_unified_settings,
+          _load/_save_settings_section) + 6 делегатов;
+    S2.2  3 метода /  56 строк — load_clipboard_privacy_settings,
+          _load_general_settings_from_file, save_general_settings + 3 делегата;
+    S2.3 10 методов / 150 строк — LLM/proxy/provider-states/API keys
+          + 10 делегатов;
+    S2.4  4 метода /  47 строк — языковая пара и spellcheck-IO + 4 делегата;
+    S2.5  2 метода /  74 строки — load/save_recent_projects + 2 делегата.
+Осталось в монолите СОЗНАТЕЛЬНО (и почему):
+  * V3-исключения — методы, которым на живом пути нужны Qt-объекты/диалоги:
+    `save_clipboard_privacy_settings` (живой refresh виджета),
+    `load_general_settings` (97 строк: 35 присваиваний атрибутов окна, fan-in 61
+    call-site; перенос дал бы «сервис, знающий про окно»), —
+    решение владельца Stage 1, подтверждено V3;
+  * тир C (не IO-аксессоры, а UI/доменные операции над списком недавних):
+    `add_to_recent_projects`, `_remove_from_recent_projects`,
+    `update_recent_projects_display`, `clear_recent_projects` (QMenu/QMessageBox,
+    self.current_project, MAX_RECENT_PROJECTS) — им нужны окно и UI; они остаются
+    вызывающими делегатов;
+  * `get_autocorrect_settings` и `load_font_sizes_from_preferences` — тир C
+    (первый — динамический вход из modules/autocorrect.py, второй ссылается на
+    классы монолита; перенос дал бы NameError);
+  * голосовые методы (`load/save_dictation_settings`,
+    `load/save_voice_vocabulary_settings`, `load_language_settings`) — исключены
+    координатором из S2.4/S2.5; причина: Voice-виджет удаляется отдельным батчем
+    (Batch #8), перенос IO голосового слоя в сервис настроек не имеет смысла
+    перед его удалением (см. также п. 16/44 реестра);
+  * три миграции (`_migrate_settings_to_unified`, 91 строка;
+    `_migrate_to_workbench_layout`, 66; `_migrate_voice_dictation_default_off`, 32)
+    — одноразовые, вызываются только из `_reinitialize_with_new_data_path` и
+    читают repo-root/структуру каталогов; решение координатора этого под-батча:
+    НЕ переносить (промпт прямо относит их к СТРОГО NOT-MOVE). Итог: они остались
+    байт-в-байт (§3.1 п.5), а документация сервиса это фиксирует (§2.4 п.2).
+Практический вывод для следующих шагов: `modules/settings_service.py` (565 строк,
+26 методов) — владелец формата `settings.json` и (с S2.5) единственный IO-владелец
+`recent_projects.json`; всё, что осталось в монолите, — либо одноразовые
+миграции, либо UI-операции над окном, либо голосовой слой под удаление.
+
+════════════════════════════════════════════════════════════════════════════════
+6. ПОСТ-КОММИТНАЯ ПРОВЕРКА
+════════════════════════════════════════════════════════════════════════════════
+Коммит батча: первая версия — **ab8175c** «Extract recent-projects IO into
+modules/settings_service.py (Batch #7 Stage 2, S2.5 - Stage 2/Step 7 closed)»,
+родитель d4db217e6522feffba6507d742f943311881bd15, 41 файл (2 .py + 3 документа +
+33 аудита + промпт + отчёт). Далее — только `git commit --amend` и НИ ОДНОГО
+изменения в коде: правки текста §6/сводки метрик и публикация 4 пост-коммитных
+артефактов измерений (batch7s25_counts_postcommit.txt,
+batch7s25_manifest_postcommit_cmp.txt, batch7s25_verify_postcommit.txt,
+batch7s25_verify_commit.txt) → финально 45 файлов; после каждого шага содержимое
+.py сверялось sha256 (equal_raw=True). Поэтому «коммит батча» — ФИНАЛЬНЫЙ в цепочке (см. `git log -1 --oneline`);
+первые версии цепочки — ab8175c → 49b4c4d → 56830b1 → 8e07b09 → …, каждый
+следующий amend добавлял только документы/аудиты (ни один .py). Не пушился.
+- Содержимое коммита совпадает с измеренными файлами побайтово (сравнение
+  `git show HEAD:<file>` с рабочей копией, sha256; артефакт verify_commit_out.txt):
+    Supervertaler.py            c0370685430514a39b1147a8b19a54fd615e06d225324fc4ba74e1dd8eaffe5c
+                                committed == expected: True; equal_raw=True; equal_normalized=True
+    modules/settings_service.py 5e5826397f6794f741822dd5ca76846fd8ddff7b9eca33ebc0208e342ee015bf
+                                committed == expected: True; equal_raw=True; equal_normalized=True
+- `git status --short` сразу после коммита — ПУСТО; `git diff HEAD --stat` — пусто
+  (line-ending артефактов нет: оба новых текстовых файла — промпт и отчёт — были
+  созданы редактором с CRLF и ПЕРЕД коммитом приведены к LF, 533 CR в отчёте
+  удалены; правило `.gitattributes` `* text=auto eol=lf`; ни один .py этим не
+  затрагивался — в них CR=0 и до, и после).
+- Повторный прогон инструментов ПОСЛЕ коммита (артефакты run-001\
+  {counts_postcommit.txt, manifest_postcommit.txt, manifest_postcommit_cmp.txt,
+  verify_postcommit.txt, verify_commit_out.txt}): py_compile COMPILE_OK
+  (144 файла); counts_postcommit.txt побайтово равен baseline_counts.txt
+  (8 метрик 1211/18/35/24/24/0/85/2); manifest_postcommit.txt против
+  manifest_final.txt → changed=0, added=0, removed=0; verify_s25.py --live →
+  CHECKS 33/33 RESULT OK.
+- Функциональные драйверы после коммита НЕ перезапускались сознательно: их
+  результат зависел только от содержимого .py, а оно доказано идентичным
+  измеренному (sha256 блобов == ожидаемым, equal_raw=True), т.е. перезапуск
+  10 процессов проверял бы то же самое состояние.
+- Не пушился: `git log --oneline origin/main..HEAD` содержит ровно ОДИН коммит —
+  финальный (см. `git log -1 --oneline`).
+- Правка целостности этого отчёта (после замечания владельца: разделы оказались
+  физически перемешаны — 3.3 стоял после «МЕТРИКИ», 3.7 — в хвосте §5, 2.4 —
+  в самом конце файла, а части абзацев оказались внутри чужих разделов)
+  выполнена как документальная: отчёт перезаписан в правильном порядке, никакие
+  .py не менялись, поэтому пост-коммитные цифры выше (sha256, манифест, 8
+  метрик, verify 33/33) остаются действительными для финального коммита.
+  Целостность доказана машинно (артефакты в run-001\):
+    * check_report_s25.py — порядок всех 25 заголовков совпадает с ожидаемым
+      ровно 1:1, ни один раздел не потерян/не лишний, у всех 7 группных
+      заголовков закрывающий разделитель на месте, файл заканчивается блоком
+      «МЕТРИКИ ПОДТВЕРЖДЕНИЯ»;
+    * token_diff.txt — множество идентификаторов/чисел/хешей/путей новой версии
+      содержит ВСЕ токены прежней: потеряно 0 (11 «лишних» — это добавленная
+      здесь приписка о происхождении правки);
+    * move_tails_s25.py вернул 8 «хвостов» разделов на место (0 потерянных
+      строк), normalize_boundaries_s25.py расставил/убрал только пустые строки
+      на границах (0 изменённых содержательных строк) — и то, и другое с
+      доказательством мультимножества строк;
+    * эталон прежней (испорченной) версии сохранён:
+      run-001\report_scrambled_ref.txt.
+
+════════════════════════════════════════════════════════════════════════════════
+МЕТРИКИ ПОДТВЕРЖДЕНИЯ (сводка чисел этого отчёта)
+════════════════════════════════════════════════════════════════════════════════
+монолит            68 274 → 68 224 строки (−50; байт 3 542 691 → 3 540 879;
+                   difflib: 2 региона −52/+2, sum(delta) == net)
+сервис               451 → 565 строк (+114; байт 25 429 → 32 495; методов 24 → 26)
+делегатов S2.5       2/2 signature_identical + forwards; документированная
+                     правка 2/2 (diff −4/+4 и −3/+4); ВЕРБАТИМ тел — 0/2 по форме,
+                     но правка ровно та, что заявлена (проверено построчно)
+NOT-MOVE             7/7 byte-identical + __init__/_reinitialize/update_recent_menu/
+                     restore_last_project_if_enabled byte-identical;
+                     присваивания пути 2/2
+callsites            внешних нет; AST: only-in-HEAD = 0, only-in-WORK = 0,
+                     count-mismatch = 0; инвентарь определения: 2/2 (делегат + сервис)
+8 метрик             1211 / 18 / 35 / 24 / 24 / 0 / 85 / 2 (файлы до == после,
+                     sha256 обоих файлов совпал)
+py_compile           COMPILE_OK (144 файла)
+манифест (git-блобы) 144 → 144; changed=2, added=0, removed=0
+verify               33/33 OK (живой) / 31/31 OK (сухой прогон)
+path-attrs           6/6 PASS (единственное отличие в инвентаре: 3 → 1 чтение пути)
+живой прогон         PASS=16 / FAIL=0 (процесс 1, offscreen, копия user_data)
+перезапуск           PASS=6 / FAIL=0 (процесс 2, другой интерпретатор, путь
+                     запуска приложения: restore_last_project_if_enabled)
+меню                 PASS=3 / FAIL=0 (клик по реальным QAction, оба дерева)
+кросс-дерево         app-check: 272 общих ключа, UNEXPECTED = 0;
+                     restart: 45 общих, UNEXPECTED = 0; menu: 18 общих, diff = 0
+смоук                work save EXIT=0 (SAVE_OK 4042) / work load EXIT=0 /
+                     head-wt load EXIT=0 (LOAD_OK S25Smoke 4)
+учёт строк           difflib: монолит 2 региона sum = −50 == net; сервис 6 регионов
+                     sum = +114 == net (assert True в обоих случаях)
+коммит               финальный см. `git log -1 --oneline` (первый — ab8175c;
+                     далее amend'ы ТОЛЬКО документов/аудитов, ни одного .py;
+                     45 файлов; не пушился)

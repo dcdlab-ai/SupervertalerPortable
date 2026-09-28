@@ -1,0 +1,43 @@
+{
+ "M1_menu_item_opens_project": {
+  "ok": true,
+  "value": {
+   "menu_labels": [
+    "1. S25 Alpha",
+    "Clear Recent Projects"
+   ],
+   "triggered_label": "1. S25 Alpha",
+   "project_after_click": "S25 Alpha",
+   "segments_after_click": 3,
+   "project_file_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Alpha.svproj",
+   "entries_before": [
+    "S25 Alpha"
+   ],
+   "entries_after": [
+    "S25 Alpha"
+   ],
+   "count_unchanged_by_reopen": true
+  }
+ },
+ "M2_clear_menu_item_no": {
+  "ok": true,
+  "value": {
+   "clear_action_present": true,
+   "entries_unchanged_after_no": true,
+   "entries": [
+    "S25 Alpha"
+   ]
+  }
+ },
+ "M3_clear_menu_item_yes": {
+  "ok": true,
+  "value": {
+   "entries_after_yes": [],
+   "menu_after_yes": [
+    "No recent projects"
+   ],
+   "cleared": true,
+   "empty_labels_ok": true
+  }
+ }
+}

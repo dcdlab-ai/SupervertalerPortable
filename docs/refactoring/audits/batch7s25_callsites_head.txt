@@ -1,0 +1,17 @@
+Supervertaler.py:6430:         self.recent_projects_file = self.user_data_path / "workbench" / "settings" / "recent_projects.json"
+Supervertaler.py:6721:             self.recent_projects_file = self.user_data_path / "workbench" / "settings" / "recent_projects.json"
+Supervertaler.py:32219:         recent_projects = self.load_recent_projects()
+Supervertaler.py:32271:         recent_projects = self.load_recent_projects()
+Supervertaler.py:32304:         self.save_recent_projects(recent_projects)
+Supervertaler.py:32317:             recent_projects = self.load_recent_projects()
+Supervertaler.py:32320:                 self.save_recent_projects(filtered)
+Supervertaler.py:32326:     def load_recent_projects(self) -> List[Dict[str, str]]:
+Supervertaler.py:32328:         if not self.recent_projects_file.exists():
+Supervertaler.py:32334:                 with open(self.recent_projects_file, 'r', encoding='utf-8') as f:
+Supervertaler.py:32338:                 with open(self.recent_projects_file, 'r', encoding='latin-1') as f:
+Supervertaler.py:32390:     def save_recent_projects(self, recent_projects: List[Dict[str, str]]):
+Supervertaler.py:32396:             with open(self.recent_projects_file, 'w', encoding='utf-8') as f:
+Supervertaler.py:32414:         recent_projects = self.load_recent_projects()
+Supervertaler.py:32446:             self.save_recent_projects([])
+Supervertaler.py:45377:             recent_projects = self.load_recent_projects()
+modules/settings_service.py:17: (``spellcheck_manager``, ``theme_manager``, ``recent_projects_file`` и др.), —

@@ -1,0 +1,316 @@
+[USER MODE] Using 'user_data/' folder
+instantiating SupervertalerQt ...
+[Data Paths] Auto-recovered config pointer to: C:\Users\AIAssistant2\Supervertaler
+[Data Paths] User data: C:\Users\AIAssistant2\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✓ Voice-dictation termbase flags reset to opt-in (v1.10.29 migration)
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: C:\Users\AIAssistant2\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[LOG] [Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling (ctrl+shift+space)
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] [Global Hotkeys] Registering: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[GlobalHotkeyManager] Registered ctrl+alt+l (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+c (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+shift+space (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+o (WinAPI)
+[GlobalHotkeyManager] Registered ctrl+alt+v (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+o, ctrl+alt+v
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+instantiated
+prod user_data=C:\Users\AIAssistant2\Supervertaler
+prod recent sha=None
+temp copy =D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\main_user_data
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C1_contract_and_wiring: {"service_module": "modules.settings_service", "settings_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings", "wiring": {"user_data_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data", "recent_projects_file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json", "service_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings"}, "expected_path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\workbench\\settings\\recent_projects.json", "path_matches_service_dir": true, "methods_callable": {"load_recent_projects": false, "save_recent_projects": false}, "service_has_path_attrs": [], "home_layout_present_by_default": false, "update_recent_projects_display_without_layout": null}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C2_a_list_format_filtering: {"entries": [{"last_opened": "<ISO>", "name": "Alpha", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"}, {"last_opened": "<ISO>", "name": "Beta", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"}], "count": 2, "service_matches_delegate": false, "service_direct": "<ABSENT-before-S2.5>", "kept": ["Alpha.svproj", "Beta.SVPROJ"], "dropped": ["Missing.svproj", "Notes.docx"], "logs": [], "unsorted_name_defaulted": {"last_opened": "<ISO>", "name": "Beta", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"}}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C3_b_legacy_dict_format: {"entries": [{"last_opened": "<ISO>", "name": "Alpha", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"}, {"name": "KeptAsIs", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Notes.docx"}, {"last_opened": "<ISO>", "name": "Missing", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Missing.svproj"}], "count": 3, "service_matches_delegate": false, "service_direct": "<ABSENT-before-S2.5>", "no_existence_filter_in_legacy_branch": "{True}", "logs": []}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+[LOG] ⚠ UTF-8 decoding failed for recent projects, trying latin-1...
+PASS C4_c_latin1_fallback: {"entries": [{"last_opened": "<ISO>", "name": "Café naïve", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"}], "name_decoded": "Café naïve", "latin1_roundtrip_ok": true, "warning_logged": ["⚠ UTF-8 decoding failed for recent projects, trying latin-1..."], "all_logs": ["⚠ UTF-8 decoding failed for recent projects, trying latin-1..."], "file_bytes_are_latin1": true}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C5_d_missing_file: {"entries": [], "count": 0, "service_matches_delegate": false, "logs": [], "file_still_absent": true}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+[LOG] Error loading recent projects: Expecting value: line 1 column 12 (char 11)
+PASS C6_e_broken_json: {"entries": [], "count": 0, "service_matches_delegate": false, "error_logged": ["Error loading recent projects: Expecting value: line 1 column 12 (char 11)"], "logs": ["Error loading recent projects: Expecting value: line 1 column 12 (char 11)"]}
+PASS C7_f1_save_bytes_cyrillic_path: {"delegate_return": null, "file": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\данные_копия\\workbench\\settings\\recent_projects.json", "raw_sha256": "0afd403743c2e7731932fcb07183780b74cc1de94d7b04a704ed83aa15579a06", "canonical_text_equals_file": true, "indent_two_and_non_ascii_preserved": true, "eol": "CRLF", "reload_entries": [{"last_opened": "<ISO>", "name": "Альфа — тест", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"}]}
+PASS C8_f2_user_data_dir_created: {"user_data_existed_before": false, "user_data_created_by_save": true, "file_written": true, "file_text": "[]", "delegate_return": null}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+[LOG] Error saving recent projects: [Errno 2] No such file or directory: 'D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\nope\\recent_projects.json'
+PASS C9_f3_save_failure_logged: {"delegate_return": null, "no_exception_raised": true, "error_logged": ["Error saving recent projects: [Errno 2] No such file or directory: 'D:\\\\Temp\\\\SupervertalerPortable\\\\refactoring\\\\batch7_stage2_s25\\\\run-001\\\\main_user_data\\\\nope\\\\recent_projects.json'"], "file_written": false}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+PASS C10_zh_path_arguments_no_cache: {"read_after_repoint": [{"last_opened": "<ISO>", "name": "Beta", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Beta.SVPROJ"}], "recent_file_untouched": true, "other_file_changed": true, "other_file_content": [{"last_opened": "<ISO>", "name": "to-other", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\Alpha.svproj"}], "service_wrote_third": "<ABSENT-before-S2.5>", "third_path_argument_honoured": false, "other_file_untouched_by_service": true, "service_read_third": "<ABSENT-before-S2.5>", "counts_first_then_second_call": [1, 2], "no_cache_confirmed": true}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+[LOG] 💾 DEBUG: Saving 3 segments
+[LOG] 💾 Seg 1: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 2: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 3: target='EMPTY...', status=not_started
+[LOG] ✗ Error getting active termbase IDs: 'NoneType' object has no attribute 'execute'
+[LOG] ✓ Saved project: S25 Alpha.svproj
+[LOG] 💾 Versioned backup saved: S25 Alpha_20260928-163909.svproj (every 1 saves)
+[LOG] ✓ Alternating row colors applied
+[LOG] ℹ️ Okapi sidecar not installed yet – will offer to download on first DOCX import
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[Superlookup] QWebEngineView not available - external browser only
+[LOG] ✓ Loaded 6 prompts from unified library
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2224611517584): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 2 (obj 2224611518544): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 3 (obj 2224611518864): target='EMPTY...', len=0, status=not_started
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 3 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✗ Error fetching TMs: 'NoneType' object has no attribute 'execute'
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG] 📋 No active termbases saved for this project
+[LOG] 📋 Refreshing termbase list (project_id: 3607626991)
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Refreshed termbase UI with restored activations
+[LOG] ✓ Spellcheck initialized for target language: nl (disabled)
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG] ✓ Set Superlookup languages: en → nl
+[LOG] ✓ Loaded project: S25 Alpha (3 segments)
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 3 segments...
+[LOG] ✅ Termbase batch worker complete: 3 segments in 0.00s (306900 seg/sec, 0 with matches)
+[LOG] 👁️  Termbase DB auto-refresh: watching supervertaler.db (2s debounce)
+PASS C11_live_open_shows_in_menu_and_home: {"project_file_saved": true, "loaded_project": ["S25 Alpha", 3], "recent_entries": [{"last_opened": "<ISO>", "name": "S25 Alpha", "path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Alpha.svproj"}], "entry_count": 1, "path_is_abs": true, "name_is_project_name": ["S25 Alpha"], "menu_labels": ["1. S25 Alpha", "Clear Recent Projects"], "home_labels": ["BTN:📄 S25 Alpha"], "home_layout_injected": true, "menu_and_file_agree": true, "home_and_file_agree": true}
+[LOG] 💾 DEBUG: Saving 3 segments
+[LOG] 💾 Seg 1: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 2: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 3: target='EMPTY...', status=not_started
+[LOG] ✗ Error getting active termbase IDs: 'NoneType' object has no attribute 'execute'
+[LOG] ✓ Saved project: S25 Beta.svproj
+[LOG] 💾 Versioned backup saved: S25 Beta_20260928-163910.svproj (every 1 saves)
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2224645885776): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 2 (obj 2224645886096): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 3 (obj 2224645886416): target='EMPTY...', len=0, status=not_started
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 3 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✗ Error fetching TMs: 'NoneType' object has no attribute 'execute'
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG] 📋 No active termbases saved for this project
+[LOG] 📋 Refreshing termbase list (project_id: 3521196417)
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Refreshed termbase UI with restored activations
+[LOG] ✓ Spellcheck initialized for target language: nl (disabled)
+[LOG] ✓ Set Superlookup languages: en → nl
+[LOG] ✓ Loaded project: S25 Beta (3 segments)
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 3 segments...
+[LOG] ✅ Termbase batch worker complete: 0 segments in 0.00s (0 seg/sec, 0 with matches)
+[LOG] 👁️  Termbase DB auto-refresh: watching supervertaler.db (2s debounce)
+PASS C12_live_remove_entry: {"order_newest_first": ["S25 Beta", "S25 Alpha"], "newest_is_beta": true, "after_remove": ["S25 Beta"], "remove_worked": true, "menu_after_remove": ["1. S25 Beta", "Clear Recent Projects"], "home_after_remove": ["BTN:📄 S25 Alpha", "BTN:📄 S25 Beta", "BTN:📄 S25 Alpha", "BTN:📄 S25 Beta"]}
+[LOG] Recent projects cleared
+PASS C13_live_clear_recent_projects: {"after_yes_entries": [], "after_yes_menu": ["No recent projects"], "after_yes_home": ["BTN:📄 S25 Alpha", "BTN:📄 S25 Beta", "BTN:📄 S25 Alpha", "BTN:📄 S25 Beta", "LBL:No recent projects"], "empty_state_ok": true, "after_no_entries_unchanged": true}
+PASS C14_live_max_recent_trim: {"max_recent_projects": 10, "entry_count_after_adds": 10, "trimmed_to_max": true, "newest_first_path": "proj11.svproj", "menu_entries": 10, "menu_trimmed_too": true}
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] ✅ Re-initialized all managers with new data path
+[LOG] 💾 DEBUG: Saving 3 segments
+[LOG] 💾 Seg 1: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 2: target='EMPTY...', status=not_started
+[LOG] 💾 Seg 3: target='EMPTY...', status=not_started
+[LOG] ✗ Error getting active termbase IDs: 'NoneType' object has no attribute 'execute'
+[LOG] ✓ Saved project: S25 Beta.svproj
+[LOG] 💾 Versioned backup saved: S25 Beta_20260928-163913.svproj (every 1 saves)
+[LOG] 🔄 Restoring last project: S25 Beta.svproj
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2224611518544): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 2 (obj 2224611517584): target='EMPTY...', len=0, status=not_started
+[LOG] 🔄   Seg 3 (obj 2224611518864): target='EMPTY...', len=0, status=not_started
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 3 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✗ Error fetching TMs: 'NoneType' object has no attribute 'execute'
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG] 📋 No active termbases saved for this project
+[LOG] 📋 Refreshing termbase list (project_id: 3333514007)
+[LOG] ✗ Error fetching termbases: 'NoneType' object has no attribute 'execute'
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Refreshed termbase UI with restored activations
+[LOG] ✓ Spellcheck initialized for target language: nl (disabled)
+[LOG] ✓ Set Superlookup languages: en → nl
+[LOG] ✓ Loaded project: S25 Beta (3 segments)
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 3 segments...
+[LOG] ✅ Termbase batch worker complete: 0 segments in 0.00s (0 seg/sec, 0 with matches)
+[LOG] 👁️  Termbase DB auto-refresh: watching supervertaler.db (2s debounce)
+PASS C15_restore_last_project: {"flag_off_restores_nothing": true, "flag_on_project": "S25 Beta", "flag_on_segments": 3, "flag_on_log": ["🔄 Restoring last project: S25 Beta.svproj"], "flag_in_settings_json": true, "recent_entry_names": ["S25 Beta"]}
+PASS C16_production_untouched: {"prod_user_data": "C:\\Users\\AIAssistant2\\Supervertaler", "temp_copy": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data", "temp_is_different_dir": true, "prod_recent_file": "C:\\Users\\AIAssistant2\\Supervertaler\\workbench\\settings\\recent_projects.json", "prod_recent_sha_before": null, "prod_recent_sha_after": null, "prod_recent_unchanged": true, "config_pointer": "C:\\Users\\AIAssistant2\\AppData\\Roaming\\Supervertaler\\config.json", "pointer_unchanged": true, "window_points_at_temp": true}
+SEED {"restart_dir": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\restart_user_data", "seeded_recent": [{"path": "D:\\Temp\\SupervertalerPortable\\refactoring\\batch7_stage2_s25\\run-001\\main_user_data\\home\\S25 Beta.svproj", "name": "S25 Beta", "last_opened": "2026-09-28T16:39:13.281363"}], "seeded_restore_flag": true, "project_files_present": ["Alpha.svproj", "Beta.SVPROJ", "S25 Alpha.svproj", "S25 Beta.svproj"]}
+
+SUMMARY: PASS=16 FAIL=0
+ALL_CHECKS_PASS
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\app_check_headwt.json
+[Hotkeys] pynput hotkey manager stopped on exit

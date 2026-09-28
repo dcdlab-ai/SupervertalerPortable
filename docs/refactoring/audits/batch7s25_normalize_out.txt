@@ -1,0 +1,9 @@
+R3 blanks removed (sentence split): 6
+R1 blanks added before sub headers: 7
+R2 blanks added before group separators: 7
+double blanks collapsed: 0
+
+lines 615 -> 623
+content lines lost: 0 added: 0
+content preserved (blank-line-only edit): True
+-> D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s25\run-001\report_normalized.txt
