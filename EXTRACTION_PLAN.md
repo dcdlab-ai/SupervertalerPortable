@@ -416,33 +416,36 @@ NOT-MOVE 7/7 byte-identical (`add_to_recent_projects`, `_remove_from_recent_proj
 Делегатов в монолите — 25 (по одному на метод, имена и сигнатуры исходные),
 `modules/settings_service.py` = 565 строк / 26 методов.
 
-**ЧТО СОЗНАТЕЛЬНО ОСТАЛОСЬ В МОНОЛИТЕ И ПОЧЕМУ:**
-  1. V3-исключения (решение владельца Stage 1): `save_clipboard_privacy_settings`
-     (живому refresh нужны Qt-объекты) и `load_general_settings` (97 строк: 2
-     строки IO + 35 присваиваний атрибутов окна, fan-in 61 call-site) — перенос
-     сделал бы сервис знающим про окно; оба остаются, их внутренние вызовы идут
-     через делегаты S2.1/S2.2.
-  2. Голосовые методы (`load/save_dictation_settings`,
-     `load/save_voice_vocabulary_settings`, `load_language_settings`) — исключены
-     координатором из S2.4/S2.5: Voice-виджет удаляется отдельным батчем
-     (Batch #8), перенос IO голосового слоя в сервис настроек перед удалением
-     смысла не имеет (реестр: п. 16/44 — MOOT).
-  3. Три миграции: `_migrate_settings_to_unified` (91), `_migrate_to_workbench_layout`
-     (66), `_migrate_voice_dictation_default_off` (32) — одноразовые, вызываются
-     только из `_reinitialize_with_new_data_path`, читают структуру каталогов и
-     (первая) repo-root; промпт S2.5 прямо отнёс их к СТРОГО NOT-MOVE. Остались
-     byte-identical, документация сервиса это фиксирует.
-  4. Тир C из домена недавних: `add_to_recent_projects`,
-     `_remove_from_recent_projects`, `update_recent_projects_display`,
-     `clear_recent_projects` — это UI/доменные операции над списком (QMenu,
-     QMessageBox, `self.current_project`, `MAX_RECENT_PROJECTS`), а не IO; они
-     остаются вызывающими двух делегатов S2.5. Туда же тир C
-     `get_autocorrect_settings` (динамический вход из `modules/autocorrect.py`) и
-     `load_font_sizes_from_preferences` (ссылается на классы монолита).
+**ЧТО СОЗНАТЕЛЬНО ОСТАЛОСЬ В МОНОЛИТЕ И ПОЧЕМУ (учёт координатора, 30.09.2026):**
+  Все перечисленные группы привязаны к функциям, которые уходят в Batch #8
+  (Voice-виджет удаляется целиком, панель home-экрана недавних в сборке
+  отсутствует), поэтому их IO-слой в сервис настроек не переносится; полный
+  список методов ведёт координатор, здесь — то, что проверено байт-в-байт
+  (отчёт S2.5 §3.1 п.5 и §2.4 п.2).
+  1. `load_general_settings` (97 строк: 2 строки чтения + 35 присваиваний
+     атрибутов окна, fan-in 61 call-site) — перенос дал бы «сервис, знающий про
+     окно»; остаётся в монолите, его чтение идёт через делегат S2.2.
+  2. 3 V3-исключения: `save_clipboard_privacy_settings`, `save_dictation_settings`,
+     `load_language_settings` — на живом пути нужны Qt-объекты/диалоги и
+     состояние окна (решение владельца Stage 1, п. V3).
+  3. Тир C — 5 методов: UI/доменные операции, а не IO-аксессоры
+     (`add_to_recent_projects`, `_remove_from_recent_projects`,
+     `update_recent_projects_display`, `clear_recent_projects` — QMenu,
+     QMessageBox, `self.current_project`, `MAX_RECENT_PROJECTS`;
+     `load_font_sizes_from_preferences` — ссылается на классы монолита).
+     Они остаются вызывающими двух делегатов S2.5.
+  4. Голосовые/диктовочные методы: `load_dictation_settings`,
+     `load/save_voice_vocabulary_settings` (исключены координатором из S2.4/S2.5;
+     реестр п. 16/44 — MOOT, закрывается удалением Voice-виджета в Batch #8).
+  5. 3 миграции: `_migrate_settings_to_unified` (91),
+     `_migrate_to_workbench_layout` (66), `_migrate_voice_dictation_default_off`
+     (32) — одноразовые, вызываются только из `_reinitialize_with_new_data_path`,
+     читают структуру каталогов и (первая) repo-root; промпт S2.5 прямо отнёс их
+     к СТРОГО NOT-MOVE. Остались byte-identical.
 
 **ПОПРАВКА К ПРОГНОЗУ S2.4:** предыдущий блок предсказывал, что S2.5 перенесёт
 10 методов / ~419 строк и «после S2.5 будет закрыто 33 из 33 методов Stage 2».
-Фактически координатор сузил под-батч до 2 методов / 74 строк (см. пункты 2 и 3
+Фактически координатор сузил под-батч до 2 методов / 74 строк (см. пункты 4 и 5
 выше), поэтому Step 7 закрыт на **25 методах**, а голосовая часть и миграции
 остаются в монолите осознанно. Это не «невыполненный план», а решение scope,
 зафиксированное в отчёте S2.5 (§5) и в `PROJECT_STATUS.md`.
