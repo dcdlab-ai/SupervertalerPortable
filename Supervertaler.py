@@ -8233,7 +8233,8 @@ class SupervertalerQt(QMainWindow):
         # Initialize Ollama keep-warm timer
         self.ollama_keepwarm_timer = None
         self._setup_ollama_keepwarm()
-    
+        self._apply_ollama_timeout_setting()
+
     def _resolve_provider_model(self, settings, provider, default='gpt-5.5'):
         """Определить имя модели для провайдера.
         
@@ -8308,7 +8309,18 @@ class SupervertalerQt(QMainWindow):
         
         if keepwarm_enabled:
             self._start_ollama_keepwarm_timer()
-    
+
+    def _apply_ollama_timeout_setting(self, llm_settings=None):
+        """Push the user's Ollama request timeout (0 = automatic) to llm_clients."""
+        try:
+            from modules.llm_clients import set_ollama_timeout
+            if llm_settings is None:
+                llm_settings = self.load_llm_settings()
+            minutes = int(llm_settings.get('ollama_timeout_minutes', 0) or 0)
+            set_ollama_timeout(minutes * 60)
+        except Exception as e:
+            self.log(f"⚠ Could not apply Ollama timeout setting: {e}")
+
     def _start_ollama_keepwarm_timer(self):
         """Запустить таймер keep-warm для Ollama (пинг каждые 4 минуты)."""
         from PyQt6.QtCore import QTimer
@@ -20942,25 +20954,33 @@ class SupervertalerQt(QMainWindow):
         model_layout.addWidget(claude_model_label)
         
         claude_combo = QComboBox()
+        # The newest Sonnet, Opus and Fable (Michael, 2026-09-28), as in the Trados
+        # and memoQ plugins.
         claude_combo.addItems([
-            "claude-sonnet-5 (Recommended)",
-            "claude-haiku-4-5-20251001 (Fast & Affordable)",
-            "claude-opus-5 (Premium - Highest Quality)",
-            "claude-fable-5 (Maximum - Deepest Reasoning, 2x Opus Price)"
+            "claude-sonnet-5-5 (Recommended)",
+            "claude-opus-5-5 (Premium - Highest Quality)",
+            "claude-fable-5-1 (Maximum - Deepest Reasoning, 2.5x Opus Price)"
         ])
         claude_combo.setToolTip(
-            "Claude Sonnet 5: Recommended - near-Opus quality at Sonnet cost.\n"
-            "Claude Haiku 4.5: Fast and affordable for batch jobs.\n"
-            "Claude Opus 5: Anthropic's flagship Opus - highest quality for hard\n"
-            "  legal/technical work ($5/$25, 1M context).\n"
-            "Claude Fable 5: Anthropic's most capable model overall - always-on reasoning,\n"
-            "  double Opus pricing; rarely worth it now that Opus 5 exists."
+            "Claude Sonnet 5.5: Recommended - near-Opus quality at Sonnet cost ($2/$10, 1M context).\n"
+            "Claude Opus 5.5: Anthropic's newest Opus - highest quality for hard\n"
+            "  legal/technical work ($4/$20, 1M context).\n"
+            "Claude Fable 5.1: Anthropic's most capable model overall - always-on reasoning,\n"
+            "  2.5x Opus pricing; for the hardest work when cost is secondary."
         )
-        current_claude_model = settings.get('claude_model', 'claude-sonnet-5')
+        current_claude_model = settings.get('claude_model', 'claude-sonnet-5-5')
+        # Exact match on the model ID. A substring test found "claude-sonnet-5"
+        # inside "claude-sonnet-5-5"; and a saved model that is no longer listed
+        # (Sonnet 5, Haiku 4.5, Opus 5...) fell back to the first entry, which
+        # saving Settings then wrote over the user's choice. It is shown instead.
         for i in range(claude_combo.count()):
-            if current_claude_model in claude_combo.itemText(i):
+            if claude_combo.itemText(i).split()[0] == current_claude_model:
                 claude_combo.setCurrentIndex(i)
                 break
+        else:
+            if current_claude_model:
+                claude_combo.addItem(f"{current_claude_model} (your current model)")
+                claude_combo.setCurrentIndex(claude_combo.count() - 1)
         claude_combo.setEnabled(claude_radio.isChecked())
         model_layout.addWidget(claude_combo)
         
@@ -21277,6 +21297,7 @@ class SupervertalerQt(QMainWindow):
             model_id = combo_text.split()[0] if combo_text else ""
             friendly = {
                 "gpt-5.5": "GPT-5.5", "gpt-5.4-mini": "GPT-5.4 Mini",
+                "claude-sonnet-5-5": "Claude Sonnet 5.5", "claude-opus-5-5": "Claude Opus 5.5", "claude-fable-5-1": "Claude Fable 5.1",
                 "claude-sonnet-5": "Claude Sonnet 5", "claude-opus-5": "Claude Opus 5", "claude-fable-5": "Claude Fable 5",
                 "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
                 "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite", "gemini-3.5-flash": "Gemini 3.5 Flash",
@@ -21543,7 +21564,26 @@ class SupervertalerQt(QMainWindow):
             "Drawback: Model keeps using RAM even when not translating."
         )
         ollama_layout.addWidget(ollama_keepwarm_cb)
-        
+
+        # Request timeout (issue #180): slow CPU-only machines can need far
+        # longer than the automatic 3-10 minutes for a single batch request.
+        ollama_timeout_row = QHBoxLayout()
+        ollama_timeout_row.addWidget(QLabel(self.tr("Request timeout:")))
+        ollama_timeout_spin = QSpinBox()
+        ollama_timeout_spin.setRange(0, 1440)
+        ollama_timeout_spin.setSuffix(self.tr(" min"))
+        ollama_timeout_spin.setSpecialValueText(self.tr("Automatic"))
+        ollama_timeout_spin.setValue(int(settings.get('ollama_timeout_minutes', 0) or 0))
+        ollama_timeout_spin.setToolTip(
+            "How long to wait for Ollama to answer a single request.\n\n"
+            "Automatic: 3–10 minutes, depending on model size and prompt length.\n"
+            "Raise it if translations time out on a slow computer (for example\n"
+            "one without a dedicated GPU). Up to 1440 minutes (24 hours)."
+        )
+        ollama_timeout_row.addWidget(ollama_timeout_spin)
+        ollama_timeout_row.addStretch()
+        ollama_layout.addLayout(ollama_timeout_row)
+
         ollama_info = QLabel(
             "💡 <b>Tip:</b> Ollama normally unloads models after 5 minutes of inactivity.\n"
             "Enable 'Keep warm' for faster translations if you translate frequently."
@@ -21867,7 +21907,8 @@ class SupervertalerQt(QMainWindow):
             mistral_enable_cb=mistral_enable_cb,
             deepseek_radio=deepseek_radio, deepseek_combo=deepseek_combo,
             openrouter_radio=openrouter_radio, openrouter_combo=openrouter_combo,
-            openrouter_enable_cb=openrouter_enable_cb
+            openrouter_enable_cb=openrouter_enable_cb,
+            ollama_timeout_spin=ollama_timeout_spin
         ))
         layout.addWidget(save_btn)
         
@@ -22237,10 +22278,9 @@ class SupervertalerQt(QMainWindow):
 
         llm_providers = [
             ("claude", "Claude", "claude", [
-                ("claude-sonnet-5", "Claude Sonnet 5 (Recommended)"),
-                ("claude-haiku-4-5-20251001", "Claude Haiku 4.5 (Fast)"),
-                ("claude-opus-5", "Claude Opus 5 (Premium)"),
-                ("claude-fable-5", "Claude Fable 5 (Maximum)"),
+                ("claude-sonnet-5-5", "Claude Sonnet 5.5 (Recommended)"),
+                ("claude-opus-5-5", "Claude Opus 5.5 (Premium)"),
+                ("claude-fable-5-1", "Claude Fable 5.1 (Maximum)"),
             ]),
             ("openai", "OpenAI", "openai", [
                 ("gpt-5.5", "GPT-5.5 (Recommended)"),
@@ -22303,11 +22343,15 @@ class SupervertalerQt(QMainWindow):
                 model_combo.addItem(model_name, model_id)
 
             # Restore saved model selection
+            # A saved model that has left the list is shown rather than replaced:
+            # falling back to the first entry meant the next save overwrote it.
             saved_model = mt_quick_settings.get(f"mtql_{code}_model")
             if saved_model:
                 idx = model_combo.findData(saved_model)
-                if idx >= 0:
-                    model_combo.setCurrentIndex(idx)
+                if idx < 0:
+                    model_combo.addItem(f"{saved_model} (your current model)", saved_model)
+                    idx = model_combo.count() - 1
+                model_combo.setCurrentIndex(idx)
 
             model_combo.setEnabled(has_key)
             self._mtql_llm_combos[f"mtql_{code}_model"] = model_combo
@@ -26326,7 +26370,8 @@ class SupervertalerQt(QMainWindow):
                                    mistral_enable_cb=None,
                                    deepseek_radio=None, deepseek_combo=None,
                                    openrouter_radio=None, openrouter_combo=None,
-                                   openrouter_enable_cb=None):
+                                   openrouter_enable_cb=None,
+                                   ollama_timeout_spin=None):
         """Сохраняет все настройки ИИ из единой вкладки AI Settings."""
         # Определяем выбранный провайдер
         if openai_radio.isChecked():
@@ -26373,7 +26418,11 @@ class SupervertalerQt(QMainWindow):
         active_endpoint = custom_endpoint_input.text().strip() if custom_endpoint_input else ''
         active_model = custom_model_input.text().strip() if custom_model_input else ''
 
-        new_settings = {
+        # Start from what is already saved: llm_settings also holds keys this
+        # tab does not own (the QuickTrans custom MT profiles), and replacing
+        # the whole dict used to delete them every time AI settings were saved.
+        new_settings = dict(existing_settings)
+        new_settings.update({
             'provider': provider,
             'openai_model': openai_combo.currentText().split()[0],
             'claude_model': claude_combo.currentText().split()[0],
@@ -26386,8 +26435,11 @@ class SupervertalerQt(QMainWindow):
             'custom_openai_endpoint': active_endpoint,
             'custom_openai_profiles': profiles,
             'custom_openai_active_profile': active_profile_name
-        }
+        })
+        if ollama_timeout_spin is not None:
+            new_settings['ollama_timeout_minutes'] = ollama_timeout_spin.value()
         self.save_llm_settings(new_settings)
+        self._apply_ollama_timeout_setting(new_settings)
 
         # Update current provider and model attributes for AI Assistant
         self.current_provider = new_settings['provider']
@@ -26586,8 +26638,14 @@ class SupervertalerQt(QMainWindow):
 
         # Load existing settings to preserve AI-related ones
         existing_settings = self.load_general_settings()
-        
-        general_settings = {
+
+        # Start from what is saved: the "general" section also holds settings
+        # other pages own (AI batch/context options, QuickTrans, FuzzyFixer
+        # range, usage log and budget, SuperLookup landing tab, import
+        # options, ...). Replacing the section with only the keys below
+        # deleted all of those on every Save General Settings.
+        general_settings = dict(existing_settings)
+        general_settings.update({
             'restore_last_project': restore_cb.isChecked(),
             'auto_open_log': auto_open_log_cb.isChecked() if auto_open_log_cb is not None else False,
             # Consolidated auto-fill setting (new canonical key).
@@ -26632,7 +26690,7 @@ class SupervertalerQt(QMainWindow):
             # AutoCorrect change the user made elsewhere.
             'autocorrect_enabled': existing_settings.get('autocorrect_enabled', True),
             'autocorrect_rule_overrides': existing_settings.get('autocorrect_rule_overrides', {}) or {},
-        }
+        })
 
         # Keep a fast-access instance value
         self.enable_sound_effects = general_settings.get('enable_sound_effects', False)
@@ -62215,7 +62273,7 @@ class SupervertalerQt(QMainWindow):
                     try:
                         from modules.llm_clients import LLMClient
                         
-                        claude_model = settings.get('claude_model', 'claude-sonnet-5')
+                        claude_model = settings.get('claude_model', 'claude-sonnet-5-5')
                         client = LLMClient(
                             api_key=api_keys['claude'],
                             provider='claude',
@@ -66496,9 +66554,11 @@ class SuperlookupTab(QWidget):
         
                 Возвращает кортеж: (exe_path, source), где source — 'saved',
                 'detected' или None."""
-        # First, check if user has a saved custom path
-        if self.main_window and hasattr(self.main_window, 'general_settings'):
-            saved_path = self.main_window.general_settings.get('autohotkey_path', '')
+        # First, check if user has a saved custom path. (Read through
+        # load_general_settings: the main window has no general_settings
+        # attribute, so the old attribute lookup never found a saved path.)
+        if self.main_window and hasattr(self.main_window, 'load_general_settings'):
+            saved_path = (self.main_window.load_general_settings() or {}).get('autohotkey_path', '')
             if saved_path and os.path.exists(saved_path):
                 print(f"[Superlookup] Using saved AutoHotkey path: {saved_path}")
                 return saved_path, 'saved'
@@ -66599,9 +66659,10 @@ class SuperlookupTab(QWidget):
         def on_close():
             # Save preference if checkbox is checked
             if dont_show_cb.isChecked():
-                if self.main_window and hasattr(self.main_window, 'general_settings'):
-                    self.main_window.general_settings['hide_autohotkey_dialog'] = True
-                    self.main_window.save_general_settings()
+                if self.main_window and hasattr(self.main_window, 'load_general_settings'):
+                    settings = self.main_window.load_general_settings() or {}
+                    settings['hide_autohotkey_dialog'] = True
+                    self.main_window.save_general_settings(settings)
             dialog.accept()
         close_btn.clicked.connect(on_close)
         layout.addWidget(close_btn)
@@ -66642,9 +66703,10 @@ class SuperlookupTab(QWidget):
                     return
             
             # Save the path
-            if self.main_window and hasattr(self.main_window, 'general_settings'):
-                self.main_window.general_settings['autohotkey_path'] = file_path
-                self.main_window.save_general_settings()
+            if self.main_window and hasattr(self.main_window, 'load_general_settings'):
+                settings = self.main_window.load_general_settings() or {}
+                settings['autohotkey_path'] = file_path
+                self.main_window.save_general_settings(settings)
                 print(f"[Superlookup] Saved AutoHotkey path: {file_path}")
             
             self._ahk_setup_status.setText(f"✓ Saved: {file_path}\n\nRestart Supervertaler to use this path.")
@@ -67292,8 +67354,8 @@ class SuperlookupTab(QWidget):
                 print("[Hotkeys] Global hotkeys (Ctrl+Alt+L, Shift+Shift) will not be available.")
                 self.hotkey_registered = False
                 # Show setup dialog (deferred to avoid blocking startup) - unless user opted out
-                if self.main_window and hasattr(self.main_window, 'general_settings'):
-                    if not self.main_window.general_settings.get('hide_autohotkey_dialog', False):
+                if self.main_window and hasattr(self.main_window, 'load_general_settings'):
+                    if not (self.main_window.load_general_settings() or {}).get('hide_autohotkey_dialog', False):
                         QTimer.singleShot(2000, self._show_autohotkey_setup_dialog)
                 else:
                     QTimer.singleShot(2000, self._show_autohotkey_setup_dialog)

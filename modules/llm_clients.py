@@ -7,7 +7,7 @@ Can be used standalone or imported by other applications.
 
 Supported Providers:
 - OpenAI (GPT-5.5, GPT-5.4 Mini)
-- Anthropic (Claude Sonnet 5, Haiku 4.5, Opus 5, Fable 5)
+- Anthropic (Claude Sonnet 5.5, Opus 5.5, Fable 5.1)
 - Google (Gemini 3.1 Flash-Lite, 2.5 Pro, 3.1 Pro Preview, Gemma 4 26B MoE)
 - Mistral AI (Mistral Large, Mistral Small)
 - DeepSeek (V4 Pro, V4 Flash)
@@ -129,6 +129,48 @@ def load_api_keys() -> Dict[str, str]:
     return api_keys
 
 
+# User-chosen Ollama request timeout in seconds (issue #180), or None for the
+# automatic timeout scaled by model size and prompt length. Set from
+# Settings → AI Settings via set_ollama_timeout(); held at module level so it
+# reaches every LLMClient without threading a parameter through each caller.
+_ollama_timeout_override: Optional[int] = None
+
+
+def set_ollama_timeout(seconds: Optional[int]) -> None:
+    """Set the Ollama request timeout in seconds; 0 or None restores automatic."""
+    global _ollama_timeout_override
+    _ollama_timeout_override = int(seconds) if seconds and int(seconds) > 0 else None
+
+
+def _resolve_ollama_timeout(model: str, prompt_len: int) -> Tuple[int, float]:
+    """Return (timeout_seconds, param_billions) for an Ollama request.
+
+    A user-set timeout wins outright, so it can be shorter as well as longer
+    than the automatic one.
+    """
+    import re
+    size_match = re.search(r'(\d+\.?\d*)b', (model or '').lower())
+    param_billions = float(size_match.group(1)) if size_match else 0
+
+    if _ollama_timeout_override:
+        return _ollama_timeout_override, param_billions
+
+    if param_billions >= 13:
+        base_timeout = 600  # 10 minutes for large models (13B+)
+    elif param_billions >= 7:
+        base_timeout = 300  # 5 minutes for medium models (7B-12B)
+    elif param_billions > 0:
+        base_timeout = 180  # 3 minutes for small models (<7B)
+    else:
+        base_timeout = 300  # 5 minutes default if size unknown
+
+    # Boost timeout for large prompts (e.g. AI Assistant prompt generation)
+    # Large prompts need more processing time for both input and output
+    if prompt_len > 5000:
+        return max(base_timeout, 600), param_billions  # At least 10 minutes for large prompts
+    return base_timeout, param_billions
+
+
 def _sanitize_ollama_endpoint(endpoint: str) -> str:
     """Strip trailing slashes and common path suffixes that cause double-path issues."""
     endpoint = endpoint.rstrip('/')
@@ -154,7 +196,7 @@ class LLMClient:
     # Default models for each provider
     DEFAULT_MODELS = {
         "openai": "gpt-5.5",  # GPT-5.5 (flagship)
-        "claude": "claude-sonnet-5",  # Claude Sonnet 5 (4.6 kept selectable)
+        "claude": "claude-sonnet-5-5",  # Claude Sonnet 5.5 (older IDs still selectable)
         "gemini": "gemini-3.1-flash-lite",  # Gemini 3.1 Flash-Lite
         "mistral": "mistral-large-latest",  # Mistral Large (flagship)
         "deepseek": "deepseek-v4-pro",  # DeepSeek V4 Pro (flagship)
@@ -334,7 +376,11 @@ class LLMClient:
             "gpt-5.5",
             "gpt-5.4-mini"
         ],
+        # Superseded models stay here: a saved choice keeps its image support.
         "claude": [
+            "claude-sonnet-5-5",
+            "claude-opus-5-5",
+            "claude-fable-5-1",
             "claude-sonnet-5",
             "claude-haiku-4-5-20251001",
             "claude-opus-5",
@@ -348,39 +394,34 @@ class LLMClient:
         ]
     }
 
-    # Available Claude models with descriptions
+    # Available Claude models with descriptions - the chat's model menu. The newest
+    # Sonnet, Opus and Fable (Michael, 2026-09-28), as in the Trados and memoQ
+    # plugins; prices checked on Anthropic's pricing page the same day. A saved
+    # older model still runs and is still costed (pricing.json keeps it).
     CLAUDE_MODELS = {
-        "claude-fable-5": {
-            "name": "Claude Fable 5",
-            "description": "Anthropic's most capable model - deepest reasoning, always-on thinking, double Opus pricing",
-            "released": "2026-06-09",
+        "claude-sonnet-5-5": {
+            "name": "Claude Sonnet 5.5",
+            "description": "Newest Sonnet - near-Opus quality at Sonnet cost ($2/$10), 1M context",
+            "released": "2026-09-28",
+            "strengths": ["General translation", "Reasoning", "Tool use", "Knowledge work", "Cost-effective"],
+            "pricing": {"input": 2, "output": 10},  # USD per million tokens
+            "use_case": "Recommended for most translation tasks"
+        },
+        "claude-opus-5-5": {
+            "name": "Claude Opus 5.5",
+            "description": "Anthropic's newest Opus - highest quality at $4/$20, 1M context",
+            "released": "2026-09-22",
+            "strengths": ["Legal translation", "Technical documents", "Complex reasoning", "Highest accuracy", "1M context"],
+            "pricing": {"input": 4, "output": 20},  # USD per million tokens
+            "use_case": "Top choice for hard legal/technical translation and long-context jobs"
+        },
+        "claude-fable-5-1": {
+            "name": "Claude Fable 5.1",
+            "description": "Anthropic's most capable model - deepest reasoning, always-on thinking, 2.5x Opus pricing",
+            "released": "2026-09-01",
             "strengths": ["Hardest translation problems", "Whole-document review", "Deepest reasoning", "1M context"],
             "pricing": {"input": 10, "output": 50},  # USD per million tokens
             "use_case": "For the hardest jobs only - always-on thinking adds billed reasoning tokens per call, so overkill for routine segment translation"
-        },
-        "claude-opus-5": {
-            "name": "Claude Opus 5",
-            "description": "Anthropic's flagship Opus - near-Fable-5 intelligence at half the price ($5/$25), 1M context",
-            "released": "2026-07-24",
-            "strengths": ["Legal translation", "Technical documents", "Complex reasoning", "Highest accuracy", "1M context"],
-            "pricing": {"input": 5, "output": 25},  # USD per million tokens
-            "use_case": "Top choice for hard legal/technical translation and long-context jobs - near-Fable quality without Fable's price or always-on-thinking cost"
-        },
-        "claude-sonnet-5": {
-            "name": "Claude Sonnet 5",
-            "description": "Newest Sonnet - near-Opus quality at Sonnet cost",
-            "released": "2026-06-30",
-            "strengths": ["General translation", "Reasoning", "Tool use", "Knowledge work", "Cost-effective"],
-            "pricing": {"input": 3, "output": 15},  # USD per million tokens (intro $2/$10 until 2026-08-31)
-            "use_case": "Recommended for most translation tasks"
-        },
-        "claude-haiku-4-5-20251001": {
-            "name": "Claude Haiku 4.5",
-            "description": "Fast & affordable - 2x speed, 1/5 cost of Sonnet",
-            "released": "2025-10-01",
-            "strengths": ["High-volume translation", "Speed", "Budget-friendly", "Batch processing"],
-            "pricing": {"input": 1, "output": 5},
-            "use_case": "Best for large translation projects where speed and cost matter"
         }
     }
 
@@ -405,7 +446,7 @@ class LLMClient:
                 print(f"{info['name']}: {info['description']}")
 
             # Get specific model
-            info = LLMClient.get_claude_model_info("claude-sonnet-5")
+            info = LLMClient.get_claude_model_info("claude-sonnet-5-5")
             print(info['use_case'])
         """
         if model_id:
@@ -1576,28 +1617,9 @@ class LLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
-        # Determine timeout based on model size (extract parameter count with regex)
-        import re
-        model_lower = self.model.lower()
-        size_match = re.search(r'(\d+\.?\d*)b', model_lower)
-        param_billions = float(size_match.group(1)) if size_match else 0
-
-        if param_billions >= 13:
-            base_timeout = 600  # 10 minutes for large models (13B+)
-        elif param_billions >= 7:
-            base_timeout = 300  # 5 minutes for medium models (7B-12B)
-        elif param_billions > 0:
-            base_timeout = 180  # 3 minutes for small models (<7B)
-        else:
-            base_timeout = 300  # 5 minutes default if size unknown
-
-        # Boost timeout for large prompts (e.g. AI Assistant prompt generation)
-        # Large prompts need more processing time for both input and output
+        # Timeout scales with model size and prompt length unless the user set one
         prompt_len = len(prompt) + (len(system_prompt) if system_prompt else 0)
-        if prompt_len > 5000:
-            timeout_seconds = max(base_timeout, 600)  # At least 10 minutes for large prompts
-        else:
-            timeout_seconds = base_timeout
+        timeout_seconds, param_billions = _resolve_ollama_timeout(self.model, prompt_len)
 
         # Use streaming for large requests to avoid timeout issues
         # Streaming reads tokens as they arrive – only the connection + first token
@@ -1723,7 +1745,9 @@ class LLMClient:
                 "Solutions:\n"
                 "  • Close other applications to free RAM\n"
                 "  • Use a smaller model: 'translategemma:4b' or 'qwen3:4b'\n"
-                "  • Try again (subsequent runs are faster)"
+                "  • Try again (subsequent runs are faster)\n"
+                "  • Allow more time: Settings → AI Settings → Local LLM (Ollama)\n"
+                "    Advanced Settings → Request timeout"
             )
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Ollama API error: {str(e)}")

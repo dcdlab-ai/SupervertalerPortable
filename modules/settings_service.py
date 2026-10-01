@@ -154,8 +154,10 @@ class SettingsService:
     # наблюдаемое поведение то же — включая отсутствие кэша (файл открывается
     # заново на каждый вызов, см. докстринг модуля).
     # save_general_settings сохраняет ОБЯЗАТЕЛЬНЫЙ позиционный аргумент settings
-    # без default: вызов без аргумента обязан и дальше падать TypeError-ом
-    # (предсуществующие сайты SuperlookupTab 66780/66823 — не чинятся здесь).
+    # без default: вызов без аргумента обязан и дальше падать TypeError-ом.
+    # (Историческая оговорка про сайты SuperlookupTab 66780/66823 снята в
+    # U1.2 upstream-sync, коммит 626d4c63 апстрима: оба сайта и чтение
+    # main_window.general_settings переведены на load/save_general_settings.)
     # save_clipboard_privacy_settings в сервис НЕ переносится (решение V3: живому
     # refresh нужны Qt-объекты; в монолите остаётся целиком).
 
@@ -234,7 +236,7 @@ class SettingsService:
         defaults = {
             'provider': 'openai',
             'openai_model': 'gpt-5.5',
-            'claude_model': 'claude-sonnet-5',
+            'claude_model': 'claude-sonnet-5-5',
             'gemini_model': 'gemini-3.1-flash-lite',
             'ollama_model': 'translategemma:12b',
             'custom_openai_model': '',
