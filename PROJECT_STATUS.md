@@ -9,13 +9,14 @@
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **68 274**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **68 224**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
 По **Step 7** выполнен **Stage 1 (Batch #7, read-only инвентаризация, 24.09.2026)**,
-решения по V1–V4 приняты, и **Stage 2 идёт**: под-батч **S2.1 «ядро API»**
-(25.09.2026) перенёс 6 методов / 39 строк в новый `modules/settings_service.py`,
+решения по V1–V4 приняты, и **Stage 2 закрыт целиком** (S2.1–S2.5): под-батч
+**S2.1 «ядро API»** (25.09.2026) перенёс 6 методов / 39 строк в новый
+`modules/settings_service.py`,
 под-батч **S2.2 «general + clipboard reading»** (26.09.2026) добавил туда ещё
 3 метода / 56 строк (`load_clipboard_privacy_settings`,
 `_load_general_settings_from_file`, `save_general_settings`) и оставил в монолите
@@ -223,6 +224,10 @@ NOT-MOVE-остаток (не переносить без решения вла�
 44721–44742 (22), `get_autocorrect_settings` 44640–44651 (12, тир C),
 `load_font_sizes_from_preferences` 45256–45342 (87, тир C — ссылается на классы
 монолита). После S2.5 будет закрыто 33 из 33 методов Stage 2 (23 закрыто S2.1–S2.4).
+**ПРОГНОЗ НЕ ПОДТВЕРДИЛСЯ:** координатор сузил S2.5 до `load/save_recent_projects`,
+поэтому Step 7 закрыт на **25 методах**; голосовая часть и три миграции остались в
+монолите сознательно. Правка прогноза — `EXTRACTION_PLAN.md`, блок «ПОПРАВКА К
+ПРОГНОЗУ S2.4» и «ИТОГ Step 7 — ЗАКРЫТ ЦЕЛИКОМ».
 
 ## Что дальше: Step 7 Stage 2 — под-батч S2.3 закрыт (Batch #7 Stage 2, 27.09.2026)
 

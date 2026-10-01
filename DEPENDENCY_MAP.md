@@ -1,6 +1,7 @@
 # DEPENDENCY_MAP.md
 **Проект:** Supervertaler — карта зависимостей для декомпозиции
-**Дата:** 2026-09-12 • Метод: AST-парсинг всех 120 файлов (Supervertaler.py + modules/ + scripts/ + tools/), включая ленивые импорты внутри методов и ветки try/except/orelse
+**Дата:** 2026-09-12 (базовый обход) • обновлено 2026-09-28: добавлен `modules/settings_service.py` (Step 7 / Batch #7); §1–§5 дополнены, агрегаты §1 оставлены как снимок
+**Метод:** AST-парсинг всех 120 файлов (Supervertaler.py + modules/ + scripts/ + tools/), включая ленивые импорты внутри методов и ветки try/except/orelse
 
 ---
 
@@ -8,9 +9,10 @@
 
 | Направление | Факт |
 |---|---|
-| `Supervertaler.py` → `modules.*` | 243 import-выражения (многие ленивые, внутри методов), 163 уникальных имени, 128 классов/функций инстанцируются в 513 местах |
+| `Supervertaler.py` → `modules.*` | 243 import-выражения (многие ленивые, внутри методов), 163 уникальных имени, 128 классов/функций инстанцируются в 513 местах. **Агрегаты — снимок 2026-09-12, не пересчитывались**; AST 2026-09-28 даёт по методу «`from modules.*`-операторов» 249 (было 243 на снимке) — рост объясняется извлечениями Batch #3–#7 |
 | `modules.*` → `Supervertaler.py` | **0 прямых импортов** (правило «modules/ must not import from Supervertaler.py» зафиксировано в `modules/voice_command_dialog.py:3-5`) |
 | `modules.*` ↔ `modules.*` | ~60 внутренних связей; крупнейший потребитель — `unified_prompt_manager_qt` (11 внутренних зависимостей) |
+| `modules/settings_service.py` → что-либо в монолите или в `modules/` | **0 импортов** — только stdlib (`json`, `os`, `datetime`, `pathlib`, `typing` + ленивый `urllib.parse.quote`). Чистый модуль: ни `Supervertaler.py`, ни `modules.*`, ни duck-typed обращений к `main_window`/`parent_app` (проверено AST 2026-09-28) |
 | Циклы импортов | **Не обнаружены** (проверено AST-графом всех файлов) |
 | Duck-typed контракты MainWindow | **14 модулей** получают `parent_app`/`main_window`/`self` |
 | scripts/, tools/ → modules | **0** (полностью автономны) |
@@ -19,7 +21,7 @@
 
 # 2. MainWindow (SupervertalerQt) → modules.*
 
-Модули, используемые классом `SupervertalerQt` (суммарно 58): `autocorrect`, `bilingual_markdown_handler`, `cafetran_docx_handler`, `clipboard_manager_widget`, `database_manager`, `dejavurtf_handler`, `dictation_toast`, `docx_comments`, `docx_handler`, `figure_context_manager`, `i18n`, `image_extractor`, `keyboard_shortcuts_widget`, `lang_detect`, `language_codes`, `llm_clients`, `local_llm_setup`, `memoqrtf_handler`, `merge_prompt_dialog`, `mqxliff_handler`, `okapi_sidecar`, `pdf_rescue_Qt`, `phrase_docx_handler`, `platform_helpers`, `po_handler`, `quicktrans`, `sdlppx_handler`, `sdltm_handler`, `settings_sidebar`, `simple_segmenter`, `statistics_dialog_qt`, `statuses`, `styled_widgets`, `superbrowser`, `supervertaler_bridge_server`, `term_picker_dialog`, `termbase_entry_editor`, `termbase_import_export`, `termbase_manager`, `termlens_popup`, `termlens_widget`, `theme_manager`, `tm_editor_dialog`, `tm_manager_qt`, `tm_metadata_manager`, `tmx_editor_qt`, `tmx_generator`, `trados_docx_handler`, `translation_memory`, `translation_results_panel`, `ui_scale`, `unified_prompt_manager_qt`, `usage_report_dialog`, `usage_statistics`, `voice_hotkey_listener`, `voice_release_poller`, `voice_tab`, `voice_vocabulary`
+Модули, используемые классом `SupervertalerQt` (суммарно 59): `autocorrect`, `bilingual_markdown_handler`, `cafetran_docx_handler`, `clipboard_manager_widget`, `database_manager`, `dejavurtf_handler`, `dictation_toast`, `docx_comments`, `docx_handler`, `figure_context_manager`, `i18n`, `image_extractor`, `keyboard_shortcuts_widget`, `lang_detect`, `language_codes`, `llm_clients`, `local_llm_setup`, `memoqrtf_handler`, `merge_prompt_dialog`, `mqxliff_handler`, `okapi_sidecar`, `pdf_rescue_Qt`, `phrase_docx_handler`, `platform_helpers`, `po_handler`, `quicktrans`, `sdlppx_handler`, `sdltm_handler`, `settings_service`, `settings_sidebar`, `simple_segmenter`, `statistics_dialog_qt`, `statuses`, `styled_widgets`, `superbrowser`, `supervertaler_bridge_server`, `term_picker_dialog`, `termbase_entry_editor`, `termbase_import_export`, `termbase_manager`, `termlens_popup`, `termlens_widget`, `theme_manager`, `tm_editor_dialog`, `tm_manager_qt`, `tm_metadata_manager`, `tmx_editor_qt`, `tmx_generator`, `trados_docx_handler`, `translation_memory`, `translation_results_panel`, `ui_scale`, `unified_prompt_manager_qt`, `usage_report_dialog`, `usage_statistics`, `voice_hotkey_listener`, `voice_release_poller`, `voice_tab`, `voice_vocabulary`
 
 Топ использования: `CheckmarkCheckBox` ×128, `format_shortcut_for_display` ×59, `CheckmarkRadioButton` ×42, `TranslationMatch` ×27, `set_help_topic` ×16, `LLMClient` ×14, `get_status` ×14, `open_help` ×9, `StandaloneSDLXLIFFHandler` ×6, `SimpleSegmenter` ×6, `CrossPlatformKeySender` ×6, `TMXGenerator` ×5, `TermbaseEntryEditor` ×4, `MQXLIFFHandler` ×4, `CafeTranDOCXHandler` ×4, `DatabaseManager` ×3, `ThemeManager` ×2, `ShortcutManager` ×2, `VoiceCommandManager` ×2, `TermLensWidget` ×2, `UnifiedPromptManagerQt` ×2 (и ~100 одноразовых).
 
@@ -43,6 +45,12 @@
 | modules/pdf_rescue_Qt.py | PDFRescueQt(parent_app): log, api_keys, load_api_keys | средняя |
 | modules/ai_actions.py | AIActionSystem(parent_app=…): current_project | низкая |
 | modules/pdf_rescue_tkinter.py | PDFRescue(parent_app): root — ORPHAN | — |
+
+`modules/settings_service.py` в эту таблицу НЕ входит: он не получает `main_window`/
+`parent_app` и не обращается к состоянию окна — все 25 перенесённых методов
+получают пути и значения через аргументы (SPLIT / SPLIT-BY-ARGUMENT по решению
+координатора). Единственная связь — прямой импорт `SettingsService` в
+`Supervertaler.py:421` и 25 делегатов, вызывающих `self.settings_service.*`.
 
 Плюс внутренние duck-typed ссылки внутри монолита (не modules, но та же проблема):
 - `SuperlookupTab` → MainWindow: ~25 атрибутов через `self.main_window` + hasattr (`db_manager`, `termbase_mgr`, `call_deepl`, `call_google_translate`, `call_custom_mt`, `create_llm_client`, `load_api_keys`, `_switch_main_tab`, `_bring_workbench_forward`, `_handle_clipboard_hotkey`…).
@@ -115,6 +123,7 @@
 | `sdlppx_handler` | — | — | — | Supervertaler, batch_offload |
 | `sdltm_handler` | — | — | — | Supervertaler |
 | `segment_split_merge` | — | — | — | Supervertaler |
+| `settings_service` | — | — | urllib.parse (quote, ленивый) | Supervertaler |
 | `settings_sidebar` | PyQt6 | — | — | Supervertaler |
 | `setup_wizard` | — | modules.config_manager | — | ORPHAN |
 | `shortcut_display` | — | — | — | Supervertaler, keyboard_shortcuts_widget, ribbon_widget, shortcut_manager, termlens_widget, tmx_editor |
@@ -185,6 +194,7 @@
 | `ui_scale` | 3 | Supervertaler, clipboard_manager_widget, keyboard_shortcuts_widget |
 | `voice_vocabulary` | 3 | Supervertaler, voice_commands, voice_dictation_lite |
 | `mic_devices` | 3 | voice_commands, voice_dictation_lite, voice_tab |
+| `settings_service` | 1 | Supervertaler |
 
 Самый используемый модуль — `platform_helpers` (11 файлов), далее `shortcut_display` (11), `styled_widgets`/`help_system` (10), `llm_clients` (7).
 
