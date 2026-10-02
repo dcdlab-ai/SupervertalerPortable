@@ -145,6 +145,7 @@ class Segment:
     okapi_tu_id: str = ""  # ID текстовой единицы Okapi для обратного слияния
     okapi_segment_index: int = -1  # индекс сегмента внутри единицы Okapi (-1 = не из Okapi)
     category: str = ""  # категория под-документа Okapi: "" (основной текст) / "comment" / "header" / "footer" / "property" / "notes"
+    join_before: Optional[str] = None  # пробел между этим сегментом и предыдущим на той же строке, когда Supervertaler разбивал строку сам (issue #191); txt-экспорт использует его, чтобы собрать строку в точности. None = неизвестно → одиночный пробел
 
     def __post_init__(self):
         """Инициализирует метки времени и согласует comments[] ↔ notes."""
