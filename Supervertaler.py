@@ -15305,145 +15305,12 @@ class SupervertalerQt(QMainWindow):
             QMessageBox.critical(self, "Clear Error", f"Failed to clear TM entries:\n\n{e}")
     
     def create_segmentation_rules_tab(self):
-        """Создаёт вкладку управления правилами сегментации."""
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(10, 10, 10, 10)
-        
-        # Header
-        header = QLabel(self.tr("📏 Segmentation Rules"))
-        header.setStyleSheet("font-size: 14px; font-weight: bold; margin-bottom: 10px;")
-        layout.addWidget(header)
-        
-        # Description
-        desc = QLabel(self.tr("Manage language-specific segmentation rules for accurate sentence/segment boundaries."))
-        desc.setStyleSheet("color: #666; font-size: 11px; margin-bottom: 10px;")
-        layout.addWidget(desc)
-        
-        # Language Selection
-        lang_group = QGroupBox(self.tr("Select Language"))
-        lang_layout = QHBoxLayout()
-        
-        lang_combo = QComboBox()
-        languages = ["English (en)", "Dutch (nl)", "German (de)", "French (fr)", "Spanish (es)", "Italian (it)", "Portuguese (pt)", "Chinese (zh)", "Japanese (ja)", "Arabic (ar)"]
-        lang_combo.addItems(languages)
-        lang_layout.addWidget(QLabel(self.tr("Language:")))
-        lang_layout.addWidget(lang_combo, 1)
-        
-        lang_group.setLayout(lang_layout)
-        layout.addWidget(lang_group)
-        
-        # Segmentation Rules
-        rules_group = QGroupBox(self.tr("Segmentation Rules"))
-        rules_layout = QVBoxLayout()
-        
-        # Current implementation info
-        current_info = QLabel(
-            "Current Implementation: SimpleSegmenter (language-agnostic)\n\n"
-            "• Segments on: . ! ? (followed by space/newline)\n"
-            "• Handles basic abbreviations: Mr. Dr. etc.\n"
-            "• Preserves paragraph breaks\n"
-            "• Treats each table cell as separate segment"
-        )
-        current_info.setStyleSheet("padding: 10px; border-radius: 4px; font-family: monospace;")
-        rules_layout.addWidget(current_info)
-        
-        # Future implementation section
-        future_label = QLabel(self.tr("🚧 Language-Specific Rules (Planned):"))
-        future_label.setStyleSheet("font-weight: bold; margin-top: 15px;")
-        rules_layout.addWidget(future_label)
-        
-        future_info = QLabel(
-            "• German: Handle compound sentences, different abbreviations\n"
-            "• Chinese/Japanese: Word boundary detection, different punctuation\n"
-            "• Arabic: Right-to-left text handling\n"
-            "• French: Quotation mark handling, spacing rules\n"
-            "• Custom: User-defined regex patterns and exceptions"
-        )
-        future_info.setStyleSheet("color: #666; margin-left: 20px;")
-        rules_layout.addWidget(future_info)
-        
-        rules_group.setLayout(rules_layout)
-        layout.addWidget(rules_group)
-        
-        # Management buttons (for future implementation)
-        buttons_group = QGroupBox(self.tr("Rule Management"))
-        buttons_layout = QVBoxLayout()
-        
-        # Test segmentation button
-        test_btn = QPushButton(self.tr("🧪 Test Segmentation"))
-        test_btn.setToolTip(self.tr("Test current segmentation rules on sample text"))
-        test_btn.clicked.connect(self.test_segmentation_rules)
-        buttons_layout.addWidget(test_btn)
-        
-        # Import/Export buttons (disabled for now)
-        import_btn = QPushButton(self.tr("📥 Import Rules"))
-        import_btn.setToolTip(self.tr("Import segmentation rules from file (Coming Soon)"))
-        import_btn.setEnabled(False)
-        buttons_layout.addWidget(import_btn)
-        
-        export_btn = QPushButton(self.tr("📤 Export Rules"))
-        export_btn.setToolTip(self.tr("Export current segmentation rules (Coming Soon)"))
-        export_btn.setEnabled(False)
-        buttons_layout.addWidget(export_btn)
-        
-        buttons_group.setLayout(buttons_layout)
-        layout.addWidget(buttons_group)
-        
-        layout.addStretch()
-        
-        return tab
-    
-    def test_segmentation_rules(self):
-        """Тестирует текущие правила сегментации на примере текста."""
-        from PyQt6.QtWidgets import QInputDialog
-        
-        sample_text = (
-            "Hello world. This is a test! How are you? "
-            "Mr. Smith went to Dr. Jones. "
-            "The U.S.A. is great. "
-            "What about this... and that? "
-            "End of test."
-        )
-        
-        text, ok = QInputDialog.getMultiLineText(
-            self, 
-            "Test Segmentation", 
-            "Enter text to test segmentation:\n(Default sample text provided)",
-            sample_text
-        )
-        
-        if ok and text:
-            try:
-                # Test with current segmenter
-                from modules.simple_segmenter import SimpleSegmenter
-                segmenter = SimpleSegmenter()
-                
-                # Create fake paragraph list for testing
-                paragraphs = [(0, text)]
-                segments = segmenter.segment_paragraphs(paragraphs)
-                
-                # Show results
-                result_text = f"Input text:\n{text}\n\n"
-                result_text += f"Segmentation results ({len(segments)} segments):\n"
-                result_text += "=" * 50 + "\n"
-                
-                for i, (para_id, segment_text) in enumerate(segments, 1):
-                    result_text += f"{i}. {segment_text}\n"
-                
-                QMessageBox.information(
-                    self,
-                    "Segmentation Test Results",
-                    result_text
-                )
-                
-            except Exception as e:
-                QMessageBox.critical(
-                    self,
-                    "Segmentation Test Error",
-                    f"Error testing segmentation:\n\n{e}"
-                )
-    
+        """Settings → Segmentation Rules (issue #191): line-break and built-in
+        rule switches, extra abbreviations, and SRX-style custom break /
+        exception rules with SRX import/export and a live test box."""
+        from modules.segmentation_rules_widget import SegmentationRulesWidget
+        return SegmentationRulesWidget(self._load_segmentation_rules, self._save_segmentation_rules)
+
     def _load_segmentation_rules(self):
         from modules.segmentation_rules import SETTINGS_KEY, SegmentationRules
         try:
@@ -15451,6 +15318,12 @@ class SupervertalerQt(QMainWindow):
         except Exception as e:
             self.log(f"⚠ Could not read the segmentation rules: {e}")
             return SegmentationRules()
+
+    def _save_segmentation_rules(self, rules):
+        from modules.segmentation_rules import SETTINGS_KEY
+        settings = self.load_general_settings()
+        settings[SETTINGS_KEY] = rules.to_dict()
+        self.save_general_settings(settings)
 
     def _make_sentence_segmenter(self, markdown: bool = False):
         """The sentence segmenter for text Supervertaler splits itself, with
