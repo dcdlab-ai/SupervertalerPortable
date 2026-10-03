@@ -59,6 +59,22 @@ For repeated or potentially conflicting runs, create a unique run subdirectory, 
 Do not reuse the same temporary directory for unrelated stages when doing so could mix artifacts.
 Keep temporary artifacts that may be useful for debugging, comparison, or verification until the current task has been successfully completed.
 Temporary artifacts may be deleted after successful completion when they are no longer needed and are not required for reproducibility or debugging.
+### Frozen test build (manual-test scenarios)
+Starting 2026-10-03, manual test-build scenarios (`T*.x` from batch reports) run against:
+`D:\SupervertalerPortable_test\` (`start.bat`, `PyLauncher.exe`).
+Rules:
+* The nested repository `D:\SupervertalerPortable_test\SupervertalerPortable\.git` is a
+  FROZEN version-control reference (state `960be5d8`, 2026-10-03). Do not pull, commit,
+  or reset in it.
+* That build's `Supervertaler.py` carries a LOCAL portable patch at the top of the file
+  (embedded-Python `sys.path` fix, 11 lines). Never overwrite it with a verbatim copy
+  from the repository — re-apply the patch after any rebuild.
+* Batches do not update the test build. Rebuilding it is a separate decision by Dmitry
+  (fresh copy from the repo + re-apply the portable patch + re-run py_compile).
+* Code validation (py_compile, AST, pyflakes, offscreen probes) is still executed in the
+  repository `E:\Dev\SupervertalerPortable` with the `E:\Dev\python-embed` runtime.
+* Unlike `E:\Dev\python-embed`, the test build's `python-embed` DOES contain
+  PyQt6-WebEngine (≈340 MB inside `PyQt6/`) — Web Resources runs in embedded mode there.
 ### Environment variables
 Do not permanently modify global Windows user or system environment variables merely to perform a project task.
 When a project command or test needs explicit temporary directories, set `TEMP` and `TMP` for that process to the appropriate stage-specific directory under:
