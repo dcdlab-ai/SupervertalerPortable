@@ -179,6 +179,33 @@ MT-результаты в главном поиске остаются (MT-вк
 | Ключ/данные | Где читается/пишется | Вердикт |
 |---|---|---|
 | `superlookup_landing_tab` (general settings.json) | Единственный владелец — SuperlookupTab: константы 64408–64415, чтение `_load_superlookup_landing_pref` 64519, запись `_on_landing_pref_changed` 64532. **Фактическая «приземляющая» логика не подключена: ключ нигде не применяется к `results_tabs.setCurrentIndex`** — радио-кнопка в Settings-подвкладке единственный потребитель. Settings-страница General ключ только сохраняет как есть (комментарий 26540, `_save_general_settings_from_ui`), UI для него нет. | В 8.10 радио-UI + 2 метода + константы удаляются. Фолбэк **не нужен**: ключ перестаёт читаться вовсе, сохранённое значение (в т.ч. `'webresources'`) становится инертным мусором в settings.json и ни на что не влияет. Документируем в отчёте 8.10. |
+
+**Эмпирическое подтверждение (offscreen-проба, 2026-10-03, возражение Дмитрия
+проверено).** Дмитрий сообщил, что наблюдает работу настройки: после
+перезапуска Ctrl+Alt+L (выделение в Editor → Ctrl+C → Ctrl+Alt+L) открывает
+подвкладку по выбору, а при отсутствии результата — «⚙️ SuperLookup Settings».
+Статический анализ этого не объясняет, поэтому поставлена изолированная
+offscreen-проба полного приложения
+(`D:\Temp\SupervertalerPortable\refactoring\b8-a2\landing_probe.py`,
+изолированные HOME/USERPROFILE/APPDATA, указатель на временный user_data,
+подложенный `settings.json` с `general.superlookup_landing_tab`, модалки
+нейтрализованы как в 8.1; маршрут Ctrl+Alt+L воспроизведён вызовом
+`open_workbench_to_superlookup("internationalization")` — тот же путь, что
+`_handle_superlookup_hotkey → _read_clipboard_for_superlookup`, минус буфер).
+
+Результат (обе пробы `result.json` в `landing-probe/{termbases,tms}/`):
+
+| pref | Радио после старта | Подвкладка после поиска | Статус |
+|---|---|---|---|
+| `termbases` | termbases (✓ прочитан) | **📖 TMs (индекс 0)** | "No results found" |
+| `tms` | tms (✓ прочитан) | **📖 TMs (индекс 0)** | "No results found" |
+
+Ключ читается, но влияет только на состояние радио-кнопок; подвкладка после
+маршрута Ctrl+Alt+L всегда TMs (дефолтный индекс 0 свежепостроенного виджета),
+перехода на Termbases/Settings нет. Единственное переключение `results_tabs`
+в классе — `setCurrentIndex(0)` в `search_with_query` (65290, путь Ctrl+K).
+Наблюдаемое Дмитрием поведение в этом коде воспроизвести не удалось
+(см. §9 п.7 — предложить контрольный эксперимент).
 | `autohotkey_path`, `hide_autohotkey_dialog` | Пишет диалог AHK (66594, 66638); читают `_find_autohotkey_executable` (66491) и `_register_hotkey_external_script` (67288). Поле `ahk_path_edit` в Settings General **никогда не создаётся** (`self.ahk_path_edit =` отсутствует; 23379 — `getattr(..., None)`), т.е. UI-владельца у ключа нет | Удалить вместе с AHK-группой; `_save_general_settings_from_ui` (26578) — убрать сохранение ключа |
 | История поиска `user_data/settings/superlookup_history.json` | `_init_search_history` 66008 | KEEP |
 | `workbench/web_cache` (user_data) | создаёт web-профиль QWebEngineProfile (63306–63316) | Код удаления уходит; в production user_data каталога **нет** (проверено `ls D:/_old/Supervertaler-Portable/Supervertaler/workbench/web_cache` → отсутствует, т.к. WebEngine в сборке не установлен). Остаточные каталоги у пользователей, ставивших full-install, безвредны |
@@ -435,6 +462,15 @@ Settings», наличие `source_text`/`search_btn`/`lang_from_combo`/`lang_to
 6. **`_prewarm_ahk`** остаётся (полезен QuickTrans-вставке); если 8.5 удалит
    Clipboard раньше — прогрев всё ещё оправдан для CrossPlatformKeySender;
    окончательное решение в 8.10 при правке `_warm_up_top_tabs`.
+7. **Наблюдение Дмитрия о работе `superlookup_landing_tab`** (открытие
+   Termbases/TMs/Settings по выбору и результату): offscreen-пробой
+   воспроизвести не удалось (см. §4). Контрольный эксперимент на машине
+   Дмитрия: установить pref=`termbases` → полный перезапуск → выделить слово →
+   Ctrl+C → Ctrl+Alt+L → какая подвкладка активна? Если Termbases — на машине
+   Дмитрия другой билд монолита (все три копии на диске агента — репо HEAD,
+   тестовая сборка D:\SupervertalerPortable_test, старый /e/Dev/Supervertaler.py —
+   содержат одинаковый «непроводной» код, проверено grep+sed); если TMs —
+   наблюдение объясняется дефолтным индексом 0, а не настройкой.
 
 ## 10. Вопросы к Дмитрию
 
