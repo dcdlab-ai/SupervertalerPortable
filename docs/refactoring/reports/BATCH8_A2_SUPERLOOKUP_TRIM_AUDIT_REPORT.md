@@ -139,8 +139,10 @@ AST-проверка самодостаточности: web-группа соз
 ### 2.4a Мёртвый MT-хвост SuperLookup (DELETE-SAFE, 8 методов + вызов, ~375 строк)
 
 Дополнение по вопросу Дмитрия «где MT-столбцы в UI?» — их нигде нет: вкладка
-MT-результатов вырезана из `init_ui` ранее (комментарий 62764 «MT tab removed –
-handled by QuickTrans»), `create_mt_results_tab()` не вызывается нигде
+MT-результатов вырезана из `init_ui` **до начала нашего рефакторинга**
+(комментарий 62764 «MT tab removed – handled by QuickTrans» уже присутствует
+в baseline-коммите 13bd37fb, старая строка 67578; это апстрим-правка
+М. Бейера, не наша), `create_mt_results_tab()` не вызывается нигде
 (grep — только def), поэтому `mt_results_table` никогда не создаётся,
 `_perform_mt_lookup` молча выходит на guard'е `hasattr(self, 'mt_results_table')`
 (63103), MyMemory-HTTP не выполняется, `display_mt_results` тоже выходит по
