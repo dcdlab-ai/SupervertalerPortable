@@ -9270,13 +9270,6 @@ class SupervertalerQt(QMainWindow):
         superlookup_action.triggered.connect(self.show_concordance_search)
         tools_menu.addAction(superlookup_action)
 
-        superbrowser_action = QAction(self.tr("🌐 Super&browser..."), self)
-        superbrowser_action.setToolTip(self.tr(
-            "ChatGPT, Claude, and Gemini side by side in one window, with "
-            "persistent logins – compare answers without switching tabs"))
-        superbrowser_action.triggered.connect(self.open_superbrowser_window)
-        tools_menu.addAction(superbrowser_action)
-
         tmx_editor_action = QAction(self.tr("✏️ T&MX Editor..."), self)
         tmx_editor_action.triggered.connect(self.open_tmx_editor_window)
         tools_menu.addAction(tmx_editor_action)
@@ -10112,49 +10105,7 @@ class SupervertalerQt(QMainWindow):
         set_help_topic(prompt_widget, HelpTopics.AI_PROMPT_MANAGER)
 
         return prompt_widget
-    
-    
-    def open_superbrowser_window(self):
-        """Открыть Superbrowser (многооконный ИИ-браузер чатов) в собственном окне.
-        
-        Удалён в серии упрощений v1.9.385, восстановлен в v1.10.365 по запросу
-        пользователя. Его прежнее место — вкладка Tools — больше не существует, поэтому
-        он следует тому же шаблону «открыть в отдельном окне», что и остальные
-        инструменты; сам виджет вернулся из git без изменений, а оставшаяся папка
-        workbench/superbrowser_profiles/ (при удалении её намеренно сохранили)
-        возвращает старые логины."""
-        from PyQt6.QtCore import Qt
-        from modules.superbrowser import SuperbrowserWidget
 
-        existing = getattr(self, '_superbrowser_window', None)
-        if existing is not None:
-            try:
-                existing.show()
-                existing.raise_()
-                existing.activateWindow()
-                return
-            except RuntimeError:
-                # Window was destroyed without the destroyed-signal callback
-                # firing (rare). Fall through and create a new one.
-                self._superbrowser_window = None
-
-        window = QWidget()
-        window.setWindowFlags(Qt.WindowType.Window)
-        window.setWindowTitle(self.tr("🌐 Superbrowser – Supervertaler"))
-        # Three browser columns want width; height matches the TMX Editor.
-        window.resize(1500, 850)
-
-        layout = QVBoxLayout(window)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        layout.addWidget(SuperbrowserWidget(parent=window, user_data_path=self.user_data_path), 1)
-
-        self._superbrowser_window = window
-        # Drop the reference when the window closes so a subsequent click
-        # opens a fresh instance instead of reusing a deleted Qt object.
-        window.destroyed.connect(lambda *a: setattr(self, '_superbrowser_window', None))
-        window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        window.show()
 
     def open_tmx_editor_window(self):
         """Открыть TMX Editor в отдельном окне.
