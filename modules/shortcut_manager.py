@@ -614,17 +614,6 @@ class ShortcutManager:
             "action": "open_clipboard_tab",
             "global": True,
         },
-        # Ctrl+Alt+O ("always-On"), not Ctrl+Alt+A. This is an OS-level global
-        # hotkey, so it fires whatever application is in front - and Supervertaler
-        # for Trados uses Ctrl+Alt+A for "Add term with abbreviation". Many people
-        # run both at once, so the two would have fought over every press.
-        "voice_alwayson_toggle": {
-            "category": "Special",
-            "description": "Voice Always-On (toggle)",
-            "default": "Ctrl+Alt+O",
-            "action": "toggle_alwayson",
-            "global": True,
-        },
         "editor_show_context_menu_double_shift": {
             "category": "Editor",
             "description": "Show context menu (double-tap Shift)",
@@ -723,19 +712,6 @@ class ShortcutManager:
             self.disabled_shortcuts = old_disabled
             self.save_shortcuts()
 
-        # Migrate autofingers_alwayson_toggle → voice_alwayson_toggle (v1.9.491+).
-        # The internal feature was renamed from "AutoFingers" to "Voice".
-        if 'autofingers_alwayson_toggle' in self.custom_shortcuts:
-            if 'voice_alwayson_toggle' not in self.custom_shortcuts:
-                self.custom_shortcuts['voice_alwayson_toggle'] = \
-                    self.custom_shortcuts['autofingers_alwayson_toggle']
-            del self.custom_shortcuts['autofingers_alwayson_toggle']
-            self.save_shortcuts()
-        if 'autofingers_alwayson_toggle' in self.disabled_shortcuts:
-            self.disabled_shortcuts.discard('autofingers_alwayson_toggle')
-            self.disabled_shortcuts.add('voice_alwayson_toggle')
-            self.save_shortcuts()
-
         # Migrate quickmenu → quicklauncher → sidekick shortcut IDs.
         # The global hotkey was renamed to "sidekick" to match the user-facing
         # feature name; the editor-only QuickLauncher kept its name.
@@ -769,18 +745,6 @@ class ShortcutManager:
             del self.custom_shortcuts['global_sidekick']
             self.save_shortcuts()
 
-        # Default-value upgrade for voice_alwayson_toggle: Ctrl+Alt+A → Ctrl+Alt+O.
-        # Ctrl+Alt+A is registered as an OS-level global hotkey, so it fired no
-        # matter which application was in front - including Trados Studio, where
-        # Supervertaler for Trados now uses Ctrl+Alt+A for "Add term with
-        # abbreviation". Without this, anyone whose binding had been persisted at
-        # the old default would go on colliding, which is precisely the case the
-        # move exists to fix. An override to anything else is left alone.
-        av = self.custom_shortcuts.get('voice_alwayson_toggle')
-        if av and av.lower() == 'ctrl+alt+a':
-            del self.custom_shortcuts['voice_alwayson_toggle']
-            self.save_shortcuts()
-
         # Merge the old `global_*` entries into the corresponding action
         # entries marked `global: True`. There used to be one local and one
         # global shortcut per action; users now manage one entry that
@@ -794,7 +758,6 @@ class ShortcutManager:
             'global_sidekick':          'sidekick_open',
             'global_clipboard':         'sidekick_open_clipboard',
             'global_pushtotalk':        'voice_dictate',
-            'global_alwayson_toggle':   'voice_alwayson_toggle',
         }
         merge_changed = False
         for old_id, new_id in _GLOBAL_TO_MERGED.items():
@@ -876,9 +839,6 @@ class ShortcutManager:
             'global_sidekick':        'sidekick_open',
             'global_clipboard':       'sidekick_open_clipboard',
             'global_pushtotalk':      'voice_dictate',
-            'global_alwayson_toggle':       'voice_alwayson_toggle',
-            # Voice rename (v1.9.491): AutoFingers → Voice
-            'autofingers_alwayson_toggle':  'voice_alwayson_toggle',
         }
         shortcut_id = _LEGACY_IDS.get(shortcut_id, shortcut_id)
 

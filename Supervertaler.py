@@ -345,7 +345,7 @@ from modules.superlookup import SuperlookupEngine  # Движок Superlookup
 from modules.pseudo_translate_dialog import run_pseudo_translation  # Псевдоперевод (диалог + применение)
 from modules.project_assets import bundle_source, resolve_source_path, ensure_target_dir, nest_in_own_folder  # Модель каталогов проекта (issue #228)
 from modules.voice_dictation_lite import QuickDictationThread  # Голосовая диктовка
-from modules.voice_commands import VoiceCommandManager, VoiceCommand, ContinuousVoiceListener  # Голосовые команды (в духе Talon)
+from modules.voice_commands import VoiceCommandManager, VoiceCommand  # Голосовые команды (в духе Talon)
 from modules.voice_command_dialog import VoiceCommandEditDialog  # Диалог правки голосовых команд.
 # ВАЖНО: в этом файле прямых ссылок на него нет (предположительно используется
 # через динамический импорт) — НЕ удалять.
@@ -6467,12 +6467,6 @@ class SupervertalerQt(QMainWindow):
         self.log(f"Welcome to Supervertaler Workbench v{__version__}")
         self.log("Supervertaler: The Ultimate Translation Workbench.")
 
-        # Bring up the Voice tray icon now (in its inactive/grey
-        # state) so the system tray slot is allocated up-front. Allocating
-        # it on first Always-On activation would cause a one-time bounce
-        # of neighbouring tray icons; doing it at startup folds that into
-        # normal app launch instead.
-        self._ensure_alwayson_tray_icon()
         # Note: the Workbench tray icon itself is set up later by
         # _setup_tray_icon(), called from main() after construction.
 
@@ -7300,10 +7294,6 @@ class SupervertalerQt(QMainWindow):
                 if hasattr(self, 'lookup_tab') else None,
         )
         create_shortcut("sidekick_open", "Alt+K", self.open_quicklauncher)
-        create_shortcut(
-            "voice_alwayson_toggle", "Ctrl+Alt+O",
-            self._toggle_alwayson_listening,
-        )
 
         # Lone Ctrl tap – Term Insert Popup (memoQ-style glossary + NT insert list).
         # Implemented as an app-level event filter rather than a QShortcut because
@@ -8218,15 +8208,6 @@ class SupervertalerQt(QMainWindow):
         self.progress_files_label.hide()  # Hidden by default, shown for multi-file projects
         progress_layout.addWidget(self.progress_files_label)
         
-        # Always-on voice indicator
-        self.alwayson_indicator_label = QLabel("")
-        self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold;")
-        self.alwayson_indicator_label.setToolTip(self.tr("Always-on voice listening status\nClick to toggle"))
-        self.alwayson_indicator_label.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.alwayson_indicator_label.mousePressEvent = lambda e: self._toggle_alwayson_from_statusbar()
-        self.alwayson_indicator_label.hide()  # Hidden until enabled
-        progress_layout.addWidget(self.alwayson_indicator_label)
-
         # Add as permanent widget (stays on right side)
         self.status_bar.addPermanentWidget(progress_frame)
         
@@ -24678,484 +24659,6 @@ class SupervertalerQt(QMainWindow):
         scripts_folder.mkdir(parents=True, exist_ok=True)
         subprocess.Popen(['explorer', str(scripts_folder)])
 
-    def _toggle_alwayson_listening(self):
-        """Переключает режим постоянного прослушивания (Always-On)."""
-        if self.voice_listener and self.voice_listener.is_listening:
-            # Stop listening
-            self.voice_listener.stop()
-            self.voice_listener = None
-            self._update_alwayson_ui("stopped")
-            self.log("🔇 Always-on listening stopped")
-            self.status_bar.showMessage("🔇 Always-on listening stopped", 3000)
-        else:
-            # Start listening
-            try:
-                dictation_settings = self.load_dictation_settings()
-                model_name = dictation_settings.get('model', 'base')
-                
-                # Recognition engine setting. Legacy 'local' maps to
-                # 'faster_whisper' for users upgrading from pre-Vosk versions.
-                engine = dictation_settings.get('recognition_engine', 'vosk')
-                if engine == 'local':
-                    engine = 'faster_whisper'
-
-                # If using API, check if we have an OpenAI key. If not,
-                # fall back to Vosk (the new safe default) rather than
-                # forcing the user into a dialog about installing extras.
-                api_key = None
-                if engine == 'api':
-                    api_keys = self.load_api_keys()
-                    api_key = api_keys.get('openai') or api_keys.get('openai_api_key')
-                    if not api_key:
-                        QMessageBox.warning(
-                            self, "OpenAI API Key Required",
-                            "To use OpenAI Whisper API, please set your OpenAI API key in:\n\n"
-                            "Settings → AI Settings → OpenAI API Key\n\n"
-                            "Falling back to Vosk (offline, free, commands-only)."
-                        )
-                        engine = 'vosk'
-                
-                # Get language setting
-                lang_setting = dictation_settings.get('language', 'Auto (use project target language)')
-                if lang_setting.startswith('Auto'):
-                    target_lang = self.current_project.target_lang if self.current_project else 'en'
-                    lang_map = {
-                        'nl': 'nl', 'nl_NL': 'nl', 'nl_BE': 'nl',
-                        'en': 'en', 'en_US': 'en', 'en_GB': 'en',
-                        'de': 'de', 'de_DE': 'de',
-                        'fr': 'fr', 'fr_FR': 'fr',
-                        'es': 'es', 'es_ES': 'es',
-                    }
-                    lang_code = lang_map.get(target_lang, 'auto')
-                else:
-                    lang_code = lang_setting.lower()[:2]
-                
-                # Create listener. user_data_path is needed by the Vosk
-                # engine to locate / download the Vosk model on demand.
-                # initial_prompt + replacements bias the Whisper
-                # decoder toward known brand / technical vocabulary so
-                # "Supervertaler" stops being heard as "Supervertile"
-                # etc. Built fresh from current settings + (optionally)
-                # the active project's termbase – see
-                # build_voice_initial_prompt() and
-                # load_voice_vocabulary_settings(). Vosk ignores both
-                # (it runs in grammar mode with a fixed phrase list).
-                vocab_settings = self.load_voice_vocabulary_settings()
-                self.voice_listener = ContinuousVoiceListener(
-                    command_manager=self.voice_command_manager,
-                    model_name=model_name,
-                    language=lang_code,
-                    engine=engine,
-                    api_key=api_key,
-                    user_data_path=str(self.user_data_path) if hasattr(self, 'user_data_path') else None,
-                    mic_device=dictation_settings.get('mic_device'),
-                    initial_prompt=self.build_voice_initial_prompt(),
-                    replacements=vocab_settings.get('replacements', []),
-                )
-                
-                # Set sensitivity from persisted settings (the Voice tab
-                # writes this key directly via _set_dictation_keys).
-                sensitivity = dictation_settings.get('alwayson_sensitivity', 'medium')
-                if sensitivity in ('low', 'medium', 'high'):
-                    self.voice_listener.set_sensitivity(sensitivity)
-                
-                # Connect signals
-                self.voice_listener.speech_detected.connect(self._on_alwayson_speech)
-                self.voice_listener.command_detected.connect(self._on_alwayson_command)
-                self.voice_listener.text_for_dictation.connect(self._on_alwayson_dictation)
-                self.voice_listener.status_update.connect(self._on_alwayson_status)
-                self.voice_listener.error_occurred.connect(self._on_alwayson_error)
-                self.voice_listener.vad_status_changed.connect(self._on_alwayson_vad_status)
-                self.voice_listener.listening_started.connect(lambda: self._update_alwayson_ui("listening"))
-                self.voice_listener.listening_stopped.connect(lambda: self._update_alwayson_ui("stopped"))
-                
-                # Log which engine we're using
-                if engine == 'api':
-                    self.log("🎧 Always-on listening started (OpenAI API – fast & accurate)")
-                elif engine == 'vosk':
-                    self.log("🎧 Always-on listening started (Vosk – offline, commands-only)")
-                else:
-                    self.log(f"🎧 Always-on listening started (faster-whisper '{model_name}')")
-                
-                # Start
-                self.voice_listener.start()
-                self.log("🎧 Always-on listening started")
-
-                # Always-On is the only time the Pause-Always-On hotkey
-                # matters, so guarantee it's armed now rather than relying on
-                # push-to-talk having lazily created the keyboard listener
-                # earlier in the session (it may never have).
-                self._ensure_voice_pause_hotkey_armed()
-
-            except Exception as e:
-                import traceback
-                self.log(f"❌ Failed to start always-on listening: {e}")
-                self.log(traceback.format_exc())
-                QMessageBox.critical(self, "Always-On Error", f"Failed to start always-on listening:\n\n{e}")
-
-    def _update_alwayson_ui(self, status: str):
-        """Обновляет элементы интерфейса Always-On."""
-        # v1.10.196: if the listener was started by the command-PTT
-        # chord (Ctrl+Alt+V by default), suppress all the big indicator
-        # chrome. PTT is transient — the user is holding a hotkey for a
-        # moment and doesn't want the status bar flashing "ALWAYS-ON" →
-        # "REC" → "stopped" → … in their face. The status-bar message
-        # set in _on_voice_command_ptt_press is the only visual feedback
-        # we want during a PTT session.
-        is_ptt = getattr(self, '_voice_command_ptt_owned', False)
-        if is_ptt:
-            # Make sure no leftover chrome is showing.
-            if hasattr(self, 'alwayson_indicator_label'):
-                self.alwayson_indicator_label.hide()
-            # When the listener confirms it has fully stopped, clear
-            # the PTT-owned flag so subsequent non-PTT sessions
-            # (manual Ctrl+Alt+O toggle) get the regular UI back.
-            # Holding it until *now* also lets _on_alwayson_dictation
-            # suppress any late transcription that arrived after the
-            # release (see _on_voice_command_ptt_release docstring).
-            if status == "stopped":
-                self._voice_command_ptt_owned = False
-            return
-
-        # Update settings panel UI (if visible)
-        if hasattr(self, 'alwayson_status_label'):
-            if status == "listening" or status == "waiting":
-                self.alwayson_status_label.setText(self.tr("🟢 Listening for speech..."))
-                self.alwayson_status_label.setStyleSheet("font-size: 9pt; padding: 5px; color: #2E7D32;")
-                self.alwayson_toggle_btn.setText(self.tr("⏹️ Stop Always-On Listening"))
-                self.alwayson_toggle_btn.setStyleSheet("padding: 8px 15px; background-color: #FFCDD2;")
-            elif status == "recording":
-                self.alwayson_status_label.setText(self.tr("🔴 Recording..."))
-                self.alwayson_status_label.setStyleSheet("font-size: 9pt; padding: 5px; color: #C62828;")
-            elif status == "processing":
-                self.alwayson_status_label.setText(self.tr("⏳ Processing..."))
-                self.alwayson_status_label.setStyleSheet("font-size: 9pt; padding: 5px; color: #F57C00;")
-            else:  # stopped or other
-                self.alwayson_status_label.setText(self.tr("⚪ Not active"))
-                self.alwayson_status_label.setStyleSheet("font-size: 9pt; padding: 5px;")
-                self.alwayson_toggle_btn.setText(self.tr("▶️ Start Always-On Listening"))
-                self.alwayson_toggle_btn.setStyleSheet("padding: 8px 15px;")
-        
-        # Update status bar indicator (always visible when active)
-        if hasattr(self, 'alwayson_indicator_label'):
-            if status == "listening" or status == "waiting":
-                self.alwayson_indicator_label.setText(self.tr("🎤 ALWAYS-ON"))
-                self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #2E7D32; background-color: #C8E6C9; padding: 2px 6px; border-radius: 3px;")
-                self.alwayson_indicator_label.setToolTip(self.tr("Always-on voice listening ACTIVE\nClick to stop"))
-                self.alwayson_indicator_label.show()
-            elif status == "recording":
-                self.alwayson_indicator_label.setText(self.tr("🔴 REC"))
-                self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold; color: white; background-color: #C62828; padding: 2px 6px; border-radius: 3px;")
-                self.alwayson_indicator_label.setToolTip(self.tr("Recording speech..."))
-                self.alwayson_indicator_label.show()
-            elif status == "processing":
-                self.alwayson_indicator_label.setText("⏳ ...")
-                self.alwayson_indicator_label.setStyleSheet("font-size: 11px; font-weight: bold; color: #F57C00; background-color: #FFF3E0; padding: 2px 6px; border-radius: 3px;")
-                self.alwayson_indicator_label.setToolTip(self.tr("Processing speech..."))
-                self.alwayson_indicator_label.show()
-            else:  # stopped or other
-                self.alwayson_indicator_label.hide()
-        
-        # Update grid toolbar button (if exists)
-        if hasattr(self, 'grid_alwayson_btn'):
-            if status == "listening" or status == "waiting":
-                self.grid_alwayson_btn.setText(self.tr("🎧 Always-On: ON"))
-                self.grid_alwayson_btn.setChecked(True)
-                self.grid_alwayson_btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #2E7D32;
-                        color: white;
-                        font-weight: bold;
-                        padding: 3px 5px;
-                        border-radius: 3px;
-                    }
-                    QPushButton:checked {
-                        background-color: #2E7D32;
-                    }
-                """)
-            elif status == "recording":
-                self.grid_alwayson_btn.setText(self.tr("🔴 REC"))
-                self.grid_alwayson_btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #C62828;
-                        color: white;
-                        font-weight: bold;
-                        padding: 3px 5px;
-                        border-radius: 3px;
-                    }
-                    QPushButton:checked {
-                        background-color: #C62828;
-                    }
-                """)
-            elif status == "processing":
-                self.grid_alwayson_btn.setText("⏳ ...")
-                self.grid_alwayson_btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #F57C00;
-                        color: white;
-                        font-weight: bold;
-                        padding: 3px 5px;
-                        border-radius: 3px;
-                    }
-                    QPushButton:checked {
-                        background-color: #F57C00;
-                    }
-                """)
-            else:  # stopped or other
-                self.grid_alwayson_btn.setText(self.tr("🎧 Always-On: OFF"))
-                self.grid_alwayson_btn.setChecked(False)
-                self.grid_alwayson_btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #757575;
-                        color: white;
-                        font-weight: bold;
-                        padding: 3px 5px;
-                        border-radius: 3px;
-                    }
-                    QPushButton:checked {
-                        background-color: #2E7D32;
-                    }
-                """)
-
-        # Update the in-Workbench Voice top tab's status indicator if
-        # it has been built (lazy on first activation). Pre-v1.10.4
-        # this also poked Sidekick's voice widget; Sidekick is gone.
-        voice_widget = getattr(self, '_voice_top_widget', None)
-        if voice_widget is not None and hasattr(voice_widget, 'set_alwayson_status'):
-            try:
-                voice_widget.set_alwayson_status(status)
-            except Exception:
-                pass
-
-        # System tray icon – visible only while Always-On is active.
-        # Gives the user a persistent "the mic is hot" signal even when
-        # Workbench is hidden.
-        self._update_alwayson_tray_icon(status)
-
-    @staticmethod
-    def _draw_mic_icon(color):
-        """Рисует небольшую пиктограмму микрофона в виде QIcon заданного цвета.
-        
-                Используется индикатором Always-On в системном трее. Два визуальных
-                состояния используют одну и ту же форму, различаясь только цветом:
-                серый — когда Always-On выключен, красный — когда идёт активное
-                прослушивание. Программная отрисовка избавляет от необходимости
-                поставлять отдельный файл-ресурс и делает смену цвета тривиальной."""
-        from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QBrush
-        size = 32
-        pix = QPixmap(size, size)
-        pix.fill(QColor(0, 0, 0, 0))
-        p = QPainter(pix)
-        try:
-            p.setRenderHint(QPainter.RenderHint.Antialiasing)
-            qcol = QColor(color) if not isinstance(color, QColor) else color
-            stroke = max(1.5, size * 0.06)
-
-            # Mic body – vertical capsule centred horizontally
-            body_w = size * 0.42
-            body_h = size * 0.50
-            body_x = (size - body_w) / 2
-            body_y = size * 0.10
-            p.setBrush(QBrush(qcol))
-            p.setPen(Qt.PenStyle.NoPen)
-            p.drawRoundedRect(
-                int(body_x), int(body_y), int(body_w), int(body_h),
-                int(body_w / 2), int(body_w / 2),
-            )
-
-            # U-shaped pickup arc cradling the body
-            p.setBrush(Qt.BrushStyle.NoBrush)
-            p.setPen(QPen(qcol, stroke, Qt.PenStyle.SolidLine,
-                          Qt.PenCapStyle.RoundCap))
-            arc_x = size * 0.16
-            arc_y = size * 0.30
-            arc_w = size * 0.68
-            arc_h = size * 0.50
-            # Qt uses 1/16ths of a degree; 0° is at 3 o'clock, going CCW.
-            p.drawArc(int(arc_x), int(arc_y), int(arc_w), int(arc_h),
-                      200 * 16, 140 * 16)
-
-            # Stand (vertical) + base (horizontal)
-            cx = size / 2
-            p.drawLine(int(cx), int(size * 0.80), int(cx), int(size * 0.90))
-            p.drawLine(int(cx - size * 0.18), int(size * 0.90),
-                       int(cx + size * 0.18), int(size * 0.90))
-        finally:
-            p.end()
-        return QIcon(pix)
-
-    def _ensure_alwayson_tray_icon(self):
-        """Лениво создаёт QSystemTrayIcon, служащий глобальным переключателем
-                Always-On и индикатором визуального состояния.
-        
-                Пиктограмма микрофона рисуется программно: серая — когда Always-On
-                выключен, красная — при активном прослушивании. Соглашение повторяет
-                OBS / Zoom / Discord (серый = готов/выключен, красный = работает).
-        
-                Иконка создаётся один раз и остаётся видимой всё время жизни окна
-                Workbench. Показ/скрытие слота трея заставляет Windows перестраивать
-                область уведомлений (эффект «подпрыгивания» иконок), поэтому слот
-                закрепляется навсегда, а с изменением состояния меняются только
-                pixmap, подсказка и формулировки меню.
-        
-                Одиночный щелчок переключает Always-On. Правый щелчок показывает
-                небольшое меню с тем же переключателем и ярлыком
-                «Open Voice in Sidekick»."""
-        if hasattr(self, '_alwayson_tray_icon'):
-            return
-        from PyQt6.QtWidgets import QSystemTrayIcon, QMenu
-        from PyQt6.QtGui import QColor
-
-        if not QSystemTrayIcon.isSystemTrayAvailable():
-            self._alwayson_tray_icon = None
-            return
-
-        # Material grey 600 (off) and red 800 (live).
-        self._alwayson_tray_icon_normal = self._draw_mic_icon(QColor(0x75, 0x75, 0x75))
-        self._alwayson_tray_icon_red = self._draw_mic_icon(QColor(0xC6, 0x28, 0x28))
-
-        tray = QSystemTrayIcon(self._alwayson_tray_icon_normal, self)
-        tray.setToolTip(self.tr("Voice – Always-On is OFF. Click to start."))
-
-        menu = QMenu(self)
-        toggle_action = menu.addAction("▶ Start Always-On")
-        toggle_action.triggered.connect(self._toggle_alwayson_listening)
-        menu.addSeparator()
-        open_action = menu.addAction("🎤 Open Voice")
-        open_action.triggered.connect(self._open_voice_in_workbench)
-        tray.setContextMenu(menu)
-        self._alwayson_tray_toggle_action = toggle_action
-
-        tray.activated.connect(self._on_alwayson_tray_activated)
-        self._alwayson_tray_icon = tray
-        tray.show()
-
-    def _on_alwayson_tray_activated(self, reason):
-        """Обработчик щелчка по иконке трея — одиночный щелчок переключает Always-On."""
-        from PyQt6.QtWidgets import QSystemTrayIcon
-        if reason == QSystemTrayIcon.ActivationReason.Trigger:
-            self._toggle_alwayson_listening()
-
-    def _update_alwayson_tray_icon(self, status: str):
-        """Переключает иконку трея между неактивным и активным видом по текущему
-                статусу слушателя. Иконка всегда остаётся видимой — меняются только
-                pixmap, подсказка и формулировки меню."""
-        self._ensure_alwayson_tray_icon()
-        tray = getattr(self, '_alwayson_tray_icon', None)
-        if tray is None:
-            return
-
-        active = status in ("listening", "waiting", "recording", "processing")
-
-        # Skip every tray API call when the active/inactive state hasn't changed.
-        # setIcon() and setToolTip() both trigger a Windows notification-area
-        # repaint that briefly hides the icon. The VAD cycle emits three status
-        # changes per spoken command (recording → processing → listening), all of
-        # which map to the same "active" state, so we can safely ignore them.
-        if getattr(self, '_alwayson_tray_active', None) == active:
-            return
-        self._alwayson_tray_active = active
-
-        tray.setIcon(
-            self._alwayson_tray_icon_red if active
-            else self._alwayson_tray_icon_normal
-        )
-        tray.setToolTip(
-            "Voice – Always-On listening. Click to stop." if active
-            else "Voice – Always-On is OFF. Click to start."
-        )
-        action = getattr(self, '_alwayson_tray_toggle_action', None)
-        if action is not None:
-            action.setText("⏹ Stop Always-On" if active else "▶ Start Always-On")
-
-    def _on_alwayson_speech(self, text: str):
-        """Обрабатывает «сырое» распознанное сообщение от слушателя Always-On."""
-        self.log(f"🎤 Heard: {text}")
-
-    def _on_alwayson_command(self, phrase: str, result: str):
-        """Обрабатывает выполнение команды слушателем Always-On."""
-        self.log(f"🎤 Command: {phrase} → {result}")
-        self.status_bar.showMessage(f"🎤 {result}", 3000)
-
-    def _on_alwayson_dictation(self, text: str):
-        """Обрабатывает продиктованный текст от слушателя Always-On
-                (команда не распознана).
-        
-                Маршрутизируется через общий кросс-прикладной хелпер, чтобы
-                Always-On, push-to-talk по F9 и глобальная голосовая горячая клавиша
-                вели себя одинаково независимо от того, какое приложение в фокусе.
-        
-                Полностью пропускается в двух случаях:
-        
-                1. v1.10.196 — слушатель был запущен через Ctrl+Alt+V (push-to-talk
-                   для команд). Пользователь явно удерживал горячую клавишу, чтобы
-                   отдать *команду*, а не надиктовать текст; если фраза не совпала
-                   с определённой командой, мы молча её отбрасываем, а не печатаем
-                   «next» / «select all» и т.п. в поле в фокусе. Флаг остаётся
-                   установленным до полной остановки слушателя (см. логику сброса
-                   в ``_update_alwayson_ui``), поэтому поздние транскрипции,
-                   пришедшие после отпускания клавиш, тоже отбрасываются.
-        
-                2. Пользователь перевёл Always-On в режим «только команды»
-                   (вкладка Voice → «Listen for commands only»). Эффект тот же:
-                   нераспознанная речь пишется в журнал, но не вводится — диктовка
-                   зарезервирована за явным путём push-to-talk
-                   (удерживать Ctrl+Shift+Space)."""
-        if getattr(self, '_voice_command_ptt_owned', False):
-            self.log(f"💬 Command PTT mode, dropping unmatched speech: {text!r}")
-            return
-        try:
-            settings = self.load_dictation_settings()
-            if settings.get('alwayson_commands_only', False):
-                self.log(f"💬 Heard (commands-only mode, not dictated): {text}")
-                return
-        except Exception:
-            pass
-        self._insert_dictated_text(text)
-
-    def _on_alwayson_status(self, message: str):
-        """Обрабатывает обновления статуса от слушателя Always-On."""
-        self.log(message)
-        if hasattr(self, 'alwayson_status_label'):
-            # Keep status label updated but don't override state-based status
-            pass
-
-    def _on_alwayson_error(self, error: str):
-        """Обрабатывает ошибки от слушателя Always-On."""
-        self.log(f"❌ Always-on error: {error}")
-        QMessageBox.warning(self, "Always-On Error", f"Voice listener error:\n\n{error}")
-
-    def _on_alwayson_vad_status(self, status: str):
-        """Обрабатывает изменения статуса VAD (ожидание/запись/обработка).
-        
-                v1.10.198: также запоминает последнее состояние в
-                ``_voice_command_ptt_last_vad_state``, чтобы обработчик отпускания
-                PTT мог решить — останавливаться немедленно или отложить. Управляет
-                отложенной остановкой: если пользователь отпустил сочетание клавиш,
-                когда utterance ещё обрабатывался, мы ждём, пока VAD не вернётся
-                в состояние простоя, и только потом демонтируем слушатель — это даёт
-                Vosk время завершить транскрипцию, чтобы длинные фразы вроде
-                «select all» не обрезались."""
-        self._voice_command_ptt_last_vad_state = status
-        self._update_alwayson_ui(status)
-
-        # If a PTT release scheduled a deferred stop and VAD has now
-        # returned to idle, the utterance has drained — safe to stop.
-        # 'listening' and 'waiting' are both valid idle states
-        # depending on listener version.
-        if getattr(self, '_voice_command_ptt_pending_stop', False):
-            if status in ('listening', 'waiting'):
-                self._do_voice_command_ptt_stop()
-
-    def _toggle_alwayson_from_statusbar(self):
-        """Переключает постоянное прослушивание по щелчку индикатора в строке состояния."""
-        self._toggle_alwayson_listening()
-
-    def _toggle_alwayson_from_grid_btn(self, checked: bool, btn: QPushButton):
-        """Переключает постоянное прослушивание по кнопке на панели инструментов сетки."""
-        self._toggle_alwayson_listening()
-        # Button state will be updated by _update_alwayson_ui
-
     def _create_system_prompts_tab(self):
         """Создаёт содержимое вкладки настроек System Prompts (слой 1)."""
         from PyQt6.QtWidgets import QGroupBox, QPushButton, QTextEdit, QComboBox
@@ -27747,30 +27250,6 @@ class SupervertalerQt(QMainWindow):
         dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
         toolbar_layout.addWidget(dictate_btn)
         
-        # Always-On Voice toggle button
-        alwayson_btn = QPushButton(self.tr("🎧 Always-On: OFF"))
-        alwayson_btn.setCheckable(True)
-        alwayson_btn.setChecked(False)
-        alwayson_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #757575;
-                color: white;
-                font-weight: bold;
-                padding: 3px 5px;
-                border-radius: 3px;
-            }
-            QPushButton:checked {
-                background-color: #2E7D32;
-            }
-            QPushButton:focus {
-                outline: none;
-            }
-        """)
-        alwayson_btn.setToolTip(self.tr("Always-On listening – continuously monitors the mic and transcribes automatically\nNo need to press the dictation shortcut"))
-        alwayson_btn.clicked.connect(lambda checked: self._toggle_alwayson_from_grid_btn(checked, alwayson_btn))
-        toolbar_layout.addWidget(alwayson_btn)
-        self.grid_alwayson_btn = alwayson_btn  # Store reference
-
         toolbar_layout.addWidget(QLabel("|"))  # Separator
 
         # Log button – opens the session log in its own movable window.
@@ -53928,9 +53407,8 @@ class SupervertalerQt(QMainWindow):
                 ``Qt.QueuedConnection``. emit() опрашивателя срабатывает из его
                 рабочего потока опроса, а дефолтный AutoConnection PyQt здесь
                 выбирает DirectConnection (оба QObject живут в главном потоке),
-                что запустило бы слот в потоке опроса. Слот вызывает
-                ``_toggle_alwayson_listening``, который трогает QWidgets (метки
-                статуса, индикатор, иконку трея) → краш между потоками.
+                что запустило бы слот в потоке опроса. Слот трогает QWidgets
+                (метки статуса) → краш между потоками.
                 Принудительный QueuedConnection проводит слот через главный цикл
                 событий."""
         existing = getattr(self, '_command_ptt_release_poller', None)
@@ -54009,8 +53487,7 @@ class SupervertalerQt(QMainWindow):
                 v1.10.196: флаг принадлежности PTT ставится ДО вызова
                 переключения, чтобы любые сигналы обновления UI, испущенные
                 при запуске слушателя (например ``listening_started``), видели
-                правильный режим и подавляли свой хром (см.
-                ``_update_alwayson_ui``)."""
+                правильный режим и подавляли свой хром."""
         listener_already_running = (
             self.voice_listener is not None
             and getattr(self.voice_listener, 'is_listening', False)
@@ -54023,10 +53500,9 @@ class SupervertalerQt(QMainWindow):
             self._voice_command_ptt_owned = False
             return
 
-        # v1.10.196: set the flag *before* toggling. Any signal-driven
-        # UI updates that run during _toggle_alwayson_listening (e.g.
-        # listening_started → _update_alwayson_ui) will then see PTT
-        # mode and skip the big "ALWAYS-ON" / "REC" indicator chrome.
+        # v1.10.196: set the flag *before* toggling so any signal-driven
+        # UI updates triggered while starting the listener would have
+        # seen PTT mode and skipped the indicator chrome.
         self._voice_command_ptt_owned = True
 
         # v1.10.197: tell the voice-command manager to queue keystroke
@@ -54051,22 +53527,10 @@ class SupervertalerQt(QMainWindow):
         except Exception as e:
             self.log(f"⚠ Could not enable PTT keystroke deferral: {e}")
 
-        try:
-            self._toggle_alwayson_listening()
-            self.status_bar.showMessage(
-                "🎙️ Listening for command… (release hotkey to stop)", 0
-            )
-        except Exception as e:
-            self.log(f"⚠ Command PTT press failed: {e}")
-            self._voice_command_ptt_owned = False
-            # If startup failed, drop the keystroke-defer too.
-            try:
-                if self.voice_command_manager and hasattr(
-                    self.voice_command_manager, 'set_defer_keystrokes'
-                ):
-                    self.voice_command_manager.set_defer_keystrokes(False)
-            except Exception:
-                pass
+        # Batch #8.2: ContinuousVoiceListener больше не создаётся
+        # (Always-On удалён), запускать нечего. Аккорд voice_command_ptt
+        # уходит вместе с Voice-фичей в 8.3/8.4; до тех пор press — no-op
+        # с уже подключённой логикой deferral/release ниже.
 
     def _on_voice_command_ptt_release(self):
         """Отпущена горячая клавиша — остановить слушателя, только если его
@@ -54092,12 +53556,9 @@ class SupervertalerQt(QMainWindow):
                 действия.
         
                 v1.10.196: флаг ``_voice_command_ptt_owned`` здесь НЕ
-                сбрасывается. Он сбрасывается позже, в ``_update_alwayson_ui``,
-                когда слушатель подтвердит полную остановку. Причина: слушатель
-                может испустить финальные ``text_for_dictation`` или
-                ``command_detected`` для аудио, захваченного до отпускания
-                клавиши. Пока флаг True, эта отложенная диктовка отбрасывается
-                (см. ``_on_alwayson_dictation``)."""
+                сбрасывается. Он сбрасывается позже, в
+                ``_do_voice_command_ptt_stop``, вместе с демонтированным
+                слушателем."""
         if not getattr(self, '_voice_command_ptt_owned', False):
             return
 
@@ -54118,8 +53579,8 @@ class SupervertalerQt(QMainWindow):
             return
 
         # Active utterance in flight. Mark pending and wait for the
-        # listener's VAD to transition back to idle (see
-        # _on_alwayson_vad_status), or for a 1500 ms hard timeout.
+        # listener's VAD to transition back to idle (reported via the
+        # deferred-stop path), or for a 1500 ms hard timeout.
         self._voice_command_ptt_pending_stop = True
         self.status_bar.showMessage("🎙️ Finishing transcription…", 0)
         try:
@@ -54133,9 +53594,8 @@ class SupervertalerQt(QMainWindow):
     def _do_voice_command_ptt_stop(self):
         """Реально демонтирует слушателя PTT. Вызывается либо немедленно (из
                 release, когда VAD уже был idle), либо из QTimer жёсткого
-                таймаута (поставленного в release при высказывании в полёте),
-                либо из ``_on_alwayson_vad_status``, когда VAD возвращается
-                в idle после отложенного отпускания. Идемпотентен — безопасно
+                таймаута (поставленного в release при высказывании в полёте).
+                Идемпотентен — безопасно
                 вызывать многократно; вторые и последующие вызовы
                 отсекаются по состоянию флагов ``_voice_command_ptt_pending_stop``
                 / ``_voice_command_ptt_owned``."""
@@ -54144,15 +53604,14 @@ class SupervertalerQt(QMainWindow):
            not getattr(self, '_voice_command_ptt_owned', False):
             return
         self._voice_command_ptt_pending_stop = False
+        # Batch #8.2: owned-flag reset used to happen in the Always-On UI
+        # update ("stopped") via listening_stopped; with that cluster gone
+        # the stop path itself is the single place that clears it.
+        self._voice_command_ptt_owned = False
 
-        try:
-            if self.voice_listener is not None and getattr(
-                self.voice_listener, 'is_listening', False
-            ):
-                self._toggle_alwayson_listening()
-                self.status_bar.clearMessage()
-        except Exception as e:
-            self.log(f"⚠ Command PTT stop failed: {e}")
+        # Batch #8.2: демонтаж Always-On слушателя ушёл вместе с кластером
+        # Always-On; демонтировать нечего (voice_listener всегда None).
+        # Сброс индикатора строки состояния также ушёл с кластером.
 
         # v1.10.197: drain any keystroke commands that were queued
         # during the hold. Delayed via QTimer so the user's physical
@@ -54657,9 +54116,8 @@ class SupervertalerQt(QMainWindow):
                 4. Последний откат → клипборд, чтобы пользователь вставил
                    вручную любым шорткатом своего приложения.
         
-                Используется и ``on_dictation_complete`` (push-to-talk F9
-                и глобальная Voice-клавиша), и ``_on_alwayson_dictation``
-                (непрерывный слушатель), поэтому поведение одинаково на всех
+                Используется ``on_dictation_complete`` (push-to-talk F9
+                и глобальная Voice-клавиша), поэтому поведение одинаково на всех
                 поверхностях."""
         focused_widget = QApplication.focusWidget()
 
@@ -66691,7 +66149,6 @@ class SuperlookupTab(QWidget):
             sk_shortcut = sm.get_shortcut('sidekick_open').lower()
             cb_shortcut = sm.get_shortcut('sidekick_open_clipboard').lower()
             pt_shortcut = sm.get_shortcut('voice_dictate').lower()
-            ao_shortcut = sm.get_shortcut('voice_alwayson_toggle').lower()
             # v1.10.193: push-to-talk for voice COMMANDS — separate
             # from the dictate chord and the always-on toggle.
             cmd_ptt_shortcut = (sm.get_shortcut('voice_command_ptt') or '').lower()
@@ -66706,7 +66163,6 @@ class SuperlookupTab(QWidget):
             if _skip('mt_quick_lookup'):              qt_shortcut = ''
             if _skip('sidekick_open_clipboard'):      cb_shortcut = ''
             if _skip('voice_dictate'):                pt_shortcut = ''
-            if _skip('voice_alwayson_toggle'):  ao_shortcut = ''
             # Defensive — voice_command_ptt may not be present in
             # older settings files; the helper raises on unknown ids
             # in some versions, so wrap in try.
@@ -66719,7 +66175,6 @@ class SuperlookupTab(QWidget):
             qt_shortcut = 'ctrl+alt+q'
             cb_shortcut = 'ctrl+shift+c'
             pt_shortcut = 'ctrl+shift+space'
-            ao_shortcut = 'ctrl+alt+a'
             cmd_ptt_shortcut = 'ctrl+alt+v'
 
         # No platform-specific rewrite needed: GlobalHotkeyManager's macOS
@@ -66762,7 +66217,6 @@ class SuperlookupTab(QWidget):
                     (qt_shortcut, self._on_pynput_quicktrans),
                     (cb_shortcut, self._on_pynput_clipboard),
                     (pt_shortcut, self._on_pynput_pushtotalk),
-                    (ao_shortcut, self._on_pynput_alwayson_toggle),
                     (cmd_ptt_shortcut, self._on_pynput_command_ptt),
                 ]
                 _to_register = [(s, cb) for s, cb in _bindings if s]
@@ -67096,17 +66550,6 @@ class SuperlookupTab(QWidget):
         except Exception as e:
             print(f"[Voice] Error in push-to-talk hotkey handler: {e}")
 
-    def _on_pynput_alwayson_toggle(self):
-        """Горячая клавиша переключения Voice Always-On — срабатывает
-                в фоновом потоке pynput.
-        
-                ВАЖНО: здесь НЕ делать никакой работы — см. докстринг
-                _on_pynput_superlookup."""
-        try:
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(0, self._handle_alwayson_toggle_hotkey)
-        except Exception as e:
-            print(f"[Voice] Error signaling main thread: {e}")
 
     def _on_pynput_command_ptt(self):
         """Нажатие горячей клавиши голосового COMMAND push-to-talk —
@@ -67125,24 +66568,6 @@ class SuperlookupTab(QWidget):
         except Exception as e:
             print(f"[Voice] Error signaling main thread: {e}")
 
-    @pyqtSlot()
-    def _handle_alwayson_toggle_hotkey(self):
-        """Выполняется в главном потоке Qt — включает/выключает непрерывное
-                прослушивание Always-On.
-        
-                В отличие от push-to-talk (записывает одно высказывание), это
-                запускает непрерывное прослушивание до следующего нажатия.
-                Визуальная обратная связь: иконка в системном трее появляется
-                при активном Always-On, плюс кнопка на панели сетки и вкладка
-                Voice Sidekick обновляются через _update_alwayson_ui."""
-        try:
-            mw = self.main_window or self.window()
-            if mw and hasattr(mw, '_toggle_alwayson_listening'):
-                mw._toggle_alwayson_listening()
-            else:
-                print("[Voice] Workbench unavailable for Always-On toggle")
-        except Exception as e:
-            print(f"[Voice] Error in Always-On toggle handler: {e}")
 
     @pyqtSlot()
     def _handle_command_ptt_press_hotkey(self):
