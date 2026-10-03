@@ -112,13 +112,8 @@ AST-проверка самодостаточности: web-группа соз
 
 ### 2.4 Группа TMs/Termbases (KEEP без правок, ядро)
 
-`create_tm_results_tab` (62784), `create_termbase_results_tab` (62876),
-`create_mt_results_tab` (62946) + MT-хвост (`_perform_mt_lookup`,
-`_call_mymemory`, `_update_mt_provider_status`, `_open_mt_settings`,
-`display_mt_results`, `_copy_mt_result`, `on_mt_result_double_click`) —
-MT-результаты в главном поиске остаются (MT-вкладка результатов была удалена
-ранее, но MT-блок в `perform_lookup` выводит в общий UI; удаление MT — не в
-объёме 8.10). Поиск: `perform_lookup`, `_on_search_*`, `search_termbases`
+`create_tm_results_tab` (62784), `create_termbase_results_tab` (62876).
+Поиск: `perform_lookup`, `_on_search_*`, `search_termbases`
 (66082, 229 строк), `get_selected_tm_ids`/`get_selected_termbase_ids`
 (колонка SuperLookup на вкладках TMs/Termbases, `tm_metadata_mgr`),
 `get_search_direction`, `get_language_filters`, `swap_language_filters`,
@@ -140,6 +135,34 @@ MT-результаты в главном поиске остаются (MT-вк
 которого **не существует** — молчаливый no-op через bare `except`
 (grep `unregister_global_hotkey` — единственное вхождение 65038). Можно поправить
 попутно (не блокер).
+
+### 2.4a Мёртвый MT-хвост SuperLookup (DELETE-SAFE, 8 методов + вызов, ~375 строк)
+
+Дополнение по вопросу Дмитрия «где MT-столбцы в UI?» — их нигде нет: вкладка
+MT-результатов вырезана из `init_ui` ранее (комментарий 62764 «MT tab removed –
+handled by QuickTrans»), `create_mt_results_tab()` не вызывается нигде
+(grep — только def), поэтому `mt_results_table` никогда не создаётся,
+`_perform_mt_lookup` молча выходит на guard'е `hasattr(self, 'mt_results_table')`
+(63103), MyMemory-HTTP не выполняется, `display_mt_results` тоже выходит по
+guard'у (65830). Вся группа — мёртвый код без UI-следа:
+
+| Метод | Строки | строк |
+|---|---|---|
+| `create_mt_results_tab` | 62946–63023 | 78 |
+| `_open_mt_settings` | 63025–63037 | 13 |
+| `_update_mt_provider_status` | 63039–63090 | 52 |
+| `_perform_mt_lookup` | 63092–63205 | 114 |
+| `_call_mymemory` | 63207–63245 | 39 |
+| `display_mt_results` | 65823–65882 | 60 |
+| `_copy_mt_result` | 65884–65888 | 5 |
+| `on_mt_result_double_click` | 65890–65895 | 6 |
+
+Плюс вызов в `perform_lookup` (65176–65184, ~6 строк), `self.search_mt_enabled`
+в `__init__` (62560) и dead `create_mt_settings_subtab` (уже учтён в §2.1).
+Все внутренние ссылки замкнуты внутри группы (grep: 62983/62995/63012 —
+соединения внутри мёртвого `create_mt_results_tab`; 65870 — внутри
+`display_mt_results`). Решение Дмитрия (ответ на §10 в.4, 2026-10-03):
+MT-блок **удаляется в 8.10**.
 
 ### 2.5 Группа хоткеев OTHER (не 8.10, покрывается 8.2/8.3/8.5)
 
@@ -348,33 +371,39 @@ PyQt6-WebEngine из requirements/сборки уменьшит full-install н�
 **Состав (один код-коммит «Batch #8.10: trim SuperLookup to TMs+Termbases»):**
 1. Удалить web-группу: 19 методов §2.1 (1258 строк).
 2. Удалить hotkey-SL/AHK-группу §2.2 (14 методов, ~542 строки).
-3. `register_global_hotkey`: оставить только `qt_shortcut`; убрать
+3. Удалить мёртвый MT-хвост §2.4a (8 методов + вызов в `perform_lookup`,
+   ~375 строк; решение Дмитрия 2026-10-03).
+4. `register_global_hotkey`: оставить только `qt_shortcut`; убрать
    `sl_shortcut`, `sk_shortcut` (мёртв), voice/clipboard-переменные, если
    ещё живы после 8.2/8.3/8.5 (NEEDS-SPLIT).
-4. Точечные правки SHARED-KEEP §2.3 (`__init__`, `init_ui` + новый текст
+5. Точечные правки SHARED-KEEP §2.3 (`__init__`, `init_ui` + новый текст
    описания без Ctrl+Alt+L, `on_results_tab_changed`, `perform_lookup`,
    `search_with_query`).
-5. SuperLookup Settings: убрать радио «Ctrl+Alt+L lands on:» +
+6. SuperLookup Settings: убрать радио «Ctrl+Alt+L lands on:» +
    `_load_superlookup_landing_pref`/`_on_landing_pref_changed` + константы
    `SUPERLOOKUP_LANDING_TAB_*`; убрать `settings_subtabs` (останется пустым);
    оставить header + resource_info (объяснение Read-флагов). Создание
-   Settings-вкладки (62770–62772) остаётся.
-6. Внешняя проводка: Edit menu 9081–9088, QShortcut 7295–7300, Help AHK-пункт
+   Settings-вкладки (62770–62772) остаётся. Решение Дмитрия (2026-10-03,
+   после контрольного эксперимента): не чинить, удалять целиком — наблюдаемое
+   «работающее» поведение было дефолтным индексом TMs + памятью подвкладки
+   в сессии.
+7. Внешняя проводка: **Edit menu «🔍 SuperLookup...» 9081–9088 — удалить
+   целиком (решение Дмитрия)**, QShortcut 7295–7300, Help AHK-пункт
    9413–9414 + `_show_ahk_setup_from_menu`, closeEvent (ahk-блоки + вызовы и
    стаб `_cleanup_web_views`), `_setup_superlookup_hotkeys` докстринг/лог.
-7. `main()`: убрать QtWebEngine-строки (67989, 67993, StderrFilter 67997–68023,
+8. `main()`: убрать QtWebEngine-строки (67989, 67993, StderrFilter 67997–68023,
    68034, комментарий 67967).
-8. shortcut_manager: удалить запись `tools_universal_lookup` (174–179) +
+9. shortcut_manager: удалить запись `tools_universal_lookup` (174–179) +
    legacy-алиасы `global_superlookup` (792, 874) — с tolerance-проверкой
    старых настроек.
-9. requirements.txt: убрать `PyQt6-WebEngine>=6.5.0` (13) и `ahk...` (62).
-10. Опционально (отдельным решением): удалить модуль-сироту
-    `modules/feature_manager.py` (0 потребителей) и мёртвые
-    `home_lookup_widget`-блоки в detach/reattach.
+10. requirements.txt: убрать `PyQt6-WebEngine>=6.5.0` (13) и `ahk...` (62).
+11. `modules/feature_manager.py` и pyproject `web = []` — **НЕ в 8.10**:
+    отдельным решением (Дмитрий, 2026-10-03). Опциональная уборка мёртвых
+    `home_lookup_widget`-блоков в detach/reattach остаётся в 8.10.
 
-**Размер:** примерно −1990 строк внутри SuperlookupTab (5241 → ~3250) и
-~−80 строк вне класса (main, меню, closeEvent, shortcut_manager) ≈
-**−2070 строк чистыми** (wc -l до/после обязателен).
+**Размер:** примерно −2172 строки внутри SuperlookupTab (web 1258 + hotkey-SL
+542 + MT-хвост ~375 − ничего) и ~−80 строк вне класса ≈ **−2250 строк
+чистыми** (wc -l до/после обязателен).
 
 **Риск:** низкий-средний. Главные зоны: (а) `register_global_hotkey` —
 недорезать нельзя, Ctrl+Alt+Q должен выжить; (б) `perform_lookup` — правки
@@ -472,20 +501,21 @@ Settings», наличие `source_text`/`search_btn`/`lang_from_combo`/`lang_to
    содержат одинаковый «непроводной» код, проверено grep+sed); если TMs —
    наблюдение объясняется дефолтным индексом 0, а не настройкой.
 
-## 10. Вопросы к Дмитрию
+## 10. Вопросы к Дмитрию — ОТВЕТЫ (2026-10-03)
 
-1. **Edit menu «🔍 SuperLookup...» (Ctrl+Alt+L)**: удалить пункт целиком
-   (рекомендация — остаётся Tools → «Super&lookup (Ctrl+K)») или оставить
-   пункт без горячей клавиши?
-2. **`superlookup_landing_tab`**: подтверждаете полное удаление радио-UI и
-   забвение ключа (фолбэк не нужен, т.к. «приземление» никогда не было
-   подключено к фактическому переключению вкладок)?
-3. **`modules/feature_manager.py`** — модуль-сирота (0 импортов): удалить в
-   8.10 попутно или отдельным решением (вместе с `web = []` в pyproject)?
-4. **MT-блок SuperLookup** (`_perform_mt_lookup`/MyMemory и MT-столбец
-   результатов): остаётся? В постановке он не упомянут — по умолчанию KEEP.
-5. **`_prewarm_ahk`**: оставить (рекомендация — ускоряет первую вставку
-   QuickTrans из внешнего приложения) или убрать вместе с AHK-повесткой?
+1. **Edit menu «🔍 SuperLookup...» (Ctrl+Alt+L)**: → **удалить пункт целиком**
+   (Дмитрий). Остаётся Tools → «Super&lookup (Ctrl+K)».
+2. **`superlookup_landing_tab`**: → **не чинить, полное удаление радио-UI и
+   забвение ключа** (Дмитрий, после контрольного эксперимента, подтвердившего
+   пробу: открывается TMs-дефолт, «Settings» — память подвкладки в сессии).
+3. **`modules/feature_manager.py`**: → **отдельным решением** вместе с
+   `web = []` в pyproject; в 8.10 НЕ входит (Дмитрий).
+4. **MT-блок SuperLookup**: Дмитрий спросил, где MT-столбцы в UI, — их нет:
+   вся группа мёртвая (§2.4a), → **удалить в 8.10** (Дмитрий).
+5. **`_prewarm_ahk`**: → **оставить** (рекомендация из §6.4 принята по
+   умолчанию; возражений нет): прогревает AHK-бинарь для paste-back QuickTrans,
+   на машинах без AHK — мгновенный no-op (проба: «AHK not found – will use
+   PowerShell fallback»).
 
 ---
 Аудит read-only; рабочие файлы `D:\Temp\SupervertalerPortable\refactoring\b8-a2\`
