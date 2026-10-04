@@ -221,6 +221,113 @@ Ollama-промпт пути A, QuickLauncher, Proofread, Chat. Т.е. по пр
 4. Перепутанные дефолты `or 'nl'/'en'` в прогрессивных совпадениях — отдельный
    баг того же класса (сейчас срабатывает только при пустых кодах).
 
+**Дополнение от Дмитрия (после первого релиза отчёта):** Preview Prompts для
+сегмента 16 показывает «en → ru». Строка «🌐 {source} → {target}» строится из
+`current_project.source_lang/target_lang` (`_preview_combined_prompt_from_grid`,
+Supervertaler.py:45989-45990 и :46011) — т.е. **в метаданных проекта
+`target_lang == 'ru'`**, и все AI-пути (A, B, прогрессивные, Match Panel — см.
+таблицу 3.1) честно просят модель переводить на русский. Нидерландский текст в
+столбце Target приходит из TM/пред-перевода/ручного ввода, а не от модели.
+Дефолт проекта — 'nl' (`modules/models.py:305`); диалог нового проекта берёт
+языковую пару из настроек приложения (Supervertaler.py:28607+, дефолт из
+Settings → Language Pair) — откуда взялся 'ru' в данном .svproj, проверить
+установку. Это, вероятно, главное объяснение симптома 4 (подтверждается тем,
+что qwen3.8-27b отвечает «по-русски в обоих режимах» — оба режима просят ru).
+
+### 3.5 Состав системного промпта и пример на нидерландском
+
+#### 3.5.1 Где живёт системный промпт и как собирается
+
+* **Встроенный дефолт**: `UnifiedPromptManagerQt._get_default_system_template`
+  (`modules/unified_prompt_manager_qt.py:3991-4041`) — один статичный шаблон
+  для всех режимов (single/batch_docx/batch_bilingual). Измерено: 2 969 символов
+  в сыром виде, ≈3 026 с разделителем «**YOUR TRANSLATION (provide ONLY the
+  translated text, no numbering or labels):**».
+* **Переопределение пользователем**: `self.system_templates` (:1063) заполняется
+  в `_load_system_templates` (:3894-3938) по приоритету: (1) файл
+  `system_prompts_layer1.json` в каталоге библиотеки промптов (user_data —
+  НЕ читался в рамках G2), (2) старые `1_System_Prompts/*.md`, (3) дефолт.
+  Т.е. фактический текст у Дмитрия может быть его правкой, а не дефолтом.
+* **Сборка** (`build_final_prompt`, :4076-4150): system_template (с подстановкой
+  `{{SOURCE_LANGUAGE}}`/`{{TARGET_LANGUAGE}}`/`{{SOURCE_TEXT}}`/`{{TARGET_TEXT}}`)
+  + `# CUSTOM PROMPT` (active_primary_prompt дословно) + `# ADDITIONAL
+  INSTRUCTIONS` (attached) + `# TERMBASE` + `# FUZZY TM MATCH` + разделитель.
+  Preview Prompts вызывает тот же `build_final_prompt` (заголовок диалога
+  «System Prompt + Custom Prompts + segment text» — Supervertaler.py:46036).
+* **Сверка с 3 844 символами Дмитрия**: дефолт даёт ≈3 026; остаток ≈820 —
+  custom prompt из библиотеки и/или текст сегмента/глоссарий (у превью горит
+  «✓ Custom prompt attached» при непустом primary prompt).
+
+#### 3.5.2 Все места с зашитым нидерландским (или иным не-целевым) примером
+
+Все примеры **статичны** — плейсхолдеров внутри примеров нет, от целевого языка
+не зависят:
+
+| Место | Содержимое |
+|---|---|
+| `unified_prompt_manager_qt.py:4013` (блок INLINE FORMATTING TAG PRESERVATION) | `"Click the <b>Save</b> button" → "Klik op de knop <b>Opslaan</b>"` — **нужный Дмитрию пример** |
+| `unified_prompt_manager_qt.py:4028-4031` (блок CAT TOOL TAG PRESERVATION) | 4 примера с нидерландским: `'[1}De uitvoer{2]' → '[1}The exports{2]'`, `'<410>De uitvoer van machines</410>' → '…Exports of machinery…'`, `'He debuted against |Juventus FC|…' → 'Hij debuteerde tegen |Juventus FC| in 2001'`, multiple |
+| `unified_prompt_manager_qt.py:4033-4035` (LANGUAGE-SPECIFIC NUMBER FORMATTING) | «If the target language is **Dutch**, **French**, **German**…» — легитимное правило, но с нидерландским уклоном |
+| `unified_prompt_manager_qt.py:745-800` (`DOMAIN_TEMPLATES`, 'patent'/'legal') | статичные NL→EN допущения генератора промптов AI Assistant: маппинги `omvattende>comprising`, `uitvoeringsvorm>embodiment` и др., «If the Dutch text is long, repetitive…», «Meester + surname» — используются через `_get_domain_template` (:5299-5301), в переводный системный промпт не попадают |
+
+Совпадения «uitvoer» в Supervertaler.py (:30194-30345) — комментарии кода о
+нормализации синонимов термбазы, не промпты. Dutch-паттерны в
+`llm_clients.py:647-689` — это `_clean_translation_response` (см. §2.3).
+
+#### 3.5.3 Условия включения тег-блоков
+
+* **В системном шаблоне** блоки «INLINE FORMATTING TAG PRESERVATION» (:4009-4015)
+  и «CAT TOOL TAG PRESERVATION» (:4017-4032) — статичный текст: включаются
+  **всегда**, когда путь использует `build_final_prompt` (A-cloud, B, Preview),
+  независимо от наличия тегов в сегменте.
+* **Условные тег-правила вне шаблона** (единственные «умные»): batch user-промпт —
+  правило нумерованных `<N>`-тегов только при `_has_inline_tags`
+  (Supervertaler.py:5793-5804); A-ollama-промпт — только при
+  `re.search(r'</?\d+/?>', segment.source)` (:~58048); отдельные шаблоны
+  FuzzyFixer/AutoTagger.
+* **Список форматов** в шаблоне: `<b>/<i>/<u>`; memoQ `[1}…{2]`; Trados Studio
+  `<410>…</410>` (XML); CafeTran `|…|`; вне шаблона — нумерованные `<1>…</1>`,
+  `<2/>`.
+
+#### 3.5.4 Различия промптов между путями
+
+| Путь | Системный промпт | Состав и порядок | Тег-блоки | Порядок размера |
+|---|---|---|---|---|
+| A (Editor, cloud) | **нет** (system=None) | весь `build_final_prompt` ≈3.0k+custom уходит в **user**-сообщение | оба блока всегда | тяжёлый |
+| A (Editor, ollama-ветка) | нет | свой вшитый промпт (роль + контекст окружения + сегмент) | правило `<N>` условно, CAT-блока нет | средний |
+| B (batch) | base_prompt = `build_final_prompt(...)` → в system; **сплит по `**SOURCE TEXT:**` не матчится с дефолтным шаблоном** (там «{{SOURCE_LANGUAGE}} text:»), поэтому base_prompt = весь промпт, включая текст первого сегмента и разделитель «**YOUR TRANSLATION…**» | system (шаблон+custom+хвост) + user (нумерованный список) | оба блока всегда + условное правило `<N>` в user | самый тяжёлый, с чужеродным хвостом |
+| C (Match Panel AI/LLM) | «You are a translation engine…» (quicktrans.py:477-482) | короткий вшитый user-промпт ≈250 симв. | нет | лёгкий |
+| D (Chat) | «You are an AI assistant for Supervertaler…» (chat_view_widget.py:809) + опц. Trados-контекст (:817) | question as user | нет | лёгкий |
+
+Вывод: системный промпт **не одинаковый** — A/B несут ≈3k шаблон с нидерландскими
+примерами (B — ещё и с первым сегментом в system), C/D — лёгкие. Одна и та же
+модель получает в разных режимах разные инструкции и разные «якорные» языки —
+это второй (после `target_lang='ru'`) вклад в симптом 4 и в разное поведение по
+режимам.
+
+#### 3.5.5 Предложения (описать, не применять)
+
+1. **Язык-нейтральные примеры**: в дефолтном шаблоне заменить нидерландские
+   примеры на бессмысленно-языковые («target keeps `<b>` around the word
+   corresponding to "Save"») или подставлять пример целевого языка из словаря по
+   `target_lang` (3–4 строки кода в `build_final_prompt`). Риск: низкий; эффект:
+   убрать чужой языковой сигнал из каждого запроса.
+2. **Условный тег-блок**: `build_final_prompt` уже получает `source_text` —
+   включать INLINE/CAT-блоки только при `re.search(r'</?[a-zA-Z0-9]+/?>', …)` /
+   memoQ-CafeTran-маркерах (по образцу batch-правила :5793). Экономия ≈1 500
+   символов на чистых сегментах, меньше расфокуса локальных моделей.
+3. **Короткий шаблон для локальных моделей**: добавить в
+   `system_prompts_layer1.json` ключ `single_compact` (≈300–500 симв.: роль,
+   направление «Translate to {{TARGET_LANGUAGE}}», только релевантное тег-правило)
+   и выбирать по провайдеру (`ollama`/`custom_openai` → compact) в месте вызова
+   `build_final_prompt` или внутри `get_system_template` (параметр от
+   вызывающего). Механизм загрузки/приоритетов в `_load_system_templates` уже
+   позволяет добавить ключ без ломки пользовательских правок.
+4. **Чистка CAT-упоминаний после 8.9**: после удаления memoQ/Trados/CafeTran
+   импортёров (батч 8.9) блок CAT TOOL TAG PRESERVATION с их примерами —
+   кандидат на сокращение/переписывание; до тех пор не трогать (примеры нужны
+   действующим форматам). Dutch-примеры (п.1) можно чистить уже сейчас.
+
 ---
 
 ## 4. Предложение исправлений (описано, НЕ применено)
