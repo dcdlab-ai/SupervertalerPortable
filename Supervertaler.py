@@ -345,8 +345,6 @@ from modules.superlookup import SuperlookupEngine  # Движок Superlookup
 from modules.pseudo_translate_dialog import run_pseudo_translation  # Псевдоперевод (диалог + применение)
 from modules.project_assets import bundle_source, resolve_source_path, ensure_target_dir, nest_in_own_folder  # Модель каталогов проекта (issue #228)
 from modules.voice_dictation_lite import QuickDictationThread  # Голосовая диктовка
-from modules.voice_commands import VoiceCommandManager, VoiceCommand  # Голосовые команды (в духе Talon)
-from modules.voice_command_dialog import VoiceCommandEditDialog  # Диалог правки голосовых команд.
 # ВАЖНО: в этом файле прямых ссылок на него нет (предположительно используется
 # через динамический импорт) — НЕ удалять.
 from modules.styled_widgets import (CheckmarkCheckBox, PurpleCheckmarkCheckBox, TealCheckmarkCheckBox, CheckmarkRadioButton,
@@ -6413,9 +6411,6 @@ class SupervertalerQt(QMainWindow):
         # Shortcut Manager for keyboard shortcuts (including enable/disable)
         self.shortcut_manager = ShortcutManager(Path(self.user_data_path) / "workbench" / "settings" / "shortcuts.json")
         
-        # Voice Command Manager for Talon-style voice commands
-        self.voice_command_manager = VoiceCommandManager(self.user_data_path, main_window=self)
-        
         # Continuous Voice Listener (always-on mode) - initialized on demand
         self.voice_listener = None  # Will be ContinuousVoiceListener when enabled
         
@@ -6701,7 +6696,6 @@ class SupervertalerQt(QMainWindow):
             self.spellcheck_manager = get_spellcheck_manager(str(self.user_data_path))
             self.fr_history = FindReplaceHistory(str(self.user_data_path))
             self.shortcut_manager = ShortcutManager(Path(self.user_data_path) / "workbench" / "settings" / "shortcuts.json")
-            self.voice_command_manager = VoiceCommandManager(self.user_data_path, main_window=self)
             
             # Update theme manager
             from modules.theme_manager import ThemeManager
@@ -9911,7 +9905,6 @@ class SupervertalerQt(QMainWindow):
         # four tabs now live in Workbench itself:
         #   Chat        → right_tabs "💬 Chat"
         #   Clipboard   → main_tabs "📋 Clipboard Manager"
-        #   Voice       → main_tabs "🎤 Voice"
         #   SuperLookup → main_tabs "🔍 SuperLookup"
         # v1.10.10 finished the cleanup: floating_assistant.py is
         # deleted and no code path references _floating_assistant
@@ -9973,7 +9966,6 @@ class SupervertalerQt(QMainWindow):
         # ============================================================
         self._superlookup_top_widget = None
         self._clipboard_top_widget = None
-        self._voice_top_widget = None
 
         from PyQt6.QtWidgets import QWidget as _QW
         superlookup_placeholder = _QW()
@@ -9983,10 +9975,6 @@ class SupervertalerQt(QMainWindow):
         clipboard_placeholder = _QW()
         self.main_tabs.addTab(clipboard_placeholder, "📋 Clipboard Manager")
         self.clipboard_tab_index = self.main_tabs.count() - 1
-
-        voice_placeholder = _QW()
-        self.main_tabs.addTab(voice_placeholder, "🎤 Voice")
-        self.voice_tab_index = self.main_tabs.count() - 1
 
         # 4. SETTINGS
         settings_tab = self.create_settings_tab()
@@ -9999,7 +9987,7 @@ class SupervertalerQt(QMainWindow):
         main_layout.addWidget(self.main_tabs)
 
         # v1.10.17: Esc-to-tray on the "quick lookup" top tabs.
-        # When the user is on SuperLookup / Clipboard / Voice –
+        # When the user is on SuperLookup / Clipboard –
         # which they typically reach via global hotkeys and treat as
         # popup utilities rather than full-screen work surfaces –
         # pressing Esc hides Workbench to the system tray, matching
@@ -11661,18 +11649,16 @@ class SupervertalerQt(QMainWindow):
     def _on_main_tab_changed(self, index: int):
         """Обработать смену главной вкладки (Grid/Project resources/Tools/Settings)."""
         try:
-            # Lazy-construct the v1.10.0 SuperLookup / Clipboard / Voice
+            # Lazy-construct the v1.10.0 SuperLookup / Clipboard
             # top tabs on first activation. Each helper is idempotent –
             # safe to call again on subsequent activations (it short-
             # circuits if already built). Keeps cold start fast by
-            # deferring the heavy SuperLookup / Voice widget construction
+            # deferring the heavy SuperLookup widget construction
             # until the user actually visits the tab.
             if hasattr(self, 'superlookup_tab_index') and index == self.superlookup_tab_index:
                 self._ensure_superlookup_top_tab()
             elif hasattr(self, 'clipboard_tab_index') and index == self.clipboard_tab_index:
                 self._ensure_clipboard_top_tab()
-            elif hasattr(self, 'voice_tab_index') and index == self.voice_tab_index:
-                self._ensure_voice_top_tab()
 
             if index == 0:  # Grid
                 # Grid refreshes automatically when segments change
@@ -11700,7 +11686,7 @@ class SupervertalerQt(QMainWindow):
     # ------------------------------------------------------------------
 
     def _warm_up_top_tabs(self):
-        """Строит новые верхние вкладки SuperLookup / Clipboard / Voice в фоне
+        """Строит новые верхние вкладки SuperLookup / Clipboard в фоне
                 через несколько секунд после запуска.
         
                 Каждый ``_ensure_*_top_tab`` идемпотентен — вызов здесь лишь
@@ -11715,8 +11701,7 @@ class SupervertalerQt(QMainWindow):
                 первый запуск ``AutoHotkey64.exe`` до 1–2 с; последующие запуски
                 попадают в горячий дисковый кэш и идут за ~150 мс)."""
         for helper in ('_ensure_superlookup_top_tab',
-                       '_ensure_clipboard_top_tab',
-                       '_ensure_voice_top_tab'):
+                       '_ensure_clipboard_top_tab'):
             try:
                 fn = getattr(self, helper, None)
                 if callable(fn):
@@ -11842,28 +11827,6 @@ class SupervertalerQt(QMainWindow):
             import traceback
             traceback.print_exc()
 
-    def _ensure_voice_top_tab(self):
-        """Строит верхнюю вкладку Voice при первой активации.
-        
-                Тот же виджет, что использует Sidekick (modules.voice_tab.VoiceTab);
-                он читает свойства родительского приложения (shortcut_manager,
-                voice_listener, load_dictation_settings), поэтому существующая
-                обвязка просто работает."""
-        if self._voice_top_widget is not None:
-            return
-        try:
-            from modules.voice_tab import VoiceTab
-            widget = VoiceTab(self)
-            self._voice_top_widget = widget
-            placeholder = self.main_tabs.widget(self.voice_tab_index)
-            layout = QVBoxLayout(placeholder)
-            layout.setContentsMargins(0, 0, 0, 0)
-            layout.addWidget(widget)
-        except Exception as e:
-            self.log(f"⚠ Could not build Voice top tab: {e}")
-            import traceback
-            traceback.print_exc()
-    
     def detach_superlookup(self):
         """Отсоединяет Superlookup в отдельное окно для использования на втором экране."""
         from PyQt6.QtWidgets import QDialog, QVBoxLayout, QPushButton
@@ -12033,10 +11996,7 @@ class SupervertalerQt(QMainWindow):
                 также строила встроенный UI вкладки Tools. Вкладка Tools выведена
                 из эксплуатации; построение SuperlookupTab осталось, потому что
                 регистрация глобальных горячих клавиш происходит как побочный
-                эффект __init__.
-        
-                Голос (команды / диктовка) регистрируется отдельно через Sidekick
-                (modules/voice_tab.py)."""
+                эффект __init__."""
         lookup_tab = SuperlookupTab(self, user_data_path=self.user_data_path)
         lookup_tab.hide()  # Never shown – purely for hotkey side effects
         self.lookup_tab = lookup_tab
@@ -20434,10 +20394,6 @@ class SupervertalerQt(QMainWindow):
         settings_tabs.addTab(ai_scroll, self.tr("🤖 AI Settings"))
         self.ai_settings_scroll = ai_scroll  # Store reference for scrolling to API keys
 
-        # ===== TAB: Voice (commands & dictation, lives in Sidekick) =====
-        voice_tab = self._create_voice_settings_tab()
-        settings_tabs.addTab(scroll_area_wrapper(voice_tab), self.tr("🎤 Voice"))
-
         # ===== TAB: Clipboard privacy (issue #246) =====
         clipboard_tab = self._create_clipboard_settings_tab()
         settings_tabs.addTab(scroll_area_wrapper(clipboard_tab), self.tr("📋 Clipboard"))
@@ -24612,53 +24568,6 @@ class SupervertalerQt(QMainWindow):
 
         return tab
 
-    def _populate_voice_commands_table(self):
-        """Обновляет таблицу голосовых команд в Sidekick (если он открыт).
-        
-                Вызывается при любом изменении voice_command_manager
-                (добавление, правка, удаление или сброс команд)."""
-        if not hasattr(self, 'voice_command_manager'):
-            return
-        # Refresh the in-Workbench Voice top tab's command table if
-        # it's been built (it's lazy-constructed on first activation).
-        # Pre-v1.10.4 this also refreshed Sidekick's voice tab; with
-        # Sidekick retired only the top tab needs poking.
-        voice_widget = getattr(self, '_voice_top_widget', None)
-        if voice_widget is not None and hasattr(voice_widget, '_populate_table'):
-            try:
-                voice_widget._populate_table()
-            except Exception:
-                pass
-
-    def _reset_voice_commands(self):
-        """Сброс голосовых команд к значениям по умолчанию."""
-        reply = QMessageBox.question(
-            self, "Reset Commands",
-            "Reset all voice commands to defaults?\n\nThis will remove any custom commands you've added.",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        
-        if reply == QMessageBox.StandardButton.Yes:
-            self.voice_command_manager.commands = self.voice_command_manager.DEFAULT_COMMANDS.copy()
-            self.voice_command_manager.save_commands()
-            self._populate_voice_commands_table()
-            QMessageBox.information(self, "Reset Complete", "Voice commands have been reset to defaults.")
-
-    def _check_ahk_installed(self) -> str:
-        """Проверяет, установлен ли AutoHotkey."""
-        ahk_exe = self.voice_command_manager._find_ahk_executable() if hasattr(self, 'voice_command_manager') else None
-        if ahk_exe:
-            return "✅ AutoHotkey detected"
-        else:
-            return "⚠️ AutoHotkey not found - install from autohotkey.com for system commands"
-
-    def _open_voice_scripts_folder(self):
-        """Открывает папку голосовых скриптов."""
-        import subprocess
-        scripts_folder = self.user_data_path / "workbench" / "voice_scripts"
-        scripts_folder.mkdir(parents=True, exist_ok=True)
-        subprocess.Popen(['explorer', str(scripts_folder)])
-
     def _create_system_prompts_tab(self):
         """Создаёт содержимое вкладки настроек System Prompts (слой 1)."""
         from PyQt6.QtWidgets import QGroupBox, QPushButton, QTextEdit, QComboBox
@@ -24966,92 +24875,6 @@ class SupervertalerQt(QMainWindow):
         display = saved_name if saved_name else "(system username)"
         self.log(f"✓ User identity saved: translator name = {display}")
         QMessageBox.information(self, "Settings Saved", f"User identity saved.\nTranslator name: {display}")
-
-    def _create_voice_settings_tab(self):
-        """Создаёт информационную вкладку Voice (со ссылкой-перенаправлением).
-        
-                Голосовые функции (команды и диктовка) живут в Sidekick. Эта вкладка
-                настроек — только указатель: краткое пояснение, карточка быстрой
-                справки по горячим клавишам и кнопка, открывающая Sidekick прямо
-                на вкладке Voice."""
-        from PyQt6.QtWidgets import QGroupBox, QPushButton
-
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
-
-        header = QLabel(self.tr("🎤 <b>Voice</b> – commands and dictation"))
-        header.setTextFormat(Qt.TextFormat.RichText)
-        header.setStyleSheet("font-size: 14pt; padding: 8px;")
-        layout.addWidget(header)
-
-        info = QLabel(
-            "Voice is Supervertaler's command and dictation system. "
-            "Its full settings panel lives in <b>Supervertaler Sidekick</b>, the "
-            "floating companion window you can summon from anywhere on your "
-            "computer.<br><br>"
-            "<b>Why is it there and not here?</b><br>"
-            "Sidekick stays accessible even when Workbench is hidden – and "
-            "Voice's Always-On listening + global hotkeys are designed to "
-            "work across every app on your computer (Word, Trados, memoQ, "
-            "browsers, etc.), not just inside Workbench."
-        )
-        info.setTextFormat(Qt.TextFormat.RichText)
-        info.setWordWrap(True)
-        info.setStyleSheet(
-            "font-size: 9pt; color: #444; padding: 12px;"
-            " background-color: #E3F2FD; border-radius: 4px;"
-        )
-        layout.addWidget(info)
-
-        open_btn = QPushButton(self.tr("🎤  Open Voice"))
-        open_btn.setStyleSheet(
-            "background-color: #4CAF50; color: white; font-weight: bold;"
-            " padding: 12px; font-size: 11pt; border: none;"
-        )
-        open_btn.clicked.connect(self._open_voice_in_workbench)
-        layout.addWidget(open_btn)
-
-        quick_ref_group = QGroupBox(self.tr("📖 Quick Reference"))
-        quick_ref_layout = QVBoxLayout()
-        quick_ref = QLabel(
-            "<b>Dictation hotkey</b> (default <b>Ctrl+Shift+Space</b>) – "
-            "hold to dictate, release to transcribe. Works in the "
-            "Workbench grid and in any other app on your computer.<br>"
-            "<b>Always-On</b> – toggleable in Sidekick → Voice tab; "
-            "listens continuously, hands-free.<br>"
-            "<b>Voice commands</b> – say a phrase to execute keystrokes, "
-            "AutoHotkey scripts, or built-in actions. Editable in Sidekick.<br><br>"
-            "Rebind the dictation hotkey to any key you like "
-            "(numpad+, a function key, anything) in "
-            "<b>Settings → Keyboard Shortcuts → Special → Voice dictation</b>."
-        )
-        quick_ref.setTextFormat(Qt.TextFormat.RichText)
-        quick_ref.setWordWrap(True)
-        quick_ref.setStyleSheet("font-size: 9pt; color: #555; padding: 8px;")
-        quick_ref_layout.addWidget(quick_ref)
-        quick_ref_group.setLayout(quick_ref_layout)
-        layout.addWidget(quick_ref_group)
-
-        layout.addStretch()
-        return tab
-
-    def _open_voice_in_workbench(self):
-        """Открывает верхнюю вкладку Voice в Workbench по ссылке из настроек
-                или пункту меню трея.
-        
-                Метод переименован из _open_voice_in_sidekick в v1.10.10 при выводе
-                Sidekick из эксплуатации. Оба существующих места вызова (ссылка
-                в настройках Voice и меню трея Always-On) обновлены соответственно."""
-        try:
-            if hasattr(self, '_ensure_voice_top_tab'):
-                self._ensure_voice_top_tab()
-            self._bring_workbench_forward()
-            if hasattr(self, 'voice_tab_index') and hasattr(self, 'main_tabs'):
-                self.main_tabs.setCurrentIndex(self.voice_tab_index)
-        except Exception as e:
-            QMessageBox.warning(self, "Could not open Voice", str(e))
 
     def _bring_workbench_forward(self):
         """Выводит Workbench на передний план.
@@ -28956,10 +28779,6 @@ class SupervertalerQt(QMainWindow):
         jump_clipboard.triggered.connect(_make_jumper('clipboard_tab_index'))
         menu.addAction(jump_clipboard)
 
-        jump_voice = QAction("Open Voice", self)
-        jump_voice.triggered.connect(_make_jumper('voice_tab_index'))
-        menu.addAction(jump_voice)
-
         jump_settings = QAction("Open Settings", self)
         jump_settings.setMenuRole(QAction.MenuRole.NoRole)  # v1.10.233: keep ⌘, off Preferences (Mac)
         jump_settings.triggered.connect(_make_jumper('settings_tab_index'))
@@ -29034,7 +28853,7 @@ class SupervertalerQt(QMainWindow):
         
                 Действие по скрытию зависит от вкладки:
         
-                - **SuperLookup / Voice**: скрыть в системный трей (требуется
+                - **SuperLookup**: скрыть в системный трей (требуется
                   иконка трея — без неё скрытие оставит пользователя в невидимом
                   окне, поэтому эти вкладки при отсутствии трея не скрываются).
                 - **Clipboard**: вернуть фокус приложению, откуда пришёл
@@ -29045,8 +28864,8 @@ class SupervertalerQt(QMainWindow):
                   потребляется (Esc означает «передумал»), чтобы последующий
                   ручной щелчок по клипу не вставил текст в устаревшее окно.
         
-                Общий затвор: текущая вкладка — одна из SuperLookup / Clipboard /
-                Voice. На Editor / TMs / Termbases / AI / Settings Esc сохраняет
+                Общий затвор: текущая вкладка — одна из SuperLookup / Clipboard.
+                На Editor / TMs / Termbases / AI / Settings Esc сохраняет
                 свои естественные семантики редактора / диалога / комбобокса
                 (отмена правки, закрытие попапа и т.д.).
         
@@ -29059,7 +28878,7 @@ class SupervertalerQt(QMainWindow):
                   пересеедится при следующем вызове, и единственный разумный смысл
                   Esc здесь — «убери меня отсюда». Поэтому проверка фокуса
                   пропускается, скрытие безусловно.
-                - **Clipboard / Voice**: пропустить скрытие, если фокус на виджете
+                - **Clipboard**: пропустить скрытие, если фокус на виджете
                   текстового ввода (QLineEdit / QTextEdit / QPlainTextEdit /
                   QAbstractSpinBox / редактируемый QComboBox), сохраняя стандартные
                   соглашения Qt-приложений (Esc очищает поле, закрывает попап
@@ -29075,7 +28894,6 @@ class SupervertalerQt(QMainWindow):
 
         superlookup_idx = getattr(self, 'superlookup_tab_index', None)
         clipboard_idx = getattr(self, 'clipboard_tab_index', None)
-        voice_idx = getattr(self, 'voice_tab_index', None)
         current = self.main_tabs.currentIndex()
 
         # SuperLookup: unconditional hide (tray required).
@@ -29112,8 +28930,8 @@ class SupervertalerQt(QMainWindow):
                 self._clipboard_prior_workbench_tab = None
                 return
 
-        # Clipboard / Voice: focus-aware hide.
-        focus_aware_indices = {clipboard_idx, voice_idx}
+        # Clipboard: focus-aware hide.
+        focus_aware_indices = {clipboard_idx}
         focus_aware_indices.discard(None)
         if current not in focus_aware_indices:
             # Some other tab – not a quick-lookup surface, do nothing.
@@ -29157,10 +28975,6 @@ class SupervertalerQt(QMainWindow):
             self._dismiss_clipboard_summon()
             return
 
-        # Голосовой режим: прячем в трей, как раньше.
-        if has_tray:
-            self.hide()
-
     def keyPressEvent(self, event):
         """Резервный путь скрытия по Esc для quick-lookup (v1.10.345).
         
@@ -29177,8 +28991,7 @@ class SupervertalerQt(QMainWindow):
                     and hasattr(self, 'main_tabs')):
                 current = self.main_tabs.currentIndex()
                 quick = (getattr(self, 'superlookup_tab_index', None),
-                         getattr(self, 'clipboard_tab_index', None),
-                         getattr(self, 'voice_tab_index', None))
+                         getattr(self, 'clipboard_tab_index', None))
                 if current in quick:
                     try:
                         self.log("[Esc] shortcut did not fire – "
@@ -44023,7 +43836,7 @@ class SupervertalerQt(QMainWindow):
     # Ядро API этого блока перенесено в modules/settings_service.py
     # (Batch #7 Stage 2, под-батч S2.1). Здесь остаются ТОНКИЕ ДЕЛЕГАТЫ с
     # исходными именами и сигнатурами: их вызывают снаружи по строке
-    # (main() 68357, modules/voice_tab.py, modules/clipboard_manager_widget.py)
+    # (main() 68357, modules/clipboard_manager_widget.py)
     # и ещё не перенесённые методы монолита (_migrate_settings_to_unified,
     # _migrate_voice_dictation_default_off — уходят в S2.5).
     # self.settings_service создаётся в __init__ и пересоздаётся при смене
@@ -53387,51 +53200,12 @@ class SupervertalerQt(QMainWindow):
         # slot is thread-safe by coincidence (only calls thread-safe
         # methods), but the contract is fragile — pin to queued so
         # any future change to the slot doesn't quietly start
-        # touching widgets from the wrong thread. Companion fix lives
-        # in _get_command_ptt_release_poller below.
+        # touching widgets from the wrong thread.
         poller.released.connect(
             self.stop_voice_dictation_if_recording,
             Qt.ConnectionType.QueuedConnection,
         )
         self._voice_release_poller = poller
-        return poller
-
-    def _get_command_ptt_release_poller(self):
-        """Лениво создаёт опрашиватель отпускания для аккорда push-to-talk
-                голосовых команд v1.10.193. Близнец
-                :meth:`_get_voice_release_poller` — отдельный экземпляр, чтобы
-                у двух аккордов было независимое отслеживание отпускания и они
-                не запускали друг у друга обработчики остановки.
-        
-                v1.10.195: сигнал ``released`` подключается через
-                ``Qt.QueuedConnection``. emit() опрашивателя срабатывает из его
-                рабочего потока опроса, а дефолтный AutoConnection PyQt здесь
-                выбирает DirectConnection (оба QObject живут в главном потоке),
-                что запустило бы слот в потоке опроса. Слот трогает QWidgets
-                (метки статуса) → краш между потоками.
-                Принудительный QueuedConnection проводит слот через главный цикл
-                событий."""
-        existing = getattr(self, '_command_ptt_release_poller', None)
-        if existing is not None:
-            return existing
-        try:
-            from modules.voice_release_poller import KeyReleasePoller, IS_WINDOWS
-        except Exception as e:
-            self.log(f"⚠ Command-PTT release poller unavailable: {e}")
-            self._command_ptt_release_poller = None
-            return None
-        if not IS_WINDOWS:
-            # Non-Windows: no release polling. The listener stays on
-            # until the user toggles always-on off manually. Graceful
-            # degradation rather than a broken feature.
-            self._command_ptt_release_poller = None
-            return None
-        poller = KeyReleasePoller(parent=self)
-        poller.released.connect(
-            self._on_voice_command_ptt_release,
-            Qt.ConnectionType.QueuedConnection,
-        )
-        self._command_ptt_release_poller = poller
         return poller
 
     def _register_voice_pushtotalk_deferred(self, qt_shortcut: str):
@@ -53450,183 +53224,6 @@ class SupervertalerQt(QMainWindow):
             self.log(f"🎤 Push-to-talk armed: {qt_shortcut} (hold to dictate, release to transcribe)")
         else:
             self.log(f"⚠ Could not parse push-to-talk shortcut: {qt_shortcut!r}")
-
-    # ── Voice COMMANDS push-to-talk (v1.10.193) ─────────────────────
-
-    def _register_voice_command_ptt_deferred(self, qt_shortcut: str):
-        """Ставит / переустанавливает аккорд push-to-talk-для-команд.
-        
-                Близнец :meth:`_register_voice_pushtotalk_deferred`, но для
-                привязки ``voice_command_ptt`` v1.10.193. Тот же низкоуровневый
-                клавиатурный слушатель (один хук pynput обслуживает оба аккорда).
-                При нажатии запускается удерживаемый нами слушатель always-on;
-                при отпускании демонтируется, если только пользователь явно не
-                переключил always-on, пока мы удерживали."""
-        listener = self._get_voice_hotkey_listener()
-        if listener is None:
-            return
-        listener.unregister('voice_command_ptt')
-        if not qt_shortcut:
-            return  # user cleared the binding — nothing to register
-        if listener.register('voice_command_ptt', qt_shortcut):
-            self.log(
-                f"🎙️ Command push-to-talk armed: {qt_shortcut} "
-                f"(hold to listen for voice commands)"
-            )
-        else:
-            self.log(f"⚠ Could not parse command-PTT shortcut: {qt_shortcut!r}")
-
-    def _on_voice_command_ptt_press(self):
-        """Нажата горячая клавиша — запустить слушатель always-on команд, если
-                он ещё не работает, и запомнить, что запустили его мы (а не
-                пользователь), чтобы демонтировать при отпускании.
-        
-                Если у пользователя always-on уже был включён, нажатие — no-op
-                (мы не перезапускаем то, что уже идёт).
-        
-                v1.10.196: флаг принадлежности PTT ставится ДО вызова
-                переключения, чтобы любые сигналы обновления UI, испущенные
-                при запуске слушателя (например ``listening_started``), видели
-                правильный режим и подавляли свой хром."""
-        listener_already_running = (
-            self.voice_listener is not None
-            and getattr(self.voice_listener, 'is_listening', False)
-        )
-        if listener_already_running:
-            # User explicitly toggled always-on. Don't fight them — the
-            # release won't tear it down either, and dictation
-            # suppression won't kick in either (always-on dictates as
-            # configured by the user).
-            self._voice_command_ptt_owned = False
-            return
-
-        # v1.10.196: set the flag *before* toggling so any signal-driven
-        # UI updates triggered while starting the listener would have
-        # seen PTT mode and skipped the indicator chrome.
-        self._voice_command_ptt_owned = True
-
-        # v1.10.197: tell the voice-command manager to queue keystroke
-        # / AHK commands instead of firing them immediately. Reason:
-        # while the user is physically holding Ctrl+Alt+V, the system
-        # has those modifier keys down at the OS level. If a voice
-        # command tries to send a synthetic Ctrl+A right now, the OS
-        # sees Ctrl+Alt held + synthetic Ctrl+A added on top → the
-        # net chord is Ctrl+Alt+A, not Ctrl+A, and the foreground
-        # window misinterprets it. (Until 1.10.x that also matched our
-        # own Always-On global hotkey, which was Ctrl+Alt+A; it is now
-        # Ctrl+Alt+O, but the underlying hazard is unchanged - any
-        # synthetic key sent under held modifiers becomes a different
-        # chord than intended, whoever ends up receiving it.) Queueing
-        # the keystrokes and draining the queue ~200 ms after release
-        # gives the OS time to register the user's physical key-up
-        # events before the synthetic ones fire.
-        try:
-            if hasattr(self, 'voice_command_manager') and self.voice_command_manager:
-                if hasattr(self.voice_command_manager, 'set_defer_keystrokes'):
-                    self.voice_command_manager.set_defer_keystrokes(True)
-        except Exception as e:
-            self.log(f"⚠ Could not enable PTT keystroke deferral: {e}")
-
-        # Batch #8.2: ContinuousVoiceListener больше не создаётся
-        # (Always-On удалён), запускать нечего. Аккорд voice_command_ptt
-        # уходит вместе с Voice-фичей в 8.3/8.4; до тех пор press — no-op
-        # с уже подключённой логикой deferral/release ниже.
-
-    def _on_voice_command_ptt_release(self):
-        """Отпущена горячая клавиша — остановить слушателя, только если его
-                запустили мы на соответствующем нажатии. Если пользователь вручную
-                переключил always-on до или во время удержания — оставить
-                работающим.
-        
-                v1.10.198: остановка теперь ОТЛОЖЕНА до завершения транскрипции
-                текущего высказывания. Если пользователь отпускает посреди фразы
-                (слушатель всё ещё в состоянии VAD 'recording' или 'processing'),
-                мы ждём возврата VAD в idle, прежде чем демонтировать слушателя.
-                Жёсткий таймаут 1500 мс на случай, если VAD никогда не просигналит
-                idle (восстановление после зависшей транскрипции). Если на момент
-                отпускания речи в полёте не было (VAD уже idle), остановка
-                срабатывает немедленно, чтобы короткое нажатие без речи оставалось
-                отзывчивым.
-        
-                Причина: длинные фразы вроде «select all» занимают ~700–900 мс
-                речи плюс окно детекции тишины Vosk для финализации. v1.10.197
-                демонтировала слушателя мгновенно по отпусканию клавиши, срезая
-                высказывание посреди потока. Vosk не выдавал ничего,
-                command_detected не срабатывал, пользователь не получал
-                действия.
-        
-                v1.10.196: флаг ``_voice_command_ptt_owned`` здесь НЕ
-                сбрасывается. Он сбрасывается позже, в
-                ``_do_voice_command_ptt_stop``, вместе с демонтированным
-                слушателем."""
-        if not getattr(self, '_voice_command_ptt_owned', False):
-            return
-
-        # If we already scheduled a deferred stop and the release fires
-        # again (e.g. autorepeat artefact), just ignore the second one.
-        if getattr(self, '_voice_command_ptt_pending_stop', False):
-            return
-
-        # v1.10.198: inspect VAD state. If there's an active utterance
-        # being captured or transcribed, defer the stop. Otherwise
-        # stop right away.
-        current_vad = getattr(self, '_voice_command_ptt_last_vad_state', '')
-        actively_processing = current_vad in ('recording', 'processing')
-
-        if not actively_processing:
-            # No active speech - stop right now.
-            self._do_voice_command_ptt_stop()
-            return
-
-        # Active utterance in flight. Mark pending and wait for the
-        # listener's VAD to transition back to idle (reported via the
-        # deferred-stop path), or for a 1500 ms hard timeout.
-        self._voice_command_ptt_pending_stop = True
-        self.status_bar.showMessage("🎙️ Finishing transcription…", 0)
-        try:
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(1500, self._do_voice_command_ptt_stop)
-        except Exception as e:
-            self.log(f"⚠ Could not schedule PTT stop timeout: {e}")
-            # Fall back to immediate stop on scheduling failure.
-            self._do_voice_command_ptt_stop()
-
-    def _do_voice_command_ptt_stop(self):
-        """Реально демонтирует слушателя PTT. Вызывается либо немедленно (из
-                release, когда VAD уже был idle), либо из QTimer жёсткого
-                таймаута (поставленного в release при высказывании в полёте).
-                Идемпотентен — безопасно
-                вызывать многократно; вторые и последующие вызовы
-                отсекаются по состоянию флагов ``_voice_command_ptt_pending_stop``
-                / ``_voice_command_ptt_owned``."""
-        # Idempotent guard: if neither pending nor owned, we already ran.
-        if not getattr(self, '_voice_command_ptt_pending_stop', False) and \
-           not getattr(self, '_voice_command_ptt_owned', False):
-            return
-        self._voice_command_ptt_pending_stop = False
-        # Batch #8.2: owned-flag reset used to happen in the Always-On UI
-        # update ("stopped") via listening_stopped; with that cluster gone
-        # the stop path itself is the single place that clears it.
-        self._voice_command_ptt_owned = False
-
-        # Batch #8.2: демонтаж Always-On слушателя ушёл вместе с кластером
-        # Always-On; демонтировать нечего (voice_listener всегда None).
-        # Сброс индикатора строки состояния также ушёл с кластером.
-
-        # v1.10.197: drain any keystroke commands that were queued
-        # during the hold. Delayed via QTimer so the user's physical
-        # Ctrl+Alt+V key-up events have time to propagate through the
-        # OS first (otherwise the synthetic keystrokes get OR'd with
-        # the still-held modifiers). 200 ms is generous; the
-        # responsive feel is still well under noticeable latency.
-        try:
-            if hasattr(self, 'voice_command_manager') and self.voice_command_manager:
-                if hasattr(self.voice_command_manager, 'set_defer_keystrokes'):
-                    from PyQt6.QtCore import QTimer
-                    mgr = self.voice_command_manager
-                    QTimer.singleShot(200, lambda: mgr.set_defer_keystrokes(False))
-        except Exception as e:
-            self.log(f"⚠ Could not schedule PTT keystroke flush: {e}")
 
     def _get_voice_hotkey_listener(self):
         """Лениво создаёт глобальный слушатель горячей клавиши push-to-talk.
@@ -53647,12 +53244,6 @@ class SupervertalerQt(QMainWindow):
         def _on_chord_pressed(binding_id):
             if binding_id == 'voice_dictate':
                 self.start_voice_dictation()
-            elif binding_id == 'voice_command_ptt':
-                # v1.10.193: push-to-talk for COMMANDS (separate from
-                # the dictate chord above). Start the always-on
-                # listener on press; the release handler tears it
-                # down again if WE started it.
-                self._on_voice_command_ptt_press()
             elif binding_id == 'voice_pause_alwayson':
                 # User-recordable hotkey that PAUSES Always-On while an
                 # external dictation tool (Wispr Flow etc.) holds the mic.
@@ -53661,8 +53252,6 @@ class SupervertalerQt(QMainWindow):
         def _on_chord_released(binding_id):
             if binding_id == 'voice_dictate':
                 self.stop_voice_dictation_if_recording()
-            elif binding_id == 'voice_command_ptt':
-                self._on_voice_command_ptt_release()
             elif binding_id == 'voice_pause_alwayson':
                 self._on_voice_pause_release()
 
@@ -54086,19 +53675,8 @@ class SupervertalerQt(QMainWindow):
             QMessageBox.critical(self, "Dictation Error", f"Failed to start dictation:\n\n{str(e)}\n\nCheck the Log tab for full details.")
 
     def on_dictation_complete(self, text):
-        """Обрабатывает завершённую диктовку — сначала проверяет голосовые команды."""
-        dictation_settings = self.load_dictation_settings()
-        voice_commands_enabled = dictation_settings.get('voice_commands_enabled', True)
-
-        # Voice commands first (if enabled).
-        if voice_commands_enabled and hasattr(self, 'voice_command_manager'):
-            was_command, result = self.voice_command_manager.process_spoken_text(text)
-            if was_command:
-                self.log(f"🎤 Voice command: {text} → {result}")
-                self.status_bar.showMessage(f"🎤 {result}", 3000)
-                return
-
-        # Otherwise route as dictation text – same cross-app path Always-On
+        """Обрабатывает завершённую диктовку."""
+        # Route as dictation text – same cross-app path Always-On
         # uses, so push-to-talk works in any app.
         self._insert_dictated_text(text)
 
@@ -66149,9 +65727,6 @@ class SuperlookupTab(QWidget):
             sk_shortcut = sm.get_shortcut('sidekick_open').lower()
             cb_shortcut = sm.get_shortcut('sidekick_open_clipboard').lower()
             pt_shortcut = sm.get_shortcut('voice_dictate').lower()
-            # v1.10.193: push-to-talk for voice COMMANDS — separate
-            # from the dictate chord and the always-on toggle.
-            cmd_ptt_shortcut = (sm.get_shortcut('voice_command_ptt') or '').lower()
 
             # Honour the per-shortcut enabled flag and the `global` field:
             # if disabled, or if the entry is no longer flagged global, skip
@@ -66163,19 +65738,11 @@ class SuperlookupTab(QWidget):
             if _skip('mt_quick_lookup'):              qt_shortcut = ''
             if _skip('sidekick_open_clipboard'):      cb_shortcut = ''
             if _skip('voice_dictate'):                pt_shortcut = ''
-            # Defensive — voice_command_ptt may not be present in
-            # older settings files; the helper raises on unknown ids
-            # in some versions, so wrap in try.
-            try:
-                if _skip('voice_command_ptt'):        cmd_ptt_shortcut = ''
-            except Exception:
-                pass
         else:
             sl_shortcut = 'ctrl+alt+l'
             qt_shortcut = 'ctrl+alt+q'
             cb_shortcut = 'ctrl+shift+c'
             pt_shortcut = 'ctrl+shift+space'
-            cmd_ptt_shortcut = 'ctrl+alt+v'
 
         # No platform-specific rewrite needed: GlobalHotkeyManager's macOS
         # NSEvent backend now follows Qt's Mac convention internally
@@ -66217,7 +65784,6 @@ class SuperlookupTab(QWidget):
                     (qt_shortcut, self._on_pynput_quicktrans),
                     (cb_shortcut, self._on_pynput_clipboard),
                     (pt_shortcut, self._on_pynput_pushtotalk),
-                    (cmd_ptt_shortcut, self._on_pynput_command_ptt),
                 ]
                 _to_register = [(s, cb) for s, cb in _bindings if s]
                 if not _to_register:
@@ -66550,56 +66116,6 @@ class SuperlookupTab(QWidget):
         except Exception as e:
             print(f"[Voice] Error in push-to-talk hotkey handler: {e}")
 
-
-    def _on_pynput_command_ptt(self):
-        """Нажатие горячей клавиши голосового COMMAND push-to-talk —
-                срабатывает в фоновом потоке pynput.
-        
-                v1.10.193: спутник ``_on_pynput_pushtotalk`` (он обслуживает
-                аккорд диктовки). Этот — для слушателя КОМАНД: пока аккорд
-                удерживается, поднимается слушатель always-on; при отпускании
-                опрашиватель отпускания останавливает его.
-        
-                ВАЖНО: здесь НЕ делать никакой работы — см. докстринг
-                _on_pynput_superlookup."""
-        try:
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(0, self._handle_command_ptt_press_hotkey)
-        except Exception as e:
-            print(f"[Voice] Error signaling main thread: {e}")
-
-
-    @pyqtSlot()
-    def _handle_command_ptt_press_hotkey(self):
-        """Выполняется в главном потоке Qt — НАЖАТИЕ голосового
-                push-to-talk-для-команд.
-        
-                v1.10.193: запускает слушателя always-on на время удержания
-                горячей клавиши, затем ставит KeyReleasePoller, чтобы остановить
-                его при отпускании. Зеркалит паттерн диктовки-PTT (нажатие через
-                GlobalHotkeyManager / pynput, отпускание через опрос
-                GetAsyncKeyState в Windows). На не-Windows опрашивателя
-                отпускания нет, поэтому слушатель работает до явного выключения
-                always-on пользователем — плавная деградация вместо сломанной
-                фичи."""
-        try:
-            mw = self.main_window or self.window()
-            if mw is None or not hasattr(mw, '_on_voice_command_ptt_press'):
-                print("[Voice] Workbench unavailable for command PTT")
-                return
-            mw._on_voice_command_ptt_press()
-            # Arm release-detection. Cheap to call repeatedly:
-            # set_chord re-parses the current shortcut binding so a
-            # rebind picked up between presses is honoured.
-            if hasattr(mw, '_get_command_ptt_release_poller'):
-                poller = mw._get_command_ptt_release_poller()
-                if poller is not None:
-                    sm = getattr(mw, 'shortcut_manager', None)
-                    chord_str = sm.get_shortcut('voice_command_ptt') if sm else ''
-                    if chord_str and poller.set_chord(chord_str):
-                        poller.start()
-        except Exception as e:
-            print(f"[Voice] Error in command-PTT press handler: {e}")
 
     def _try_ahk_library_method(self):
         """Пробует зарегистрировать горячую клавишу через библиотеку ahk.
