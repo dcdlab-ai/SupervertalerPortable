@@ -344,10 +344,7 @@ import pyperclip  # Работа с буфером обмена для Superlook
 from modules.superlookup import SuperlookupEngine  # Движок Superlookup
 from modules.pseudo_translate_dialog import run_pseudo_translation  # Псевдоперевод (диалог + применение)
 from modules.project_assets import bundle_source, resolve_source_path, ensure_target_dir, nest_in_own_folder  # Модель каталогов проекта (issue #228)
-from modules.voice_dictation_lite import QuickDictationThread  # Голосовая диктовка
-# ВАЖНО: в этом файле прямых ссылок на него нет (предположительно используется
-# через динамический импорт) — НЕ удалять.
-from modules.styled_widgets import (CheckmarkCheckBox, PurpleCheckmarkCheckBox, TealCheckmarkCheckBox, CheckmarkRadioButton,
+from modules.styled_widgets import (CheckmarkCheckBox, TealCheckmarkCheckBox, CheckmarkRadioButton,
                                     PinkCheckmarkCheckBox, BlueCheckmarkCheckBox, OrangeCheckmarkCheckBox, CustomRadioButton)  # Чекбоксы/радиокнопки (Batch #3c)
 from modules.statuses import (
     STATUSES,
@@ -6240,19 +6237,6 @@ class SupervertalerQt(QMainWindow):
         self.source_language = "English"
         self.target_language = "Dutch"
 
-        # Voice model download tracking
-        self.is_loading_model = False
-        self.loading_model_name = None
-
-        # Voice push-to-talk via a single low-level keyboard listener
-        # (replaces the old Windows RegisterHotKey path so we get release
-        # events for hold-to-talk). Created lazily on first use; see
-        # _get_voice_hotkey_listener. The 200 ms debounce timestamp guards
-        # against the in-editor QShortcut and the global listener both
-        # calling start_voice_dictation on the same press.
-        self._voice_hotkey_listener = None
-        self._voice_dictate_last_press_ms = 0
-        
         # Target editor signal suppression (prevents load-time churn)
         self._suppress_target_change_handlers = False
         # v1.10.229: Same idea for source editors — set True when we're
@@ -6410,9 +6394,6 @@ class SupervertalerQt(QMainWindow):
         
         # Shortcut Manager for keyboard shortcuts (including enable/disable)
         self.shortcut_manager = ShortcutManager(Path(self.user_data_path) / "workbench" / "settings" / "shortcuts.json")
-        
-        # Continuous Voice Listener (always-on mode) - initialized on demand
-        self.voice_listener = None  # Will be ContinuousVoiceListener when enabled
         
         # Figure Context Manager for multimodal AI translation
         from modules.figure_context_manager import FigureContextManager
@@ -7053,21 +7034,6 @@ class SupervertalerQt(QMainWindow):
             self.global_shortcuts[shortcut_id] = shortcut
             return shortcut
 
-        # Voice dictation (default Ctrl+Shift+Space; configurable in
-        # Settings → Keyboard Shortcuts). The fallback below only applies if
-        # voice_dictate is somehow absent from the registry — keep it in sync
-        # with the registry default rather than the long-dead "F9".
-        # Disable autorepeat: holding the chord (hold-to-talk mode) must NOT
-        # re-fire start_voice_dictation, otherwise toggle semantics keep
-        # stopping and restarting the recording while the key is held –
-        # producing fragmented audio that Whisper hallucinates over.
-        _voice_dictate_sc = create_shortcut("voice_dictate", "Ctrl+Shift+Space", self.start_voice_dictation)
-        if _voice_dictate_sc is not None:
-            try:
-                _voice_dictate_sc.setAutoRepeat(False)
-            except Exception:
-                pass
-
         # Segment split / merge (Trados / memoQ style). Window-level QShortcuts
         # fire even with a cell editor focused (QTextEdit doesn't consume
         # Ctrl+Alt combos). Configurable in Settings → Keyboard Shortcuts.
@@ -7205,15 +7171,6 @@ class SupervertalerQt(QMainWindow):
         # entirely rather than playing whack-a-mole with edge cases.
         # The _DoubleTapShiftEventFilter class is also removed from the
         # module-level definitions just above.
-
-        # Hold-to-talk release detection is now handled by the global
-        # GlobalHotkeyListener (single low-level keyboard hook delivers
-        # both press and release for the user's voice_dictate chord, in or
-        # out of the editor). The legacy _F9HoldReleaseFilter only worked
-        # for the F9 key inside the Workbench window and only when the
-        # user's shortcut happened to be F9 – it was effectively dead code
-        # for the Ctrl+Shift+Space default. Removed in v1.9.492.
-
 
         # Ctrl+Shift+Enter - Always confirm all selected segments
         create_shortcut("editor_confirm_selected", "Ctrl+Shift+Return", self.confirm_selected_segments)
@@ -16827,13 +16784,13 @@ class SupervertalerQt(QMainWindow):
         termbase_table = QTableWidget()
         self.termbase_table = termbase_table  # Store for external access (Superlookup navigation)
         # v1.10.28: added 🎤 Voice column (per-termbase opt-in for
-        # voice-dictation vocabulary biasing).
+        # voice-dictation vocabulary biasing) — removed in Batch #8.4 (F1).
         # v1.10.247: added 🔍 SuperLookup column (per-termbase toggle for
-        # SuperLookup inclusion, independent of Read). New column count = 10.
-        termbase_table.setColumnCount(10)
+        # SuperLookup inclusion, independent of Read). New column count = 9.
+        termbase_table.setColumnCount(9)
         termbase_table.setHorizontalHeaderLabels([
             "Type", "Name", "Languages", "Terms",
-            "Read", "Write", "Project", "AI", "🎤 Voice", "🔍 SuperLookup",
+            "Read", "Write", "Project", "AI", "🔍 SuperLookup",
         ])
         termbase_table.horizontalHeader().setStretchLastSection(False)
         termbase_table.setColumnWidth(0, 80)   # Type (Project/Background)
@@ -16844,14 +16801,13 @@ class SupervertalerQt(QMainWindow):
         termbase_table.setColumnWidth(5, 50)   # Write checkbox
         termbase_table.setColumnWidth(6, 60)   # Priority
         termbase_table.setColumnWidth(7, 40)   # AI checkbox
-        termbase_table.setColumnWidth(8, 70)   # 🎤 Voice checkbox
-        termbase_table.setColumnWidth(9, 100)  # 🔍 SuperLookup checkbox
+        termbase_table.setColumnWidth(8, 100)  # 🔍 SuperLookup checkbox
         termbase_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         termbase_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         termbase_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)  # Disable inline editing
         # v1.10.169: click-header-to-sort on the data columns (Type, Name,
         # Languages, Terms). The checkbox columns (Read / Write / Project /
-        # AI / Voice) can be header-clicked too, but they don't carry sortable
+        # AI) can be header-clicked too, but they don't carry sortable
         # data — Qt's QTableWidget sort orders cellWidgets by their row's
         # text item, which for those columns is None, so clicking them is
         # a visual no-op. setSortingEnabled is flipped off + back on around
@@ -17866,34 +17822,6 @@ class SupervertalerQt(QMainWindow):
                 ai_checkbox.toggled.connect(on_ai_toggle)
                 termbase_table.setCellWidget(row, 7, ai_checkbox)
 
-                # 🎤 Voice checkbox (purple) – whether this termbase
-                # contributes target-language terms to Whisper's
-                # initial_prompt for voice dictation (v1.10.28).
-                # Independent of project context, no Read/Write
-                # interaction – purely a voice-dictation opt-in flag.
-                voice_enabled = termbase_mgr.get_termbase_voice_enabled(tb['id'])
-                voice_checkbox = PurpleCheckmarkCheckBox()
-                voice_checkbox.setChecked(voice_enabled)
-                voice_checkbox.setToolTip(
-                    "🎤 Voice: include this termbase's target-language terms "
-                    "in the dictation vocabulary that biases Whisper. Opt-in: "
-                    "tick only the few termbases relevant to your current "
-                    "work – pulling target terms from every termbase is too "
-                    "noisy for users with dozens of glossaries. Requires "
-                    "the global toggle in 🎤 Voice tab → Dictation vocabulary "
-                    "→ \"Also bias from your termbases\" to be on."
-                )
-
-                def on_voice_toggle(checked, tb_id=tb['id'], tb_name=tb['name']):
-                    termbase_mgr.set_termbase_voice_enabled(tb_id, checked)
-                    self.log(
-                        f"{'✅ Enabled' if checked else '❌ Disabled'} "
-                        f"voice-dictation bias for termbase: {tb_name}"
-                    )
-
-                voice_checkbox.toggled.connect(on_voice_toggle)
-                termbase_table.setCellWidget(row, 8, voice_checkbox)
-
                 # v1.10.247: 🔍 SuperLookup checkbox (teal). The single
                 # switch deciding whether SuperLookup searches this termbase,
                 # independent of Read. Default on (included) for every
@@ -17916,14 +17844,14 @@ class SupervertalerQt(QMainWindow):
                             f"SuperLookup: termbase {tb_id}"
                         )
                     else:
-                        sender = termbase_table.cellWidget(row_idx, 9)
+                        sender = termbase_table.cellWidget(row_idx, 8)
                         if sender:
                             sender.blockSignals(True)
                             sender.setChecked(not checked)
                             sender.blockSignals(False)
 
                 tb_superlookup_checkbox.toggled.connect(on_tb_superlookup_toggle)
-                termbase_table.setCellWidget(row, 9, tb_superlookup_checkbox)
+                termbase_table.setCellWidget(row, 8, tb_superlookup_checkbox)
 
             # Update header checkbox states based on current selection
             tb_read_header_checkbox.blockSignals(True)
@@ -17931,7 +17859,7 @@ class SupervertalerQt(QMainWindow):
             tb_superlookup_header_checkbox.blockSignals(True)
             all_tb_read_checked = all(termbase_table.cellWidget(r, 4).isChecked() if termbase_table.cellWidget(r, 4) else False for r in range(termbase_table.rowCount())) if termbase_table.rowCount() > 0 else False
             all_tb_write_checked = all(termbase_table.cellWidget(r, 5).isChecked() if termbase_table.cellWidget(r, 5) else False for r in range(termbase_table.rowCount())) if termbase_table.rowCount() > 0 else False
-            all_tb_superlookup_checked = all(termbase_table.cellWidget(r, 9).isChecked() if termbase_table.cellWidget(r, 9) else False for r in range(termbase_table.rowCount())) if termbase_table.rowCount() > 0 else False
+            all_tb_superlookup_checked = all(termbase_table.cellWidget(r, 8).isChecked() if termbase_table.cellWidget(r, 8) else False for r in range(termbase_table.rowCount())) if termbase_table.rowCount() > 0 else False
             tb_read_header_checkbox.setChecked(all_tb_read_checked)
             tb_write_header_checkbox.setChecked(all_tb_write_checked)
             tb_superlookup_header_checkbox.setChecked(all_tb_superlookup_checked)
@@ -25282,31 +25210,6 @@ class SupervertalerQt(QMainWindow):
             import traceback
             traceback.print_exc()
 
-    def open_settings_to_keyboard_shortcuts(self):
-        """Переход к Settings → Keyboard Shortcuts.
-        
-                Вызывается по ссылке «Change in Settings → Keyboard Shortcuts»
-                на вкладке Voice. Переключает главное окно на страницу настроек
-                и выбирает подвкладку Keyboard Shortcuts."""
-        try:
-            main_tabs = getattr(self, 'main_tabs', None)
-            settings_tabs = getattr(self, 'settings_tabs', None)
-            settings_idx = getattr(self, 'settings_tab_index', None)
-            kb_idx = getattr(self, 'keyboard_shortcuts_tab_index', None)
-            if main_tabs is not None and settings_idx is not None:
-                main_tabs.setCurrentIndex(settings_idx)
-            if settings_tabs is not None and kb_idx is not None:
-                settings_tabs.setCurrentIndex(kb_idx)
-            self._bring_workbench_forward()
-        except Exception as e:
-            QMessageBox.information(
-                self, "Open Keyboard Shortcuts",
-                f"Couldn't auto-navigate (\"{e}\"). Open the main "
-                "Workbench window → Settings → Keyboard Shortcuts and "
-                "find <b>Voice dictation / push-to-talk</b> under "
-                "<b>Special</b>."
-            )
-
     def reload_global_hotkeys(self):
         """Перерегистрирует набор глобальных горячих клавиш с актуальными
                 значениями ShortcutManager.
@@ -27067,12 +26970,6 @@ class SupervertalerQt(QMainWindow):
         autotag_btn.clicked.connect(self.autotag_current_segment)
         toolbar_layout.addWidget(autotag_btn)
 
-        dictate_btn = QPushButton(f"🎤 Dictate{self._dictation_shortcut_label()}")
-        dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 3px 5px; border: none; outline: none;")
-        dictate_btn.clicked.connect(self.start_voice_dictation)
-        dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
-        toolbar_layout.addWidget(dictate_btn)
-        
         toolbar_layout.addWidget(QLabel("|"))  # Separator
 
         # Log button – opens the session log in its own movable window.
@@ -27098,8 +26995,7 @@ class SupervertalerQt(QMainWindow):
         # Store references
         self.tab_seg_info = tab_seg_info
         self.tab_status_combo = tab_status_combo
-        self.tab_dictate_btn = dictate_btn
-        
+
         # Create TermLens and Session Log tabs widget
         from PyQt6.QtWidgets import QTabWidget
         from modules.termlens_widget import TermLensWidget
@@ -28266,15 +28162,6 @@ class SupervertalerQt(QMainWindow):
         clear_btn = QPushButton(self.tr("🗑️ Clear Target"))
         clear_btn.clicked.connect(self.clear_tab_target)
 
-        # Voice dictation button
-        dictate_btn = QPushButton(f"🎤 Dictate{self._dictation_shortcut_label()}")
-        dictate_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
-        dictate_btn.clicked.connect(self.start_voice_dictation)
-        dictate_btn.setToolTip(self.tr("Push-to-talk dictation – press your dictation shortcut (or click) to record, transcribe, and insert text. Set the key in Settings → Keyboard Shortcuts."))
-
-        # Store reference to dictate button for state updates
-        editor_widget.dictate_btn = dictate_btn
-
         save_btn = QPushButton(self.tr("💾 Save"))
         save_btn.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold; padding: 3px 5px;")
         save_btn.clicked.connect(self.save_tab_segment)
@@ -28284,7 +28171,6 @@ class SupervertalerQt(QMainWindow):
 
         button_layout.addWidget(copy_btn)
         button_layout.addWidget(clear_btn)
-        button_layout.addWidget(dictate_btn)
         button_layout.addStretch()
         button_layout.addWidget(save_btn)
         button_layout.addWidget(save_next_btn)
@@ -43843,7 +43729,7 @@ class SupervertalerQt(QMainWindow):
     # каталога данных в _reinitialize_with_new_data_path().
     # S2.2 добавил к ним ещё три делегата вне этого блока:
     # load_clipboard_privacy_settings (44704), _load_general_settings_from_file
-    # и save_general_settings (рядом, у load_dictation_settings) — каждый стоит
+    # и save_general_settings — каждый стоит
     # ТОЧНО на месте своего тела из HEAD.
 
     def _get_settings_dir(self) -> Path:
@@ -44092,79 +43978,6 @@ class SupervertalerQt(QMainWindow):
         и дальше падать TypeError-ом, как падал до переноса.)"""
         self.settings_service.save_general_settings(settings)
 
-    def load_dictation_settings(self) -> Dict[str, Any]:
-        """Загружает настройки Voice."""
-        defaults = {
-            'model': 'base',
-            'max_duration': 10,
-            'language': 'Auto (use project target language)'
-        }
-
-        try:
-            prefs = self._load_settings_section("ui")
-            dictation = prefs.get('dictation_settings', {})
-            result = defaults.copy()
-            result.update(dictation)
-            return result
-        except:
-            return defaults
-
-    def save_dictation_settings(self, model: str, duration: int, language: str):
-        """Сохраняет настройки Voice."""
-        # Load existing preferences to check if model changed
-        all_settings = self._load_unified_settings()
-        prefs = all_settings.setdefault("ui", {})
-        old_model = prefs.get('dictation_settings', {}).get('model')
-
-        # Update dictation settings
-        prefs['dictation_settings'] = {
-            'model': model,
-            'max_duration': duration,
-            'language': language
-        }
-
-        # Model download info
-        model_sizes = {
-            'tiny': '75 MB',
-            'base': '142 MB',
-            'small': '466 MB',
-            'medium': '1.5 GB',
-            'large': '2.9 GB'
-        }
-
-        # Save back
-        try:
-            self._save_unified_settings(all_settings)
-            self.log(f"✓ Voice settings saved: Model={model}, Duration={duration}s")
-
-            # Build message
-            message = (
-                f"Voice settings saved successfully!\n\n"
-                f"Model: {model}\n"
-                f"Max Duration: {duration} seconds\n"
-                f"Language: {language}"
-            )
-
-            # Add download info if model changed
-            if old_model != model:
-                import os
-                cache_path = os.path.expanduser('~/.cache/whisper')
-                if os.name == 'nt':  # Windows
-                    cache_path = os.path.join(os.environ.get('USERPROFILE', ''), '.cache', 'whisper')
-
-                download_size = model_sizes.get(model, 'unknown size')
-                message += (
-                    f"\n\n📥 Model Download Info:\n"
-                    f"If you haven't used the '{model}' model before, it will be\n"
-                    f"downloaded automatically on first use ({download_size}).\n\n"
-                    f"Storage location:\n{cache_path}"
-                )
-
-            QMessageBox.information(self, "Settings Saved", message)
-        except Exception as e:
-            self.log(f"⚠ Could not save Voice settings: {str(e)}")
-            QMessageBox.warning(self, "Save Error", f"Could not save settings:\n{str(e)}")
-
     def _load_language_pair_from_disk(self):
         """Читает только языковую пару источник/перевод из settings.json.
         
@@ -44182,126 +43995,6 @@ class SupervertalerQt(QMainWindow):
         language_pair = self.settings_service._load_language_pair_from_disk()
         if language_pair is not None:
             self.source_language, self.target_language = language_pair
-
-    # =========================================================
-    # Voice dictation vocabulary biasing (v1.10.26 issue: Whisper
-    # misheard "Supervertaler" as "Supervertile" / etc. – see
-    # modules/voice_vocabulary.py for the full design).
-    # =========================================================
-
-    def load_voice_vocabulary_settings(self) -> Dict[str, Any]:
-        """Загружает настройки словаря голосовой диктовки пользователя.
-        
-                Форма настроек (хранится под ключом ``voice_vocabulary`` в едином
-                JSON настроек):
-        
-                    {
-                        "custom_terms": ["MyClient", "TechWord", ...],
-                        "replacements": [
-                            {"heard": "supervertile", "meant": "Supervertaler"},
-                            ...
-                        ],
-                        "use_termbase": true
-                    }
-        
-                Встроенные дефолты (modules.voice_vocabulary.DEFAULT_VOCABULARY
-                и DEFAULT_REPLACEMENTS) применяются *поверх* настроек
-                пользователя всегда, поэтому бренды вроде «Supervertaler»
-                поддерживаются даже при чистой установке без настроек."""
-        defaults = {
-            'custom_terms': [],
-            'replacements': [],
-            'use_termbase': True,
-        }
-        try:
-            section = self._load_settings_section("voice_vocabulary")
-            result = defaults.copy()
-            result.update(section or {})
-            # Sanity-check shapes – tolerate strings that got saved as
-            # JSON lists, etc. Bad entries are silently dropped.
-            if not isinstance(result.get('custom_terms'), list):
-                result['custom_terms'] = []
-            if not isinstance(result.get('replacements'), list):
-                result['replacements'] = []
-            result['use_termbase'] = bool(result.get('use_termbase', True))
-            return result
-        except Exception as e:
-            print(f"[VoiceVocab] load failed, using defaults: {e!r}")
-            return defaults
-
-    def save_voice_vocabulary_settings(self, custom_terms, replacements, use_termbase):
-        """Сохраняет настройки словаря голосовой диктовки. Заменяет секцию
-                ``voice_vocabulary`` целиком; частичные обновления не
-                поддерживаются сознательно (UI всегда пишет все три поля)."""
-        try:
-            self._save_settings_section("voice_vocabulary", {
-                'custom_terms': [
-                    str(t).strip() for t in (custom_terms or [])
-                    if str(t).strip()
-                ],
-                'replacements': [
-                    {
-                        'heard': str(r.get('heard', '')).strip(),
-                        'meant': str(r.get('meant', '')).strip(),
-                    }
-                    for r in (replacements or [])
-                    if isinstance(r, dict)
-                    and str(r.get('heard', '')).strip()
-                    and str(r.get('meant', '')).strip()
-                ],
-                'use_termbase': bool(use_termbase),
-            })
-        except Exception as e:
-            print(f"[VoiceVocab] save failed: {e!r}")
-
-    def build_voice_initial_prompt(self) -> str:
-        """Строит ``initial_prompt`` для Whisper из дефолтов + пользовательских
-                термов + (опционально) записей терминологий активного проекта
-                на языке источника.
-        
-                Вызывается при каждом создании новой поверхности диктовки
-                (слушатель always-on, поток push-to-talk), поэтому изменения
-                настроек пользователя действуют на следующем высказывании
-                без перезапуска Workbench."""
-        settings = self.load_voice_vocabulary_settings()
-        custom = settings.get('custom_terms', [])
-        termbase_terms = []
-        if settings.get('use_termbase', True):
-            try:
-                termbase_terms = self._collect_voice_dictation_termbase_terms()
-            except Exception as e:
-                print(f"[VoiceVocab] termbase pull failed: {e!r}")
-        try:
-            from modules.voice_vocabulary import build_initial_prompt
-            return build_initial_prompt(
-                custom_terms=custom,
-                termbase_terms=termbase_terms,
-            )
-        except Exception as e:
-            print(f"[VoiceVocab] prompt build failed: {e!r}")
-            return ""
-
-    def open_termbases_tab(self):
-        """Переключает панель главных вкладок на верхнюю вкладку 🏷️ Termbases.
-        
-                Ищется по тексту вкладки, а не по сохранённому индексу, чтобы
-                пережить любой будущий пере-порядок верхних вкладок. No-op,
-                если вкладки Termbases нет (например, какая-то будущая сборка,
-                где управление терминологиями переехало). Возвращает True при
-                переключении, False, если вкладка не найдена.
-        
-                Добавлено в v1.10.31 для флажка voice-bias на вкладке Voice —
-                отметка «Also bias from your termbases» автоматически ведёт
-                сюда, чтобы пользователь мог выбрать, какие терминологии реально
-                включить (колонка 🎤 Voice по-терминологически opt-in
-                с v1.10.29)."""
-        if not hasattr(self, 'main_tabs'):
-            return False
-        for i in range(self.main_tabs.count()):
-            if "Termbases" in self.main_tabs.tabText(i):
-                self.main_tabs.setCurrentIndex(i)
-                return True
-        return False
 
     def _migrate_voice_dictation_default_off(self):
         """Однократный сброс: очистить флаг ``voice_dictation_enabled``
@@ -44335,58 +44028,6 @@ class SupervertalerQt(QMainWindow):
             )
         except Exception as e:
             print(f"[VoiceVocab] opt-in reset migration error: {e!r}")
-
-    def _collect_voice_dictation_termbase_terms(self) -> list:
-        """Возвращает значения ``target_term`` на **целевом языке** каждого
-                терма каждой терминологии, у которой включён **флаг голосовой
-                диктовки**. Список используется ``build_voice_initial_prompt()``
-                как дополнительная лексическая подпитка Whisper.
-        
-                Почему перевод, а не источник: переводчики диктуют *целевую*
-                сторону (язык, который производят). Переводчик EN→NL,
-                диктующий по-нидерландски, нуждается в том, чтобы Whisper знал
-                нидерландскую терминологию, а не английские оригиналы.
-        
-                Почему без фильтра проекта: раньше это требовало открытого
-                проекта Workbench (вызывался ``get_active_termbase_ids(project_id)``),
-                из-за чего фича молча не работала, пока Workbench открыт как
-                вспомогательная утилита рядом с переводом в Trados — типичный
-                случай. v1.10.28 заменила по-проектную активацию чтения/записи
-                на отдельный по-терминологический флаг голосовой диктовки
-                (колонка ``🎤 Voice`` в Termbase Manager), не зависящий от
-                контекста проекта.
-        
-                Best-effort: любая ошибка базы/API ловится и превращается
-                в пустой список, чтобы никогда не ломать диктовку."""
-        if not hasattr(self, 'termbase_mgr') or not self.termbase_mgr:
-            return []
-        try:
-            voice_ids = self.termbase_mgr.get_voice_enabled_termbase_ids() or []
-        except Exception:
-            return []
-        out = []
-        seen = set()
-        for tb_id in voice_ids:
-            try:
-                terms = self.termbase_mgr.get_terms(tb_id) or []
-            except Exception:
-                continue
-            for entry in terms:
-                # Target-language column (what the translator dictates).
-                tgt = (entry.get('target_term') or '').strip()
-                if not tgt:
-                    continue
-                key = tgt.lower()
-                if key in seen:
-                    continue
-                seen.add(key)
-                out.append(tgt)
-                # Cap to keep the prompt from ballooning past Whisper's
-                # token budget. build_initial_prompt() trims further
-                # if needed, but it's cheaper to cap here.
-                if len(out) >= 200:
-                    return out
-        return out
 
     def load_language_settings(self):
         """Инициализирует проверку орфографии по уже загруженному целевому
@@ -53171,744 +52812,6 @@ class SupervertalerQt(QMainWindow):
                 except:
                     pass
 
-    def _get_voice_release_poller(self):
-        """Лениво создаёт опрашиватель отпускания клавиши на базе
-                GetAsyncKeyState.
-        
-                Один экземпляр на приложение. Возвращает ``None`` на платформах,
-                где опрос не реализован (сейчас macOS / Linux). Опрашиватель
-                НЕ ставит клавиатурный хук — обнаружение нажатия остаётся
-                на RegisterHotKey, он лишь следит за состоянием клавиши,
-                пока удерживается аккорд."""
-        existing = getattr(self, '_voice_release_poller', None)
-        if existing is not None:
-            return existing
-        try:
-            from modules.voice_release_poller import KeyReleasePoller, IS_WINDOWS
-        except Exception as e:
-            self.log(f"⚠ Voice release poller unavailable: {e}")
-            self._voice_release_poller = None
-            return None
-        if not IS_WINDOWS:
-            self._voice_release_poller = None
-            return None
-        poller = KeyReleasePoller(parent=self)
-        # v1.10.195: explicit QueuedConnection. emit() runs on the
-        # poller worker thread; AutoConnection would pick
-        # DirectConnection (both QObjects live on the main thread)
-        # and the slot would run on the worker thread. The current
-        # slot is thread-safe by coincidence (only calls thread-safe
-        # methods), but the contract is fragile — pin to queued so
-        # any future change to the slot doesn't quietly start
-        # touching widgets from the wrong thread.
-        poller.released.connect(
-            self.stop_voice_dictation_if_recording,
-            Qt.ConnectionType.QueuedConnection,
-        )
-        self._voice_release_poller = poller
-        return poller
-
-    def _register_voice_pushtotalk_deferred(self, qt_shortcut: str):
-        """Ставит клавиатурный слушатель push-to-talk и привязывает шорткат.
-        
-                Вызывается через QTimer из SuperlookupTab.register_global_hotkey,
-                чтобы блокирующая установка хука pynput не задерживала остальную
-                регистрацию глобальных горячих клавиш при старте Workbench.
-                Безопасно вызывать повторно (перерегистрация после смены шортката
-                — основной не-стартовый вызывающий)."""
-        listener = self._get_voice_hotkey_listener()
-        if listener is None:
-            return
-        listener.unregister('voice_dictate')
-        if listener.register('voice_dictate', qt_shortcut):
-            self.log(f"🎤 Push-to-talk armed: {qt_shortcut} (hold to dictate, release to transcribe)")
-        else:
-            self.log(f"⚠ Could not parse push-to-talk shortcut: {qt_shortcut!r}")
-
-    def _get_voice_hotkey_listener(self):
-        """Лениво создаёт глобальный слушатель горячей клавиши push-to-talk.
-        
-                Возвращает работающий экземпляр слушателя или None, если pynput /
-                низкоуровневый клавиатурный хук недоступен. Один экземпляр на
-                приложение. Сигналы подключаются здесь (не в __init__), чтобы
-                они достигали уже существующей инфраструктуры диктовки."""
-        if self._voice_hotkey_listener is not None:
-            return self._voice_hotkey_listener
-        try:
-            from modules.voice_hotkey_listener import GlobalHotkeyListener
-        except Exception as e:
-            self.log(f"⚠ Voice hotkey listener unavailable: {e}")
-            return None
-        listener = GlobalHotkeyListener(self)
-
-        def _on_chord_pressed(binding_id):
-            if binding_id == 'voice_dictate':
-                self.start_voice_dictation()
-            elif binding_id == 'voice_pause_alwayson':
-                # User-recordable hotkey that PAUSES Always-On while an
-                # external dictation tool (Wispr Flow etc.) holds the mic.
-                self._on_voice_pause_press()
-
-        def _on_chord_released(binding_id):
-            if binding_id == 'voice_dictate':
-                self.stop_voice_dictation_if_recording()
-            elif binding_id == 'voice_pause_alwayson':
-                self._on_voice_pause_release()
-
-        listener.chord_pressed.connect(_on_chord_pressed)
-        listener.chord_released.connect(_on_chord_released)
-        # Record-a-key for the pause hotkey routes through the same hook.
-        listener.captured.connect(self._on_voice_pause_key_captured)
-        if not listener.start():
-            self.log("⚠ Voice hotkey listener failed to start – push-to-talk will not work")
-            return None
-        # Register the saved pause-Always-On hotkey (may be a media key,
-        # stored as a serialized VK chord). Safe no-op if unset.
-        try:
-            _pause_spec = self.load_dictation_settings().get('voice_pause_hotkey')
-            if _pause_spec:
-                listener.register_serialized('voice_pause_alwayson', _pause_spec)
-        except Exception:
-            pass
-        self._voice_hotkey_listener = listener
-        return listener
-
-    # ── Pause Always-On via a user-recorded global hotkey ───────────────
-    # For users who drive an EXTERNAL dictation tool (Wispr Flow, Dragon…)
-    # with their own hotkey — often an odd key like media fast-forward.
-    # While that key is engaged we pause our Always-On Vosk listener so the
-    # two don't fight over the microphone. The key is RECORDED (not typed)
-    # so media keys work; behaviour is Hold (default) or Toggle.
-
-    def _voice_pause_mode(self) -> str:
-        try:
-            return self.load_dictation_settings().get('voice_pause_mode', 'hold')
-        except Exception:
-            return 'hold'
-
-    def _pause_alwayson_external(self):
-        """Приостанавливает слушателя Always-On (если работает) для внешней диктовки."""
-        vl = getattr(self, 'voice_listener', None)
-        if vl and getattr(vl, 'is_listening', False) and not getattr(vl, '_paused', False):
-            try:
-                vl.pause()
-                self._alwayson_paused_by_external = True
-                self.log("⏸️ Always-On paused for external dictation")
-            except Exception as e:
-                self.log(f"⚠ Could not pause Always-On: {e}")
-
-    def _resume_alwayson_external(self):
-        """Возобновляет Always-On, если ЕГО приостановили мы для внешней диктовки."""
-        if not getattr(self, '_alwayson_paused_by_external', False):
-            return
-        self._alwayson_paused_by_external = False
-        vl = getattr(self, 'voice_listener', None)
-        if vl and getattr(vl, '_paused', False):
-            try:
-                vl.resume()
-                self.log("▶️ Always-On resumed")
-            except Exception as e:
-                self.log(f"⚠ Could not resume Always-On: {e}")
-
-    def _ensure_voice_pause_hotkey_armed(self):
-        """Гарантирует, что горячая клавиша Pause-Always-On зарегистрирована
-                на глобальном клавиатурном слушателе.
-        
-                Идемпотентен и безопасен при повторных вызовах. Вызывается при
-                каждом старте Always-On, чтобы клавиша паузы была активна ровно
-                тогда, когда нужна, а не зависела от того, что push-to-talk лениво
-                создал слушателя раньше в сессии. Без этого пользователь внешнего
-                инструмента диктовки (не использующий Workbench push-to-talk)
-                мог бы держать Always-On работающим с незарегистрированной
-                горячей клавишей паузы — клавиша ничего бы не делала, а внешняя
-                диктовка просачивалась бы в Vosk ([unk] [unk])."""
-        try:
-            spec = (self.load_dictation_settings() or {}).get('voice_pause_hotkey') or ''
-        except Exception:
-            spec = ''
-        if not spec:
-            return  # no pause hotkey configured — nothing to arm
-        listener = self._get_voice_hotkey_listener()
-        if listener is None:
-            return
-        try:
-            # Re-register unconditionally (unregister first) so we're correct
-            # even if the listener was created before the hotkey was set, or a
-            # prior registration was cleared.
-            listener.unregister('voice_pause_alwayson')
-            if listener.register_serialized('voice_pause_alwayson', spec):
-                self.log("⏸️ Pause-Always-On hotkey armed")
-            else:
-                self.log(f"⚠ Could not parse Pause-Always-On hotkey: {spec!r}")
-        except Exception as e:
-            self.log(f"⚠ Could not arm Pause-Always-On hotkey: {e}")
-
-    def _on_voice_pause_press(self):
-        if self._voice_pause_mode() == 'toggle':
-            if getattr(self, '_alwayson_paused_by_external', False):
-                self._resume_alwayson_external()
-            else:
-                self._pause_alwayson_external()
-        else:  # hold
-            self._pause_alwayson_external()
-
-    def _on_voice_pause_release(self):
-        if self._voice_pause_mode() != 'toggle':
-            self._resume_alwayson_external()
-
-    def _set_voice_pause_setting(self, **kw):
-        try:
-            s = self._load_unified_settings()
-            ds = s.setdefault('ui', {}).setdefault('dictation_settings', {})
-            ds.update(kw)
-            self._save_unified_settings(s)
-        except Exception as e:
-            self.log(f"⚠ Could not save voice-pause setting: {e}")
-
-    def _begin_voice_pause_capture(self):
-        """Входит в режим записи клавиши для горячей клавиши паузы (вызывается со вкладки Voice)."""
-        listener = self._get_voice_hotkey_listener()
-        if listener is None:
-            self.log("⚠ Can't record a hotkey — the global keyboard listener is unavailable.")
-            lbl = getattr(self, '_voice_pause_hotkey_label', None)
-            if lbl is not None:
-                lbl.setText("Listener unavailable")
-            return
-        self._capturing_voice_pause = True
-        listener.begin_capture()
-        self.log("⏺ Recording pause hotkey — press the key you use for external dictation…")
-
-    def _on_voice_pause_key_captured(self, chord):
-        """Обрабатывает захваченный аккорд из режима записи клавиши (только для горячей клавиши паузы)."""
-        if not getattr(self, '_capturing_voice_pause', False):
-            return  # capture wasn't initiated by us
-        self._capturing_voice_pause = False
-        try:
-            from modules.voice_hotkey_listener import serialize_chord, describe_chord
-        except Exception:
-            return
-        spec = serialize_chord(chord)
-        label = describe_chord(chord) or 'Not set'
-        self._set_voice_pause_setting(voice_pause_hotkey=spec)
-        listener = self._get_voice_hotkey_listener()
-        if listener is not None:
-            listener.unregister('voice_pause_alwayson')
-            if spec:
-                listener.register_serialized('voice_pause_alwayson', spec)
-        lbl = getattr(self, '_voice_pause_hotkey_label', None)
-        if lbl is not None:
-            lbl.setText(label)
-        self.log(f"⏸️ Pause-Always-On hotkey set to: {label}")
-
-    def _clear_voice_pause_hotkey(self):
-        self._set_voice_pause_setting(voice_pause_hotkey='')
-        self._capturing_voice_pause = False
-        listener = getattr(self, '_voice_hotkey_listener', None)
-        if listener is not None:
-            try:
-                listener.cancel_capture()
-                listener.unregister('voice_pause_alwayson')
-            except Exception:
-                pass
-        lbl = getattr(self, '_voice_pause_hotkey_label', None)
-        if lbl is not None:
-            lbl.setText("Not set")
-        self.log("⏸️ Pause-Always-On hotkey cleared")
-
-    def stop_voice_dictation_if_recording(self):
-        """Останавливает активную запись диктовки при отпускании
-                (hold-to-talk).
-        
-                No-op, если:
-                  - записи сейчас нет, или
-                  - пользователь явно установил ``pushtotalk_mode = 'toggle'``
-                    (тогда отпускание не должно останавливать запись —
-                    пользователь хочет семантику нажал-старт / нажал-стоп).
-        
-                Вызывается глобальным клавиатурным слушателем при отпускании
-                аккорда voice_dictate."""
-        try:
-            mode = self.load_dictation_settings().get('pushtotalk_mode', 'hold')
-        except Exception:
-            mode = 'hold'
-        if mode == 'toggle':
-            return
-
-        thread = getattr(self, 'dictation_thread', None)
-        if thread is None:
-            return
-        try:
-            if thread.isRunning() and getattr(thread, 'is_recording', False):
-                thread.stop_recording()
-                self.log("⏹️ Hold-to-talk: hotkey released, transcribing…")
-                # Dismiss the listening toast immediately on user-initiated
-                # stop; on_dictation_finished will also try to dismiss but
-                # the visual feedback should disappear right now.
-                try:
-                    toast = getattr(self, '_dictation_toast', None)
-                    if toast is not None:
-                        toast.dismiss()
-                        self._dictation_toast = None
-                except Exception:
-                    pass
-        except Exception:
-            pass
-
-    def start_voice_dictation(self):
-        """Запускает или останавливает диктовку (переключающее поведение).
-        
-                Старое поведение (до Vosk): при активном always-on горячая
-                клавиша диктовки переключала его ВЫКЛ вместо диктовки, потому
-                что оба пути использовали Whisper и делили микрофон
-                исключительно.
-        
-                Новое поведение (сосуществование Vosk + faster-whisper):
-                always-on использует Vosk для распознавания команд, push-to-talk
-                — faster-whisper для диктовки связного текста. Это разные
-                движки и им СЛЕДУЕТ сосуществовать — нужно лишь заглушить
-                слушателя always-on на время диктовки, чтобы надиктованный текст
-                не интерпретировался наполовину как команда. Микрофон
-                возвращается Vosk через ``_resume_alwayson_after_dictation``,
-                когда поток диктовки сигнализирует ``finished``."""
-        # Debounce: the in-editor QShortcut and the global keyboard listener
-        # can both fire start_voice_dictation for the same physical press
-        # (the listener fires on the OS hook ~1 ms before Qt routes the
-        # event to the QShortcut). Without this guard the second call sees
-        # is_recording=True and aborts the recording milliseconds after it
-        # started. 200 ms window comfortably covers the worst-case Qt
-        # dispatch lag without affecting genuinely re-issued presses.
-        import time as _time
-        now_ms = int(_time.monotonic() * 1000)
-        if now_ms - self._voice_dictate_last_press_ms < 200:
-            return
-        self._voice_dictate_last_press_ms = now_ms
-
-        # If always-on is currently running, pause it (don't kill it) so
-        # push-to-talk can use the mic alone, then resume after.
-        alwayson_was_running = bool(
-            self.voice_listener and self.voice_listener.is_listening)
-        if alwayson_was_running:
-            try:
-                self.voice_listener.pause()
-                self.log("⏸️ Always-on paused for push-to-talk dictation")
-            except Exception:
-                pass
-        # Stash the flag so the dictation-finished callback knows whether
-        # to resume always-on or leave it stopped.
-        self._alwayson_was_running_before_dictation = alwayson_was_running
-
-        # Debug: Check thread state
-        has_thread = hasattr(self, 'dictation_thread')
-        thread_exists = has_thread and self.dictation_thread is not None
-        thread_running = thread_exists and self.dictation_thread.isRunning()
-        is_recording = thread_exists and getattr(self.dictation_thread, 'is_recording', False)
-
-        self.log(f"🔍 DEBUG: has_thread={has_thread}, thread_exists={thread_exists}, thread_running={thread_running}, is_recording={is_recording}")
-
-        # Check if already recording - if so, stop it
-        if thread_running:
-            if is_recording:
-                # Stop recording early
-                self.dictation_thread.stop_recording()
-                self.log("⏹️ Stopping recording early...")
-                # Dismiss the "🎤 Listening…" toast immediately on the
-                # user-initiated stop. on_dictation_finished will also
-                # call dismiss() once the thread actually finishes
-                # transcribing, but that can be a couple of seconds
-                # later – the user pressed the shortcut to STOP, so the
-                # visual feedback should disappear right away.
-                try:
-                    toast = getattr(self, '_dictation_toast', None)
-                    if toast is not None:
-                        toast.dismiss()
-                        self._dictation_toast = None
-                except Exception:
-                    pass
-                return
-            else:
-                # Thread is running but not recording (probably transcribing/loading model)
-                self.log("⚠️ Thread is running but not recording - waiting for it to finish...")
-                return
-
-        try:
-            # Load dictation settings
-            dictation_settings = self.load_dictation_settings()
-            model_name = dictation_settings.get('model', 'base')
-            max_duration = dictation_settings.get('max_duration', 10)
-            lang_setting = dictation_settings.get('language', 'Auto (use project target language)')
-
-            # Push-to-talk dictation engine. Three sources, in order:
-            #
-            #   1. User's explicit ``pushtotalk_engine`` setting (added
-            #      in v1.9.441 as a separate dropdown in the Voice tab)
-            #   2. ``'auto'`` → mirror the Always-On engine
-            #   3. Always-On engine (with Vosk → faster-whisper since Vosk
-            #      is commands-only and push-to-talk needs running text)
-            #
-            # Legacy ``recognition_engine='local'`` also maps to faster-whisper.
-            ptt_engine = dictation_settings.get('pushtotalk_engine', 'auto')
-            if ptt_engine == 'auto':
-                always_on_engine = dictation_settings.get('recognition_engine', 'vosk')
-                if always_on_engine in ('vosk', 'local'):
-                    ptt_engine = 'faster_whisper'
-                elif always_on_engine == 'api':
-                    ptt_engine = 'api'
-                else:
-                    ptt_engine = 'faster_whisper'
-            elif ptt_engine == 'local':  # very old legacy alias
-                ptt_engine = 'faster_whisper'
-            use_api = ptt_engine == 'api'
-            api_key = None
-            if use_api:
-                api_keys = self.load_api_keys()
-                api_key = api_keys.get('openai') or api_keys.get('openai_api_key')
-                if not api_key:
-                    QMessageBox.warning(
-                        self, "OpenAI API Key Required",
-                        "To use OpenAI Whisper API, please set your OpenAI API key in:\n\n"
-                        "Settings → AI Settings → OpenAI API Key"
-                    )
-                    return
-
-            # Determine language. Two flavours of "Auto":
-            #   - "Auto-detect (Whisper picks per utterance)" – pass
-            #     language=None to Whisper so it detects per utterance.
-            #     Right for mixed-language workflows.
-            #   - "Auto (use project target language)" – read the
-            #     Workbench project's target language and pin Whisper
-            #     to it. Right for single-language workflows.
-            if lang_setting.startswith('Auto-detect'):
-                # Sentinel value 'auto' is converted to None by
-                # QuickDictationThread before being passed to Whisper.
-                target_lang = '__autodetect__'
-            elif lang_setting == 'Auto (use project target language)':
-                target_lang = getattr(self, 'target_language', 'English')
-            else:
-                # Use override language from settings
-                target_lang = lang_setting
-
-            # Map language names to Whisper codes
-            lang_map = {
-                'English': 'en',
-                'Dutch': 'nl',
-                'German': 'de',
-                'French': 'fr',
-                'Spanish': 'es',
-                'Italian': 'it',
-                'Portuguese': 'pt',
-                'Polish': 'pl',
-                'Russian': 'ru',
-                'Chinese': 'zh',
-                'Japanese': 'ja',
-                'Korean': 'ko'
-            }
-            if target_lang == '__autodetect__':
-                # 'auto' is the sentinel that QuickDictationThread maps
-                # to language=None at transcribe time, triggering
-                # Whisper's per-utterance language detection.
-                lang_code = 'auto'
-            else:
-                lang_code = lang_map.get(target_lang, 'auto')
-
-            # Create dictation thread with user settings. mic_device is
-            # the saved device *name* from the Voice tab's Microphone
-            # dropdown; the thread resolves it to a sounddevice index at
-            # record time via modules.mic_devices (None ⇒ OS default).
-            # initial_prompt + replacements bias the Whisper decoder
-            # toward known vocabulary (defaults + custom + optional
-            # active termbase) – see build_voice_initial_prompt() and
-            # modules/voice_vocabulary.py.
-            mic_device = dictation_settings.get('mic_device')
-            vocab_settings = self.load_voice_vocabulary_settings()
-            self.dictation_thread = QuickDictationThread(
-                model_name=model_name,
-                language=lang_code,
-                duration=max_duration,
-                use_api=use_api,
-                api_key=api_key,
-                mic_device=mic_device,
-                initial_prompt=self.build_voice_initial_prompt(),
-                replacements=vocab_settings.get('replacements', []),
-            )
-
-            # Connect signals
-            self.dictation_thread.transcription_ready.connect(self.on_dictation_complete)
-            self.dictation_thread.status_update.connect(self.on_dictation_status)
-            self.dictation_thread.error_occurred.connect(self.on_dictation_error)
-            self.dictation_thread.finished.connect(self.on_dictation_finished)
-            self.dictation_thread.model_loading_started.connect(self.on_model_loading_started)
-            self.dictation_thread.model_loading_finished.connect(self.on_model_loading_finished)
-
-            # Change button appearance
-            self._set_dictation_button_recording(True)
-
-            # Start recording
-            if use_api:
-                self.log(f"▶️ Starting dictation thread (OpenAI Whisper API, language={lang_code}, duration={max_duration}s)...")
-            else:
-                self.log(f"▶️ Starting dictation thread (local Whisper model={model_name}, language={lang_code}, duration={max_duration}s)...")
-            # Visual cue so the user knows the hotkey was received and the
-            # mic is now hot. Push-to-talk fires from Ctrl+Shift+Space in any
-            # app via the global hotkey; without this there's no feedback
-            # that recording started. Replaces the earlier QApplication.beep()
-            # which was unreliable (many users mute system sound) and harsh
-            # on Windows (the system Ding tone reads as an error).
-            try:
-                from modules.dictation_toast import show_dictation_toast
-                self._dictation_toast = show_dictation_toast(self)
-            except Exception as _toast_err:
-                print(f"[Dictation toast] Failed to show: {_toast_err}")
-                self._dictation_toast = None
-            self.dictation_thread.start()
-
-        except Exception as e:
-            self._set_dictation_button_recording(False)
-            import traceback
-            error_details = traceback.format_exc()
-            self.log(f"")
-            self.log(f"❌ ERROR starting dictation:")
-            self.log(f"   {str(e)}")
-            self.log(f"")
-            self.log(f"Full traceback:")
-            self.log(error_details)
-            self.log(f"")
-            QMessageBox.critical(self, "Dictation Error", f"Failed to start dictation:\n\n{str(e)}\n\nCheck the Log tab for full details.")
-
-    def on_dictation_complete(self, text):
-        """Обрабатывает завершённую диктовку."""
-        # Route as dictation text – same cross-app path Always-On
-        # uses, so push-to-talk works in any app.
-        self._insert_dictated_text(text)
-
-    def _insert_dictated_text(self, text: str):
-        """Маршрутизирует надиктованный текст в подходящую цель.
-        
-                Порядок предпочтения:
-                1. Находящийся в фокусе редактор сетки Supervertaler
-                   (EditableGridTextEditor) → прямая вставка с обработкой курсора.
-                2. Находящийся в фокусе редактор перевода вкладочной панели →
-                   прямая вставка.
-                3. Любое другое приложение в фокусе → AHK SendText /
-                   osascript-нажатия / pynput type через
-                   CrossPlatformKeySender.type_text.
-                4. Последний откат → клипборд, чтобы пользователь вставил
-                   вручную любым шорткатом своего приложения.
-        
-                Используется ``on_dictation_complete`` (push-to-talk F9
-                и глобальная Voice-клавиша), поэтому поведение одинаково на всех
-                поверхностях."""
-        focused_widget = QApplication.focusWidget()
-
-        if isinstance(focused_widget, EditableGridTextEditor):
-            current_text = focused_widget.toPlainText()
-            if current_text:
-                focused_widget.setPlainText(current_text + " " + text)
-            else:
-                focused_widget.setPlainText(text)
-            cursor = focused_widget.textCursor()
-            cursor.movePosition(cursor.MoveOperation.End)
-            focused_widget.setTextCursor(cursor)
-            self.status_bar.showMessage(f"✅ Dictation: {text[:50]}...", 3000)
-            return
-
-        # Tabbed panel editor (legacy list view).
-        if hasattr(self, 'tabbed_panels'):
-            for panel in self.tabbed_panels:
-                try:
-                    if hasattr(panel, 'editor_widget') and panel.editor_widget.target_editor.hasFocus():
-                        target = panel.editor_widget.target_editor
-                        current_text = target.toPlainText()
-                        if current_text:
-                            target.setPlainText(current_text + " " + text)
-                        else:
-                            target.setPlainText(text)
-                        cursor = target.textCursor()
-                        cursor.movePosition(cursor.MoveOperation.End)
-                        target.setTextCursor(cursor)
-                        self.status_bar.showMessage(
-                            f"✅ Dictation: {text[:50]}...", 3000)
-                        return
-                except Exception:
-                    pass
-
-        # Cross-app: type into whatever has keyboard focus.
-        try:
-            from modules.platform_helpers import CrossPlatformKeySender
-            sender = CrossPlatformKeySender()
-            if sender.is_available and sender.type_text(text):
-                self.log(f"💬 Dictated: {text}")
-                self.status_bar.showMessage(
-                    f"💬 Dictated: {text[:50]}...", 3000)
-                return
-        except Exception as e:
-            self.log(f"⚠ Dictation type failed: {e}")
-
-        # Last-resort clipboard fallback.
-        try:
-            QApplication.clipboard().setText(text)
-            self.log(
-                f"💬 Dictated → clipboard (auto-typing unavailable): {text}")
-            self.status_bar.showMessage(
-                f"📋 Copied to clipboard: {text[:50]}...", 4000)
-        except Exception:
-            self.log(f"💬 Dictation (no target): {text}")
-            self.status_bar.showMessage(f"💬 {text[:50]}...", 3000)
-
-    def on_dictation_status(self, message):
-        """Показывает статус диктовки."""
-        self.log(message)  # Also log to Log tab
-        self.status_bar.showMessage(message, 2000)
-
-    def on_dictation_error(self, error_msg):
-        """Обрабатывает ошибку диктовки."""
-        self._set_dictation_button_recording(False)
-
-        # Log the full error to Log tab
-        self.log("")
-        self.log("❌ SUPERVOICE ERROR:")
-        self.log(error_msg)
-        self.log("")
-
-        self.status_bar.showMessage(f"❌ Voice dictation error", 3000)
-
-        # Hand the mic back to always-on if we paused it for this dictation.
-        self._resume_alwayson_after_dictation()
-
-        # Show detailed error dialog for FFmpeg issues
-        if "FFmpeg" in error_msg or "ffmpeg" in error_msg:
-            QMessageBox.warning(self, "FFmpeg Required", error_msg)
-
-    def on_dictation_finished(self):
-        """Обрабатывает завершение потока диктовки."""
-        self.log("✓ Dictation thread finished")
-        self._set_dictation_button_recording(False)
-        # Dismiss the "🎤 Listening…" toast if it's still up.
-        try:
-            toast = getattr(self, '_dictation_toast', None)
-            if toast is not None:
-                toast.dismiss()
-                self._dictation_toast = None
-        except Exception:
-            pass
-        # Hand the mic back to always-on if we paused it for this dictation.
-        self._resume_alwayson_after_dictation()
-
-    def _resume_alwayson_after_dictation(self):
-        """Заново включает слушателя always-on, если push-to-talk его
-                приостановил.
-        
-                Идемпотентно — безопасно вызывать и из пути успеха, и из пути
-                ошибки. Возобновляет только если (а) флаг был установлен
-                в ``start_voice_dictation`` И (б) слушатель ещё существует
-                и находится в состоянии паузы."""
-        if not getattr(self, '_alwayson_was_running_before_dictation', False):
-            return
-        self._alwayson_was_running_before_dictation = False
-        try:
-            if (self.voice_listener
-                    and self.voice_listener.is_listening
-                    and getattr(self.voice_listener, 'is_paused', False)):
-                self.voice_listener.resume()
-                self.log("▶️ Always-on resumed")
-        except Exception as e:
-            self.log(f"⚠ Could not resume always-on listener: {e}")
-
-    def on_model_loading_started(self, model_name):
-        """Обрабатывает начало загрузки/скачивания модели Whisper."""
-        self.is_loading_model = True
-        self.loading_model_name = model_name
-        model_sizes = {
-            'tiny': '75 MB',
-            'base': '142 MB',
-            'small': '466 MB',
-            'medium': '1.5 GB',
-            'large': '2.9 GB'
-        }
-        size = model_sizes.get(model_name, 'unknown size')
-
-        # Check if model exists
-        import os
-        cache_dir = self._get_whisper_cache_path()
-        model_files = [
-            f"{model_name}.pt",
-            f"{model_name}.en.pt",
-            f"{model_name}-v3.pt"
-        ]
-        model_exists = any(os.path.exists(os.path.join(cache_dir, f)) for f in model_files)
-
-        if model_exists:
-            self.status_bar.showMessage(f"🎤 Voice: Loading '{model_name}' model...", 10000)
-            self.log(f"⏳ Loading Whisper model '{model_name}' from cache...")
-        else:
-            self.status_bar.showMessage(f"📥 Voice: Downloading '{model_name}' model ({size})...", 60000)
-            self.log(f"")
-            self.log(f"📥 DOWNLOADING Whisper model '{model_name}' ({size})...")
-            self.log(f"   This is a one-time download. Please be patient!")
-            self.log(f"   ⚠️ DO NOT CLOSE SUPERVERTALER until download completes!")
-            self.log(f"   Location: {cache_dir}")
-            self.log(f"")
-
-    def on_model_loading_finished(self):
-        """Обрабатывает завершение загрузки/скачивания модели Whisper."""
-        model_name = self.loading_model_name  # Save before clearing
-        self.is_loading_model = False
-        self.loading_model_name = None
-        self.status_bar.showMessage(f"🎤 Voice: '{model_name}' model ready", 3000)
-        self.log(f"✅ Model '{model_name}' loaded successfully")
-
-    def _dictation_shortcut_label(self) -> str:
-        """Возвращает текущий шорткат голосовой диктовки как отображаемый
-                суффикс, например « (Ctrl+Shift+Space)», или «», если шорткат не
-                привязан.
-        
-                Клавиша диктовки настраивается пользователем (Settings →
-                Keyboard Shortcuts, ``voice_dictate``), поэтому кнопки
-                Dictate/Stop читают её вживую, а не хардкодят клавишу,
-                которая устаревает при перепривязке. (Старая подпись «(F9)» была
-                ошибкой — дефолт: Ctrl+Shift+Space.)"""
-        sm = getattr(self, 'shortcut_manager', None)
-        if sm is None:
-            return ""
-        try:
-            key = sm.get_shortcut('voice_dictate')
-        except Exception:
-            return ""
-        if not key:
-            return ""
-        try:
-            return f" ({format_shortcut_for_display(key)})"
-        except Exception:
-            return f" ({key})"
-
-    def _set_dictation_button_recording(self, is_recording):
-        """Меняет вид кнопки диктовки по состоянию записи."""
-        suffix = self._dictation_shortcut_label()
-        # Обновляем кнопку диктовки в представлении сетки
-        if hasattr(self, 'tab_dictate_btn'):
-            button = self.tab_dictate_btn
-            if is_recording:
-                button.setText(f"⏹️ Stop{suffix}")
-                button.setStyleSheet("background-color: #D32F2F; color: white; font-weight: bold;")
-            else:
-                button.setText(f"🎤 Dictate{suffix}")
-                button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
-
-        # Обновляем кнопку диктовки в представлении списка (устаревший путь, для совместимости)
-        if hasattr(self, 'tabbed_panels'):
-            for panel in self.tabbed_panels:
-                try:
-                    # Используем сохранённую ссылку на кнопку диктовки
-                    if hasattr(panel, 'editor_widget') and hasattr(panel.editor_widget, 'dictate_btn'):
-                        button = panel.editor_widget.dictate_btn
-                        if is_recording:
-                            button.setText(f"⏹️ Stop{suffix}")
-                            button.setStyleSheet("background-color: #D32F2F; color: white; font-weight: bold;")
-                        else:
-                            button.setText(f"🎤 Dictate{suffix}")
-                            button.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
-                except:
-                    pass
-
     def save_tab_segment(self):
         """Сохраняет текущий сегмент в редакторе вкладки."""
         if not hasattr(self, 'tab_current_segment_id') or not self.tab_current_segment_id:
@@ -57169,35 +56072,6 @@ class SupervertalerQt(QMainWindow):
     
     def closeEvent(self, event):
         """Обрабатывает событие закрытия окна."""
-        # Проверяем, скачивается ли модель Whisper
-        if self.is_loading_model:
-            model_sizes = {
-                'tiny': '75 MB',
-                'base': '142 MB',
-                'small': '466 MB',
-                'medium': '1.5 GB',
-                'large': '2.9 GB'
-            }
-            size = model_sizes.get(self.loading_model_name, 'unknown size')
-
-            reply = QMessageBox.warning(
-                self,
-                "⚠️ Voice Model Downloading",
-                f"Voice is currently downloading the '{self.loading_model_name}' model ({size}).\n\n"
-                f"If you close now, the download will be interrupted and the model\n"
-                f"file may become corrupted. You would need to delete the incomplete\n"
-                f"file manually and re-download.\n\n"
-                f"Download location:\n"
-                f"{self._get_whisper_cache_path()}\n\n"
-                f"Do you want to force quit anyway?",
-                QMessageBox.StandardButton.No | QMessageBox.StandardButton.Yes,
-                QMessageBox.StandardButton.No
-            )
-
-            if reply == QMessageBox.StandardButton.No:
-                event.ignore()
-                return
-
         # Проверяем несохранённые изменения проекта
         if self.project_modified:
             reply = QMessageBox.question(
@@ -57377,14 +56251,6 @@ class SupervertalerQt(QMainWindow):
         except Exception:
             pass
 
-    def _get_whisper_cache_path(self):
-        """Возвращает путь к папке кэша моделей Whisper."""
-        import os
-        if os.name == 'nt':  # Windows
-            return os.path.join(os.environ.get('USERPROFILE', ''), '.cache', 'whisper')
-        else:  # Linux/Mac
-            return os.path.expanduser('~/.cache/whisper')
-    
     # =========================================================================
     # LLM TRANSLATION INTEGRATION
     # =========================================================================
@@ -65686,8 +64552,7 @@ class SuperlookupTab(QWidget):
     
     def register_global_hotkey(self):
         """Регистрирует глобальные горячие клавиши Superlookup, QuickTrans,
-                Sidekick, Clipboard, Voice push-to-talk и переключателя Voice
-                Always-On.
+                Sidekick и Clipboard.
         
                 Идемпотентно: если менеджер от прежней регистрации всё ещё
                 работает, он останавливается первым. Это делает вызов из
@@ -65726,7 +64591,6 @@ class SuperlookupTab(QWidget):
             qt_shortcut = sm.get_shortcut('mt_quick_lookup').lower()
             sk_shortcut = sm.get_shortcut('sidekick_open').lower()
             cb_shortcut = sm.get_shortcut('sidekick_open_clipboard').lower()
-            pt_shortcut = sm.get_shortcut('voice_dictate').lower()
 
             # Honour the per-shortcut enabled flag and the `global` field:
             # if disabled, or if the entry is no longer flagged global, skip
@@ -65737,12 +64601,10 @@ class SuperlookupTab(QWidget):
             if _skip('tools_universal_lookup'):       sl_shortcut = ''
             if _skip('mt_quick_lookup'):              qt_shortcut = ''
             if _skip('sidekick_open_clipboard'):      cb_shortcut = ''
-            if _skip('voice_dictate'):                pt_shortcut = ''
         else:
             sl_shortcut = 'ctrl+alt+l'
             qt_shortcut = 'ctrl+alt+q'
             cb_shortcut = 'ctrl+shift+c'
-            pt_shortcut = 'ctrl+shift+space'
 
         # No platform-specific rewrite needed: GlobalHotkeyManager's macOS
         # NSEvent backend now follows Qt's Mac convention internally
@@ -65754,22 +64616,13 @@ class SuperlookupTab(QWidget):
         # and produced different physical chords for local vs global; that
         # parser was fixed in modules/platform_helpers.py:_MacNSEventHotkey._parse.
 
-        # Logging helper. Defined here (above the push-to-talk listener
-        # setup) so both the listener block and the RegisterHotKey block
-        # below can use the same mirror-to-main-window-log behaviour.
+        # Logging helper. Defined here (above the RegisterHotKey block)
+        # so both this and the fallback block below can use the same
+        # mirror-to-main-window-log behaviour.
         def _log(m):
             print(m, flush=True)
             if self.main_window and hasattr(self.main_window, 'log'):
                 self.main_window.log(m)
-
-        # --- Push-to-talk routing ---
-        # Press detection: RegisterHotKey (in the _bindings list below).
-        # Release detection: GetAsyncKeyState polling triggered when the
-        # press handler fires; no keyboard hook is installed, so this
-        # doesn't interfere with AHK's hook chain (which was the problem
-        # the earlier pynput.keyboard.Listener-based attempt ran into).
-        # See modules/voice_release_poller.py.
-        _log(f"[Voice] Push-to-talk: press via RegisterHotKey, release via GetAsyncKeyState polling ({pt_shortcut or 'unset'})")
 
         # --- Attempt 1: WinAPI / pynput (cross-platform) ---
         import sys as _sys
@@ -65783,7 +64636,6 @@ class SuperlookupTab(QWidget):
                     (sl_shortcut, self._on_pynput_superlookup),
                     (qt_shortcut, self._on_pynput_quicktrans),
                     (cb_shortcut, self._on_pynput_clipboard),
-                    (pt_shortcut, self._on_pynput_pushtotalk),
                 ]
                 _to_register = [(s, cb) for s, cb in _bindings if s]
                 if not _to_register:
@@ -66068,54 +64920,6 @@ class SuperlookupTab(QWidget):
                 print("[Clipboard] open_workbench_to_clipboard unavailable")
         except Exception as e:
             print(f"[Clipboard] Error in _open_clipboard_after_copy: {e}")
-
-    def _on_pynput_pushtotalk(self):
-        """Глобальная горячая клавиша голосового push-to-talk — срабатывает
-                в фоновом потоке pynput.
-        
-                ВАЖНО: здесь НЕ делать никакой работы — см. докстринг
-                _on_pynput_superlookup."""
-        try:
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(0, self._handle_pushtotalk_hotkey)
-        except Exception as e:
-            print(f"[Voice] Error signaling main thread: {e}")
-
-    @pyqtSlot()
-    def _handle_pushtotalk_hotkey(self):
-        """Выполняется в главном потоке Qt — запускает запись диктовки
-                push-to-talk на главном Workbench ровно так же, как F9. Результат
-                диктовки далее маршрутизируется в ``_insert_dictated_text``,
-                который при фокусе вне Supervertaler откатывается к AHK SendText /
-                osascript / набору pynput — поэтому это работает в любом
-                приложении.
-        
-                Hold-to-talk: после запуска записи стартует ``KeyReleasePoller``
-                (опрос GetAsyncKeyState, без клавиатурного хука), наблюдающий
-                за привязанным аккордом и вызывающий
-                ``stop_voice_dictation_if_recording`` в момент отпускания любой
-                из требуемых клавиш. Учитывает настройку ``pushtotalk_mode``
-                пользователя: ``hold`` → отпускание останавливает; ``toggle`` →
-                отпускание игнорируется (следующее нажатие останавливает)."""
-        try:
-            mw = self.main_window or self.window()
-            if mw and hasattr(mw, 'start_voice_dictation'):
-                mw.start_voice_dictation()
-                # Arm release-detection. Cheap to call repeatedly:
-                # set_chord re-parses the user's current binding so a
-                # shortcut change picked up between presses is honoured.
-                if hasattr(mw, '_get_voice_release_poller'):
-                    poller = mw._get_voice_release_poller()
-                    if poller is not None:
-                        sm = getattr(mw, 'shortcut_manager', None)
-                        chord_str = sm.get_shortcut('voice_dictate') if sm else ''
-                        if chord_str and poller.set_chord(chord_str):
-                            poller.start()
-            else:
-                print("[Voice] Workbench unavailable for push-to-talk")
-        except Exception as e:
-            print(f"[Voice] Error in push-to-talk hotkey handler: {e}")
-
 
     def _try_ahk_library_method(self):
         """Пробует зарегистрировать горячую клавишу через библиотеку ahk.

@@ -185,15 +185,6 @@ class ShortcutManager:
             "action": "force_refresh_matches"
         },
 
-        # Special
-        "voice_dictate": {
-            "category": "Special",
-            "description": "Voice dictation / push-to-talk",
-            "default": "Ctrl+Shift+Space",
-            "action": "start_voice_dictation",
-            "global": True,
-        },
-
         # Match Insertion (Direct)
         "match_insert_1": {
             "category": "Match Insertion",
@@ -744,7 +735,6 @@ class ShortcutManager:
             'global_quicktrans':        'mt_quick_lookup',
             'global_sidekick':          'sidekick_open',
             'global_clipboard':         'sidekick_open_clipboard',
-            'global_pushtotalk':        'voice_dictate',
         }
         merge_changed = False
         for old_id, new_id in _GLOBAL_TO_MERGED.items():
@@ -825,7 +815,6 @@ class ShortcutManager:
             'global_quicktrans':      'mt_quick_lookup',
             'global_sidekick':        'sidekick_open',
             'global_clipboard':       'sidekick_open_clipboard',
-            'global_pushtotalk':      'voice_dictate',
         }
         shortcut_id = _LEGACY_IDS.get(shortcut_id, shortcut_id)
 
