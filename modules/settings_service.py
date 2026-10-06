@@ -31,8 +31,9 @@ SupervertalerQt сохраняет 6 тонких одноимённых дел�
 ``_get_unified_settings_path``, ``_load_unified_settings``,
 ``_save_unified_settings``, ``_load_settings_section``,
 ``_save_settings_section``), поэтому все call sites продолжают работать без
-изменений — включая строковые (getattr) обращения из ``modules/``
-(``voice_tab.py``, ``clipboard_manager_widget.py``) и безусловный вызов
+изменений — включая строковые (getattr) обращения из ``modules/`` (до Batch
+#8.5 — ``voice_tab.py`` и ``clipboard_manager_widget.py``, удалённые в Batch
+#8.3/#8.5) и безусловный вызов
 ``window._load_settings_section("ui")`` из ``main()`` монолита. Оставшиеся
 в монолите методы (``_migrate_settings_to_unified``,
 ``_migrate_to_workbench_layout``, ``_migrate_voice_dictation_default_off`` —
@@ -44,13 +45,16 @@ SupervertalerQt сохраняет 6 тонких одноимённых дел�
 ``self.user_data_path / "workbench" / "settings"`` (инъекция зависимости,
 значение то же).
 
-Под-батч S2.2 (тот же Stage 2) добавил сюда три метода общего слоя:
-``load_clipboard_privacy_settings``, ``_load_general_settings_from_file`` и
+Под-батч S2.2 (тот же Stage 2) добавил сюда два метода общего слоя:
+``_load_general_settings_from_file`` и
 ``save_general_settings``; их тела — тоже ВЕРБАТИМ-перенос, вызовы
 ``self._load_settings_section``/``self._save_settings_section``/``self.log``
 внутри них теперь резолвятся в методы этого класса, а не в делегаты монолита.
+(Третий метод S2.2, ``load_clipboard_privacy_settings``, удалён в Batch #8.5
+вместе с вкладкой Clipboard — F2.)
 ``load_general_settings`` (97 строк: применение ~35 атрибутов окна) остаётся в
-монолите, как и ``save_clipboard_privacy_settings`` — но его внутренний вызов
+монолите, как и остававшийся там ``save_clipboard_privacy_settings`` (удалён в
+Batch #8.5) — но его внутренний вызов
 ``self._load_general_settings_from_file()`` идёт через одноимённый делегат и не
 менялся.
 
@@ -158,19 +162,9 @@ class SettingsService:
     # (Историческая оговорка про сайты SuperlookupTab 66780/66823 снята в
     # U1.2 upstream-sync, коммит 626d4c63 апстрима: оба сайта и чтение
     # main_window.general_settings переведены на load/save_general_settings.)
-    # save_clipboard_privacy_settings в сервис НЕ переносится (решение V3: живому
-    # refresh нужны Qt-объекты; в монолите остаётся целиком).
-
-    def load_clipboard_privacy_settings(self) -> Dict[str, Any]:
-        """Сохранённые настройки захвата/хранения/исключений буфера обмена.
-                Возвращает {} при отсутствии сохранённого, поэтому применяются
-                собственные дефолты виджета (захват включён — поведение
-                как до v1.10.369)."""
-        try:
-            return self._load_settings_section("features").get('clipboard_privacy', {}) or {}
-        except Exception as e:
-            self.log(f"⚠ Could not load clipboard privacy settings: {e}")
-            return {}
+    # load_clipboard_privacy_settings удалён в Batch #8.5 вместе с вкладкой
+    # Clipboard (F2); save_clipboard_privacy_settings в сервис не переносился
+    # (решение V3: живому refresh нужны Qt-объекты) и удалён из монолита там же.
 
     def _load_general_settings_from_file(self) -> Dict[str, Any]:
         """Загружает общие настройки из единого settings.json (секция general)."""

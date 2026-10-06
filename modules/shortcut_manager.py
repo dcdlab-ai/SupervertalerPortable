@@ -585,13 +585,6 @@ class ShortcutManager:
             "default": "Alt+K",
             "action": "open_quicklauncher",
         },
-        "sidekick_open_clipboard": {
-            "category": "Hotkeys",
-            "description": "Open Clipboard manager",
-            "default": "Ctrl+Alt+C",
-            "action": "open_clipboard_tab",
-            "global": True,
-        },
         "editor_show_context_menu_double_shift": {
             "category": "Editor",
             "description": "Show context menu (double-tap Shift)",
@@ -734,7 +727,6 @@ class ShortcutManager:
             'global_superlookup':       'tools_universal_lookup',
             'global_quicktrans':        'mt_quick_lookup',
             'global_sidekick':          'sidekick_open',
-            'global_clipboard':         'sidekick_open_clipboard',
         }
         merge_changed = False
         for old_id, new_id in _GLOBAL_TO_MERGED.items():
@@ -758,27 +750,10 @@ class ShortcutManager:
         # been removed. With Sidekick retired the global Ctrl+Alt+K
         # binding is gone; sidekick_open is now an in-app-only
         # shortcut and Alt+K is fine again.
-
-        # Default-value upgrade for sidekick_open_clipboard: Ctrl+Shift+C
-        # → Ctrl+Alt+C. The old default fired unreliably on Windows
-        # (Ctrl+Shift+C is widely claimed by browsers / DevTools and
-        # other apps), so users who were on the previous default are
-        # bumped to Ctrl+Alt+C.
         #
-        # This is a ONE-TIME migration and must be gated: it can't tell a
-        # legacy user still on the old default from one who has just
-        # *deliberately* re-selected Ctrl+Shift+C. Running it on every
-        # load wiped that deliberate choice on the next restart (the
-        # binding silently snapped back to Ctrl+Alt+C). Gate it behind a
-        # persisted marker so it fires at most once per install; after
-        # that Ctrl+Shift+C is a freely selectable binding again.
-        _CLIP_MIGRATION = 'clipboard_default_ctrlaltc_v1'
-        if _CLIP_MIGRATION not in self.applied_migrations:
-            sk_clip = self.custom_shortcuts.get('sidekick_open_clipboard')
-            if sk_clip and sk_clip.lower() == 'ctrl+shift+c':
-                del self.custom_shortcuts['sidekick_open_clipboard']
-            self.applied_migrations.add(_CLIP_MIGRATION)
-            self.save_shortcuts()
+        # Batch #8.5: the analogous one-time upgrade for
+        # `sidekick_open_clipboard` (Ctrl+Shift+C → Ctrl+Alt+C) was
+        # removed together with the Clipboard Manager (F2).
 
     def save_shortcuts(self):
         """Save custom shortcuts to file"""
@@ -814,7 +789,6 @@ class ShortcutManager:
             'global_superlookup':     'tools_universal_lookup',
             'global_quicktrans':      'mt_quick_lookup',
             'global_sidekick':        'sidekick_open',
-            'global_clipboard':       'sidekick_open_clipboard',
         }
         shortcut_id = _LEGACY_IDS.get(shortcut_id, shortcut_id)
 
