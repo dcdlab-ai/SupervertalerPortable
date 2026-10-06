@@ -36405,12 +36405,17 @@ class SupervertalerQt(QMainWindow):
             traceback.print_exc()
     
     def get_translator_name(self) -> str:
-        """Возвращает настроенное пользователем имя переводчика, с откатом к имени пользователя системы."""
+        """Возвращает настроенное пользователем имя переводчика, с откатом к нейтральной константе.
+
+                Раньше фолбэком было системное имя пользователя (USERNAME/USER);
+                решением Дмитрия по итогам Batch #8.7 (вопрос 1 отчёта) заменено
+                на «Translator» — страница настроек User Identity удалена в
+                Batch #8.7, ключ general.translator_name остаётся приоритетным."""
         settings = self.load_general_settings()
         name = settings.get('translator_name', '').strip()
         if name:
             return name
-        return os.environ.get('USERNAME', os.environ.get('USER', 'user'))
+        return "Translator"
 
     def _build_sdlxliff_translations_dict(self):
         """Строит отображение segment_id → целевой текст для экспорта SDLXLIFF.
