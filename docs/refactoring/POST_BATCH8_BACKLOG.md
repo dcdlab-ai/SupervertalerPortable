@@ -107,6 +107,16 @@
   `styled_widgets.py` и `termbase_manager.py` про колонку 🎤.
 * `_prewarm_ahk`/AHK — оставить как опциональный ускоритель (не удалять).
 * MyMemory включён по умолчанию (500 символов, внешний сервис) — решение о дефолте.
+* **Микро-батч после 8.9 (решение Дмитрия, BATCH8_7 §8 в.2):** удалить чип «🔗 Trados»
+  в Chat и `modules/trados_bridge_client.py` (524 строк): ~123 строки в
+  `chat_view_widget.py` (импорт 23–27, чип 309, блок 332–362, слот 364–399,
+  pref 401–411, ветка toggle 425–431, send-путь 811–817, fetch 835–859) и ~24 строки
+  в `unified_prompt_manager_qt.py` (6337–6358, 6380–6381). Все обращения охраняются;
+  клиент независим от удалённого в 8.7 сервера (читает handshake плагина
+  `trados/runtime/bridge.json`).
+* Орфанные ключи/данные после 8.7 (инвентаризация в конце Batch #8): ключ
+  `general.translator_name` (читается фолбэком «Translator», коммит acfe8880);
+  handshake/лог `workbench/runtime/sidekick-bridge.json|.log` (user_data не трогать).
 
 ## 8. Список фич «простой версии» — проход
 
