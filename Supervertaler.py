@@ -7592,91 +7592,6 @@ class SupervertalerQt(QMainWindow):
             import traceback
             traceback.print_exc()
 
-    def _on_bridge_prompt_request(self, expanded: str, display_prompt: str, prompt_name: str):
-        """Обработать промпт QuickLauncher, пересланный плагином Trados.
-        
-        Подключено через Qt::QueuedConnection (межпоточный emit из потока HTTP-обработчика
-        моста), поэтому всегда выполняется в GUI-потоке. Шаги:
-        
-          1. Вывести Workbench на передний план (полная цепочка «молотом» — Trados
-             является источником этих запросов и агрессивно удерживает фокус).
-          2. Переключиться на верхнюю вкладку ✨ AI и выбрать её под-вкладку 💬 Chat.
-             В Workbench две поверхности Chat — одна в правой панели рядом с редактором
-             (процесс перевода), вторая как под-вкладка на всю ширину внутри вкладки AI
-             (общий разговор с ИИ). Промпты QuickLauncher из Trados по определению
-             «общие», поэтому они попадают на вторую, где больше места на экране
-             для чтения ответа.
-          3. Отправить в чат «отображаемую» версию промпта как сообщение пользователя
-             (плагин Trados строит отредактированную display-версию — например,
-             «[source document – N segments]» вместо полного текста проекта, чтобы чат
-             не засорялся килобайтами контекста, который LLM нужен, но пользователь его
-             уже видел).
-          4. Отправить полностью развёрнутый промпт в LLM напрямую через
-             ``ChatBackend.send_ai_request``. Мы обходим переопределение
-             ``_context_aware_send`` в представлении чата: сторона Trados уже выполнила
-             всю подстановку контекста; повторный запуск prepend'ил бы представление
-             Workbench об активном контексте, что неверно для промпта из Trados.
-        
-        До v1.10.4 это жило на FloatingAssistant. v1.10.10 перенесло в главное окно
-        с целью «Chat правой панели»; v1.10.24 по запросу пользователей перенаправило
-        на под-вкладку Chat вкладки AI — правая панель для перевода, Chat вкладки AI
-        для общего разговора.
-        
-        Обе поверхности Chat используют один ChatBackend, поэтому сообщение пользователя
-        и ответ LLM появляются в обоих местах автоматически — нужно лишь сделать
-        Chat вкладки AI видимым к моменту прихода промпта."""
-        try:
-            self._bring_workbench_forward()
-        except Exception:
-            pass
-
-        try:
-            # Switch the main top tabs to ✨ AI. The index isn't
-            # stored on self, so look it up by tab text – cheap, and
-            # robust if future builds shift indices.
-            if hasattr(self, 'main_tabs'):
-                ai_tab_index = -1
-                for i in range(self.main_tabs.count()):
-                    if "AI" in self.main_tabs.tabText(i) and "✨" in self.main_tabs.tabText(i):
-                        ai_tab_index = i
-                        break
-                if ai_tab_index >= 0:
-                    self.main_tabs.setCurrentIndex(ai_tab_index)
-
-            # Switch the AI tab's inner sub-tabs to 💬 Chat. The
-            # ai_subtabs property is set up in create_main_layout
-            # and points at prompt_manager_qt.sub_tabs.
-            ai_subtabs = getattr(self, 'ai_subtabs', None)
-            if ai_subtabs is not None:
-                for i in range(ai_subtabs.count()):
-                    if "Chat" in ai_subtabs.tabText(i):
-                        ai_subtabs.setCurrentIndex(i)
-                        break
-        except Exception:
-            pass
-
-        backend = getattr(
-            getattr(self, 'prompt_manager_qt', None), 'chat_backend', None
-        )
-        if backend is None:
-            self.log("⚠ Trados bridge: chat backend unavailable")
-            return
-
-        label = f"[{prompt_name}] " if prompt_name else ""
-        try:
-            backend.add_message("user", label + (display_prompt or expanded))
-            system_prompt = "You are an AI assistant. Follow the instructions precisely."
-            response, metadata = backend.send_ai_request(expanded, system_prompt)
-            if response and response.strip():
-                backend.add_message("assistant", response, metadata=metadata)
-            else:
-                backend.add_message("system", "⚠ No response received.")
-        except Exception as e:
-            try:
-                backend.add_message("system", f"⚠ Error: {e}")
-            except Exception:
-                print(f"[Trados bridge] Error handling prompt: {e}")
-
     def show_term_insert_popup(self):
         """Показать всплывающее окно-зеркало TermLens для текущего сегмента.
         
@@ -9849,27 +9764,6 @@ class SupervertalerQt(QMainWindow):
         # v1.10.10 finished the cleanup: floating_assistant.py is
         # deleted and no code path references _floating_assistant
         # any more.
-
-        # Supervertaler Bridge server – inverse of the Trados-side bridge.
-        # Lets the Trados plugin POST a QuickLauncher prompt here for
-        # the Workbench Chat panel to run. Only the on-disk handshake
-        # filename (sidekick-bridge.json) keeps the old "sidekick" name,
-        # because Core/SupervertalerBridge.cs on the Trados side looks up
-        # the handshake by that exact name; renaming it would break the
-        # bridge for mismatched product versions. The consumer here is
-        # the in-Workbench Chat tab (FloatingAssistant was retired in
-        # v1.10.4). See modules/supervertaler_bridge_server.py.
-        self._bridge_server = None
-        try:
-            from modules.supervertaler_bridge_server import SupervertalerBridgeServer
-            self._bridge_server = SupervertalerBridgeServer(self)
-            self._bridge_server.run_prompt_requested.connect(
-                self._on_bridge_prompt_request
-            )
-            self._bridge_server.start()
-            QApplication.instance().aboutToQuit.connect(self._bridge_server.stop)
-        except Exception as e:
-            self.log(f"⚠ Trados bridge server failed to start: {e}")
 
         # Keep backward compatibility reference
         self.document_views_widget = self.main_tabs
@@ -20248,10 +20142,6 @@ class SupervertalerQt(QMainWindow):
         autocorrect_tab = self._create_autocorrect_settings_tab()
         settings_tabs.addTab(scroll_area_wrapper(autocorrect_tab), self.tr("✍️ AutoCorrect"))
 
-        # ===== TAB 2: User Identity =====
-        identity_tab = self._create_user_identity_tab()
-        settings_tabs.addTab(scroll_area_wrapper(identity_tab), self.tr("👤 User Identity"))
-
         # ===== TAB 3: AI Settings (LLM, Ollama) =====
         ai_tab = self._create_ai_settings_tab()
         ai_scroll = scroll_area_wrapper(ai_tab)
@@ -24429,80 +24319,6 @@ class SupervertalerQt(QMainWindow):
                 default_prompt = "# SYSTEM PROMPT\n\nNo default prompt available."
             editor.setPlainText(default_prompt)
             self.log(f"✓ Reset system prompt to default: {selected_mode}")
-
-    def _create_user_identity_tab(self):
-        """Создаёт вкладку настроек User Identity — имя переводчика, используемое при экспорте файлов."""
-        from PyQt6.QtWidgets import QGroupBox, QPushButton
-
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
-
-        settings = self.load_general_settings()
-
-        # Header
-        header = QLabel(
-            "👤 <b>User Identity</b><br>"
-            "<span style='color:#666;'>Configure the translator name that appears in exported files. "
-            "This name is written to SDLXLIFF comments, Trados return packages, TMX files, and other output.</span>"
-        )
-        header.setTextFormat(Qt.TextFormat.RichText)
-        header.setWordWrap(True)
-        header.setStyleSheet("font-size: 9pt; padding: 10px; background-color: #E3F2FD; border-radius: 4px;")
-        layout.addWidget(header)
-
-        # Translator name group
-        name_group = QGroupBox(self.tr("Translator Name"))
-        name_layout = QVBoxLayout()
-
-        name_info = QLabel(
-            "Enter your name or alias as you want it to appear in exported files.\n"
-            "If left empty, your system username will be used as a fallback."
-        )
-        name_info.setWordWrap(True)
-        name_info.setStyleSheet("font-size: 9pt; color: #555;")
-        name_layout.addWidget(name_info)
-
-        name_layout.addSpacing(5)
-
-        name_edit = QLineEdit()
-        name_edit.setPlaceholderText(self.tr("(uses system username if empty)"))
-        name_edit.setText(settings.get('translator_name', ''))
-        name_edit.setMaxLength(100)
-        name_layout.addWidget(name_edit)
-
-        # Show current fallback
-        import os as _os
-        fallback = _os.environ.get('USERNAME', _os.environ.get('USER', ''))
-        if fallback:
-            fallback_label = QLabel(f"Current system username: <b>{fallback}</b>")
-            fallback_label.setTextFormat(Qt.TextFormat.RichText)
-            fallback_label.setStyleSheet("font-size: 8pt; color: #888; margin-top: 3px;")
-            name_layout.addWidget(fallback_label)
-
-        name_group.setLayout(name_layout)
-        layout.addWidget(name_group)
-
-        # Save button
-        save_btn = QPushButton(self.tr("💾 Save User Identity"))
-        save_btn.setStyleSheet("font-weight: bold; padding: 8px;")
-        save_btn.clicked.connect(lambda: self._save_user_identity_from_ui(name_edit))
-        layout.addWidget(save_btn)
-
-        layout.addStretch()
-        return tab
-
-    def _save_user_identity_from_ui(self, name_edit):
-        """Сохраняет настройки идентификации пользователя."""
-        general_settings = self.load_general_settings()
-        general_settings['translator_name'] = name_edit.text().strip()
-        self.save_general_settings(general_settings)
-
-        saved_name = name_edit.text().strip()
-        display = saved_name if saved_name else "(system username)"
-        self.log(f"✓ User identity saved: translator name = {display}")
-        QMessageBox.information(self, "Settings Saved", f"User identity saved.\nTranslator name: {display}")
 
     def _bring_workbench_forward(self):
         """Выводит Workbench на передний план.
