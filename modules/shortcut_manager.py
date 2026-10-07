@@ -171,13 +171,6 @@ class ShortcutManager:
             "default": "Ctrl+K",
             "action": "show_concordance_search"
         },
-        "tools_universal_lookup": {
-            "category": "Resources",
-            "description": "Superlookup",
-            "default": "Ctrl+Alt+L",
-            "action": "show_universal_lookup",
-            "global": True,
-        },
         "tools_force_refresh": {
             "category": "Resources",
             "description": "Force Refresh Matches (clear cache)",
@@ -724,7 +717,6 @@ class ShortcutManager:
         # to the merged ID (unless the merged ID already has its own
         # customisation, which we don't want to clobber).
         _GLOBAL_TO_MERGED = {
-            'global_superlookup':       'tools_universal_lookup',
             'global_quicktrans':        'mt_quick_lookup',
             'global_sidekick':          'sidekick_open',
         }
@@ -786,7 +778,6 @@ class ShortcutManager:
             'global_quickmenu': 'sidekick_open',
             'global_quicklauncher': 'sidekick_open',
             # Merged: action-pair IDs replaced by single entry with `global: True`
-            'global_superlookup':     'tools_universal_lookup',
             'global_quicktrans':      'mt_quick_lookup',
             'global_sidekick':        'sidekick_open',
         }

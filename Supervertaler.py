@@ -491,37 +491,24 @@ else:
 # ЗАВЕРШЕНИЕ ПРОЦЕССОВ ГЛОБАЛЬНЫХ ГОРЯЧИХ КЛАВИШ (AHK / pynput)
 # ============================================================================
 
-# Глобальные ссылки на процессы/слушатели горячих клавиш: их записывает
+# Глобальная ссылка на слушатель горячих клавиш: её записывает
 # SuperlookupTab.register_global_hotkey при регистрации, а читает
 # cleanup_hotkey_processes на выходе через atexit.
-_ahk_process = None
 _hotkey_manager = None
 
 def cleanup_hotkey_processes():
-    """Останавливает слушатели pynput и процессы AHK при выходе из приложения.
+    """Останавливает слушатель pynput при выходе из приложения.
 
     Зарегистрирована через atexit (см. ниже). Сбои при очистке намеренно
     проглатываются: завершение работы не должно ломаться из-за хоткеев.
     """
-    global _ahk_process, _hotkey_manager
+    global _hotkey_manager
     if _hotkey_manager:
         try:
             _hotkey_manager.stop()
             print("[Hotkeys] pynput hotkey manager stopped on exit")
         except Exception:
             pass
-    if _ahk_process:
-        try:
-            _ahk_process.terminate()
-            _ahk_process.wait(timeout=1)
-            print("[Hotkeys] AHK process terminated on exit")
-        except Exception:
-            # terminate не сработал (процесс завис) — снимаем принудительно
-            try:
-                _ahk_process.kill()
-                print("[Hotkeys] AHK process killed on exit")
-            except Exception:
-                pass
 
 # Регистрируем очистку горячих клавиш на выходе интерпретатора
 atexit.register(cleanup_hotkey_processes)
@@ -7231,16 +7218,10 @@ class SupervertalerQt(QMainWindow):
         # Ctrl+Q - Open QuickLauncher directly
         create_shortcut("editor_open_quicklauncher", "Ctrl+Q", self.open_quicklauncher)
 
-        # The next three actions used to have only an OS-level global hotkey
-        # entry. After merging local + global into one shortcut per action,
-        # they need an in-app QShortcut binding too so the same key works
-        # whether or not Supervertaler is frontmost. The global side is
-        # registered separately by SuperlookupTab.register_global_hotkey.
-        create_shortcut(
-            "tools_universal_lookup", "Ctrl+Alt+L",
-            lambda: self.lookup_tab._handle_superlookup_hotkey()
-                if hasattr(self, 'lookup_tab') else None,
-        )
+        # This action used to have only an OS-level global hotkey entry.
+        # After merging local + global into one shortcut per action, it
+        # needs an in-app QShortcut binding too so the same key works
+        # whether or not Supervertaler is frontmost.
         create_shortcut("sidekick_open", "Alt+K", self.open_quicklauncher)
 
         # Lone Ctrl tap – Term Insert Popup (memoQ-style glossary + NT insert list).
@@ -8905,18 +8886,6 @@ class SupervertalerQt(QMainWindow):
         clean_tags_action.triggered.connect(self.show_clean_tags_dialog)
         bulk_menu.addAction(clean_tags_action)
 
-        edit_menu.addSeparator()
-
-        # Superlookup
-        superlookup_action = QAction(self.tr("🔍 &SuperLookup..."), self)
-        if IS_MACOS:
-            superlookup_action.setShortcut("Meta+Ctrl+L")  # Ctrl+Cmd+L on Mac
-        else:
-            superlookup_action.setShortcut("Ctrl+Alt+L")
-        # Tab indices: Grid=0, Project resources=1, Tools=2, Settings=3
-        superlookup_action.triggered.connect(lambda: self._go_to_superlookup() if hasattr(self, 'main_tabs') else None)  # Navigate to Superlookup
-        edit_menu.addAction(superlookup_action)
-        
         # QA Menu — quality assurance. Today it holds AI Proofreading; it's
         # designed as the umbrella for future traditional CAT-tool QA checks
         # (tags, numbers, terminology, consistency) and spelling/grammar
@@ -9234,16 +9203,6 @@ class SupervertalerQt(QMainWindow):
         help_menu.addAction(github_action)
 
         help_menu.addSeparator()
-
-        # AutoHotkey setup (Windows only)
-        if os.name == 'nt':
-            ahk_setup_action = QAction(self.tr("⌨️ Setup AutoHotkey (Global Hotkey)"), self)
-            ahk_setup_action.setToolTip(
-                f"Configure AutoHotkey for SuperLookup global hotkey ({format_shortcut_for_display('Ctrl+Alt+L')})"
-            )
-            ahk_setup_action.triggered.connect(self._show_ahk_setup_from_menu)
-            help_menu.addAction(ahk_setup_action)
-            help_menu.addSeparator()
 
         about_action = QAction(self.tr("ℹ️ About"), self)
         about_action.triggered.connect(self.show_about)
@@ -11715,15 +11674,6 @@ class SupervertalerQt(QMainWindow):
                 if detached_lookup.engine:
                     detached_lookup.engine.set_tm_database(self.tm_database)
             
-            # Copy home lookup state if it exists
-            if hasattr(self, 'home_lookup_widget') and self.home_lookup_widget:
-                # Copy source text
-                source_text = self.home_lookup_widget.source_text.toPlainText()
-                detached_lookup.source_text.setPlainText(source_text)
-                
-                # Copy TM database reference
-                if hasattr(self.home_lookup_widget, 'tm_database'):
-                    detached_lookup.tm_database = self.home_lookup_widget.tm_database
             
             layout.addWidget(detached_lookup, stretch=1)
             
@@ -11752,12 +11702,6 @@ class SupervertalerQt(QMainWindow):
         if not self.lookup_detached_window:
             return
         
-        # Copy state back to home widget if it exists
-        if (hasattr(self, 'home_lookup_widget') and self.home_lookup_widget and 
-            hasattr(self, 'lookup_detached_widget') and self.lookup_detached_widget):
-            # Copy source text
-            source_text = self.lookup_detached_widget.source_text.toPlainText()
-            self.home_lookup_widget.source_text.setPlainText(source_text)
         
         # Close detached window
         self.lookup_detached_window.close()
@@ -11776,8 +11720,8 @@ class SupervertalerQt(QMainWindow):
     # directly. The wrapper widget and its method are gone.
 
     def _setup_superlookup_hotkeys(self):
-        """Создаёт (скрытый) SuperlookupTab, чей __init__ регистрирует глобальные
-                горячие клавиши (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K).
+        """Создаёт (скрытый) SuperlookupTab, чей __init__ регистрирует глобальную
+                горячую клавишу QuickTrans (Ctrl+Alt+Q).
         
                 До v1.9.467 это жило в create_specialised_tools_tab(), которая
                 также строила встроенный UI вкладки Tools. Вкладка Tools выведена
@@ -11793,7 +11737,7 @@ class SupervertalerQt(QMainWindow):
             if failed:
                 self.log(f"⚠ Global hotkeys: some failed to register: {', '.join(failed)}")
             else:
-                self.log("⌨ Global hotkeys registered (Ctrl+Alt+L, Ctrl+Alt+Q, Alt+K)")
+                self.log("⌨ Global hotkeys registered (Ctrl+Alt+Q)")
         else:
             self.log("⚠ Global hotkeys NOT registered – check console for errors")
     
@@ -22073,36 +22017,6 @@ class SupervertalerQt(QMainWindow):
             # Navigate to MT Quick Lookup sub-tab
             if hasattr(self, 'settings_tabs') and hasattr(self, 'mt_quick_lookup_tab_index'):
                 self.settings_tabs.setCurrentIndex(self.mt_quick_lookup_tab_index)
-
-    def _find_autohotkey_for_settings(self):
-        """Находит исполняемый файл AutoHotkey для отображения в настройках (состояние не меняет)."""
-        # Standard installation paths
-        username = os.environ.get('USERNAME', '')
-        ahk_paths = [
-            r"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe",
-            r"C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe",
-            r"C:\Program Files\AutoHotkey\AutoHotkey.exe",
-            r"C:\Program Files (x86)\AutoHotkey\AutoHotkey.exe",
-            fr"C:\Users\{username}\AppData\Local\Programs\AutoHotkey\AutoHotkey.exe",
-        ]
-        
-        for path in ahk_paths:
-            if os.path.exists(path):
-                return path, 'detected'
-        
-        return None, None
-    
-    def _browse_autohotkey_for_settings(self, line_edit):
-        """Выбирает исполняемый файл AutoHotkey и обновляет поле ввода."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Locate AutoHotkey Executable",
-            "C:\\Program Files",
-            "Executable Files (*.exe);;All Files (*.*)"
-        )
-        
-        if file_path:
-            line_edit.setText(file_path)
     
     def _create_backup_settings_tab(self):
         """Settings → 💾 Backup.
@@ -23063,7 +22977,6 @@ class SupervertalerQt(QMainWindow):
             # from the instance attrs it sets (resolved when Save is clicked).
             getattr(self, 'enable_backup_cb', None), getattr(self, 'backup_interval_spin', None),
             tb_hide_shorter_cb, smart_selection_cb,
-            ahk_path_edit=getattr(self, 'ahk_path_edit', None),
             auto_center_cb=auto_center_cb,
             auto_confirm_100_cb=auto_confirm_100_cb,
             auto_confirm_overwrite_cb=auto_confirm_overwrite_cb,
@@ -25136,7 +25049,7 @@ class SupervertalerQt(QMainWindow):
                                        auto_open_log_cb=None, auto_insert_100_cb=None, tm_save_mode_combo=None, tb_highlight_cb=None,
                                        enable_backup_cb=None, backup_interval_spin=None,
                                        tb_hide_shorter_cb=None, smart_selection_cb=None,
-                                       ahk_path_edit=None, auto_center_cb=None, auto_confirm_100_cb=None,
+                                       auto_center_cb=None, auto_confirm_100_cb=None,
                                        auto_confirm_overwrite_cb=None, sound_effects_cb=None, sound_event_combos=None,
                                        disable_cache_cb=None, auto_fill_confirm_cb=None,
                                        auto_propagate_on_confirm_cb=None, auto_propagate_confirm_cb=None,
@@ -25228,7 +25141,6 @@ class SupervertalerQt(QMainWindow):
             'grid_font_size': self.default_font_size,
             'results_match_font_size': 9,
             'results_compare_font_size': 9,
-            'autohotkey_path': ahk_path_edit.text().strip() if ahk_path_edit is not None else existing_settings.get('autohotkey_path', ''),
             'enable_sound_effects': sound_effects_cb.isChecked() if sound_effects_cb is not None else existing_settings.get('enable_sound_effects', False),
             'disable_all_caches': disable_cache_cb.isChecked() if disable_cache_cb is not None else existing_settings.get('disable_all_caches', False),
             # v1.10.230: AutoCorrect-while-typing has its own Settings tab
@@ -28294,26 +28206,6 @@ class SupervertalerQt(QMainWindow):
                     except Exception as e:
                         print(f"[Superlookup] Error stopping pynput: {e}")
 
-                # Освобождаем библиотеку ahk, если использовалась (резерв Windows)
-                if hasattr(self.lookup_tab, '_using_ahk_library') and self.lookup_tab._using_ahk_library:
-                    if hasattr(self.lookup_tab, '_ahk') and self.lookup_tab._ahk:
-                        try:
-                            self.lookup_tab._ahk.stop_hotkeys()
-                            print("[Superlookup] ahk library hotkeys stopped")
-                        except Exception as e:
-                            print(f"[Superlookup] Error stopping ahk library: {e}")
-
-                # Завершаем внешний процесс AutoHotkey, если запущен (резерв Windows)
-                if hasattr(self.lookup_tab, 'ahk_process') and self.lookup_tab.ahk_process:
-                    try:
-                        self.lookup_tab.ahk_process.terminate()
-                        self.lookup_tab.ahk_process.wait(timeout=2)
-                        print("[Superlookup] AHK process terminated")
-                    except Exception:
-                        try:
-                            self.lookup_tab.ahk_process.kill()
-                        except Exception:
-                            pass
         except Exception as e:
             print(f"[Superlookup] Error during hotkey cleanup: {e}")
 
@@ -55237,16 +55129,6 @@ class SupervertalerQt(QMainWindow):
             pass
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(log_dir)))
     
-    def _show_ahk_setup_from_menu(self):
-        """Показывает диалог настройки AutoHotkey из меню Help."""
-        if hasattr(self, 'lookup_tab') and self.lookup_tab:
-            self.lookup_tab._show_autohotkey_setup_dialog()
-        else:
-            QMessageBox.warning(
-                self,
-                "SuperLookup Not Available",
-                "SuperLookup tab is not available. Please restart the application."
-            )
 
     def show_about(self):
         """Показывает диалог About с кликабельной ссылкой на сайт."""
@@ -55328,30 +55210,19 @@ class SupervertalerQt(QMainWindow):
             if reply == QMessageBox.StandardButton.Save:
                 self.save_project()
                 self._stop_okapi_sidecar()
-                self._cleanup_web_views()
                 self._close_detached_log_windows()
                 event.accept()
             elif reply == QMessageBox.StandardButton.Discard:
                 self._stop_okapi_sidecar()
-                self._cleanup_web_views()
                 self._close_detached_log_windows()
                 event.accept()
             else:
                 event.ignore()
         else:
             self._stop_okapi_sidecar()
-            self._cleanup_web_views()
             self._close_detached_log_windows()
             event.accept()
 
-    def _cleanup_web_views(self):
-        """Очищает WebEngine-виджеты — ОТКЛЮЧЕНО для предотвращения краша."""
-        # Очистку WebEngine отключили: она вызывала падения Python
-        # при выходе из программы. Qt разберётся с WebEngine сам;
-        # возможное предупреждение "Release of profile requested" безвредно.
-        print("[WebEngine Cleanup] Skipping manual cleanup - letting Qt handle it")
-        pass
-    
     def _close_detached_log_windows(self):
         """Закрывает все отсоединённые окна журнала при закрытии главного окна."""
         try:
@@ -59701,8 +59572,6 @@ class SuperlookupTab(QWidget):
         self.enabled_termbases = []  # List of termbase IDs to search
         self.search_tm_enabled = True  # Search TMs by default
         self.search_termbase_enabled = True  # Search termbases by default
-        self.search_mt_enabled = False  # MT not implemented yet
-        self.search_web_enabled = False  # Web resources not implemented yet
         
         # Initialize checkbox lists (even if Settings tab is removed)
         self.tm_checkboxes = []
@@ -59792,20 +59661,7 @@ class SuperlookupTab(QWidget):
         self._header_label.setStyleSheet("font-size: 11pt; font-weight: bold; color: #1976D2;")
         layout.addWidget(self._header_label, 0)
 
-        if os.name == 'nt':
-            description_text = (
-                f"Press {format_shortcut_for_display('Ctrl+Alt+L')} or paste text to search your TMs and Termbases."
-            )
-        elif IS_MACOS:
-            description_text = (
-                f"Press {format_shortcut_for_display('Meta+Ctrl+L')} or paste text to search your TMs and Termbases.\n"
-                "Requires Accessibility permission in System Settings → Privacy & Security."
-            )
-        else:
-            description_text = (
-                f"Press {format_shortcut_for_display('Ctrl+Alt+L')} or paste text to search your TMs and Termbases.\n"
-                "Requires pynput installed (pip install pynput)."
-            )
+        description_text = "Type or paste text to search your TMs and Termbases."
 
         self._description_label = QLabel(description_text)
         self._description_label.setWordWrap(True)
@@ -59890,8 +59746,7 @@ class SuperlookupTab(QWidget):
         self.results_tabs.tabBar().setDrawBase(False)
         self.results_tabs.tabBar().setExpanding(False)
         # Force tabs to fit their full text. Without this macOS clips the
-        # SuperLookup sub-tabs ("QuickTrans" → "QuickT…", "Web Resources"
-        # → "Web Reso…", etc.) even when there's plenty of horizontal
+        # SuperLookup sub-tabs even when there's plenty of horizontal
         # space — Qt's default ElideRight is too aggressive on Mac.
         self.results_tabs.tabBar().setElideMode(Qt.TextElideMode.ElideNone)
         self.results_tabs.tabBar().setUsesScrollButtons(False)
@@ -59906,10 +59761,6 @@ class SuperlookupTab(QWidget):
         self.results_tabs.addTab(termbase_tab, "📚 Termbases")
         
         # MT tab removed – handled by QuickTrans.
-
-        # Web Resources tab
-        web_tab = self.create_web_resources_tab()
-        self.results_tabs.addTab(web_tab, "🌐 Web Resources")
         
         # Settings tab
         settings_tab = self.create_settings_tab()
@@ -60087,1476 +59938,6 @@ class SuperlookupTab(QWidget):
         
         return tab
     
-    def create_mt_results_tab(self):
-        """Создаёт вкладку результатов MT со статусом провайдеров и результатами."""
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(5, 5, 5, 5)
-        
-        # === Provider Status Summary ===
-        status_frame = QFrame()
-        status_frame.setFrameStyle(QFrame.Shape.StyledPanel)
-        status_frame.setStyleSheet("QFrame { background-color: #f5f5f5; border-radius: 4px; padding: 5px; }")
-        status_layout = QVBoxLayout(status_frame)
-        status_layout.setContentsMargins(10, 10, 10, 10)
-        
-        # Header row with title and settings link
-        header_row = QHBoxLayout()
-        
-        status_title = QLabel(self.tr("🤖 MT Providers"))
-        status_title.setStyleSheet("font-weight: bold; font-size: 11pt;")
-        header_row.addWidget(status_title)
-        
-        header_row.addStretch()
-        
-        # Link to Settings
-        settings_link = QPushButton(self.tr("⚙️ Configure in Settings"))
-        settings_link.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                color: #1976D2;
-                border: none;
-                font-size: 10pt;
-                text-decoration: underline;
-            }
-            QPushButton:hover {
-                color: #1565C0;
-            }
-        """)
-        settings_link.setCursor(Qt.CursorShape.PointingHandCursor)
-        settings_link.clicked.connect(self._open_mt_settings)
-        header_row.addWidget(settings_link)
-        
-        status_layout.addLayout(header_row)
-        
-        # Provider status label (shows which are active)
-        self.mt_provider_status_label = QLabel()
-        self.mt_provider_status_label.setWordWrap(True)
-        self.mt_provider_status_label.setStyleSheet("color: #666; font-size: 9pt; padding: 5px 0;")
-        status_layout.addWidget(self.mt_provider_status_label)
-        
-        # Update the status display
-        self._update_mt_provider_status()
-        
-        layout.addWidget(status_frame)
-        
-        # === MT Results Section ===
-        results_group = QGroupBox(self.tr("📝 Translation Results"))
-        results_layout = QVBoxLayout(results_group)
-        
-        # Results table
-        self.mt_results_table = QTableWidget()
-        self.mt_results_table.setColumnCount(3)
-        self.mt_results_table.setHorizontalHeaderLabels(["Provider", "Translation", ""])
-        self.mt_results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.mt_results_table.setColumnWidth(0, 120)
-        self.mt_results_table.setColumnWidth(2, 60)
-        self.mt_results_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.mt_results_table.verticalHeader().setVisible(False)
-        self.mt_results_table.doubleClicked.connect(self.on_mt_result_double_click)
-        
-        results_layout.addWidget(self.mt_results_table)
-        
-        # Status
-        self.mt_status_label = QLabel(self.tr("Enter text and click Search to get MT translations"))
-        self.mt_status_label.setStyleSheet("color: #666; font-style: italic; padding: 5px;")
-        results_layout.addWidget(self.mt_status_label)
-        
-        layout.addWidget(results_group, stretch=1)
-        
-        return tab
-    
-    def _open_mt_settings(self):
-        """Переход к Settings → вкладка MT Settings."""
-        if self.main_window:
-            # v1.10.161: label-based on both axes.
-            # Was hard-coded main_tabs.setCurrentIndex(4) +
-            # settings_tabs.setCurrentIndex(3), both stale: Settings drifted
-            # to 7 (so 4 landed on SuperLookup) and MT Settings drifted
-            # past index 3 (so 3 landed on Voice, not MT). Label lookup
-            # can't silently drift the same way.
-            if hasattr(self.main_window, '_switch_main_tab'):
-                self.main_window._switch_main_tab("Settings")
-            if hasattr(self.main_window, '_switch_settings_subtab'):
-                self.main_window._switch_settings_subtab("MT")
-    
-    def _update_mt_provider_status(self):
-        """Обновляет отображение статуса MT-провайдеров."""
-        # Get API keys and enabled states from main window
-        api_keys = {}
-        enabled_providers = {}
-        
-        if self.main_window:
-            if hasattr(self.main_window, 'load_api_keys'):
-                api_keys = self.main_window.load_api_keys()
-            if hasattr(self.main_window, 'load_provider_enabled_states'):
-                enabled_providers = self.main_window.load_provider_enabled_states()
-        
-        # Define all MT providers
-        providers = [
-            ("DeepL", "mt_deepl", "deepl"),
-            ("Google Translate", "mt_google_translate", "google_translate"),
-            ("Microsoft Translator", "mt_microsoft", "microsoft_translate"),
-            ("Amazon Translate", "mt_amazon", "amazon_translate"),
-            ("ModernMT", "mt_modernmt", "modernmt"),
-            ("MyMemory", "mt_mymemory", None),
-        ]
-        
-        ready_providers = []
-        disabled_providers = []
-        missing_key_providers = []
-        
-        for name, enabled_key, api_key_name in providers:
-            is_enabled = enabled_providers.get(enabled_key, True)
-            has_key = api_key_name is None or bool(api_keys.get(api_key_name))
-            
-            if has_key and is_enabled:
-                ready_providers.append(name)
-            elif has_key and not is_enabled:
-                disabled_providers.append(name)
-            else:
-                missing_key_providers.append(name)
-        
-        # Build status text
-        status_parts = []
-        if ready_providers:
-            status_parts.append(f"✅ Active: {', '.join(ready_providers)}")
-        if disabled_providers:
-            status_parts.append(f"⏸️ Disabled: {', '.join(disabled_providers)}")
-        if missing_key_providers:
-            status_parts.append(f"❌ No API key: {', '.join(missing_key_providers)}")
-        
-        if not status_parts:
-            status_text = "No MT providers configured"
-        else:
-            status_text = "\n".join(status_parts)
-        
-        self.mt_provider_status_label.setText(status_text)
-    
-    def _perform_mt_lookup(self, text: str, source_lang: str = None, target_lang: str = None):
-        """Вызывает включённых MT-провайдеров параллельно и возвращает
-                результаты.
-        
-                Полностью пропускается, когда у этого экземпляра SuperlookupTab
-                нет таблицы MT-результатов (например, внутри Floating Assistant /
-                Sidekick, где MT обрабатывает собственный MTFetchWorker QuickTrans).
-                В том случае прежняя реализация делала блокирующие HTTP-вызовы
-                и выбрасывала результаты, замораживая UI до ~30 с при каждом
-                нажатии Ctrl+Alt+L."""
-        # Sidekick / Floating Assistant has no MT table — don't burn HTTP calls.
-        if not hasattr(self, 'mt_results_table'):
-            return []
-
-        if not self.main_window:
-            return []
-
-        # Get languages from main window if not provided
-        if not source_lang:
-            source_lang = getattr(self.main_window, 'source_language', 'en')
-        if not target_lang:
-            target_lang = getattr(self.main_window, 'target_language', 'nl')
-
-        # Get API keys and enabled providers from Settings
-        api_keys = {}
-        enabled_providers = {}
-        if hasattr(self.main_window, 'load_api_keys'):
-            api_keys = self.main_window.load_api_keys()
-        if hasattr(self.main_window, 'load_provider_enabled_states'):
-            enabled_providers = self.main_window.load_provider_enabled_states()
-
-        # Define MT providers with their settings keys and API key names
-        providers = [
-            ("DeepL", "mt_deepl", "deepl"),
-            ("Google Translate", "mt_google_translate", "google_translate"),
-            ("Microsoft Translator", "mt_microsoft", "microsoft_translate"),
-            ("Amazon Translate", "mt_amazon", "amazon_translate"),
-            ("ModernMT", "mt_modernmt", "modernmt"),
-            ("MyMemory", "mt_mymemory", None),
-        ]
-
-        # Build the list of provider call closures to dispatch in parallel.
-        active_calls = []
-        for provider_name, enabled_key, api_key_name in providers:
-            is_enabled = enabled_providers.get(enabled_key, True)
-            has_key = api_key_name is None or bool(api_keys.get(api_key_name))
-            if not is_enabled or not has_key:
-                continue
-
-            mw = self.main_window
-            if provider_name == "DeepL" and hasattr(mw, 'call_deepl'):
-                call = lambda mw=mw, k=api_keys.get('deepl'): mw.call_deepl(text, source_lang, target_lang, k)
-            elif provider_name == "Google Translate" and hasattr(mw, 'call_google_translate'):
-                call = lambda mw=mw, k=api_keys.get('google_translate'): mw.call_google_translate(text, source_lang, target_lang, k)
-            elif provider_name == "Microsoft Translator" and hasattr(mw, 'call_microsoft_translate'):
-                call = lambda mw=mw, k=api_keys.get('microsoft_translate'): mw.call_microsoft_translate(text, source_lang, target_lang, k)
-            elif provider_name == "Amazon Translate" and hasattr(mw, 'call_amazon_translate'):
-                region = api_keys.get('amazon_translate_region', 'us-east-1')
-                call = lambda mw=mw, k=api_keys.get('amazon_translate'), r=region: mw.call_amazon_translate(text, source_lang, target_lang, k, r)
-            elif provider_name == "ModernMT" and hasattr(mw, 'call_modernmt'):
-                call = lambda mw=mw, k=api_keys.get('modernmt'): mw.call_modernmt(text, source_lang, target_lang, k)
-            elif provider_name == "MyMemory":
-                call = lambda: self._call_mymemory(text, source_lang, target_lang)
-            else:
-                continue
-
-            active_calls.append((provider_name, call))
-
-        if not active_calls:
-            return []
-
-        # Fan out: every provider runs concurrently. Total wall-clock is now
-        # max(provider_times) instead of sum(provider_times). Per-future timeout
-        # caps a single misbehaving provider; the overall as_completed wait
-        # caps the whole batch so the UI can never stall longer than that.
-        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
-        import time
-
-        per_provider_timeout = 5.0
-        overall_timeout = 6.0  # small slack over per-provider so timeouts surface as errors
-        results = []
-        deadline = time.monotonic() + overall_timeout
-
-        with ThreadPoolExecutor(max_workers=len(active_calls), thread_name_prefix="sv-mt") as executor:
-            future_to_name = {executor.submit(call): name for name, call in active_calls}
-            for future, provider_name in list(future_to_name.items()):
-                remaining = max(0.0, min(per_provider_timeout, deadline - time.monotonic()))
-                try:
-                    translation = future.result(timeout=remaining)
-                except FuturesTimeout:
-                    future.cancel()
-                    results.append({
-                        'provider': provider_name,
-                        'translation': "[Error: timed out]",
-                        'is_error': True,
-                    })
-                    continue
-                except Exception as e:
-                    print(f"[Superlookup] MT error ({provider_name}): {e}")
-                    results.append({
-                        'provider': provider_name,
-                        'translation': f"[Error: {str(e)}]",
-                        'is_error': True,
-                    })
-                    continue
-
-                if translation:
-                    results.append({
-                        'provider': provider_name,
-                        'translation': translation,
-                        'is_error': translation.startswith('['),
-                    })
-
-        return results
-    
-    def _call_mymemory(self, text: str, source_lang: str, target_lang: str) -> str:
-        """Вызывает бесплатный API перевода MyMemory."""
-        try:
-            import requests
-            
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-            }
-            
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-            
-            src = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            url = "https://api.mymemory.translated.net/get"
-            params = {
-                'q': text,
-                'langpair': f"{src}|{tgt}"
-            }
-            
-            response = requests.get(url, params=params, timeout=10)
-            response.raise_for_status()
-            
-            data = response.json()
-            if data.get('responseStatus') == 200:
-                return data['responseData']['translatedText']
-            else:
-                return f"[MyMemory error: {data.get('responseStatus')}]"
-                
-        except Exception as e:
-            return f"[MyMemory error: {e}]"
-
-    def create_web_resources_tab(self):
-        """Создаёт вкладку Web Resources с вертикальной боковой панелью веб-ресурсов."""
-        tab = QWidget()
-        layout = QHBoxLayout(tab)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        
-        # Try to import QWebEngineView for embedded browser with persistent storage
-        self.web_engine_available = False
-        self.web_profile = None
-        self.SilentWebPage = None  # Custom page class that suppresses JS console spam
-        try:
-            from PyQt6.QtWebEngineWidgets import QWebEngineView
-            from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile
-
-            # Create a custom page class that silences JavaScript console messages
-            class SilentWebEnginePage(QWebEnginePage):
-                """QWebEnginePage, подавляющая вывод консоли JavaScript."""
-                def javaScriptConsoleMessage(self, level, message, lineNumber, sourceID):
-                    # Silently ignore all JS console messages from web pages
-                    pass
-
-            # Subclassed view that adds default-browser items to the right-click
-            # menu: "Open link in default browser" when the click target is a
-            # hyperlink, plus an always-available "Open page in default browser".
-            class SidekickWebEngineView(QWebEngineView):
-                def contextMenuEvent(self, event):
-                    menu = self.createStandardContextMenu()
-                    try:
-                        request = self.lastContextMenuRequest()
-                    except AttributeError:
-                        request = None
-                    link_url = None
-                    if request is not None:
-                        try:
-                            url = request.linkUrl()
-                            if url is not None and not url.isEmpty():
-                                link_url = QUrl(url)
-                        except Exception:
-                            link_url = None
-
-                    menu.addSeparator()
-                    if link_url is not None:
-                        link_action = menu.addAction("Open link in default browser")
-                        link_action.triggered.connect(
-                            lambda _checked=False, u=link_url: QDesktopServices.openUrl(u)
-                        )
-                    page_url = self.url()
-                    if page_url is not None and not page_url.isEmpty() and page_url.toString() != "about:blank":
-                        page_action = menu.addAction("Open page in default browser")
-                        page_action.triggered.connect(
-                            lambda _checked=False, u=QUrl(page_url): QDesktopServices.openUrl(u)
-                        )
-                    menu.exec(event.globalPos())
-
-            self.SilentWebPage = SilentWebEnginePage
-            self.QWebEngineView = SidekickWebEngineView
-            self.QWebEngineProfile = QWebEngineProfile
-            self.web_engine_available = True
-            
-            # Create persistent profile for login/cookie storage
-            if self.user_data_path:
-                storage_path = os.path.join(str(self.user_data_path), 'workbench', 'web_cache')
-            else:
-                # Fallback to script directory if user_data_path not provided
-                storage_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'user_data', 'workbench', 'web_cache')
-            os.makedirs(storage_path, exist_ok=True)
-            self.web_profile = QWebEngineProfile("SuperlookupProfile", self)
-            self.web_profile.setPersistentStoragePath(storage_path)
-            self.web_profile.setPersistentCookiesPolicy(QWebEngineProfile.PersistentCookiesPolicy.ForcePersistentCookies)
-            print(f"[Superlookup] QWebEngineView available - embedded browser enabled with persistent storage at {storage_path}")
-        except ImportError:
-            print("[Superlookup] QWebEngineView not available - external browser only")
-            self.QWebEngineView = None
-            self.QWebEngineProfile = None
-        
-        # Setting for browser mode (embedded vs external)
-        self.web_browser_mode = 'embedded' if self.web_engine_available else 'external'
-        
-        # === Web Resources Definitions ===
-        # Each resource has: name, icon, url_template with {query}, {sl} (source lang), {tl} (target lang)
-        # Language codes vary per service - we'll map them in _get_web_lang_code()
-        self.web_resources = [
-            {
-                'id': 'iate',
-                'name': 'IATE',
-                'icon': '🇪🇺',
-                'description': 'EU terminology database',
-                'url_template': 'https://iate.europa.eu/search/byUrl?term={query}&sl={sl}&tl={tl}',
-                'lang_format': 'iso2',  # en, nl, de, fr
-                'bidirectional': False,  # respects source/target direction
-            },
-            {
-                'id': 'linguee',
-                'name': 'Linguee',
-                'icon': '📗',
-                'description': 'Bilingual dictionary with context',
-                'url_template': 'https://www.linguee.com/{sl_full}-{tl_full}/search?source=auto&query={query}',
-                'lang_format': 'full_lower',  # dutch, english, german
-                'bidirectional': True,  # searches both directions
-            },
-            {
-                'id': 'proz',
-                'name': 'ProZ.com',
-                'icon': '💬',
-                'description': 'Translator terminology database',
-                'url_template': 'https://www.proz.com/search/?term={query}&from={sl}&to={tl}&results_per_page=25&es=1',
-                'lang_format': 'iso3',  # dut, eng, ger
-                'bidirectional': False,
-            },
-            {
-                'id': 'reverso',
-                'name': 'Reverso Context',
-                'icon': '🔄',
-                'description': 'Context-based translations',
-                'url_template': 'https://context.reverso.net/translation/{sl_full}-{tl_full}/{query}',
-                'lang_format': 'full_lower',  # dutch, english
-                'bidirectional': False,
-            },
-            {
-                'id': 'google',
-                'name': 'Google Search',
-                'icon': '🔍',
-                'description': 'General web search',
-                'url_template': 'https://www.google.com/search?q={query}',
-                'lang_format': None,  # No language needed
-                'bidirectional': True,
-            },
-            {
-                'id': 'google_patents',
-                'name': 'Google Patents',
-                'icon': '📜',
-                'description': 'Patent search',
-                'url_template': 'https://patents.google.com/?q="{query}"',
-                'lang_format': None,
-                'bidirectional': True,
-            },
-            {
-                'id': 'wikipedia_source',
-                'name': 'Wikipedia (Source)',
-                'icon': '📖',
-                'description': 'Wikipedia in source language',
-                'url_template': 'https://{sl}.wikipedia.org/w/index.php?search={query}',
-                'lang_format': 'iso2',  # nl, en, de
-                'bidirectional': True,
-            },
-            {
-                'id': 'wikipedia_target',
-                'name': 'Wikipedia (Target)',
-                'icon': '📖',
-                'description': 'Wikipedia in target language',
-                'url_template': 'https://{tl}.wikipedia.org/w/index.php?search={query}',
-                'lang_format': 'iso2',
-                'bidirectional': True,
-            },
-            {
-                'id': 'juremy',
-                'name': 'Juremy',
-                'icon': '⚖️',
-                'description': 'Legal terminology database',
-                'url_template': 'https://juremy.com/search?src={sl}&dst={tl}&q={query}&opts=ia&tool=iws',
-                'lang_format': 'iso639_3',  # nld, eng, deu (ISO 639-3 codes)
-                'bidirectional': False,
-            },
-            {
-                'id': 'beijerterm',  # internal id kept so existing user settings still resolve
-                'name': 'Beijerterm',
-                'icon': '📚',
-                'description': 'Curated multilingual terminology database (Dutch ↔ English)',
-                'url_template': 'https://beijerterm.com/?q={query}&from={sl}&to={tl}',
-                'lang_format': 'iso2',  # nl, en — Beijerterm deep-link expects ISO 639-1
-                'bidirectional': True,
-            },
-            {
-                'id': 'acronymfinder',
-                'name': 'AcronymFinder',
-                'icon': '🔤',
-                'description': 'Acronym and abbreviation dictionary',
-                'url_template': 'https://www.acronymfinder.com/~/search/af.aspx?string=exact&Acronym={query}',
-                'lang_format': None,
-                'bidirectional': True,
-            },
-            {
-                'id': 'babelnet',
-                'name': 'BabelNet',
-                'icon': '🌐',
-                'description': 'Multilingual encyclopedic dictionary',
-                'url_template': 'https://babelnet.org/search?word={query}&lang={sl_upper}&transLang={tl_upper}',
-                'lang_format': 'iso2_upper',  # NL, EN, DE
-                'bidirectional': False,
-            },
-            {
-                'id': 'wiktionary_source',
-                'name': 'Wiktionary (Source)',
-                'icon': '📓',
-                'description': 'Wiktionary in source language',
-                'url_template': 'https://{sl}.wiktionary.org/wiki/{query}',
-                'lang_format': 'iso2',
-                'bidirectional': True,
-            },
-            {
-                'id': 'wiktionary_target',
-                'name': 'Wiktionary (Target)',
-                'icon': '📓',
-                'description': 'Wiktionary in target language',
-                'url_template': 'https://{tl}.wiktionary.org/wiki/{query}',
-                'lang_format': 'iso2',
-                'bidirectional': True,
-            },
-            {
-                'id': 'github_code',
-                'name': 'GitHub Code (all)',
-                'icon': '💻',
-                'description': 'Search code across all GitHub repositories',
-                'url_template': 'https://github.com/search?q={query}&type=code',
-                'lang_format': None,
-                'bidirectional': True,
-            },
-            {
-                'id': 'opus_corpus',
-                'name': 'OPUS Corpus',
-                'icon': '📚',
-                'description': 'Search 58B parallel sentences from OPUS parallel corpora',
-                'url_template': 'https://opus.nlpl.eu/bin/opuscqp.pl?corpus={opus_corpus};lang={sl};cqp={query};align={tl}',
-                'lang_format': 'iso2',
-                'bidirectional': False,
-                'has_corpus_selector': True,  # Special flag for OPUS
-            },
-        ]
-        
-        # OPUS corpus options for the selector
-        self.opus_corpora = [
-            ('DGT', 'DGT - EU Translation Memory (1.1B pairs)'),
-            ('Europarl', 'Europarl - EU Parliament (186M pairs)'),
-            ('OpenSubtitles', 'OpenSubtitles - Movies/TV (20B pairs)'),
-            ('EMEA', 'EMEA - Medicines Agency (243M pairs)'),
-            ('EUbookshop', 'EUbookshop - EU Publications (279M pairs)'),
-            ('JRC-Acquis', 'JRC-Acquis - EU Legislation (147M pairs)'),
-            ('ECB', 'ECB - Central Bank (15M pairs)'),
-            ('TED2020', 'TED2020 - TED Talks (143M pairs)'),
-            ('WikiMatrix', 'WikiMatrix - Wikipedia (127M pairs)'),
-            ('GlobalVoices', 'GlobalVoices - News (7.3M pairs)'),
-            ('Tatoeba', 'Tatoeba - Example Sentences (8.7M pairs)'),
-        ]
-        self.current_opus_corpus = 'DGT'  # Default corpus
-        
-        # === Use QSplitter for resizable sidebar ===
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        
-        # === Left sidebar with vertical tabs ===
-        sidebar = QWidget()
-        sidebar.setMinimumWidth(120)
-        sidebar.setMaximumWidth(250)
-        sidebar.setStyleSheet("""
-            QWidget {
-                background-color: #f5f5f5;
-                border-right: 1px solid #ddd;
-            }
-        """)
-        sidebar_layout = QVBoxLayout(sidebar)
-        sidebar_layout.setContentsMargins(5, 5, 5, 5)
-        sidebar_layout.setSpacing(2)
-
-        # Sidebar header
-        sidebar_header = QLabel(self.tr("🌐 Resources"))
-        sidebar_header.setStyleSheet(
-            f"font-weight: bold; font-size: {scaled_pt(10):.1f}pt; padding: 5px; color: #1976D2;"
-        )
-        sidebar_layout.addWidget(sidebar_header)
-
-        # Scrollable area for resource buttons – ensures all resources are
-        # accessible even on smaller screens / when the panel is short.
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
-        scroll_area.setStyleSheet("QScrollArea { background: transparent; border: none; }")
-
-        scroll_content = QWidget()
-        scroll_content.setStyleSheet("background: transparent;")
-        scroll_layout = QVBoxLayout(scroll_content)
-        scroll_layout.setContentsMargins(0, 0, 0, 0)
-        scroll_layout.setSpacing(2)
-
-        # Resource buttons list
-        self.web_resource_buttons = []
-        self.web_resource_button_group = QButtonGroup(self)
-        self.web_resource_button_group.setExclusive(True)
-
-        for i, resource in enumerate(self.web_resources):
-            btn = QPushButton(f"{resource['icon']} {resource['name']}")
-            btn.setCheckable(True)
-            btn.setToolTip(resource['description'])
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    text-align: left;
-                    padding: 5px 8px;
-                    border: none;
-                    border-radius: 4px;
-                    background-color: transparent;
-                    font-size: {scaled_pt(9):.1f}pt;
-                    outline: none;
-                }}
-                QPushButton:hover {{
-                    background-color: #e3e3e3;
-                }}
-                QPushButton:checked {{
-                    background-color: #2196F3;
-                    color: white;
-                    font-weight: bold;
-                }}
-                QPushButton:focus {{
-                    outline: none;
-                    border: none;
-                }}
-            """)
-            btn.clicked.connect(lambda checked, idx=i: self._on_web_resource_selected(idx))
-            self.web_resource_button_group.addButton(btn, i)
-            self.web_resource_buttons.append(btn)
-            scroll_layout.addWidget(btn)
-
-        scroll_layout.addStretch()
-        scroll_area.setWidget(scroll_content)
-        sidebar_layout.addWidget(scroll_area, stretch=1)
-        
-        # "Search All" button - pre-loads all resources
-        search_all_btn = QPushButton(self.tr("🔎 Search All"))
-        search_all_btn.setToolTip(self.tr("Search all web resources at once (embedded mode)"))
-        search_all_btn.setStyleSheet(f"""
-            QPushButton {{
-                padding: 8px;
-                background-color: #FF9800;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: {scaled_pt(9):.1f}pt;
-                outline: none;
-            }}
-            QPushButton:hover {{
-                background-color: #F57C00;
-            }}
-            QPushButton:focus {{
-                outline: none;
-                border: none;
-            }}
-        """)
-        search_all_btn.clicked.connect(lambda: self._perform_web_search(search_all=True))
-        sidebar_layout.addWidget(search_all_btn)
-        
-        # Browser mode toggle
-        mode_label = QLabel(self.tr("Mode:"))
-        mode_label.setStyleSheet(f"font-size: {scaled_pt(8):.1f}pt; color: #666; padding-top: 5px;")
-        sidebar_layout.addWidget(mode_label)
-        
-        self.web_mode_embedded_radio = CheckmarkRadioButton(self.tr("Embedded"))
-        self.web_mode_embedded_radio.setToolTip(self.tr("Show results inside Supervertaler"))
-        self.web_mode_embedded_radio.setChecked(self.web_browser_mode == 'embedded')
-        self.web_mode_embedded_radio.setEnabled(self.web_engine_available)
-        self.web_mode_embedded_radio.toggled.connect(self._on_web_mode_changed)
-        sidebar_layout.addWidget(self.web_mode_embedded_radio)
-        
-        self.web_mode_external_radio = CheckmarkRadioButton(self.tr("External"))
-        self.web_mode_external_radio.setToolTip(self.tr("Open results in default browser"))
-        self.web_mode_external_radio.setChecked(self.web_browser_mode == 'external')
-        self.web_mode_external_radio.toggled.connect(self._on_web_mode_changed)
-        sidebar_layout.addWidget(self.web_mode_external_radio)
-        
-        # "Open in Browser" button at bottom of sidebar
-        self.web_open_external_btn = QPushButton(self.tr("🌍 Open in Browser"))
-        self.web_open_external_btn.setToolTip(self.tr("Open current page in your default web browser"))
-        self.web_open_external_btn.setStyleSheet(f"""
-            QPushButton {{
-                padding: 8px;
-                min-height: 20px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                font-size: {scaled_pt(9):.1f}pt;
-                margin-top: 5px;
-                outline: none;
-            }}
-            QPushButton:hover {{
-                background-color: #45a049;
-            }}
-            QPushButton:focus {{
-                outline: none;
-                border: none;
-            }}
-        """)
-        self.web_open_external_btn.clicked.connect(self._open_web_resource_external)
-        sidebar_layout.addWidget(self.web_open_external_btn)
-        
-        splitter.addWidget(sidebar)
-        
-        # === Main content area ===
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(10, 10, 10, 10)
-        content_layout.setSpacing(5)
-        
-        # Info label showing current language direction (no separate search bar - uses main Superlookup search)
-        self.web_lang_info_label = QLabel(self.tr("Languages: Any → Any  •  Click Search above or select a resource"))
-        self.web_lang_info_label.setStyleSheet(
-            f"color: #666; font-size: {scaled_pt(9):.1f}pt; padding: 3px 0;"
-        )
-        content_layout.addWidget(self.web_lang_info_label)
-        
-        # OPUS corpus selector (hidden by default, shown when OPUS is selected)
-        self.opus_selector_widget = QWidget()
-        opus_selector_layout = QHBoxLayout(self.opus_selector_widget)
-        opus_selector_layout.setContentsMargins(0, 5, 0, 5)
-        opus_selector_layout.setSpacing(8)
-        
-        opus_label = QLabel(self.tr("📚 Corpus:"))
-        opus_label.setStyleSheet("font-weight: bold; color: #1976D2;")
-        opus_selector_layout.addWidget(opus_label)
-        
-        self.opus_corpus_combo = QComboBox()
-        self.opus_corpus_combo.setMinimumWidth(280)
-        self.opus_corpus_combo.setStyleSheet("""
-            QComboBox {
-                padding: 5px 10px;
-                border: 1px solid #1976D2;
-                border-radius: 4px;
-                background: white;
-            }
-            QComboBox:hover {
-                border-color: #1565C0;
-            }
-            QComboBox::drop-down {
-                border: none;
-                padding-right: 8px;
-            }
-        """)
-        for corpus_id, corpus_name in self.opus_corpora:
-            self.opus_corpus_combo.addItem(corpus_name, corpus_id)
-        self.opus_corpus_combo.currentIndexChanged.connect(self._on_opus_corpus_changed)
-        opus_selector_layout.addWidget(self.opus_corpus_combo)
-        
-        opus_selector_layout.addStretch()
-        self.opus_selector_widget.hide()  # Hidden by default
-        content_layout.addWidget(self.opus_selector_widget)
-        
-        # Web view container - stacked widget for embedded views per resource
-        self.web_view_stack = QStackedWidget()
-        
-        # LAZY LOADING: Don't create all web views upfront - create them on demand
-        # This dramatically improves startup performance and memory usage
-        # Each QWebEngineView spawns a Chromium process, so 14 views = 14 processes
-        self.web_views = {}  # Will be populated lazily when resources are selected
-        # Each web view is wrapped in a container widget that adds a find-in-page bar.
-        # The stack stores containers, but self.web_views still holds the raw views
-        # so existing setUrl() / page() callers keep working unchanged.
-        self.web_view_containers = {}
-        
-        # Fallback view for external mode or when web engine not available
-        self.web_results_view = QTextEdit()
-        self.web_results_view.setReadOnly(True)
-        self.web_results_view.setStyleSheet("""
-            QTextEdit {
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                padding: 10px;
-                font-size: 11pt;
-            }
-        """)
-        self._show_web_welcome_message()
-        self.web_view_stack.addWidget(self.web_results_view)
-        
-        content_layout.addWidget(self.web_view_stack, stretch=1)
-        
-        splitter.addWidget(content_widget)
-        splitter.setStretchFactor(0, 0)  # Sidebar doesn't stretch
-        splitter.setStretchFactor(1, 1)  # Content area stretches
-        splitter.setSizes([150, 600])    # Initial sizes
-        
-        layout.addWidget(splitter, stretch=1)
-        
-        # Track current resource and last search URL
-        self.current_web_resource_index = 0
-        self.last_web_search_url = None
-        self.last_web_search_query = None
-        
-        # Select first resource by default
-        if self.web_resource_buttons:
-            self.web_resource_buttons[0].setChecked(True)
-        
-        # Show correct view based on mode
-        self._update_web_view_for_mode()
-        
-        # Update enabled state based on settings
-        self.search_web_enabled = True  # Now implemented!
-        
-        return tab
-    
-    def _show_web_welcome_message(self):
-        """Показывает приветственное сообщение в окне веб-результатов."""
-        mode_info = "embedded browser" if self.web_browser_mode == 'embedded' else "your default web browser"
-        self.web_results_view.setHtml(f"""
-            <div style="text-align: center; padding: 40px; color: #999;">
-                <h2>🌐 Web Resources</h2>
-                <p>Select a resource from the sidebar and enter a search term.</p>
-                <p>Results will open in <b>{mode_info}</b>.</p>
-                <p style="font-size: 10pt; margin-top: 20px;">
-                    <b>Tip:</b> The search respects the language direction from the From/To dropdowns above.
-                </p>
-                <p style="font-size: 9pt; color: #aaa; margin-top: 10px;">
-                    Use the mode toggle in the sidebar to switch between embedded and external browser.
-                </p>
-            </div>
-        """)
-    
-    def _create_web_view_for_resource(self, resource):
-        """Лениво создаёт web view для конкретного ресурса (создание
-                по требованию).
-        
-                Это улучшает производительность: не нужно создавать все 14+
-                экземпляров QWebEngineView при старте. Каждый QWebEngineView
-                порождает собственный процесс Chromium, поэтому ленивая загрузка
-                заметно экономит память и время запуска."""
-        if not self.web_engine_available:
-            return
-            
-        if resource['id'] in self.web_views:
-            return  # Already created
-            
-        web_view = self.QWebEngineView()
-
-        # Use persistent profile with silent page (suppresses JS console spam)
-        if self.web_profile and self.SilentWebPage:
-            page = self.SilentWebPage(self.web_profile, web_view)
-            web_view.setPage(page)
-
-        web_view.setUrl(QUrl("about:blank"))
-
-        # Wrap the view in a container that adds a Ctrl+F find-in-page toolbar.
-        # The container is what gets added to the stack; self.web_views still
-        # maps to the raw view so existing setUrl()/page() callers are unchanged.
-        container = self._create_web_view_container(web_view)
-
-        self.web_view_stack.addWidget(container)
-        self.web_views[resource['id']] = web_view
-        self.web_view_containers[resource['id']] = container
-
-        print(f"[Superlookup] Created web view for {resource['name']} (lazy load)")
-
-    def _create_web_view_container(self, web_view):
-        """Оборачивает QWebEngineView в контейнер со скрытой панелью поиска
-                по странице.
-        
-                Панель переключается через Ctrl+F (когда контейнер в фокусе)
-                и Esc. Enter / Shift+Enter циклически листают следующее/
-                предыдущее совпадение. Счётчик совпадений и переключатель
-                учёта регистра живут на самой панели."""
-        from PyQt6.QtGui import QShortcut, QKeySequence
-        from PyQt6.QtWebEngineCore import QWebEnginePage
-
-        container = QWidget()
-        v = QVBoxLayout(container)
-        v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(0)
-        v.addWidget(web_view, stretch=1)
-
-        # --- Find bar ---
-        find_bar = QWidget()
-        find_bar.setStyleSheet("""
-            QWidget#sl_find_bar { background-color: #f5f5f5; border-top: 1px solid #ddd; }
-            QLineEdit { border: 1px solid #bbb; border-radius: 3px; padding: 3px 6px; background: white; }
-            QPushButton { padding: 2px 8px; border: 1px solid transparent; border-radius: 3px; background: transparent; }
-            QPushButton:hover { background: #e3e3e3; border: 1px solid #ccc; }
-            QLabel { color: #666; font-size: 9pt; }
-        """)
-        find_bar.setObjectName("sl_find_bar")
-        h = QHBoxLayout(find_bar)
-        h.setContentsMargins(8, 4, 8, 4)
-        h.setSpacing(4)
-
-        h.addWidget(QLabel(self.tr("Find:")))
-        find_input = QLineEdit()
-        find_input.setPlaceholderText(self.tr("Find on page…"))
-        find_input.setMinimumWidth(220)
-        h.addWidget(find_input, stretch=1)
-
-        status = QLabel("")
-        status.setMinimumWidth(80)
-        h.addWidget(status)
-
-        prev_btn = QPushButton("▲")
-        prev_btn.setToolTip(self.tr("Previous match (Shift+Enter)"))
-        prev_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        h.addWidget(prev_btn)
-
-        next_btn = QPushButton("▼")
-        next_btn.setToolTip(self.tr("Next match (Enter)"))
-        next_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        h.addWidget(next_btn)
-
-        case_check = QCheckBox(self.tr("Match case"))
-        case_check.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        h.addWidget(case_check)
-
-        clear_btn = QPushButton("✕")
-        clear_btn.setToolTip(self.tr("Clear (Esc)"))
-        clear_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        h.addWidget(clear_btn)
-
-        # Bar is permanently visible so users discover it without needing Ctrl+F.
-        v.addWidget(find_bar)
-
-        # --- Behaviour ---
-        def _do_find(backward=False):
-            text = find_input.text()
-            flags = QWebEnginePage.FindFlag(0)
-            if backward:
-                flags |= QWebEnginePage.FindFlag.FindBackward
-            if case_check.isChecked():
-                flags |= QWebEnginePage.FindFlag.FindCaseSensitively
-
-            if not text:
-                web_view.findText("")
-                status.setText("")
-                find_input.setStyleSheet("")
-                return
-
-            def _cb(result):
-                try:
-                    total = result.numberOfMatches()
-                    active = result.activeMatch()
-                except Exception:
-                    return
-                if total == 0:
-                    status.setText(self.tr("No matches"))
-                    find_input.setStyleSheet("background: #fde7e9;")
-                else:
-                    status.setText(f"{active} of {total}")
-                    find_input.setStyleSheet("")
-
-            try:
-                web_view.findText(text, flags, _cb)
-            except TypeError:
-                # Older Qt without callback overload
-                web_view.findText(text, flags)
-                status.setText("")
-
-        def focus_find_bar():
-            """Фокусирует поле поиска (панель всегда видима)."""
-            find_input.setFocus()
-            find_input.selectAll()
-            if find_input.text():
-                _do_find()
-
-        def clear_find():
-            """Очищает поиск и возвращает фокус странице."""
-            find_input.clear()
-            web_view.findText("")
-            status.setText("")
-            find_input.setStyleSheet("")
-            web_view.setFocus()
-
-        find_input.textChanged.connect(lambda _t: _do_find(backward=False))
-        find_input.returnPressed.connect(lambda: _do_find(backward=False))
-        prev_btn.clicked.connect(lambda: _do_find(backward=True))
-        next_btn.clicked.connect(lambda: _do_find(backward=False))
-        case_check.toggled.connect(lambda _c: _do_find(backward=False))
-        clear_btn.clicked.connect(clear_find)
-
-        # Ctrl+F focuses the input (bar is always visible).
-        find_shortcut = QShortcut(QKeySequence(QKeySequence.StandardKey.Find), container)
-        find_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        find_shortcut.activated.connect(focus_find_bar)
-
-        # Esc clears the search and returns focus to the page.
-        esc_shortcut = QShortcut(QKeySequence("Escape"), find_input)
-        esc_shortcut.setContext(Qt.ShortcutContext.WidgetShortcut)
-        esc_shortcut.activated.connect(clear_find)
-
-        # Shift+Enter for previous match while the input has focus.
-        shift_enter = QShortcut(QKeySequence("Shift+Return"), find_input)
-        shift_enter.setContext(Qt.ShortcutContext.WidgetShortcut)
-        shift_enter.activated.connect(lambda: _do_find(backward=True))
-        shift_enter_pad = QShortcut(QKeySequence("Shift+Enter"), find_input)
-        shift_enter_pad.setContext(Qt.ShortcutContext.WidgetShortcut)
-        shift_enter_pad.activated.connect(lambda: _do_find(backward=True))
-
-        # Stash references on the container so they aren't garbage-collected
-        # and so callers can introspect (e.g. tests).
-        container.web_view = web_view
-        container.find_bar = find_bar
-        container.find_input = find_input
-        container.focus_find_bar = focus_find_bar
-        container.clear_find = clear_find
-
-        return container
-
-    def _get_web_view_index(self, resource_id):
-        """Возвращает индекс в стеке для контейнера web view по ID ресурса."""
-        if resource_id in self.web_view_containers:
-            return self.web_view_stack.indexOf(self.web_view_containers[resource_id])
-        return -1
-    
-    def _on_web_mode_changed(self, checked):
-        """Обрабатывает переключение режима браузера."""
-        if self.web_mode_embedded_radio.isChecked():
-            self.web_browser_mode = 'embedded'
-        else:
-            self.web_browser_mode = 'external'
-        
-        self._update_web_view_for_mode()
-        self._show_web_welcome_message()
-        print(f"[Superlookup] Web browser mode changed to: {self.web_browser_mode}")
-    
-    def _update_web_view_for_mode(self):
-        """Обновляет стек видов по текущему режиму."""
-        if self.web_browser_mode == 'embedded' and self.web_engine_available:
-            # Show embedded view for current resource (create lazily if needed)
-            resource = self.web_resources[self.current_web_resource_index]
-            if resource['id'] not in self.web_views:
-                self._create_web_view_for_resource(resource)
-            idx = self._get_web_view_index(resource['id'])
-            if idx >= 0:
-                self.web_view_stack.setCurrentIndex(idx)
-        else:
-            # Show text view (for external mode or fallback)
-            self.web_view_stack.setCurrentIndex(self.web_view_stack.indexOf(self.web_results_view))
-    
-    def _on_web_resource_selected(self, index):
-        """Обрабатывает выбор веб-ресурса из боковой панели."""
-        self.current_web_resource_index = index
-        resource = self.web_resources[index]
-        
-        # Show/hide OPUS corpus selector based on selected resource
-        if hasattr(self, 'opus_selector_widget'):
-            if resource.get('has_corpus_selector'):
-                self.opus_selector_widget.show()
-            else:
-                self.opus_selector_widget.hide()
-        
-        # Update view based on mode
-        if self.web_browser_mode == 'embedded' and self.web_engine_available:
-            # LAZY LOADING: Create web view for this resource if it doesn't exist yet
-            if resource['id'] not in self.web_views:
-                self._create_web_view_for_resource(resource)
-            
-            # Switch to this resource's embedded web view
-            idx = self._get_web_view_index(resource['id'])
-            if idx >= 0:
-                self.web_view_stack.setCurrentIndex(idx)
-                
-                # If we have a cached search query, perform search for this resource
-                if self.last_web_search_query:
-                    url = self._build_web_search_url(resource, self.last_web_search_query)
-                    if url:
-                        self.web_views[resource['id']].setUrl(QUrl(url))
-        else:
-            # External mode - show info
-            self.web_results_view.setHtml(f"""
-                <div style="text-align: center; padding: 40px;">
-                    <h2>{resource['icon']} {resource['name']}</h2>
-                    <p style="color: #666;">{resource['description']}</p>
-                    <p style="margin-top: 20px;">Enter a search term above and press Search.</p>
-                    <p style="font-size: 9pt; color: #aaa;">Results will open in your default browser.</p>
-                </div>
-            """)
-        
-        # Update language info
-        self._update_web_lang_info()
-    
-    def _update_web_lang_info(self):
-        """Обновляет информационную метку направления языков для веб-ресурсов."""
-        from_lang = self.lang_from_combo.currentData() if hasattr(self, 'lang_from_combo') else None
-        to_lang = self.lang_to_combo.currentData() if hasattr(self, 'lang_to_combo') else None
-        
-        from_display = self.lang_from_combo.currentText() if from_lang else "Any"
-        to_display = self.lang_to_combo.currentText() if to_lang else "Any"
-        
-        if hasattr(self, 'web_lang_info_label'):
-            self.web_lang_info_label.setText(f"Languages: {from_display} → {to_display}")
-    
-    def _schedule_lazy_web_views(self, query: str, resources, idx: int):
-        """Создаёт / setUrl-ит один QWebEngineView за такт цикла событий.
-        
-                Рекурсивно планирует себя на следующий индекс, пока не будут
-                обработаны все ресурсы. Уступка циклу событий между созданиями
-                web view держит главный поток отзывчивым и не даёт DWM Windows
-                «оглушать» окно Sidekick во время поиска.
-        
-                Отмена: если уже запущен более новый поиск
-                (self._web_search_query отличается от запроса, с которым была
-                начата эта цепочка), прерваться."""
-        if getattr(self, '_web_search_query', None) != query:
-            return
-        if idx >= len(resources):
-            return
-        resource = resources[idx]
-        try:
-            url = self._build_web_search_url(resource, query)
-            if url:
-                if resource['id'] not in self.web_views:
-                    self._create_web_view_for_resource(resource)
-                if resource['id'] in self.web_views:
-                    self.web_views[resource['id']].setUrl(QUrl(url))
-        except Exception as e:
-            print(f"[SuperLookup] Lazy web view error for {resource.get('name', '?')}: {e}")
-        QTimer.singleShot(0, lambda: self._schedule_lazy_web_views(query, resources, idx + 1))
-
-    def _perform_web_search(self, search_all: bool = False, silent: bool = False):
-        """Выполняет веб-поиск выбранным(и) ресурсом(ами).
-        
-                Аргументы:
-                    search_all: если True, искать по всем включённым ресурсам
-                                (для встроенного режима)
-                    silent: если True, НЕ трогать self.status_label.
-                                Используется при вызове из perform_lookup,
-                                где центральная строка статуса принадлежит
-                                фоновому воркеру поиска (чтобы его сообщение
-                                «✓ Found N results» не затиралось сообщением
-                                «Searching all web resources for X» из этого
-                                синхронного пути кода)."""
-        # Use the main Superlookup source text field
-        query = self.source_text.currentText().strip()
-        if not query:
-            if not silent:
-                self.status_label.setText(self.tr("Please enter a search term in the Source Text field above"))
-            return
-        
-        # Cache the query for when user switches between resources
-        self.last_web_search_query = query
-        
-        if self.web_browser_mode == 'embedded' and self.web_engine_available:
-            # Embedded mode - load in web views
-            if search_all:
-                # IMPORTANT: each QWebEngineView creation is 100-500 ms on Windows.
-                # Doing 16+ of them in a synchronous loop blocks the main thread
-                # for 3-8 s, which exceeds Windows DWM's "Not Responding"
-                # threshold (~5 s). DWM then ghosts the Sidekick window – it
-                # loses Z-order and apps like Trados Studio (aggressive about
-                # foreground reclaim) immediately pop in front, making Sidekick
-                # appear to "disappear" while the search is running.
-                #
-                # Mitigation: do the currently-visible resource synchronously
-                # (so the user sees results in the active sub-tab right away),
-                # then schedule the rest one-per-event-loop-tick via QTimer.
-                # Total wall-clock is similar but the main thread keeps yielding
-                # to the event loop, so the UI stays responsive and DWM doesn't
-                # mark the app as Not Responding.
-                self._web_search_query = query  # used by deferred ticks for cancellation
-
-                current_idx = self.current_web_resource_index
-                current_resource = (self.web_resources[current_idx]
-                                    if 0 <= current_idx < len(self.web_resources)
-                                    else None)
-
-                # 1. Currently-visible resource: create + setUrl immediately so
-                #    the active sub-tab has results without delay.
-                if current_resource:
-                    try:
-                        url = self._build_web_search_url(current_resource, query)
-                        if url:
-                            if current_resource['id'] not in self.web_views:
-                                self._create_web_view_for_resource(current_resource)
-                            if current_resource['id'] in self.web_views:
-                                self.web_views[current_resource['id']].setUrl(QUrl(url))
-                                view_idx = self._get_web_view_index(current_resource['id'])
-                                if view_idx >= 0:
-                                    self.web_view_stack.setCurrentIndex(view_idx)
-                    except Exception as e:
-                        print(f"[SuperLookup] Web search (current resource) error: {e}")
-
-                # 2. Other resources: schedule lazily, one per event-loop tick.
-                other_resources = [r for i, r in enumerate(self.web_resources) if i != current_idx]
-                if other_resources:
-                    QTimer.singleShot(0, lambda: self._schedule_lazy_web_views(query, other_resources, 0))
-
-                if not silent:
-                    self.status_label.setText(f"Searching all web resources for '{query}'")
-            else:
-                # Search current resource only
-                resource = self.web_resources[self.current_web_resource_index]
-                url = self._build_web_search_url(resource, query)
-                if url:
-                    self.last_web_search_url = url
-                    # Create view lazily if needed
-                    if resource['id'] not in self.web_views:
-                        self._create_web_view_for_resource(resource)
-                    if resource['id'] in self.web_views:
-                        self.web_views[resource['id']].setUrl(QUrl(url))
-                        # Show this resource's view
-                        idx = self._get_web_view_index(resource['id'])
-                        if idx >= 0:
-                            self.web_view_stack.setCurrentIndex(idx)
-                    if not silent:
-                        self.status_label.setText(f"Loaded {resource['name']} search")
-        else:
-            # External mode - open in browser
-            resource = self.web_resources[self.current_web_resource_index]
-            url = self._build_web_search_url(resource, query)
-            
-            if url:
-                self.last_web_search_url = url
-                
-                # Show the URL that will be opened
-                self.web_results_view.setHtml(f"""
-                    <div style="padding: 20px;">
-                        <h3>{resource['icon']} {resource['name']}</h3>
-                        <p><b>Search term:</b> {query}</p>
-                        <p><b>Opening URL:</b></p>
-                        <p style="word-wrap: break-word; color: #1976D2;">
-                            <a href="{url}">{url}</a>
-                        </p>
-                        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-                        <p style="color: #666; font-size: 10pt;">
-                            Click "Open in Browser" to open again, or select another resource.
-                        </p>
-                    </div>
-                """)
-                
-                # Open in default browser
-                QDesktopServices.openUrl(QUrl(url))
-                if not silent:
-                    self.status_label.setText(f"Opened {resource['name']} search in browser")
-    
-    def search_all_web_resources(self, query: str):
-        """Ищет по всем веб-ресурсам с данным запросом (вызывается из
-                интеграции Superlookup).
-        
-                Примечание: метод теперь использует напрямую поле source_text,
-                поэтому параметр query должен совпадать с тем, что уже в
-                source_text."""
-        if query:
-            # Source text should already be set, just trigger the search
-            self._perform_web_search(search_all=True)
-    
-    def _build_web_search_url(self, resource, query):
-        """Строит URL поиска для веб-ресурса с корректными кодами языков."""
-        import urllib.parse
-
-        # Get language settings (may be a list of variants)
-        from_lang = self.lang_from_combo.currentData() if hasattr(self, 'lang_from_combo') else None
-        to_lang = self.lang_to_combo.currentData() if hasattr(self, 'lang_to_combo') else None
-
-        # If we got a list of variants, use the first one for web URLs
-        if isinstance(from_lang, list) and from_lang:
-            from_lang = from_lang[0]
-        if isinstance(to_lang, list) and to_lang:
-            to_lang = to_lang[0]
-
-        # If the From/To combos are set to "Any" (or not yet populated), fall
-        # back to the main window's project language pair – the same pair
-        # QuickTrans uses. This is what the user configured as their default
-        # in Settings → Language Pair (e.g. Dutch → English), so resources
-        # like IATE / Linguee / ProZ / BabelNet fire with the right codes
-        # instead of the hard-coded English → Dutch fallback.
-        if not from_lang or not to_lang:
-            mw = self.main_window
-            if mw is not None:
-                # Prefer current_project pair if a project is loaded; otherwise
-                # use the app-wide default.
-                proj = getattr(mw, 'current_project', None)
-                if proj is not None:
-                    if not from_lang:
-                        from_lang = getattr(proj, 'source_lang', None) or getattr(mw, 'source_language', None)
-                    if not to_lang:
-                        to_lang = getattr(proj, 'target_lang', None) or getattr(mw, 'target_language', None)
-                else:
-                    if not from_lang:
-                        from_lang = getattr(mw, 'source_language', None)
-                    if not to_lang:
-                        to_lang = getattr(mw, 'target_language', None)
-
-        # Final safety net – if everything above failed, default to English-Dutch
-        if not from_lang:
-            from_lang = 'en'
-        if not to_lang:
-            to_lang = 'nl'
-        
-        # URL-encode the query
-        encoded_query = urllib.parse.quote(query)
-        
-        # Get language codes in the format needed by this resource
-        lang_format = resource.get('lang_format')
-        sl = self._get_web_lang_code(from_lang, lang_format)
-        tl = self._get_web_lang_code(to_lang, lang_format)
-        sl_full = self._get_web_lang_code(from_lang, 'full_lower')
-        tl_full = self._get_web_lang_code(to_lang, 'full_lower')
-        sl_upper = self._get_web_lang_code(from_lang, 'iso2').upper()
-        tl_upper = self._get_web_lang_code(to_lang, 'iso2').upper()
-
-        # Linguee uses a canonical language-pair slug: English is always
-        # first in any English↔X pair (e.g. /english-dutch/, never
-        # /dutch-english/), and source=auto handles the query direction.
-        # Non-canonical URLs redirect/error – particularly badly inside the
-        # embedded QWebEngineView. Swap sl_full/tl_full for this resource
-        # when one side is English and it isn't already first. For non-
-        # English pairs (e.g. French↔German), fall back to alphabetical
-        # ordering – this mirrors Linguee's actual slug scheme.
-        if resource.get('id') == 'linguee' and sl_full and tl_full:
-            if 'english' in (sl_full, tl_full):
-                if sl_full != 'english':
-                    sl_full, tl_full = tl_full, sl_full
-            elif sl_full > tl_full:
-                sl_full, tl_full = tl_full, sl_full
-        
-        # Build URL from template
-        url = resource['url_template']
-        url = url.replace('{query}', encoded_query)
-        url = url.replace('{sl}', sl)
-        url = url.replace('{tl}', tl)
-        url = url.replace('{sl_full}', sl_full)
-        url = url.replace('{tl_full}', tl_full)
-        url = url.replace('{sl_upper}', sl_upper)
-        url = url.replace('{tl_upper}', tl_upper)
-        
-        # Handle OPUS corpus placeholder
-        if '{opus_corpus}' in url and hasattr(self, 'current_opus_corpus'):
-            url = url.replace('{opus_corpus}', self.current_opus_corpus)
-        
-        return url
-    
-    def _on_opus_corpus_changed(self, index):
-        """Обрабатывает смену выбора корпуса OPUS."""
-        if hasattr(self, 'opus_corpus_combo'):
-            self.current_opus_corpus = self.opus_corpus_combo.currentData()
-            # If we have a search query, refresh the OPUS view
-            if self.last_web_search_query and hasattr(self, 'web_views'):
-                resource = self.web_resources[self.current_web_resource_index]
-                if resource.get('has_corpus_selector') and resource['id'] in self.web_views:
-                    url = self._build_web_search_url(resource, self.last_web_search_query)
-                    self.web_views[resource['id']].setUrl(QUrl(url))
-    
-    def _get_web_lang_code(self, lang_code, format_type):
-        """Преобразует код языка в формат, нужный разным веб-сервисам."""
-        if not lang_code or not format_type:
-            return ''
-        
-        # Normalize input - handle full language names or codes
-        lang_lower = lang_code.lower()
-        
-        # Language code mappings
-        # ISO-2 codes (2-letter): en, nl, de, fr, es, etc.
-        iso2_map = {
-            'english': 'en', 'en': 'en', 'en-us': 'en', 'en-gb': 'en', 'en-au': 'en',
-            'dutch': 'nl', 'nl': 'nl', 'nl-nl': 'nl', 'nl-be': 'nl', 'nederlands': 'nl',
-            'german': 'de', 'de': 'de', 'de-de': 'de', 'de-at': 'de', 'de-ch': 'de', 'deutsch': 'de',
-            'french': 'fr', 'fr': 'fr', 'fr-fr': 'fr', 'fr-be': 'fr', 'fr-ca': 'fr', 'français': 'fr',
-            'spanish': 'es', 'es': 'es', 'es-es': 'es', 'es-mx': 'es', 'español': 'es',
-            'italian': 'it', 'it': 'it', 'it-it': 'it', 'italiano': 'it',
-            'portuguese': 'pt', 'pt': 'pt', 'pt-pt': 'pt', 'pt-br': 'pt', 'português': 'pt',
-            'polish': 'pl', 'pl': 'pl', 'polski': 'pl',
-            'russian': 'ru', 'ru': 'ru', 'русский': 'ru',
-            'chinese': 'zh', 'zh': 'zh', 'zh-cn': 'zh', 'zh-tw': 'zh', '中文': 'zh',
-            'japanese': 'ja', 'ja': 'ja', '日本語': 'ja',
-            'korean': 'ko', 'ko': 'ko', '한국어': 'ko',
-            'arabic': 'ar', 'ar': 'ar', 'العربية': 'ar',
-            'swedish': 'sv', 'sv': 'sv', 'svenska': 'sv',
-            'danish': 'da', 'da': 'da', 'dansk': 'da',
-            'norwegian': 'no', 'no': 'no', 'nb': 'no', 'nn': 'no', 'norsk': 'no',
-            'finnish': 'fi', 'fi': 'fi', 'suomi': 'fi',
-            'czech': 'cs', 'cs': 'cs', 'čeština': 'cs',
-            'hungarian': 'hu', 'hu': 'hu', 'magyar': 'hu',
-            'romanian': 'ro', 'ro': 'ro', 'română': 'ro',
-            'greek': 'el', 'el': 'el', 'ελληνικά': 'el',
-            'turkish': 'tr', 'tr': 'tr', 'türkçe': 'tr',
-            'ukrainian': 'uk', 'uk': 'uk', 'українська': 'uk',
-            'bulgarian': 'bg', 'bg': 'bg', 'български': 'bg',
-        }
-        
-        # ISO-3 codes (3-letter for ProZ): dut, eng, ger, fre, spa, etc. (ISO 639-2/B bibliographic)
-        iso3_map = {
-            'english': 'eng', 'en': 'eng', 'en-us': 'eng', 'en-gb': 'eng',
-            'dutch': 'dut', 'nl': 'dut', 'nl-nl': 'dut', 'nl-be': 'dut', 'nederlands': 'dut',
-            'german': 'ger', 'de': 'ger', 'de-de': 'ger', 'deutsch': 'ger',
-            'french': 'fre', 'fr': 'fre', 'fr-fr': 'fre', 'français': 'fre',
-            'spanish': 'spa', 'es': 'spa', 'es-es': 'spa', 'español': 'spa',
-            'italian': 'ita', 'it': 'ita', 'it-it': 'ita', 'italiano': 'ita',
-            'portuguese': 'por', 'pt': 'por', 'pt-pt': 'por', 'português': 'por',
-            'polish': 'pol', 'pl': 'pol', 'polski': 'pol',
-            'russian': 'rus', 'ru': 'rus', 'русский': 'rus',
-            'chinese': 'chi', 'zh': 'chi', 'zh-cn': 'chi', '中文': 'chi',
-            'japanese': 'jpn', 'ja': 'jpn', '日本語': 'jpn',
-            'korean': 'kor', 'ko': 'kor', '한국어': 'kor',
-            'arabic': 'ara', 'ar': 'ara', 'العربية': 'ara',
-            'swedish': 'swe', 'sv': 'swe', 'svenska': 'swe',
-            'danish': 'dan', 'da': 'dan', 'dansk': 'dan',
-            'norwegian': 'nor', 'no': 'nor', 'norsk': 'nor',
-            'finnish': 'fin', 'fi': 'fin', 'suomi': 'fin',
-            'czech': 'cze', 'cs': 'cze', 'čeština': 'cze',
-            'hungarian': 'hun', 'hu': 'hun', 'magyar': 'hun',
-            'romanian': 'rum', 'ro': 'rum', 'română': 'rum',
-            'greek': 'gre', 'el': 'gre', 'ελληνικά': 'gre',
-            'turkish': 'tur', 'tr': 'tur', 'türkçe': 'tur',
-            'ukrainian': 'ukr', 'uk': 'ukr', 'українська': 'ukr',
-            'bulgarian': 'bul', 'bg': 'bul', 'български': 'bul',
-        }
-        
-        # ISO 639-3 codes (for Juremy): nld, eng, deu, fra, spa, etc.
-        iso639_3_map = {
-            'english': 'eng', 'en': 'eng', 'en-us': 'eng', 'en-gb': 'eng',
-            'dutch': 'nld', 'nl': 'nld', 'nl-nl': 'nld', 'nl-be': 'nld', 'nederlands': 'nld',
-            'german': 'deu', 'de': 'deu', 'de-de': 'deu', 'deutsch': 'deu',
-            'french': 'fra', 'fr': 'fra', 'fr-fr': 'fra', 'français': 'fra',
-            'spanish': 'spa', 'es': 'spa', 'es-es': 'spa', 'español': 'spa',
-            'italian': 'ita', 'it': 'ita', 'it-it': 'ita', 'italiano': 'ita',
-            'portuguese': 'por', 'pt': 'por', 'pt-pt': 'por', 'português': 'por',
-            'polish': 'pol', 'pl': 'pol', 'polski': 'pol',
-            'russian': 'rus', 'ru': 'rus', 'русский': 'rus',
-        }
-        
-        # Full language names (lowercase for URL slugs)
-        full_lower_map = {
-            'english': 'english', 'en': 'english', 'en-us': 'english', 'en-gb': 'english',
-            'dutch': 'dutch', 'nl': 'dutch', 'nl-nl': 'dutch', 'nl-be': 'dutch', 'nederlands': 'dutch',
-            'german': 'german', 'de': 'german', 'de-de': 'german', 'deutsch': 'german',
-            'french': 'french', 'fr': 'french', 'fr-fr': 'french', 'français': 'french',
-            'spanish': 'spanish', 'es': 'spanish', 'es-es': 'spanish', 'español': 'spanish',
-            'italian': 'italian', 'it': 'italian', 'it-it': 'italian', 'italiano': 'italian',
-            'portuguese': 'portuguese', 'pt': 'portuguese', 'pt-pt': 'portuguese', 'português': 'portuguese',
-            'polish': 'polish', 'pl': 'polish', 'polski': 'polish',
-            'russian': 'russian', 'ru': 'russian', 'русский': 'russian',
-            'chinese': 'chinese', 'zh': 'chinese', 'zh-cn': 'chinese', '中文': 'chinese',
-            'japanese': 'japanese', 'ja': 'japanese', '日本語': 'japanese',
-            'korean': 'korean', 'ko': 'korean', '한국어': 'korean',
-            'arabic': 'arabic', 'ar': 'arabic', 'العربية': 'arabic',
-            'swedish': 'swedish', 'sv': 'swedish', 'svenska': 'swedish',
-            'danish': 'danish', 'da': 'danish', 'dansk': 'danish',
-            'norwegian': 'norwegian', 'no': 'norwegian', 'norsk': 'norwegian',
-            'finnish': 'finnish', 'fi': 'finnish', 'suomi': 'finnish',
-            'czech': 'czech', 'cs': 'czech', 'čeština': 'czech',
-            'hungarian': 'hungarian', 'hu': 'hungarian', 'magyar': 'hungarian',
-            'romanian': 'romanian', 'ro': 'romanian', 'română': 'romanian',
-            'greek': 'greek', 'el': 'greek', 'ελληνικά': 'greek',
-            'turkish': 'turkish', 'tr': 'turkish', 'türkçe': 'turkish',
-            'ukrainian': 'ukrainian', 'uk': 'ukrainian', 'українська': 'ukrainian',
-            'bulgarian': 'bulgarian', 'bg': 'bulgarian', 'български': 'bulgarian',
-        }
-        
-        # Select the appropriate mapping
-        if format_type == 'iso2':
-            return iso2_map.get(lang_lower, lang_lower[:2] if len(lang_lower) >= 2 else 'en')
-        elif format_type == 'iso3':
-            return iso3_map.get(lang_lower, 'eng')
-        elif format_type == 'iso639_3':
-            return iso639_3_map.get(lang_lower, 'eng')
-        elif format_type == 'full_lower':
-            return full_lower_map.get(lang_lower, 'english')
-        else:
-            return lang_lower
-    
-    def _open_web_resource_external(self):
-        """Открывает последний URL поиска в браузере по умолчанию."""
-        if self.last_web_search_url:
-            QDesktopServices.openUrl(QUrl(self.last_web_search_url))
-        else:
-            # If no search has been performed, build URL with current input from source_text
-            query = self.source_text.currentText().strip()
-            if query:
-                self._perform_web_search()
-            else:
-                self.status_label.setText(self.tr("Enter a search term in the Source Text field first"))
-    
-    # Setting key + valid values for the Ctrl+Alt+L landing sub-tab.
-    SUPERLOOKUP_LANDING_TAB_KEY = 'superlookup_landing_tab'
-    SUPERLOOKUP_LANDING_TAB_DEFAULT = 'termbases'
-    SUPERLOOKUP_LANDING_TAB_LABELS = {
-        'quicktrans': 'QuickTrans',
-        'tms': 'TMs',
-        'termbases': 'Termbases',
-        'webresources': 'Web Resources',
-    }
 
     def create_settings_tab(self):
         """Создаёт вкладку Settings с подвкладками по каждому типу ресурсов."""
@@ -61578,43 +59959,6 @@ class SuperlookupTab(QWidget):
         desc.setStyleSheet("color: #666; padding: 5px 0;")
         layout.addWidget(desc, 0)
 
-        # Ctrl+Alt+L landing-tab preference. Lives above the sub-sub-tabs so
-        # it's visible regardless of which resource sub-tab is selected.
-        # We use a QFrame + QLabel rather than a QGroupBox to dodge the
-        # theme_manager's QGroupBox styling, and CheckmarkRadioButton rather
-        # than plain QRadioButton because the theme strips QRadioButton's
-        # native checked-state indicator (see theme_manager.py:475-486).
-        landing_frame = QFrame()
-        landing_frame.setFrameShape(QFrame.Shape.NoFrame)
-        landing_outer = QVBoxLayout(landing_frame)
-        landing_outer.setContentsMargins(0, 5, 0, 5)
-        landing_outer.setSpacing(2)
-
-        landing_label = QLabel(self.tr("Ctrl+Alt+L lands on:"))
-        landing_label.setStyleSheet("font-weight: bold;")
-        landing_outer.addWidget(landing_label)
-
-        landing_row = QHBoxLayout()
-        landing_row.setContentsMargins(0, 0, 0, 0)
-        landing_row.setSpacing(15)
-
-        self._landing_tab_buttons = {}
-        self._landing_tab_button_group = QButtonGroup(landing_frame)
-        self._landing_tab_button_group.setExclusive(True)
-        current_pref = self._load_superlookup_landing_pref()
-        for value, label in self.SUPERLOOKUP_LANDING_TAB_LABELS.items():
-            rb = CheckmarkRadioButton(label)
-            rb.setChecked(value == current_pref)
-            rb.toggled.connect(
-                lambda checked, v=value: self._on_landing_pref_changed(v, checked)
-            )
-            self._landing_tab_buttons[value] = rb
-            self._landing_tab_button_group.addButton(rb)
-            landing_row.addWidget(rb)
-        landing_row.addStretch()
-        landing_outer.addLayout(landing_row)
-        layout.addWidget(landing_frame, 0)
-
         # v1.10.168: Removed the per-SuperLookup Termbase + TM checkbox
         # sub-tabs. Selection now lives in one place per resource: the
         # main TMs tab's Read column for translation memories, and the
@@ -61635,164 +59979,12 @@ class SuperlookupTab(QWidget):
         )
         layout.addWidget(resource_info, 0)
 
-        # Create sub-tabs for each resource type
-        self.settings_subtabs = QTabWidget()
-        self.settings_subtabs.tabBar().setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.settings_subtabs.tabBar().setDrawBase(False)
-        self.settings_subtabs.tabBar().setExpanding(False)
-
-        # Note: MT Settings removed - now in main Settings → MT Settings
-
-        # Web Settings sub-tab
-        web_settings_tab = self.create_web_settings_subtab()
-        self.settings_subtabs.addTab(web_settings_tab, "🌐 Web Resources")
-
-        # QuickTrans Settings used to be mounted here as a sub-sub-tab
-        # when this SuperlookupTab lived inside Sidekick (is_sidekick=
-        # True). With Sidekick retired in v1.10.4 / v1.10.10, the
-        # QuickTrans settings widget moved to Workbench Settings →
-        # ⚡ QuickTrans where it's the sole, canonical mount point.
-        # Keeping it out of the SuperLookup tab also keeps
-        # _mtql_checkboxes / _mtql_llm_combos on the main window
-        # unambiguous (single source of truth).
-
-        layout.addWidget(self.settings_subtabs, stretch=1)
-
         return tab
-
-    def _load_superlookup_landing_pref(self) -> str:
-        """Читает предпочитаемую пользователем подвкладку приземления Ctrl+Alt+L из настроек."""
-        try:
-            mw = self.main_window
-            if mw and hasattr(mw, 'load_general_settings'):
-                settings = mw.load_general_settings() or {}
-                value = settings.get(self.SUPERLOOKUP_LANDING_TAB_KEY)
-                if value in self.SUPERLOOKUP_LANDING_TAB_LABELS:
-                    return value
-        except Exception as e:
-            print(f"[Superlookup] Could not load landing tab pref: {e}")
-        return self.SUPERLOOKUP_LANDING_TAB_DEFAULT
-
-    def _on_landing_pref_changed(self, value: str, checked: bool):
-        """Сохраняет новое предпочтение подвкладки приземления Ctrl+Alt+L."""
-        if not checked:
-            return  # only react to the newly-selected button
-        try:
-            mw = self.main_window
-            if mw and hasattr(mw, 'load_general_settings') and hasattr(mw, 'save_general_settings'):
-                settings = mw.load_general_settings() or {}
-                settings[self.SUPERLOOKUP_LANDING_TAB_KEY] = value
-                mw.save_general_settings(settings)
-        except Exception as e:
-            print(f"[Superlookup] Could not save landing tab pref: {e}")
 
     # v1.10.168: create_tm_settings_subtab / create_termbase_settings_subtab
     # were removed. Selection now lives on the main TMs / Termbases tabs
-    # (Read column). The SuperLookup Settings tab still exists (Web
-    # Resources sub-tab + Ctrl+Alt+L landing preference), but no longer
-    # hosts a per-resource checkbox list.
-    
-    def create_mt_settings_subtab(self):
-        """Создаёт подвкладку настроек MT."""
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
-        
-        # Info section
-        info = QLabel(
-            "Machine Translation integration is coming soon.\n"
-            "This will allow SuperLookup to query DeepL, Google Translate, and other MT services."
-        )
-        info.setWordWrap(True)
-        info.setStyleSheet("padding: 5px; border-radius: 3px;")
-        layout.addWidget(info, 0)
-        
-        # Enable checkbox (disabled for now)
-        self.mt_search_checkbox = CheckmarkCheckBox(self.tr("✓ Enable Machine Translation (Coming Soon)"))
-        self.mt_search_checkbox.setChecked(False)
-        self.mt_search_checkbox.setEnabled(False)
-        self.mt_search_checkbox.setStyleSheet("font-weight: bold; font-size: 11pt; color: #999; padding: 10px 0;")
-        layout.addWidget(self.mt_search_checkbox, 0)
-        
-        # Placeholder content
-        placeholder = QLabel(self.tr("🚧 Under Construction\n\nComing soon:\n• DeepL integration\n• Google Translate\n• Microsoft Translator\n• Amazon Translate\n• ModernMT"))
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("color: #999; padding: 40px; font-size: 11pt;")
-        layout.addWidget(placeholder, stretch=1)
-        
-        return tab
-    
-    def create_web_settings_subtab(self):
-        """Создаёт подвкладку настроек Web Resources."""
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
-        
-        # Info section
-        info = QLabel(
-            "All web resources appear in the Web Resources tab by default. "
-            "Uncheck any you want to hide. "
-            "Uncheck every resource to disable web search entirely."
-        )
-        info.setWordWrap(True)
-        info.setStyleSheet("color: #666; padding: 5px; background-color: #E8F5E9; border-radius: 3px;")
-        layout.addWidget(info, 0)
-
-        # Available resources list
-        resources_label = QLabel(self.tr("Available Web Resources:"))
-        resources_label.setStyleSheet("font-weight: bold; padding-top: 10px;")
-        layout.addWidget(resources_label, 0)
-        
-        # Scroll area for resource checkboxes
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.StyledPanel)
-        
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout(scroll_widget)
-        scroll_layout.setContentsMargins(10, 10, 10, 10)
-        scroll_layout.setSpacing(5)
-        
-        # Add checkboxes for each resource (all enabled by default)
-        self.web_resource_checkboxes = []
-        default_resources = [
-            ('🇪🇺 IATE', 'EU terminology database - supports language direction'),
-            ('📗 Linguee', 'Bilingual dictionary with context sentences'),
-            ('💬 ProZ.com', 'Translator terminology database - supports language direction'),
-            ('🔄 Reverso Context', 'Context-based translations with examples'),
-            ('🔍 Google Search', 'General web search'),
-            ('📜 Google Patents', 'Search patents for terminology'),
-            ('📖 Wikipedia (Source)', 'Wikipedia in source language'),
-            ('📖 Wikipedia (Target)', 'Wikipedia in target language'),
-            ('⚖️ Juremy', 'Legal terminology database'),
-            ('📚 Beijerterm', 'Dutch-English terminology database (1.9M+ entries)'),
-            ('🔤 AcronymFinder', 'Acronym and abbreviation dictionary'),
-            ('🌐 BabelNet', 'Multilingual encyclopedic dictionary'),
-            ('📓 Wiktionary (Source)', 'Wiktionary in source language'),
-            ('📓 Wiktionary (Target)', 'Wiktionary in target language'),
-        ]
-        
-        for i, (name, desc) in enumerate(default_resources):
-            cb = CheckmarkCheckBox(name)
-            cb.setChecked(True)
-            cb.setToolTip(desc)
-            # Connect to update sidebar visibility when checkbox changes
-            cb.stateChanged.connect(lambda state, idx=i: self._on_web_resource_checkbox_changed(idx, state))
-            scroll_layout.addWidget(cb)
-            self.web_resource_checkboxes.append(cb)
-        
-        scroll_layout.addStretch()
-        scroll.setWidget(scroll_widget)
-        layout.addWidget(scroll, stretch=1)
-        
-        # Future: Add custom URL section
-        future_label = QLabel(self.tr("💡 Tip: More web resources can be added in future updates"))
-        future_label.setStyleSheet("color: #666; font-size: 9pt; font-style: italic; padding: 5px 0;")
-        layout.addWidget(future_label, 0)
-        
-        return tab
+    # (Read column). The SuperLookup Settings tab still exists, but no
+    # longer hosts a per-resource checkbox list.
     
     def on_results_tab_changed(self, index):
         """Обрабатывает смену вкладки результатов.
@@ -61801,29 +59993,14 @@ class SuperlookupTab(QWidget):
                 тогда (и только тогда), когда пользователь переходит на неё.
         
                 - Вкладка Settings: обновить списки ресурсов.
-                - Вкладка Web Resources: запустить отложенный веб-поиск
-                  (отложен из perform_lookup, чтобы не платить за создание
-                  QWebEngineView, когда пользователь эту вкладку не открывает).
-                - Вкладка QuickTrans: запустить отложенный веер MT-запросов
-                  (отложен, чтобы не плодить N HTTP-вызовов провайдеров, когда
-                  пользователь эту вкладку не открывает, и чтобы мимолётно
-                  не создавать скрытый диалог WindowStaysOnTopHint, который
-                  иначе построил бы конструктор MTQuickPopup — он нарушает
-                  Z-order и задвигает Sidekick за Trados).
         
                 Вкладки ищутся динамически по заголовку, чтобы это продолжало
                 работать при добавлении/удалении вкладок в будущем."""
         settings_index = -1
-        web_index = -1
-        quicktrans_index = -1
         for i in range(self.results_tabs.count()):
             label = self.results_tabs.tabText(i)
             if settings_index < 0 and "Settings" in label:
                 settings_index = i
-            if web_index < 0 and "Web Resources" in label:
-                web_index = i
-            if quicktrans_index < 0 and "QuickTrans" in label:
-                quicktrans_index = i
 
         if index == settings_index and settings_index >= 0:
             # v1.10.168: per-SuperLookup TM + Termbase checkbox lists
@@ -61831,21 +60008,6 @@ class SuperlookupTab(QWidget):
             # tabs' Read flags. Just refresh language dropdowns here.
             print("[Superlookup] Settings tab viewed - refreshing language dropdowns")
             self.populate_language_dropdowns()
-
-        if index == web_index and web_index >= 0:
-            if getattr(self, '_web_search_pending', False):
-                self._web_search_pending = False
-                if hasattr(self, 'web_browser_mode') and self.web_browser_mode == 'embedded' \
-                   and hasattr(self, 'web_engine_available') and self.web_engine_available:
-                    try:
-                        self._perform_web_search(search_all=True, silent=True)
-                    except Exception as e:
-                        print(f"[SuperLookup] Deferred web search error: {e}")
-                elif hasattr(self, 'web_browser_mode') and self.web_browser_mode == 'external':
-                    try:
-                        self._perform_web_search(search_all=False, silent=True)
-                    except Exception as e:
-                        print(f"[SuperLookup] Deferred web search (external) error: {e}")
 
         # NOTE (v1.10.10): the QuickTrans-sub-tab deferred dispatch
         # path was removed when Sidekick was retired. It only fired
@@ -61864,21 +60026,6 @@ class SuperlookupTab(QWidget):
         """Обрабатывает переключение флажка поиска по терминологиям."""
         self.search_termbase_enabled = (state == Qt.CheckState.Checked.value)
         print(f"[Superlookup] Termbase search {'enabled' if self.search_termbase_enabled else 'disabled'}")
-    
-    def _on_web_resource_checkbox_changed(self, index: int, state: int):
-        """Обрабатывает изменение флажка веб-ресурса — показывает/скрывает соответствующую кнопку боковой панели."""
-        is_checked = (state == Qt.CheckState.Checked.value)
-        if hasattr(self, 'web_resource_buttons') and index < len(self.web_resource_buttons):
-            self.web_resource_buttons[index].setVisible(is_checked)
-            print(f"[Superlookup] Web resource {index} {'shown' if is_checked else 'hidden'}")
-            
-            # If the hidden resource was selected, select the first visible one
-            if not is_checked and hasattr(self, 'current_web_resource_index') and self.current_web_resource_index == index:
-                for i, btn in enumerate(self.web_resource_buttons):
-                    if btn.isVisible():
-                        self._on_web_resource_selected(i)
-                        btn.setChecked(True)
-                        break
     
     def refresh_tm_list(self):
         """v1.10.168: no-op-заглушка. Список по-ТМных флажков SuperLookup
@@ -61943,9 +60090,9 @@ class SuperlookupTab(QWidget):
         return 'both'
     
     def _on_language_changed(self):
-        """Обрабатывает смену языка в выпадающем списке — обновляет информацию Web Resources."""
-        # Update the web resources language info label
-        self._update_web_lang_info()
+        """Обрабатывает смену языка в выпадающем списке (no-op: языковая сводка
+                Web Resources ушла вместе с подвкладкой Web Resources в Batch #8.10)."""
+        pass
     
     def get_language_filters(self):
         """Возвращает текущие настройки языковых фильтров.
@@ -62183,43 +60330,13 @@ class SuperlookupTab(QWidget):
         except:
             pass
     
-    def capture_text(self):
-        """Захватывает текст из активного приложения (запускается глобальной горячей клавишей)."""
-        if not self.SuperlookupEngine:
-            return
-        
-        # Initialize engine if needed
-        if not self.engine:
-            self.engine = self.SuperlookupEngine(mode='universal')
-            
-            # Set TM database if available
-            if self.tm_database:
-                self.engine.set_tm_database(self.tm_database)
-        
-        self.status_label.setText(self.tr("⏳ Capturing text..."))
-        QApplication.processEvents()
-        
-        # Capture text
-        text = self.engine.capture_text()
-        
-        if text:
-            self.source_text.setCurrentText(text)
-            self.status_label.setText(f"✓ Captured {len(text)} characters. Searching...")
-            # Auto-search after capture
-            self.perform_lookup()
-        else:
-            self.status_label.setText(self.tr("✗ No text captured. Try again."))
-    
     def perform_lookup(self):
         """Выполняет поиск по исходному тексту.
         
                 Поиски по ТМ и терминологиям выполняются в фоновом QRunnable,
                 чтобы UI оставался отзывчивым даже с очень большими
                 терминологиями. Результаты поступают через сигналы (tm_ready /
-                termbase_ready / finished). MT и веб-поиск пока остаются
-                в главном потоке — MT быстрый (early-outs в Sidekick, параллель
-                через ThreadPoolExecutor в главном окне), веб-поиск медленный,
-                но его цена — создание QWebEngineView, а не SQLite."""
+                termbase_ready / finished)."""
         text = self.source_text.currentText().strip()
 
         if not text:
@@ -62317,58 +60434,6 @@ class SuperlookupTab(QWidget):
         self._active_search_worker = worker
         QThreadPool.globalInstance().start(worker)
 
-        # MT still runs synchronously on the main thread: _perform_mt_lookup
-        # early-outs in the Sidekick context (no mt_results_table) and is
-        # parallelised via ThreadPoolExecutor otherwise, so it doesn't block
-        # significantly. Cheap compared to TM/termbase SQL.
-        try:
-            mt_results = self._perform_mt_lookup(text, from_lang, to_lang)
-            self.display_mt_results(mt_results)
-        except Exception as e:
-            print(f"[SuperLookup] MT lookup error: {e}")
-
-        # Web Resources – DEFERRED. We do NOT fire _perform_web_search here.
-        # Creating 16+ QWebEngineViews per search is heavy (each spawns a
-        # Chromium subprocess, touches OS-level windowing, and the cumulative
-        # effect on slower machines disrupts Sidekick's Z-order — Trados
-        # Studio aggressively reclaims foreground when our process is busy
-        # creating subprocesses, and Sidekick ends up behind Trados even
-        # though it was never hidden in Qt's view of the world).
-        #
-        # Instead, we just remember that a web search is pending. When (and
-        # only when) the user actually navigates to the Web Resources sub-tab,
-        # on_results_tab_changed fires the search. If the user never opens
-        # the Web Resources tab — and most users using SuperLookup as a
-        # termbase/TM lookup don't — we never pay the cost at all.
-        any_web_checked = True
-        if hasattr(self, 'web_resource_checkboxes') and self.web_resource_checkboxes:
-            any_web_checked = any(cb.isChecked() for cb in self.web_resource_checkboxes)
-
-        if hasattr(self, 'web_browser_mode') and any_web_checked:
-            self._web_search_pending = True
-            # If the user is already viewing the Web Resources sub-tab, fire
-            # the web search now. on_results_tab_changed only fires the
-            # deferred search on a tab *change*, so a re-search from the Web
-            # Resources tab would otherwise leave the web views stuck on the
-            # previous query.
-            web_index = -1
-            if hasattr(self, 'results_tabs'):
-                for i in range(self.results_tabs.count()):
-                    if "Web Resources" in self.results_tabs.tabText(i):
-                        web_index = i
-                        break
-            if web_index >= 0 and self.results_tabs.currentIndex() == web_index:
-                self._web_search_pending = False
-                try:
-                    if self.web_browser_mode == 'embedded' and getattr(self, 'web_engine_available', False):
-                        self._perform_web_search(search_all=True, silent=True)
-                    elif self.web_browser_mode == 'external':
-                        self._perform_web_search(search_all=False, silent=True)
-                except Exception as e:
-                    print(f"[SuperLookup] Active-tab web search error: {e}")
-        else:
-            self._web_search_pending = False
-
     def _on_search_tm_ready(self, results):
         """Слот: результаты конкорданса ТМ пришли от воркера."""
         self._search_in_flight_tm = results or []
@@ -62433,13 +60498,8 @@ class SuperlookupTab(QWidget):
         if hasattr(self, 'results_tabs'):
             self.results_tabs.setCurrentIndex(0)  # TM Matches is first tab
         
-        # Perform the lookup (TM, Termbase, MT)
+        # Perform the lookup (TM, Termbase)
         self.perform_lookup()
-        
-        # Pre-load all web resources in embedded mode
-        if hasattr(self, 'web_browser_mode') and self.web_browser_mode == 'embedded':
-            if hasattr(self, 'search_all_web_resources'):
-                self.search_all_web_resources(query)
     
     def set_project_languages(self, source_lang: str = None, target_lang: str = None):
         """Устанавливает выпадающие списки языков по исходному и целевому
@@ -62464,9 +60524,6 @@ class SuperlookupTab(QWidget):
         if target_lang and hasattr(self, 'lang_to_combo'):
             self._set_language_combo(self.lang_to_combo, target_lang)
         
-        # Update web resources language info label if available
-        if hasattr(self, '_on_language_changed'):
-            self._on_language_changed()
     
     def _set_language_combo(self, combo, lang_code):
         """Устанавливает комбобокс языка на конкретный код языка."""
@@ -62963,80 +61020,6 @@ class SuperlookupTab(QWidget):
                         table.scrollToItem(item)
         except Exception as e:
             print(f"[Superlookup] Error selecting term: {e}")
-
-    def display_mt_results(self, results):
-        """Отображает результаты MT в таблице."""
-        # The MT tab was removed from the Superlookup UI (MT is now handled by
-        # QuickTrans). When this SuperlookupTab instance was built without the
-        # MT tab (e.g. inside the Floating Assistant), mt_results_table does
-        # not exist – silently skip so perform_lookup() can continue to the
-        # web-resource search that follows.
-        if not hasattr(self, 'mt_results_table'):
-            return
-        self.mt_results_table.setRowCount(0)
-        
-        if results:
-            success_count = 0
-            error_count = 0
-            
-            for result in results:
-                row = self.mt_results_table.rowCount()
-                self.mt_results_table.insertRow(row)
-                
-                # Check if this is an error result
-                is_error = result.get('is_error', False) if isinstance(result, dict) else False
-                
-                # Provider name
-                provider = result.get('provider', 'MT') if isinstance(result, dict) else getattr(result, 'provider', 'MT')
-                provider_item = QTableWidgetItem(provider)
-                if is_error:
-                    provider_item.setForeground(QColor("#F44336"))  # Red for errors
-                    error_count += 1
-                else:
-                    provider_item.setForeground(QColor("#1976d2"))  # Blue for success
-                    success_count += 1
-                self.mt_results_table.setItem(row, 0, provider_item)
-                
-                # Translation text (or error message)
-                translation = result.get('translation', '') if isinstance(result, dict) else getattr(result, 'target', '')
-                trans_item = QTableWidgetItem(translation)
-                trans_item.setToolTip(translation)
-                if is_error:
-                    trans_item.setForeground(QColor("#F44336"))  # Red text for errors
-                    trans_item.setFont(QFont(trans_item.font().family(), -1, -1, True))  # Italic
-                self.mt_results_table.setItem(row, 1, trans_item)
-                
-                # Copy button (only for successful translations)
-                if not is_error:
-                    copy_btn = QPushButton("📋")
-                    copy_btn.setFixedSize(30, 24)
-                    copy_btn.setToolTip(self.tr("Copy translation"))
-                    copy_btn.clicked.connect(lambda checked, t=translation: self._copy_mt_result(t))
-                    self.mt_results_table.setCellWidget(row, 2, copy_btn)
-            
-            # Update status with breakdown
-            if error_count > 0:
-                self.mt_status_label.setText(f"✓ Got {success_count} translation(s), ⚠ {error_count} error(s)")
-                self.mt_status_label.setStyleSheet("color: #FF9800; font-weight: bold;")
-            else:
-                self.mt_status_label.setText(f"✓ Got {success_count} translation(s)")
-                self.mt_status_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
-        else:
-            self.mt_status_label.setText(self.tr("No MT results. Check provider settings."))
-            self.mt_status_label.setStyleSheet("color: #666; font-style: italic;")
-    
-    def _copy_mt_result(self, text):
-        """Копирует результат MT в буфер обмена."""
-        import pyperclip
-        pyperclip.copy(text)
-        self.status_label.setText(f"✓ Copied: {text[:50]}...")
-    
-    def on_mt_result_double_click(self, index):
-        """Обрабатывает двойной щелчок по результату MT для копирования."""
-        row = index.row()
-        trans_item = self.mt_results_table.item(row, 1)
-        if trans_item:
-            self._copy_mt_result(trans_item.text())
     
     def _tm_table_context_menu(self, pos):
         """Контекстное меню по правому щелчку для таблицы результатов ТМ."""
@@ -63622,195 +61605,22 @@ class SuperlookupTab(QWidget):
         if self.engine:
             self.engine.set_tm_database(tm_db)
     
-    def _find_autohotkey_executable(self):
-        """Находит исполняемый файл AutoHotkey, сначала проверяя сохранённый
-                путь.
-        
-                Возвращает кортеж: (exe_path, source), где source — 'saved',
-                'detected' или None."""
-        # First, check if user has a saved custom path. (Read through
-        # load_general_settings: the main window has no general_settings
-        # attribute, so the old attribute lookup never found a saved path.)
-        if self.main_window and hasattr(self.main_window, 'load_general_settings'):
-            saved_path = (self.main_window.load_general_settings() or {}).get('autohotkey_path', '')
-            if saved_path and os.path.exists(saved_path):
-                print(f"[Superlookup] Using saved AutoHotkey path: {saved_path}")
-                return saved_path, 'saved'
-        
-        # Standard installation paths
-        username = os.environ.get('USERNAME', '')
-        ahk_paths = [
-            r"C:\Program Files\AutoHotkey\v2\AutoHotkey.exe",
-            r"C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe",
-            r"C:\Program Files\AutoHotkey\AutoHotkey.exe",
-            r"C:\Program Files (x86)\AutoHotkey\AutoHotkey.exe",
-            fr"C:\Users\{username}\AppData\Local\Programs\AutoHotkey\AutoHotkey.exe",
-            # v1 paths
-            r"C:\Program Files\AutoHotkey\v1.1\AutoHotkeyU64.exe",
-            r"C:\Program Files\AutoHotkey\v1.1\AutoHotkeyU32.exe",
-        ]
-        
-        for path in ahk_paths:
-            if os.path.exists(path):
-                print(f"[Superlookup] Detected AutoHotkey at: {path}")
-                return path, 'detected'
-        
-        return None, None
-    
-    def _show_autohotkey_setup_dialog(self):
-        """Показывает диалог помощи в установке или поиске AutoHotkey."""
-        dialog = QDialog(self)
-        dialog.setWindowTitle(self.tr("AutoHotkey Setup - SuperLookup"))
-        dialog.setMinimumWidth(500)
-        
-        layout = QVBoxLayout(dialog)
-        
-        # Header
-        header = QLabel(self.tr("⌨️ AutoHotkey Required for Global Hotkey"))
-        header.setStyleSheet("font-size: 14px; font-weight: bold; margin-bottom: 10px;")
-        layout.addWidget(header)
-        
-        # Explanation
-        explanation = QLabel(
-            f"SuperLookup uses AutoHotkey to provide a global hotkey ({format_shortcut_for_display('Ctrl+Alt+L')}) "
-            "that works from any application.\n\n"
-            "Without AutoHotkey, SuperLookup will still work, but only when "
-            "Supervertaler is the active window."
-        )
-        explanation.setWordWrap(True)
-        explanation.setStyleSheet("margin-bottom: 15px;")
-        layout.addWidget(explanation)
-        
-        # Options group
-        options_group = QGroupBox(self.tr("Choose an option:"))
-        options_layout = QVBoxLayout(options_group)
-        
-        # Option 1: Download AutoHotkey
-        download_btn = QPushButton(self.tr("📥 Download AutoHotkey (Recommended)"))
-        download_btn.setStyleSheet("padding: 8px; font-size: 11px;")
-        download_btn.setToolTip(self.tr("Opens the AutoHotkey download page in your browser"))
-        download_btn.clicked.connect(lambda: self._open_ahk_download())
-        options_layout.addWidget(download_btn)
-        
-        # Option 2: Browse for existing installation
-        browse_layout = QHBoxLayout()
-        browse_btn = QPushButton(self.tr("📁 Browse for AutoHotkey.exe"))
-        browse_btn.setStyleSheet("padding: 8px; font-size: 11px;")
-        browse_btn.setToolTip(self.tr("Locate AutoHotkey.exe if you have it installed in a custom location"))
-        browse_btn.clicked.connect(lambda: self._browse_for_autohotkey(dialog))
-        browse_layout.addWidget(browse_btn)
-        options_layout.addLayout(browse_layout)
-        
-        # Option 3: Skip
-        skip_btn = QPushButton(self.tr("⏭️ Skip (Use SuperLookup without global hotkey)"))
-        skip_btn.setStyleSheet("padding: 8px; font-size: 11px; color: #666;")
-        skip_btn.clicked.connect(dialog.reject)
-        options_layout.addWidget(skip_btn)
-        
-        layout.addWidget(options_group)
-        
-        # Status label (for showing selected path)
-        self._ahk_setup_status = QLabel("")
-        self._ahk_setup_status.setStyleSheet("color: green; margin-top: 10px;")
-        self._ahk_setup_status.setWordWrap(True)
-        layout.addWidget(self._ahk_setup_status)
-        
-        # Note about restart
-        note = QLabel(
-            self.tr("💡 Note: After installing AutoHotkey, restart Supervertaler to enable the global hotkey.")
-        )
-        note.setStyleSheet("color: #666; font-size: 10px; margin-top: 15px;")
-        note.setWordWrap(True)
-        layout.addWidget(note)
-        
-        # Don't show again checkbox
-        dont_show_cb = CheckmarkCheckBox(self.tr("Do not show this dialog again"))
-        dont_show_cb.setStyleSheet("margin-top: 10px;")
-        layout.addWidget(dont_show_cb)
-        
-        # Close button
-        close_btn = QPushButton(self.tr("Close"))
-        def on_close():
-            # Save preference if checkbox is checked
-            if dont_show_cb.isChecked():
-                if self.main_window and hasattr(self.main_window, 'load_general_settings'):
-                    settings = self.main_window.load_general_settings() or {}
-                    settings['hide_autohotkey_dialog'] = True
-                    self.main_window.save_general_settings(settings)
-            dialog.accept()
-        close_btn.clicked.connect(on_close)
-        layout.addWidget(close_btn)
-        
-        dialog.exec()
-    
-    def _open_ahk_download(self):
-        """Открывает страницу загрузки AutoHotkey."""
-        import webbrowser
-        webbrowser.open("https://www.autohotkey.com/download/")
-        QMessageBox.information(
-            self,
-            "Download AutoHotkey",
-            "The AutoHotkey download page has been opened in your browser.\n\n"
-            "Download and install AutoHotkey v2.x, then restart Supervertaler."
-        )
-    
-    def _browse_for_autohotkey(self, parent_dialog):
-        """Даёт пользователю выбрать исполняемый файл AutoHotkey."""
-        file_path, _ = QFileDialog.getOpenFileName(
-            parent_dialog,
-            "Locate AutoHotkey Executable",
-            "C:\\Program Files",
-            "Executable Files (*.exe);;All Files (*.*)"
-        )
-        
-        if file_path:
-            # Verify it looks like AutoHotkey
-            if 'autohotkey' not in file_path.lower():
-                result = QMessageBox.question(
-                    parent_dialog,
-                    "Confirm Selection",
-                    f"The selected file doesn't appear to be AutoHotkey:\n{file_path}\n\n"
-                    "Are you sure you want to use this file?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if result != QMessageBox.StandardButton.Yes:
-                    return
-            
-            # Save the path
-            if self.main_window and hasattr(self.main_window, 'load_general_settings'):
-                settings = self.main_window.load_general_settings() or {}
-                settings['autohotkey_path'] = file_path
-                self.main_window.save_general_settings(settings)
-                print(f"[Superlookup] Saved AutoHotkey path: {file_path}")
-            
-            self._ahk_setup_status.setText(f"✓ Saved: {file_path}\n\nRestart Supervertaler to use this path.")
-            
-            QMessageBox.information(
-                parent_dialog,
-                "Path Saved",
-                f"AutoHotkey path saved:\n{file_path}\n\n"
-                "Please restart Supervertaler to enable the global hotkey."
-            )
-    
     def register_global_hotkey(self):
-        """Регистрирует глобальные горячие клавиши Superlookup, QuickTrans
-                и Sidekick.
+        """Регистрирует глобальную горячую клавишу QuickTrans (Ctrl+Alt+Q
+                по умолчанию, настраивается в Settings → Keyboard Shortcuts).
         
                 Идемпотентно: если менеджер от прежней регистрации всё ещё
                 работает, он останавливается первым. Это делает вызов из
                 ``reload_global_hotkeys`` после смены привязки в Settings →
                 Keyboard Shortcuts безопасным.
         
-                Стратегия:
-                1. Пробует WinAPI RegisterHotKey / pynput GlobalHotKeys
-                   (кроссплатформенно).
-                2. В Windows при неудаче — откат к внешнему скрипту AHK.
-                3. В macOS/Linux при неудаче pynput горячие клавиши
-                   недоступны.
+                Стратегия: WinAPI RegisterHotKey / pynput GlobalHotKeys
+                (кроссплатформенно). В macOS/Linux при неудаче pynput горячие
+                клавиши недоступны.
         
                 Клавиши шорткатов читаются из ShortcutManager (настраивается
                 в Settings)."""
-        global _ahk_process, _hotkey_manager
+        global _hotkey_manager
 
         # Stop any previously-running manager so re-registration applies a
         # clean set of bindings instead of stacking new keys on top of old.
@@ -63829,9 +61639,7 @@ class SuperlookupTab(QWidget):
         # ShortcutManager._LEGACY_IDS, so old saved settings keep working.
         sm = getattr(self.main_window, 'shortcut_manager', None) if self.main_window else None
         if sm:
-            sl_shortcut = sm.get_shortcut('tools_universal_lookup').lower()
             qt_shortcut = sm.get_shortcut('mt_quick_lookup').lower()
-            sk_shortcut = sm.get_shortcut('sidekick_open').lower()
 
             # Honour the per-shortcut enabled flag and the `global` field:
             # if disabled, or if the entry is no longer flagged global, skip
@@ -63839,10 +61647,8 @@ class SuperlookupTab(QWidget):
             # up by the regular create_shortcut path.)
             def _skip(sid):
                 return (not sm.is_enabled(sid)) or (not sm.is_global(sid))
-            if _skip('tools_universal_lookup'):       sl_shortcut = ''
             if _skip('mt_quick_lookup'):              qt_shortcut = ''
         else:
-            sl_shortcut = 'ctrl+alt+l'
             qt_shortcut = 'ctrl+alt+q'
 
         # No platform-specific rewrite needed: GlobalHotkeyManager's macOS
@@ -63872,7 +61678,6 @@ class SuperlookupTab(QWidget):
             if manager.is_available:
                 # Skip empty shortcuts (action disabled or `global` flag off)
                 _bindings = [
-                    (sl_shortcut, self._on_pynput_superlookup),
                     (qt_shortcut, self._on_pynput_quicktrans),
                 ]
                 _to_register = [(s, cb) for s, cb in _bindings if s]
@@ -63909,32 +61714,13 @@ class SuperlookupTab(QWidget):
                      "for the bundled app) in System Settings → Privacy & "
                      "Security → Accessibility, then restart Supervertaler.")
 
-        # --- Attempt 2: AHK external script (Windows only) ---
-        if IS_WINDOWS:
-            self._register_hotkey_external_script()
-        else:
-            self.hotkey_registered = False
-
-    def _on_pynput_superlookup(self):
-        """Вызывается из фонового потока pynput при нажатии Ctrl+Alt+L.
-        
-                ВАЖНО: здесь НЕ делать никакой работы — колбэки pynput на macOS
-                падают при касании pyperclip, pynput Controller или объектов Qt.
-                Только просигналить главному потоку Qt и немедленно вернуться."""
-        try:
-            from PyQt6.QtCore import QMetaObject, Qt as QtConst
-            QMetaObject.invokeMethod(
-                self, "_handle_superlookup_hotkey",
-                QtConst.ConnectionType.QueuedConnection,
-            )
-        except Exception as e:
-            print(f"[Superlookup] Error signaling main thread: {e}")
+        self.hotkey_registered = False
 
     def _on_pynput_quicktrans(self):
         """Вызывается из фонового потока pynput при нажатии Ctrl+Alt+Q.
         
-                ВАЖНО: здесь НЕ делать никакой работы — см. докстринг
-                _on_pynput_superlookup."""
+                ВАЖНО: здесь НЕ делать никакой работы — вся обработка
+                выполняется в _handle_quicktrans_hotkey (главный поток Qt)."""
         try:
             from PyQt6.QtCore import QMetaObject, Qt as QtConst
             QMetaObject.invokeMethod(
@@ -63943,250 +61729,7 @@ class SuperlookupTab(QWidget):
             )
         except Exception as e:
             print(f"[QuickTrans] Error signaling main thread: {e}")
-
-    def _try_ahk_library_method(self):
-        """Пробует зарегистрировать горячую клавишу через библиотеку ahk.
-        
-                Возвращает True при успехе, иначе False."""
-        try:
-            from ahk import AHK
-            print("[Superlookup] ahk library available, attempting to use it...")
-            
-            # Find AutoHotkey executable using shared function
-            ahk_exe, source = self._find_autohotkey_executable()
-            
-            # Create AHK instance (with executable path if found)
-            if ahk_exe:
-                print(f"[Superlookup] Using AutoHotkey at: {ahk_exe} (source: {source})")
-                self._ahk = AHK(executable_path=ahk_exe)
-            else:
-                # Let it try to find AHK on PATH (may fail)
-                self._ahk = AHK()
-            print(f"[Superlookup] AHK instance created: {self._ahk}")
-            
-            # Define hotkey callback
-            def on_hotkey():
-                """Вызывается при нажатии Ctrl+Alt+L."""
-                print("[Superlookup] Hotkey triggered via ahk library!")
-                try:
-                    # Copy selection to clipboard
-                    self._ahk.send('^c')  # Ctrl+C
-                    time.sleep(0.2)  # Give clipboard time to update
-                    
-                    # Get clipboard text
-                    text = pyperclip.paste()
-                    
-                    # Activate Supervertaler window
-                    try:
-                        self._ahk.win_activate('Supervertaler')
-                    except Exception as e:
-                        print(f"[Superlookup] win_activate error (non-critical): {e}")
-                    
-                    # Trigger lookup in main thread
-                    if text:
-                        # Use QTimer to call from main thread
-                        QTimer.singleShot(0, lambda: self.on_ahk_capture(text))
-                        
-                except Exception as e:
-                    print(f"[Superlookup] Error in hotkey callback: {e}")
-            
-            # Register the hotkey
-            self._ahk.add_hotkey('^!l', callback=on_hotkey)  # Ctrl+Alt+L
-            self._ahk.start_hotkeys()
-            
-            print("[Superlookup] ✓ Hotkey registered via ahk library: Ctrl+Alt+L")
-            self.hotkey_registered = True
-            self._using_ahk_library = True
-            return True
-            
-        except ImportError:
-            print("[Superlookup] ahk library not installed (pip install ahk)")
-            return False
-        except Exception as e:
-            print(f"[Superlookup] ahk library method failed: {e}")
-            # Clean up on failure
-            if hasattr(self, '_ahk'):
-                try:
-                    self._ahk.stop_hotkeys()
-                except:
-                    pass
-                self._ahk = None
-            return False
     
-    def _register_hotkey_external_script(self):
-        """Регистрирует горячую клавишу через внешний AHK-скрипт (метод отката)."""
-        global _ahk_process
-        self._using_ahk_library = False
-        try:
-            # Kill any existing instances of the AHK script first
-            if os.name == 'nt':
-                try:
-                    # Use multiple methods to ensure cleanup
-                    # Method 1: Kill by window title
-                    subprocess.run(['taskkill', '/F', '/FI', 'WINDOWTITLE eq supervertaler_hotkeys.ahk*'],
-                                 capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                    
-                    # Method 2: Kill AutoHotkey processes more aggressively
-                    subprocess.run(['taskkill', '/F', '/IM', 'AutoHotkey.exe'],
-                                 capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                    
-                    # Method 3: Kill by process name pattern
-                    import psutil
-                    try:
-                        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-                            try:
-                                if 'supervertaler_hotkeys' in ' '.join(proc.cmdline() or []):
-                                    proc.kill()
-                            except:
-                                pass
-                    except:
-                        pass
-                except:
-                    pass
-            
-            # Find AutoHotkey executable using shared function
-            ahk_exe, source = self._find_autohotkey_executable()
-            
-            if not ahk_exe:
-                print("[Hotkeys] AutoHotkey not found.")
-                print("[Hotkeys] Global hotkeys (Ctrl+Alt+L, Shift+Shift) will not be available.")
-                self.hotkey_registered = False
-                # Show setup dialog (deferred to avoid blocking startup) - unless user opted out
-                if self.main_window and hasattr(self.main_window, 'load_general_settings'):
-                    if not (self.main_window.load_general_settings() or {}).get('hide_autohotkey_dialog', False):
-                        QTimer.singleShot(2000, self._show_autohotkey_setup_dialog)
-                else:
-                    QTimer.singleShot(2000, self._show_autohotkey_setup_dialog)
-                return
-            
-            print(f"[Hotkeys] Found AutoHotkey at: {ahk_exe} (source: {source})")
-            
-            ahk_script = Path(__file__).parent / "supervertaler_hotkeys.ahk"
-            print(f"[Hotkeys] Looking for script at: {ahk_script}")
-            print(f"[Hotkeys] Script exists: {ahk_script.exists()}")
-            
-            if ahk_script.exists():
-                # Start AHK script in background (hidden)
-                self.ahk_process = subprocess.Popen([ahk_exe, str(ahk_script)],
-                                                   creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
-                # Store in global variable for atexit cleanup
-                _ahk_process = self.ahk_process
-                print(f"[Hotkeys] AHK hotkeys registered (Ctrl+Alt+L, Shift+Shift)")
-                
-                # Start file watcher
-                self.start_file_watcher()
-                self.hotkey_registered = True
-            else:
-                print(f"[Hotkeys] AHK script not found: {ahk_script}")
-                self.hotkey_registered = False
-        except Exception as e:
-            print(f"[Hotkeys] Could not start AHK hotkeys: {e}")
-            self.hotkey_registered = False
-    
-    def start_file_watcher(self):
-        """Следит за сигнальными файлами от AHK (Superlookup и MT Quick Lookup)."""
-        self.signal_file = Path(__file__).parent / "lookup_signal.txt"
-        self.capture_file = Path(__file__).parent / "temp_capture.txt"
-        self.mt_lookup_signal_file = Path(__file__).parent / "mt_lookup_signal.txt"
-
-        print(f"[Superlookup] File watcher started, watching: {self.signal_file}")
-        print(f"[QuickTrans] File watcher started, watching: {self.mt_lookup_signal_file}")
-        
-        # Create timer to check for signal file
-        self.file_check_timer = QTimer()
-        self.file_check_timer.timeout.connect(self.check_for_signal)
-        self.file_check_timer.start(100)  # Check every 100ms
-    
-    def check_for_signal(self):
-        """Проверяет, записал ли AHK сигнальный файл."""
-        # Check for Superlookup signal
-        if self.signal_file.exists():
-            print(f"[Superlookup] Signal file detected!")
-            try:
-                # Delete signal file
-                self.signal_file.unlink()
-                print(f"[Superlookup] Signal file deleted")
-
-                # Get text from clipboard (AHK already copied it)
-                time.sleep(0.1)  # Give clipboard a moment
-                text = pyperclip.paste()
-
-                # Trigger lookup
-                if text:
-                    self.on_ahk_capture(text)
-            except Exception as e:
-                print(f"[Superlookup] Error reading capture: {e}")
-
-        # Check for MT Quick Lookup signal
-        if hasattr(self, 'mt_lookup_signal_file') and self.mt_lookup_signal_file.exists():
-            print(f"[QuickTrans] Signal file detected!")
-            try:
-                # Small delay to let AHK finish writing/close the file
-                time.sleep(0.05)
-
-                # Delete signal file with retry for file lock
-                for attempt in range(3):
-                    try:
-                        self.mt_lookup_signal_file.unlink()
-                        print(f"[QuickTrans] Signal file deleted")
-                        break
-                    except PermissionError:
-                        if attempt < 2:
-                            time.sleep(0.05)
-                        else:
-                            raise
-
-                # Get text from clipboard (AHK already copied it)
-                time.sleep(0.1)  # Give clipboard a moment
-                text = pyperclip.paste()
-
-                # Trigger MT Quick Lookup
-                if text:
-                    self.on_ahk_mt_lookup_capture(text)
-            except Exception as e:
-                print(f"[QuickTrans] Error reading capture: {e}")
-    
-    @pyqtSlot()
-    def _handle_superlookup_hotkey(self):
-        """Выполняется в главном потоке Qt после срабатывания глобальной
-                горячей клавиши.
-        
-                Отправляет Cmd+C / Ctrl+C приложению переднего плана, ждёт
-                обновления буфера, затем передаёт в Superlookup. Всё здесь
-                работает в главном потоке, избегая краша macOS от вызова
-                pyperclip или pynput из фонового потока."""
-        try:
-            from modules.platform_helpers import CrossPlatformKeySender
-            sender = CrossPlatformKeySender()
-            sender.send_copy()
-            # Read clipboard after a short delay (give OS time to process Cmd+C)
-            QTimer.singleShot(250, self._read_clipboard_for_superlookup)
-        except Exception as e:
-            print(f"[Superlookup] Error in hotkey handler: {e}")
-
-    def _read_clipboard_for_superlookup(self):
-        """Читает буфер обмена и передаёт в SuperLookup.
-        
-                v1.10.1 (фаза 2 issue #199): горячая клавиша теперь выводит
-                Workbench вперёд и переключает на верхнюю вкладку SuperLookup
-                вместо открытия Sidekick. Sidekick по-прежнему работает для тех,
-                кто вызывает его вручную через Ctrl+Alt+K. Пустой буфер всё равно
-                запускает переход — без текста мы пропускаем авто-поиск и даём
-                пользователю ввести запрос вручную, тот же контракт видимой
-                обратной связи, что был у Sidekick."""
-        text = pyperclip.paste() or ""
-
-        mw = self.main_window
-        # New path: route to Workbench's SuperLookup top tab.
-        if mw and hasattr(mw, 'open_workbench_to_superlookup'):
-            try:
-                mw.open_workbench_to_superlookup(text)
-                return
-            except Exception as e:
-                print(f"[Superlookup] Workbench top-tab route failed: {e}")
-                # Last-ditch fallback: main-window AHK-capture handler.
-                if text:
-                    self.on_ahk_capture(text)
 
     @pyqtSlot()
     def _handle_quicktrans_hotkey(self):
@@ -64236,40 +61779,6 @@ class SuperlookupTab(QWidget):
         text = pyperclip.paste() or ""
         if text:
             self.on_ahk_mt_lookup_capture(text)
-
-    def on_ahk_capture(self, text):
-        """Обрабатывает текст, захваченный AHK."""
-        try:
-            print(f"[Superlookup] on_ahk_capture called with text: {text[:50]}...")
-
-            # Bring Supervertaler to foreground using platform-native method
-            # On Windows: AttachThreadInput + SetForegroundWindow (reliable)
-            # On macOS: osascript
-            # On Linux: wmctrl / xdotool
-            from modules.platform_helpers import activate_window_by_title
-
-            main_window = self.window()
-            if main_window:
-                # Restore if minimized first (Qt side)
-                if main_window.isMinimized():
-                    main_window.showNormal()
-                elif main_window.isHidden():
-                    main_window.show()
-
-                # Use native API to bring window to foreground
-                # This uses the window title, which always contains "Supervertaler"
-                activate_window_by_title("Supervertaler")
-
-                # Qt side: raise + activate as fallback
-                main_window.raise_()
-                main_window.activateWindow()
-
-            # Longer delay to allow all window focus events to settle
-            # Window activation triggers focus restoration which takes time
-            QTimer.singleShot(250, lambda: self.show_superlookup(text))
-
-        except Exception as e:
-            print(f"[Superlookup] Error handling capture: {e}")
 
     def on_ahk_mt_lookup_capture(self, text):
         """Обрабатывает текст MT Quick Lookup, захваченный AHK (Ctrl+Alt+Q)."""
@@ -64437,73 +61946,6 @@ class SuperlookupTab(QWidget):
             self._header_label.setVisible(not compact)
         if hasattr(self, '_description_label'):
             self._description_label.setVisible(not compact)
-
-    def show_superlookup(self, text):
-        """Показывает Superlookup с предзаполненным текстом."""
-        try:
-            print(f"[Superlookup] show_superlookup called with text: {text[:50]}...")
-            
-            # Get main window reference
-            main_window = self.main_window
-            if not main_window:
-                main_window = self.window()
-            
-            print(f"[Superlookup] Main window found: {main_window is not None}")
-            print(f"[Superlookup] Main window type: {type(main_window).__name__}")
-            print(f"[Superlookup] Has main_tabs: {hasattr(main_window, 'main_tabs')}")
-            
-            # v1.10.161: label-based. Was hard-coded setCurrentIndex(4)
-            # with a stale comment referring to a "Tools" tab that no
-            # longer exists — the old "Tools" tab was retired and
-            # SuperLookup got promoted to its own top-level tab. The old
-            # code happened to land on SuperLookup *by coincidence*
-            # because SuperLookup is now where Tools used to be (index
-            # 4), but that's no comfort if the tab list shuffles again.
-            if hasattr(main_window, '_switch_main_tab'):
-                if main_window._switch_main_tab("SuperLookup"):
-                    print(f"[Superlookup] Switched to SuperLookup tab via label lookup")
-                else:
-                    print(f"[Superlookup] WARNING: SuperLookup tab not found")
-            elif hasattr(main_window, 'main_tabs'):
-                main_window.main_tabs.setCurrentIndex(4)  # last-resort fallback
-                print(f"[Superlookup] Fell back to hard-coded index 4")
-            else:
-                print(f"[Superlookup] WARNING: Main window has no main_tabs attribute!")
-            QApplication.processEvents()  # Force GUI update
-            
-            # Switch to Superlookup within modules_tabs
-            if hasattr(main_window, 'modules_tabs'):
-                print(f"[Superlookup] Current modules_tab index: {main_window.modules_tabs.currentIndex()}")
-                for i in range(main_window.modules_tabs.count()):
-                    if "superlookup" in main_window.modules_tabs.tabText(i).lower():
-                        main_window.modules_tabs.setCurrentIndex(i)
-                        print(f"[Superlookup] Switched to Superlookup tab (index {i})")
-                        QApplication.processEvents()  # Force GUI update
-                        break
-            
-            # Delay text input and lookup to ensure tab is fully loaded
-            QTimer.singleShot(100, lambda: self._fill_and_search(text))
-                    
-        except Exception as e:
-            print(f"[Superlookup] Error showing lookup: {e}")
-    
-    def _fill_and_search(self, text):
-        """Заполняет текст и запускает поиск (вызывается после завершения переключения вкладок)."""
-        try:
-            print(f"[Superlookup] _fill_and_search called")
-            # Fill in text and trigger lookup
-            if hasattr(self, 'source_text'):
-                self.source_text.setCurrentText(text)
-                print(f"[Superlookup] Text filled in source_text field")
-                # Trigger lookup by calling perform_lookup directly
-                self.perform_lookup()
-                print(f"[Superlookup] perform_lookup() called")
-            else:
-                print(f"[Superlookup] ERROR: source_text widget not found!")
-        except Exception as e:
-            print(f"[Superlookup] Error in _fill_and_search: {e}")
-            import traceback
-            traceback.print_exc()
 
 
 
@@ -64752,43 +62194,6 @@ def main():
 
     sys.excepthook = global_exception_handler
     
-    # Подавляем болтовню Chromium/QtWebEngine (ошибки кэша, предупреждения GPU, JS-консоль):
-    # она безвредна, но пугает пользователей — сайты сыплют кучей шума про CSP/permissions.
-    os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-logging --log-level=3 --enable-logging=stderr --v=-1"
-    
-    # Подавляем консольный вывод "js:" Qt WebEngine (нарушения CSP, предупреждения permissions):
-    # он идёт из встроенных веб-страниц и к Supervertaler отношения не имеет.
-    os.environ["QT_LOGGING_RULES"] = "*.debug=false;qt.webenginecontext.debug=false;js=false"
-    
-    # Фильтруем stderr, убирая шумные сообщения JS-консоли Chromium:
-    # строки с префиксом "js:" приходят из встроенных страниц и пугают пользователей.
-    class StderrFilter:
-        """Фильтр, подавляющий вывод JS-консоли Chromium из stderr."""
-        def __init__(self, original_stderr):
-            self.original = original_stderr
-            # Шаблоны для подавления (из встроенных веб-страниц)
-            self.suppress_prefixes = (
-                'js:', 'js: Error with Permissions-Policy', 'js: Refused to load',
-                'js: Document-Policy', 'js: Listener added', 'js: No ID or name',
-                'js: [Report Only]', 'js: Unrecognized feature'
-            )
-        
-        def write(self, text):
-            # Подавляем строки, начинающиеся с префиксов JS-консоли
-            if text.strip() and any(text.strip().startswith(prefix) for prefix in self.suppress_prefixes):
-                return  # молча отбрасываем
-            self.original.write(text)
-        
-        def flush(self):
-            self.original.flush()
-        
-        def fileno(self):
-            return self.original.fileno()
-        
-        def isatty(self):
-            return self.original.isatty() if hasattr(self.original, 'isatty') else False
-    
-    sys.stderr = StderrFilter(sys.stderr)
     
     # Специфика Linux: избегаем ошибок доступа к памяти из нативных библиотек —
     # ChromaDB и Hunspell падают на некоторых конфигурациях Linux.
@@ -64798,8 +62203,6 @@ def main():
         # Используем более безопасный malloc, если доступен
         os.environ.setdefault("MALLOC_CHECK_", "0")
     
-    # Включаем разделение контекстов OpenGL до создания QApplication (требуется QtWebEngine)
-    QApplication.setAttribute(Qt.ApplicationAttribute.AA_ShareOpenGLContexts)
     
     app = QApplication(sys.argv)
     app.setApplicationName("Supervertaler")

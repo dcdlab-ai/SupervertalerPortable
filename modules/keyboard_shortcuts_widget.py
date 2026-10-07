@@ -15,7 +15,7 @@ from PyQt6.QtGui import QKeySequence, QKeyEvent, QFont, QPainter, QPen, QColor
 
 from modules.shortcut_manager import ShortcutManager
 from modules.shortcut_display import format_shortcut_for_display, format_shortcuts_in_text
-from modules.platform_helpers import IS_WINDOWS, IS_MACOS, IS_LINUX
+from modules.platform_helpers import IS_MACOS, IS_LINUX
 from modules.ui_scale import scaled_pt
 from modules.styled_widgets import HelpButton
 from modules.help_system import Topics as HelpTopics
@@ -393,18 +393,15 @@ class KeyboardShortcutsWidget(QWidget):
         # Global Hotkeys Settings group (cross-platform)
         # Note: && is used so Qt displays a literal ampersand instead of treating
         # the next character as a mnemonic accelerator.
-        hotkey_group = QGroupBox("⌨️ Global Hotkeys (Superlookup && QuickTrans)")
+        hotkey_group = QGroupBox("⌨️ Global Hotkeys (QuickTrans)")
         hotkey_layout = QVBoxLayout()
 
         if IS_MACOS:
-            sl_key = format_shortcut_for_display('Meta+Ctrl+L')   # ⌃⌘L
             qt_key = format_shortcut_for_display('Meta+Ctrl+M')   # ⌃⌘M
         else:
-            sl_key = format_shortcut_for_display('Ctrl+Alt+L')
             qt_key = format_shortcut_for_display('Ctrl+Alt+Q')
         hotkey_info = QLabel(
-            f"Global hotkeys allow {sl_key} (Superlookup) and "
-            f"{qt_key} (QuickTrans) to work from any application."
+            f"Global hotkeys allow {qt_key} (QuickTrans) to work from any application."
         )
         hotkey_info.setWordWrap(True)
         hotkey_info.setStyleSheet(
@@ -430,8 +427,7 @@ class KeyboardShortcutsWidget(QWidget):
                         'nsevent': 'NSEvent',
                     }.get(raw, raw or 'unknown')
                 else:
-                    # External AHK script path doesn't expose a manager.
-                    backend_label = 'AutoHotkey'
+                    backend_label = 'unknown'
 
         if hotkey_active:
             status_text = f"✅ Active (via {backend_label})"
@@ -472,46 +468,6 @@ class KeyboardShortcutsWidget(QWidget):
             linux_note.setStyleSheet(
                 f"color: #d97706; font-size: {scaled_pt(9):.1f}pt; padding: 5px;")
             hotkey_layout.addWidget(linux_note)
-
-        # AutoHotkey fallback settings (Windows only)
-        if IS_WINDOWS and mw:
-            import os
-            ahk_path_layout = QHBoxLayout()
-            ahk_path_label = QLabel("AutoHotkey Path (fallback):")
-            ahk_path_layout.addWidget(ahk_path_label)
-
-            ahk_path_edit = QLineEdit()
-            ahk_path_edit.setPlaceholderText("Auto-detect, or specify custom path...")
-            # Read the saved path from the main window's general settings
-            general_settings = (mw.load_general_settings() or {}) if mw and hasattr(mw, 'load_general_settings') else {}
-            saved_ahk_path = general_settings.get('autohotkey_path', '')
-            ahk_path_edit.setText(saved_ahk_path)
-            ahk_path_edit.setToolTip(
-                "AutoHotkey is used as a fallback if pynput cannot register hotkeys.\n"
-                "Leave empty to auto-detect, or specify the full path to AutoHotkey.exe."
-            )
-            ahk_path_layout.addWidget(ahk_path_edit, stretch=1)
-
-            ahk_browse_btn = QPushButton("📁 Browse...")
-            ahk_browse_btn.setMaximumWidth(100)
-            if hasattr(mw, '_browse_autohotkey_for_settings'):
-                ahk_browse_btn.clicked.connect(
-                    lambda: mw._browse_autohotkey_for_settings(ahk_path_edit)
-                )
-            ahk_path_layout.addWidget(ahk_browse_btn)
-
-            hotkey_layout.addLayout(ahk_path_layout)
-
-            if hasattr(mw, '_find_autohotkey_for_settings'):
-                detected_path, source = mw._find_autohotkey_for_settings()
-                if detected_path:
-                    detected_label = QLabel(f"💡 Detected: {detected_path}")
-                    detected_label.setStyleSheet(
-                        f"color: #666; font-size: {scaled_pt(9):.1f}pt;")
-                    hotkey_layout.addWidget(detected_label)
-
-            # Store reference on main window so save handler can access it
-            mw.ahk_path_edit = ahk_path_edit
 
         restart_note = QLabel("💡 Changes apply immediately – no restart needed.")
         restart_note.setStyleSheet(
