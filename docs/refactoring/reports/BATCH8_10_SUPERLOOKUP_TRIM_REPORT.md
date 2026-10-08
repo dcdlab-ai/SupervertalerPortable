@@ -307,3 +307,49 @@ WebEngine-шум) и 64801–64802 (AA_ShareOpenGLContexts). modules/**:
 3. **Опционально**: `pip uninstall ahk` в тестовой сборке вместе с
    T8.10.10 (пакет больше нигде не импортируется) — включить в сценарий или
    почистить при следующей пересборке?
+
+## 9. Результаты ручного тестирования (Дмитрий, 2026-10-08) и решения
+
+Все сценарии T8.10.1–T8.10.11 в тестовой сборке (`D:\SupervertalerPortable_test\`,
+включая T8.10.10 — `pip uninstall PyQt6-WebEngine PyQt6-WebEngine-Qt6`) —
+ПОДТВЕРЖДЕНЫ:
+
+- **T8.10.1** ✓ Старт без исключений; в логе нет «[Superlookup] QWebEngineView
+  available…», ошибок регистрации хоткеев нет (кроме возможно занятого
+  Ctrl+Alt+Q).
+- **T8.10.2** ✓ Подвкладки ровно «📖 TMs», «📚 Termbases», «⚙️ SuperLookup
+  Settings»; поиск, поля From/To, история на месте.
+- **T8.10.3** ✓ Поиск из SuperLookup и из редактора (Ctrl+K, контекстное меню
+  «Search in SuperLookup») — результаты TM/термбаз приходят, без исключений.
+- **T8.10.4** ✓ Нет радио «Ctrl+Alt+L lands on:», нет подвкладки Web Resources,
+  памятка про Read-флаги осталась; старый settings.json с
+  `superlookup_landing_tab: webresources` стартует без ошибок.
+- **T8.10.5** ✓ Ctrl+Alt+L мёртв (глобально и в приложении, пункта в Edit-меню
+  нет); Ctrl+Alt+Q из Блокнота открывает QuickTrans-попап, вставка перевода
+  работает (в т.ч. путь через восстановленные `on_ahk_mt_lookup_capture` /
+  `show_mt_quick_lookup_from_ahk`); Ctrl+Shift+Q и Ctrl+K работают.
+- **T8.10.6** ✓ **Уточнение Дмитрия: Tools-меню — 10 пунктов** (в постановке
+  T8.10.6 было ошибочно указано 12), «Super&lookup (Ctrl+K)» на месте;
+  Edit-меню без пункта SuperLookup; Help-меню без пункта AutoHotkey Setup.
+- **T8.10.7** ✓ QuickTrans/Concordance на месте, «Superlookup (Ctrl+Alt+L)»
+  отсутствует; группа Global Hotkeys упоминает только QuickTrans; смена
+  Ctrl+Alt+Q переживает перезапуск.
+- **T8.10.8** ✓ Вставка из SuperLookup, «Ask AI assistant»; detach/reattach
+  SuperLookup работает (мёртвые home_lookup-блоки удалены).
+- **T8.10.9** ✓ live-test: импорт 180/400 сегментов; перевод сегмента; Save;
+  настройка переживает перезапуск; навигация по вкладкам.
+- **T8.10.10** ✓ БЕЗ WebEngine: после `pip uninstall PyQt6-WebEngine
+  PyQt6-WebEngine-Qt6` старт и базовые сценарии (T8.10.1, T8.10.2, T8.10.9)
+  проходят.
+- **T8.10.11** ✓ Выход: иконка трея исчезает, процесс завершается (флаки-краш
+  0xC0000005 — предсуществующий), в логе нет traceback и ahk-хвостов.
+
+### Решения по вопросам §8
+
+1. **`modules/feature_manager.py`** (+ pyproject `web = []`) — **отложить до
+   финального инвентаря сирот в конце Batch #8** (позже появится в
+   POST_BATCH8_BACKLOG).
+2. **Док-остатки Ctrl+Alt+L / WebEngine** (§4, п. 2–4 и 7) — **чистить
+   финальным docs-проходом Batch #8**, как запланировано.
+3. **`pip uninstall ahk` в тестовой сборке** — **почистить при следующей
+   пересборке** (в сценарий T8.10.10 не включать).
