@@ -4,12 +4,14 @@
 читать этот файл вместо повторного просмотра всех документов. Подробности каждого шага — в
 `EXTRACTION_PLAN.md` (секции «Статус Step N после Batch #X») и `docs/refactoring/`.
 
-**Обновлено:** 2026-09-28 (Batch #7 Stage 2, под-батч S2.5 — STEP 7 ЗАКРЫТ) • **Текущий шаг:** Step 7 завершён: Stage 1 (read-only) + Stage 2 в пяти под-батчах (S2.1 «ядро API», S2.2 «general + clipboard reading», S2.3 «LLM/proxy/provider/api keys», S2.4 «языковая пара + spellcheck-IO», S2.5 «recent projects») — `modules/settings_service.py` 565 строк / 26 методов + 25 тонких делегатов; монолит **68 224** строки; дальше — Step 8 (Grid: render + match panel + comments UI)
+**Обновлено:** 2026-10-09 (Batch #8.8 — первый запуск без визарда, legacy-миграции удалены) • **Текущий шаг:** серия Batch #8 (удаление функциональности): 8.1–8.5 ✓, 8.7 ✓, 8.10 ✓, **8.8 ✓** (коммит `ede28068`: удалены SetupWizard/first-run гейты/миграции, `modules/setup_wizard.py` удалён); монолит **61 743** строки; дальше — Batch #8.9 (CLI `--batch/--translate-sdlxliff`), затем микро-батч «Trados-чип», финальный инвентарь сирот + docs-проход.
+
+**Batch #7 (историч.):** Step 7 завершён: Stage 1 (read-only) + Stage 2 в пяти под-батчах (S2.1 «ядро API», S2.2 «general + clipboard reading», S2.3 «LLM/proxy/provider/api keys», S2.4 «языковая пара + spellcheck-IO», S2.5 «recent projects») — `modules/settings_service.py` 565 строк / 26 методов + 25 тонких делегатов; монолит на тот момент **68 224** строки
 
 ## Кратко: где мы находимся
 
 Инкрементальная декомпозиция монолита `Supervertaler.py` (73 337 строк на старте;
-сейчас **68 224**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
+сейчас **61 743**) в пакеты `modules/` по плану `EXTRACTION_PLAN.md` (Step 0–14).
 Выполнены **Step 1–5** (батчи #1, #2, #3a, #3b, #3c, #4, #5) и **Step 6 целиком**
 (Batch #6: Stage 1 — инвентаризация, Stage 2 — `modules/grid/helpers.py`,
 Stage 3 — `modules/grid/pagination.py`, Stage 4 — `modules/grid/filters.py`).
