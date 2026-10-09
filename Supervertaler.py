@@ -289,35 +289,6 @@ def get_user_data_path() -> Path:
     return default_path
 
 
-def needs_first_run_data_dialog() -> bool:
-    """
-    Нужно ли показывать диалог выбора каталога данных при первом запуске.
-
-    Возвращает True, только если:
-    - файла-указателя ещё нет, И
-    - в каталоге по умолчанию нет содержимого
-
-    То есть это действительно «чистая» установка.
-    """
-    # Если файл-указатель есть, пользователь уже выбрал место
-    pointer_path = get_config_pointer_path()
-    if pointer_path.exists():
-        return False
-
-    # Если в каталоге по умолчанию есть содержимое, сработало
-    # автовосстановление (диалог не нужен)
-    default_path = get_default_user_data_path()
-    if default_path.exists():
-        try:
-            for item in default_path.iterdir():
-                if item.is_file() or (item.is_dir() and any(item.iterdir())):
-                    return False  # Содержимое есть, диалог не нужен
-        except OSError:
-            pass
-
-    # Действительно чистая установка — нужен диалог
-    return True
-
 import threading
 import time  # Для пауз/задержек в Superlookup
 import re
@@ -6253,10 +6224,6 @@ class SupervertalerQt(QMainWindow):
         # - Auto-recovery if pointer is deleted but data exists at default location
         from modules.database_manager import DatabaseManager
         
-        # Check if this is first run BEFORE getting the path
-        # (so we know whether to show the data location dialog later)
-        self._needs_data_location_dialog = needs_first_run_data_dialog()
-
         # Resolve the user data path via the unified pointer system for ALL
         # users (dev, pip, EXE). The dev branch used to hardcode this to
         # ~/Supervertaler and skip the pointer entirely, which made
@@ -6294,17 +6261,13 @@ class SupervertalerQt(QMainWindow):
         except Exception:
             pass
 
-        # Ensure user_data directory exists (creates empty folder if missing)
-        # BUT only if we're not going to show the dialog (which will create the chosen folder)
-        if not self._needs_data_location_dialog:
-            self.user_data_path.mkdir(parents=True, exist_ok=True)
+        # Ensure user_data directory and workbench/settings layout exist
+        # (unconditional, idempotent; replaces the removed first-run dialogs
+        # and legacy migrations - Batch #8.8)
+        self.user_data_path.mkdir(parents=True, exist_ok=True)
+        (self.user_data_path / "workbench" / "settings").mkdir(parents=True, exist_ok=True)
         
         print(f"[Data Paths] User data: {self.user_data_path}")
-
-        # Migrate old settings files to unified settings/settings.json (one-time)
-        if not self._needs_data_location_dialog:
-            self._migrate_settings_to_unified()
-            self._migrate_to_workbench_layout()
 
         # Load the saved source/target language pair NOW, before any UI is
         # built. The Language Pair combo boxes read self.source_language /
@@ -6313,18 +6276,14 @@ class SupervertalerQt(QMainWindow):
         # dropdown change will save the stale UI values back to disk.
         # Spellcheck initialization stays in load_language_settings(),
         # which runs later after spellcheck_manager and log are ready.
-        if not self._needs_data_location_dialog:
-            self._load_language_pair_from_disk()
+        self._load_language_pair_from_disk()
 
         # Database Manager for Termbases
         self.db_manager = DatabaseManager(
             db_path=str(self.user_data_path / "resources" / "supervertaler.db"),
             log_callback=self.log
         )
-        # Only connect if we're not showing the dialog (which will create the folder)
-        # If dialog is needed, we'll connect after user chooses location
-        if not self._needs_data_location_dialog:
-            self.db_manager.connect()
+        self.db_manager.connect()
         
         # TM Database - Initialize early so Superlookup works without a project loaded
         from modules.translation_memory import TMDatabase
@@ -6353,19 +6312,6 @@ class SupervertalerQt(QMainWindow):
         # Termbase Manager - needed for glossary AI injection
         from modules.termbase_manager import TermbaseManager
         self.termbase_mgr = TermbaseManager(self.db_manager, self.log)
-
-        # v1.10.29 one-shot reset: v1.10.28 introduced the
-        # ``voice_dictation_enabled`` column with DEFAULT 1, so users
-        # upgrading from v1.10.28 (or fresh installs that picked up
-        # the v1.10.28 migration before today) ended up with every
-        # termbase contributing to dictation bias by default. A user
-        # with dozens of termbases flagged that as wrong – defaults
-        # should be opt-in. v1.10.29 flips the DB DEFAULT to 0 for
-        # new rows (database_manager.py) and one-shot resets all
-        # existing rows here. Sentinel in settings JSON prevents the
-        # reset from running twice or stomping on a user's own
-        # post-v1.10.29 selections.
-        self._migrate_voice_dictation_default_off()
 
         # Spellcheck Manager for target language spell checking
         self.spellcheck_manager = get_spellcheck_manager(str(self.user_data_path))
@@ -6492,132 +6438,6 @@ class SupervertalerQt(QMainWindow):
                     self.match_top_tabs.setCurrentWidget(self.quicktrans_panel_match)
             finally:
                 self._restoring_dock = False
-
-        # First-run check - show unified setup wizard
-        if self._needs_data_location_dialog or not general_settings.get('first_run_completed', False):
-            from PyQt6.QtCore import QTimer
-            QTimer.singleShot(300, lambda: self._show_setup_wizard(is_first_run=True))
-    
-    def _show_data_location_dialog(self):
-        """Показать диалог выбора папки данных пользователем при первом запуске."""
-        try:
-            from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel, 
-                                         QPushButton, QLineEdit, QFileDialog, QDialogButtonBox)
-            
-            dialog = QDialog(self)
-            dialog.setWindowTitle(self.tr("Choose Data Folder Location"))
-            dialog.setMinimumWidth(550)
-            dialog.setModal(True)
-            
-            layout = QVBoxLayout(dialog)
-            layout.setSpacing(15)
-            
-            # Title
-            title_label = QLabel(self.tr("<h2>📁 Choose Your Data Folder</h2>"))
-            layout.addWidget(title_label)
-            
-            # Explanation
-            msg_label = QLabel(
-                "Supervertaler stores your data in a folder of your choice, which contains things like:<br><br>"
-                "• API keys<br>"
-                "• Translation memories<br>"
-                "• Termbases<br>"
-                "• Prompts<br>"
-                "• Settings<br><br>"
-                "Choose a location that's easy to find and backup.<br>"
-                "You can change this later in Settings → General."
-            )
-            msg_label.setWordWrap(True)
-            layout.addWidget(msg_label)
-            
-            # Path input with browse button
-            path_layout = QHBoxLayout()
-            
-            path_edit = QLineEdit()
-            default_path = get_default_user_data_path()
-            path_edit.setText(str(default_path))
-            path_edit.setMinimumWidth(350)
-            path_layout.addWidget(path_edit)
-            
-            browse_btn = QPushButton(self.tr("Browse..."))
-            def browse_folder():
-                folder = QFileDialog.getExistingDirectory(
-                    dialog, 
-                    "Choose Data Folder",
-                    str(Path.home())
-                )
-                if folder:
-                    # Append "Supervertaler" if user didn't include it
-                    folder_path = Path(folder)
-                    if folder_path.name != "Supervertaler":
-                        folder_path = folder_path / "Supervertaler"
-                    path_edit.setText(str(folder_path))
-            
-            browse_btn.clicked.connect(browse_folder)
-            path_layout.addWidget(browse_btn)
-            
-            layout.addLayout(path_layout)
-            
-            # Tip
-            tip_label = QLabel(
-                "💡 <b>Tip:</b> The default location is in your home folder, "
-                "making it easy to find and backup."
-            )
-            tip_label.setWordWrap(True)
-            tip_label.setStyleSheet("color: #666;")
-            layout.addWidget(tip_label)
-            
-            # Buttons
-            button_layout = QHBoxLayout()
-            
-            default_btn = QPushButton(self.tr("Use Default"))
-            default_btn.clicked.connect(lambda: path_edit.setText(str(default_path)))
-            button_layout.addWidget(default_btn)
-            
-            button_layout.addStretch()
-            
-            ok_btn = QPushButton(self.tr("OK"))
-            ok_btn.setDefault(True)
-            ok_btn.clicked.connect(dialog.accept)
-            button_layout.addWidget(ok_btn)
-            
-            layout.addLayout(button_layout)
-            
-            # Show dialog
-            if dialog.exec() == QDialog.DialogCode.Accepted:
-                chosen_path = Path(path_edit.text())
-                
-                # Create the folder
-                chosen_path.mkdir(parents=True, exist_ok=True)
-                
-                # Save the choice to config pointer
-                save_user_data_path(chosen_path)
-                
-                # Update our path if different from what we initialized with
-                if chosen_path != self.user_data_path:
-                    self.user_data_path = chosen_path
-                    # Re-initialize managers with new path
-                    self._reinitialize_with_new_data_path()
-                else:
-                    # Same path, but we still need to connect database (it was deferred)
-                    if hasattr(self, 'db_manager') and self.db_manager and not self.db_manager.connection:
-                        self.db_manager.connect()
-                
-                self.log(f"📁 Data folder set to: {chosen_path}")
-                
-                # Now show the features welcome dialog
-                from PyQt6.QtCore import QTimer
-                QTimer.singleShot(300, self._show_first_run_welcome)
-            else:
-                # User cancelled - use default anyway
-                default_path.mkdir(parents=True, exist_ok=True)
-                save_user_data_path(default_path)
-                self.log(f"📁 Using default data folder: {default_path}")
-                
-        except Exception as e:
-            self.log(f"⚠️ Data location dialog error: {e}")
-            import traceback
-            traceback.print_exc()
     
     def _reinitialize_with_new_data_path(self):
         """Заново инициализировать менеджеры после смены пользователем пути к данным."""
@@ -6631,9 +6451,10 @@ class SupervertalerQt(QMainWindow):
                 log=self.log,
             )
 
-            # Migrate settings if needed for the new data path
-            self._migrate_settings_to_unified()
-            self._migrate_to_workbench_layout()
+            # Batch #8.8: unconditional, idempotent creation of the data-folder
+            # layout (replaces the removed legacy migrations).
+            self.user_data_path.mkdir(parents=True, exist_ok=True)
+            (self.user_data_path / "workbench" / "settings").mkdir(parents=True, exist_ok=True)
 
             # Close existing database connection
             if hasattr(self, 'db_manager') and self.db_manager:
@@ -6683,273 +6504,6 @@ class SupervertalerQt(QMainWindow):
             import traceback
             traceback.print_exc()
     
-    def _show_first_run_welcome(self):
-        """No-op начиная с v1.9.474.
-        
-        Раньше показывался вводный диалог о модульной архитектуре Supervertaler с
-        перенаправлением в Settings → Features. Обе сущности — система modular-extras
-        и вкладка Features — выведены из эксплуатации, когда каждый функциональный
-        модуль стал базовой зависимостью. Подтверждение папки данных теперь делает
-        мастер настройки; больше ничему не нужно беспокоить пользователя при первом
-        запуске. Оставлен заглушкой, чтобы ожидающие вызовы QTimer.singleShot()
-        не падали."""
-        try:
-            settings = self.load_general_settings()
-            settings['first_run_completed'] = True
-            self.save_general_settings(settings)
-        except Exception:
-            pass
-
-    def _show_setup_wizard(self, is_first_run: bool = False):
-        """Показать единый мастер настройки, объединяющий выбор папки данных и знакомство с возможностями.
-        
-        Args:
-            is_first_run: True — автоматический запуск при первом старте. False —
-                          пользователь вызвал вручную из меню (тогда шаг папки данных
-                          пропускается, если она уже настроена)."""
-        try:
-            from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                                         QPushButton, QLineEdit, QFileDialog, QStackedWidget,
-                                         QWidget, QFrame, QCheckBox)
-            from PyQt6.QtCore import Qt
-
-            dialog = QDialog(self)
-            dialog.setWindowTitle(self.tr("Supervertaler Workbench Setup Wizard"))
-            dialog.setMinimumWidth(600)
-            dialog.setMinimumHeight(450)
-            dialog.setModal(True)
-
-            main_layout = QVBoxLayout(dialog)
-            main_layout.setSpacing(15)
-            main_layout.setContentsMargins(20, 20, 20, 20)
-
-            # Stacked widget for wizard pages
-            stacked = QStackedWidget()
-
-            # Determine if we need to show data folder page
-            show_data_folder_page = is_first_run and self._needs_data_location_dialog
-
-            # ==================== PAGE 1: Data Folder Selection ====================
-            page1 = QWidget()
-            page1_layout = QVBoxLayout(page1)
-            page1_layout.setSpacing(15)
-
-            # Step indicator
-            step1_indicator = QLabel(self.tr("<span style='color: #888;'>Step 1 of 2</span>"))
-            page1_layout.addWidget(step1_indicator)
-
-            # Title
-            page1_title = QLabel(self.tr("<h2>📁 Choose Your Data Folder</h2>"))
-            page1_layout.addWidget(page1_title)
-
-            # Explanation
-            page1_msg = QLabel(
-                "Supervertaler stores your data in a folder of your choice:<br><br>"
-                "• <b>API keys</b> – Your LLM provider credentials<br>"
-                "• <b>Translation memories</b> – Reusable translation pairs<br>"
-                "• <b>Termbases</b> – Terminology databases<br>"
-                "• <b>Prompts</b> – Custom AI prompts<br>"
-                "• <b>Settings</b> – Application configuration<br><br>"
-                "Choose a location that's easy to find and backup."
-            )
-            page1_msg.setWordWrap(True)
-            page1_layout.addWidget(page1_msg)
-
-            # Path input with browse button
-            path_layout = QHBoxLayout()
-            path_edit = QLineEdit()
-            default_path = get_default_user_data_path()
-            path_edit.setText(str(default_path))
-            path_edit.setMinimumWidth(350)
-            path_layout.addWidget(path_edit)
-
-            browse_btn = QPushButton(self.tr("Browse..."))
-            def browse_folder():
-                folder = QFileDialog.getExistingDirectory(
-                    dialog,
-                    "Choose Data Folder",
-                    str(Path.home())
-                )
-                if folder:
-                    folder_path = Path(folder)
-                    if folder_path.name != "Supervertaler":
-                        folder_path = folder_path / "Supervertaler"
-                    path_edit.setText(str(folder_path))
-
-            browse_btn.clicked.connect(browse_folder)
-            path_layout.addWidget(browse_btn)
-            page1_layout.addLayout(path_layout)
-
-            # Tip
-            page1_tip = QLabel(
-                "💡 <b>Tip:</b> The default location is in your home folder, "
-                "making it easy to find and backup."
-            )
-            page1_tip.setWordWrap(True)
-            page1_tip.setStyleSheet("color: #666;")
-            page1_layout.addWidget(page1_tip)
-
-            page1_layout.addStretch()
-            stacked.addWidget(page1)
-
-            # ==================== PAGE 2: Features Introduction ====================
-            page2 = QWidget()
-            page2_layout = QVBoxLayout(page2)
-            page2_layout.setSpacing(15)
-
-            # Step indicator
-            step2_label = "Step 2 of 2" if show_data_folder_page else "Setup"
-            step2_indicator = QLabel(f"<span style='color: #888;'>{step2_label}</span>")
-            page2_layout.addWidget(step2_indicator)
-
-            # Data folder info (shown when skipping page 1)
-            if not show_data_folder_page:
-                from PyQt6.QtGui import QDesktopServices
-                from PyQt6.QtCore import QUrl
-
-                data_folder_path = str(self.user_data_path)
-                data_folder_info = QLabel(
-                    f"<b>📁 Data Folder:</b> <a href='file:///{data_folder_path}' "
-                    f"style='color: #3b82f6;'>{data_folder_path}</a><br>"
-                    "<span style='color: #666; font-size: 0.9em;'>"
-                    "Your settings, TMs, termbases and prompts are stored here. "
-                    "Change in Settings → General.</span>"
-                )
-                data_folder_info.setWordWrap(True)
-                data_folder_info.setTextFormat(Qt.TextFormat.RichText)
-                data_folder_info.setOpenExternalLinks(False)  # Handle clicks ourselves
-                data_folder_info.linkActivated.connect(
-                    lambda url: QDesktopServices.openUrl(QUrl.fromLocalFile(data_folder_path))
-                )
-                data_folder_info.setStyleSheet(
-                    "background: #f0f4ff; padding: 12px; border-radius: 6px; "
-                    "border-left: 4px solid #3b82f6; margin-bottom: 10px;"
-                )
-                page2_layout.addWidget(data_folder_info)
-
-            # Title
-            page2_title = QLabel(self.tr("<h2>✨ You're all set!</h2>"))
-            page2_layout.addWidget(page2_title)
-
-            # Message – kept deliberately short. Earlier versions of this
-            # page explained Supervertaler's modular-features architecture
-            # and pointed users at Settings → Features. Both are gone in
-            # v1.9.474: every feature module that used to be optional is
-            # now a core dependency, so there is nothing for the user to
-            # install or toggle.
-            page2_msg = QLabel(
-                "Your data folder is ready and Supervertaler is set up.<br><br>"
-                "Have a look around the <b>Editor</b> tab to start translating, "
-                "or visit <b>Settings</b> to configure API keys, prompts, theme, "
-                "and more."
-            )
-            page2_msg.setWordWrap(True)
-            page2_msg.setTextFormat(Qt.TextFormat.RichText)
-            page2_layout.addWidget(page2_msg)
-
-            # Checkbox
-            dont_show_checkbox = CheckmarkCheckBox(self.tr("Don't show this wizard on startup"))
-            dont_show_checkbox.setChecked(True)
-            page2_layout.addWidget(dont_show_checkbox)
-
-            page2_layout.addStretch()
-            stacked.addWidget(page2)
-
-            main_layout.addWidget(stacked)
-
-            # ==================== Navigation Buttons ====================
-            nav_layout = QHBoxLayout()
-
-            back_btn = QPushButton(self.tr("← Back"))
-            back_btn.setVisible(False)  # Hidden on first page
-
-            next_btn = QPushButton(self.tr("Next →"))
-            finish_btn = QPushButton(self.tr("Finish"))
-            finish_btn.setVisible(False)
-            finish_btn.setDefault(True)
-
-            # Use Default button (only on page 1)
-            default_btn = QPushButton(self.tr("Use Default"))
-            default_btn.clicked.connect(lambda: path_edit.setText(str(default_path)))
-
-            nav_layout.addWidget(default_btn)
-            nav_layout.addStretch()
-            nav_layout.addWidget(back_btn)
-            nav_layout.addWidget(next_btn)
-            nav_layout.addWidget(finish_btn)
-
-            main_layout.addLayout(nav_layout)
-
-            # Track chosen path for later
-            chosen_path_holder = [None]
-
-            def go_to_page(page_index):
-                stacked.setCurrentIndex(page_index)
-                if page_index == 0:
-                    back_btn.setVisible(False)
-                    next_btn.setVisible(True)
-                    finish_btn.setVisible(False)
-                    default_btn.setVisible(True)
-                else:
-                    back_btn.setVisible(show_data_folder_page)
-                    next_btn.setVisible(False)
-                    finish_btn.setVisible(True)
-                    default_btn.setVisible(False)
-
-            def on_next():
-                # Save the data folder choice
-                chosen_path = Path(path_edit.text())
-                chosen_path_holder[0] = chosen_path
-
-                # Create the folder and save config
-                chosen_path.mkdir(parents=True, exist_ok=True)
-                save_user_data_path(chosen_path)
-
-                # Update our path if different
-                if chosen_path != self.user_data_path:
-                    self.user_data_path = chosen_path
-                    self._reinitialize_with_new_data_path()
-                else:
-                    if hasattr(self, 'db_manager') and self.db_manager and not self.db_manager.connection:
-                        self.db_manager.connect()
-
-                self.log(f"📁 Data folder set to: {chosen_path}")
-                go_to_page(1)
-
-            def on_back():
-                go_to_page(0)
-
-            def on_finish():
-                # Save first_run preference
-                if dont_show_checkbox.isChecked():
-                    settings = self.load_general_settings()
-                    settings['first_run_completed'] = True
-                    self.save_general_settings(settings)
-                    self.log("✅ Setup wizard completed (won't show again on startup)")
-                else:
-                    self.log("✅ Setup wizard shown (will show again next time)")
-
-                dialog.accept()
-
-            back_btn.clicked.connect(on_back)
-            next_btn.clicked.connect(on_next)
-            finish_btn.clicked.connect(on_finish)
-
-            # Start on appropriate page
-            if show_data_folder_page:
-                go_to_page(0)
-            else:
-                # Skip to features page if data folder already configured
-                go_to_page(1)
-                step2_indicator.setText(self.tr("<span style='color: #888;'>Supervertaler Setup</span>"))
-
-            dialog.exec()
-
-        except Exception as e:
-            self.log(f"⚠️ Setup wizard error: {e}")
-            import traceback
-            traceback.print_exc()
-
     def init_ui(self):
         """Инициализировать пользовательский интерфейс."""
         # Build window title with dev mode indicator
@@ -9150,11 +8704,6 @@ class SupervertalerQt(QMainWindow):
         superdocs_action.setToolTip(self.tr("Open the Workbench documentation in your browser (press F1 for help on the current panel)"))
         superdocs_action.triggered.connect(lambda: self._open_url("https://docs.supervertaler.com/workbench/"))
         help_menu.addAction(superdocs_action)
-
-        setup_wizard_action = QAction(self.tr("🚀 Setup Wizard..."), self)
-        setup_wizard_action.setToolTip(self.tr("Run the initial setup wizard (data folder location, features overview)"))
-        setup_wizard_action.triggered.connect(lambda: self._show_setup_wizard(is_first_run=False))
-        help_menu.addAction(setup_wizard_action)
 
         help_menu.addSeparator()
 
@@ -42899,8 +42448,7 @@ class SupervertalerQt(QMainWindow):
     # Ядро API этого блока перенесено в modules/settings_service.py
     # (Batch #7 Stage 2, под-батч S2.1). Здесь остаются ТОНКИЕ ДЕЛЕГАТЫ с
     # исходными именами и сигнатурами: их вызывают снаружи по строке
-    # (main()) и ещё не перенесённые методы монолита (_migrate_settings_to_unified,
-    # _migrate_voice_dictation_default_off — уходят в S2.5).
+    # (main()); legacy-миграции настроек удалены в Batch #8.8.
     # self.settings_service создаётся в __init__ и пересоздаётся при смене
     # каталога данных в _reinitialize_with_new_data_path().
     # S2.2 добавил к ним ещё делегаты вне этого блока:
@@ -42938,165 +42486,6 @@ class SupervertalerQt(QMainWindow):
         (Тонкий делегат: SettingsService._save_settings_section, Batch #7 Stage 2)"""
         return self.settings_service._save_settings_section(section, section_data)
 
-    def _migrate_settings_to_unified(self):
-        """Однократная миграция со старых файлов настроек на единый settings/settings.json."""
-        settings_dir = self._get_settings_dir()
-        unified_file = settings_dir / "settings.json"
-
-        # Skip if already migrated
-        if unified_file.exists():
-            return
-
-        print("[Settings] Migrating to unified settings/settings.json ...")
-        settings_dir.mkdir(parents=True, exist_ok=True)
-        unified = {"api_keys": {}, "general": {}, "ui": {}, "features": {}}
-
-        # 1. Migrate general_settings.json
-        old_general = self.user_data_path / "general_settings.json"
-        if old_general.exists():
-            try:
-                with open(old_general, 'r', encoding='utf-8') as f:
-                    unified["general"] = json.load(f)
-                old_general.rename(old_general.with_suffix('.json.migrated'))
-            except Exception as e:
-                print(f"[Settings] Warning: could not migrate general_settings.json: {e}")
-
-        # 2. Migrate ui_preferences.json
-        old_prefs = self.user_data_path / "ui_preferences.json"
-        if old_prefs.exists():
-            try:
-                with open(old_prefs, 'r', encoding='utf-8') as f:
-                    prefs = json.load(f)
-                # Remove the nested general_settings (it's a stale duplicate of general_settings.json)
-                prefs.pop('general_settings', None)
-                unified["ui"] = prefs
-                old_prefs.rename(old_prefs.with_suffix('.json.migrated'))
-            except Exception as e:
-                print(f"[Settings] Warning: could not migrate ui_preferences.json: {e}")
-
-        # 3. Migrate feature_settings.json
-        old_features = self.user_data_path / "feature_settings.json"
-        if old_features.exists():
-            try:
-                with open(old_features, 'r', encoding='utf-8') as f:
-                    unified["features"] = json.load(f)
-                old_features.rename(old_features.with_suffix('.json.migrated'))
-            except Exception as e:
-                print(f"[Settings] Warning: could not migrate feature_settings.json: {e}")
-
-        # 4. Migrate api_keys.txt
-        api_keys_file = None
-        for candidate in [self.user_data_path / "api_keys.txt",
-                          Path(__file__).parent / "user_data_private" / "api_keys.txt"]:
-            if candidate.exists():
-                api_keys_file = candidate
-                break
-
-        if api_keys_file:
-            try:
-                api_keys = {}
-                with open(api_keys_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and '=' in line and not line.startswith('#'):
-                            key, value = line.split('=', 1)
-                            api_keys[key.strip().lower()] = value.strip()
-                # Migrate legacy 'google' key to canonical 'gemini' key
-                if api_keys.get('google') and not api_keys.get('gemini'):
-                    api_keys['gemini'] = api_keys['google']
-                unified["api_keys"] = api_keys
-                api_keys_file.rename(api_keys_file.with_suffix('.txt.migrated'))
-            except Exception as e:
-                print(f"[Settings] Warning: could not migrate api_keys.txt: {e}")
-
-        # 5. Relocate satellite JSON files to settings/ subfolder
-        import shutil
-        for filename in ['find_replace_history.json', 'superlookup_history.json',
-                         'recent_projects.json',
-                         'themes.json', 'shortcuts.json', 'voice_commands.json']:
-            old_path = self.user_data_path / filename
-            new_path = settings_dir / filename
-            if old_path.exists() and not new_path.exists():
-                try:
-                    shutil.move(str(old_path), str(new_path))
-                except Exception as e:
-                    print(f"[Settings] Warning: could not move {filename}: {e}")
-
-        # 6. Write unified settings
-        try:
-            with open(unified_file, 'w', encoding='utf-8') as f:
-                json.dump(unified, f, indent=2, ensure_ascii=False)
-            print(f"[Settings] Migration complete: {unified_file}")
-        except Exception as e:
-            print(f"[Settings] Error writing unified settings: {e}")
-
-    def _migrate_to_workbench_layout(self):
-        """Однократная миграция: переносит файлы Workbench в под-папку
-                workbench/.
-        
-                Старая компоновка:
-                    ~/Supervertaler/settings/         → workbench/settings/
-                    ~/Supervertaler/dictionaries/     → workbench/dictionaries/
-                    ~/Supervertaler/voice_scripts/    → workbench/voice_scripts/
-                    ~/Supervertaler/ai_assistant/     → workbench/ai_assistant/
-                    ~/Supervertaler/superbrowser_profiles/ → workbench/superbrowser_profiles/
-                    ~/Supervertaler/web_cache/        → workbench/web_cache/
-                    ~/Supervertaler/projects/         → workbench/projects/
-        
-                Общие ресурсы (prompt_library/, resources/) остаются в корне."""
-        import shutil
-
-        flag_file = self.user_data_path / "workbench" / ".migrated"
-        if flag_file.exists():
-            return
-
-        old_settings = self.user_data_path / "settings" / "settings.json"
-        if not old_settings.exists():
-            # Nothing to migrate – fresh install or already migrated.
-            # Just ensure the workbench dir exists and write the flag.
-            try:
-                (self.user_data_path / "workbench" / "settings").mkdir(parents=True, exist_ok=True)
-                flag_file.write_text(datetime.utcnow().isoformat(), encoding='utf-8')
-            except Exception:
-                pass
-            return
-
-        print("[Layout] Migrating to workbench/ subfolder layout ...")
-        wb = self.user_data_path / "workbench"
-
-        try:
-            # Move settings/ → workbench/settings/
-            old_settings_dir = self.user_data_path / "settings"
-            new_settings_dir = wb / "settings"
-            if old_settings_dir.exists() and not new_settings_dir.exists():
-                new_settings_dir.mkdir(parents=True, exist_ok=True)
-                for f in old_settings_dir.iterdir():
-                    if f.is_file():
-                        dest = new_settings_dir / f.name
-                        if not dest.exists():
-                            shutil.move(str(f), str(dest))
-                # Remove old dir if empty
-                try:
-                    old_settings_dir.rmdir()
-                except OSError:
-                    pass
-
-            # Move top-level directories → workbench/
-            for dirname in ['dictionaries', 'voice_scripts', 'ai_assistant',
-                            'superbrowser_profiles', 'web_cache', 'projects']:
-                old_dir = self.user_data_path / dirname
-                new_dir = wb / dirname
-                if old_dir.exists() and not new_dir.exists():
-                    try:
-                        shutil.move(str(old_dir), str(new_dir))
-                    except Exception as e:
-                        print(f"[Layout] Warning: could not move {dirname}: {e}")
-
-            flag_file.write_text(datetime.utcnow().isoformat(), encoding='utf-8')
-            print("[Layout] Migration to workbench/ layout complete.")
-        except Exception as e:
-            print(f"[Layout] Warning: migration incomplete: {e}")
-
     def _load_general_settings_from_file(self) -> Dict[str, Any]:
         """Загружает общие настройки из единого settings.json (секция general).
         (Тонкий делегат: SettingsService._load_general_settings_from_file,
@@ -43129,39 +42518,6 @@ class SupervertalerQt(QMainWindow):
         language_pair = self.settings_service._load_language_pair_from_disk()
         if language_pair is not None:
             self.source_language, self.target_language = language_pair
-
-    def _migrate_voice_dictation_default_off(self):
-        """Однократный сброс: очистить флаг ``voice_dictation_enabled``
-                у всех терминологий, чтобы opt-in-дефолт v1.10.29 вступил в силу
-                для пользователей, обновившихся с v1.10.28 (где флаг добавлялся
-                с DEFAULT 1, делая каждую существующую терминологию
-                voice-включённой).
-        
-                Выполняется не более одного раза на базу, под затвором-сентинелой
-                в едином JSON настроек. Ручные выборы пользователя после v1.10.29
-                не трогаются — сентинела ставится при первом запуске метода,
-                и при каждом следующем запуске метод сразу возвращается.
-        
-                При любой ошибке молча пропускается; худшее, что случится, —
-                пользователь увидит старые дефолты v1.10.28 и должен будет
-                вручную снять галочки в колонке 🎤 Voice, что то же UX,
-                что и без этой миграции."""
-        try:
-            prefs = self._load_settings_section("ui")
-            if prefs.get("voice_dictation_opt_in_reset_applied"):
-                return  # already migrated
-            cursor = self.db_manager.cursor
-            cursor.execute(
-                "UPDATE termbases SET voice_dictation_enabled = 0"
-            )
-            self.db_manager.connection.commit()
-            prefs["voice_dictation_opt_in_reset_applied"] = True
-            self._save_settings_section("ui", prefs)
-            self.log(
-                "✓ Voice-dictation termbase flags reset to opt-in (v1.10.29 migration)"
-            )
-        except Exception as e:
-            print(f"[VoiceVocab] opt-in reset migration error: {e!r}")
 
     def load_language_settings(self):
         """Инициализирует проверку орфографии по уже загруженному целевому
