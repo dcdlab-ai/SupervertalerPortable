@@ -231,3 +231,46 @@ REPL (4, каждая assert count==1): tooltip Quick Count (форматы), do
 Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-9\` — `implement_89.py`, `snapshots\` (35 зон, sha256), `verify_snapshots.py`, `startup_chain_{before,after}.json`, `undefined_names_{before,after}.txt`, `protection2.py`, `counts_{before,after}.txt`, `regress_common.py` + `regress\regress_{before,after}.log` + `regress\out-{before,after}\`, `probes\probe_{before,after}_{clean,upgrade}.log` + `menu_{before,after}.txt`, `headless_{before,after}.txt`, `cli_{before,after}.txt`, `head-wt\` (worktree HEAD).
 
 **Push — только после подтверждения Дмитрия.**
+
+## 9. Ручные тесты Дмитрия (тестовая сборка, 2026-10-09) и решения по вопросам §8
+
+Пакет §5 (замена `Supervertaler.py` SHA `aab1f180…` + удаление всех 9 модулей) применён к
+`D:\SupervertalerPortable_test\`; сценарии §6 выполнены на копии user_data.
+
+| Сценарий | Результат |
+|---|---|
+| T8.9.1 апгрейд-старт | ПОДТВЕРЖДЕНО — старт без исключений; меню Project/Import/Export/Tools/Help открываются; CAT-пунктов (memoQ, CafeTran, Trados Studio, Phrase (Memsource), Déjà Vu X3) нет; разделители в порядке (одинарные) |
+| T8.9.2 импорт | ПОДТВЕРЖДЕНО — Import Document (docx), Import Text/Markdown, Import Folder работают, сегменты появляются (в Import Folder чекбокса memoQ нет) |
+| T8.9.3 экспорт | ПОДТВЕРЖДЕНО — Translated document, Simple text file, TMX (из грида и из выбранного сегмента) — файлы создаются и открываются |
+| T8.9.4 вкладка TMs | ПОДТВЕРЖДЕНО — импорт TMX, создание/подключение TM работают; кнопки/пунктов «Attach Trados TM (.sdltm)» нет |
+| T8.9.5 drag-and-drop | ПОДТВЕРЖДЕНО — .docx/.txt поведение как раньше (у окна drop-обработчика нет — проверка фиксирует это); перетаскивание .sdlxliff/.mqxliff не тестировалось — нет файлов |
+| T8.9.6 Settings | ПОДТВЕРЖДЕНО — все 14 страниц открываются (в т.ч. File Types, Keyboard Shortcuts); Save сохраняет |
+| T8.9.7 чистый старт | ПОДТВЕРЖДЕНО — окно открывается без визарда; ключ API → импорт md → правка сегмента → Save → перезапуск; указатели восстановлены |
+| T8.9.8 CLI `--batch` | ПОДТВЕРЖДЕНО — флаг больше не обрабатывается: приложение стартует штатно (ожидаемое поведение по §1 п.5), без traceback |
+| T8.9.9 live-test | ПОДТВЕРЖДЕНО — импорт 180/400 сегментов, перевод сегмента, TM-подсказки, Save, навигация по всем вкладкам; открытие .svproj из CAT-формата — НЕ ТЕСТИРОВАЛОСЬ (нет файлов; поля sdlppx/sdlxliff в Properties проекта отображаются, импортёра нет) |
+| T8.9.10 выход | ПОДТВЕРЖДЕНО — иконка трея исчезает, процесс завершается (0xC0000005 — предсуществующий флаки), в логе нет traceback |
+
+**Ответы Дмитрия на вопросы §8 (решения):**
+
+1. `modules/statuses.py` (`match_memoq_status`/`compose_memoq_status`) — **удалить в финальном
+   инвентаре сирот** (сам statuses.py остаётся). → POST_BATCH8_BACKLOG §7.
+2. Комментарий в `main()` 56795–56797 («Автономный batch-offload-режим…») — **снести в
+   финальный docs-проход**. → POST_BATCH8_BACKLOG §7/§10.
+3. `setup.py` (PyPI keywords memoQ/Trados/SDLPPX) — **оставить как метаданные**;
+   необходимость файла для portable-сборки определена (ниже).
+4. lxml (0 потребителей) — **удаление из requirements.txt/pyproject подтверждено**,
+   выполняется в финальном инвентаре сирот. → POST_BATCH8_BACKLOG §7.
+
+**Необходимость `setup.py` для portable-сборки (вопрос 3, измерение):** portable-сборка
+`D:\SupervertalerPortable_test\` не содержит `setup.py` (в `SupervertalerPortable\` лежат
+только `pyproject.toml` и `requirements.txt`); `start.bat` запускает
+`python-embed\python.exe … Supervertaler.py` напрямую, без установки пакета; в репозитории
+`setup.py` не вызывается ни одним скриптом/конфигом (grep по `.py/.bat/.md/.toml/.txt/.cfg/.spec`
+— только сам файл и упоминания в CODE_MAP/аудитах). Вывод: **для portable-сборки `setup.py`
+не нужен** — он обслуживает только PyPI-дистрибуцию (`pip install Supervertaler`,
+`py_modules=["Supervertaler"]`, `entry_points console_scripts`); по решению Дмитрия файл
+остаётся как метаданные PyPI, keywords memoQ/Trados/SDLPPX не правятся.
+
+**Итог Batch #8.9: закрыт** — код `5a29d3c9`, отчёт `c82cb784`, ручные тесты T8.9.1–T8.9.10
+подтверждены (2 подпункта N/A из-за отсутствия CAT-файлов), решения по всем 4 вопросам
+получены и занесены в POST_BATCH8_BACKLOG §7.
