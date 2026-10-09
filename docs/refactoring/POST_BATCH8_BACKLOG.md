@@ -104,7 +104,9 @@
   решение о мёртвом коде.
 * Док-остатки: `HelpTopics.VOICE`/`HelpTopics.SIDEKICK` (help_system.py),
   докстринг `platform_helpers.py` (VoiceCommandManager), тултип/комментарии
-  `styled_widgets.py` и `termbase_manager.py` про колонку 🎤.
+  `styled_widgets.py` и `termbase_manager.py` про колонку 🎤; докстринг
+  `modules/settings_service.py:38–39` (историческое упоминание legacy-миграций,
+  удалённых в 8.8 — решение Дмитрия, BATCH8_8 §9).
 * `_prewarm_ahk`/AHK — оставить как опциональный ускоритель (не удалять).
 * MyMemory включён по умолчанию (500 символов, внешний сервис) — решение о дефолте.
 * **Микро-батч после 8.9 (решение Дмитрия, BATCH8_7 §8 в.2):** удалить чип «🔗 Trados»
