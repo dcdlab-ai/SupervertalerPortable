@@ -1,0 +1,1 @@
+                tm_table.setCellWidget(row, 6, superlookup_checkbox)

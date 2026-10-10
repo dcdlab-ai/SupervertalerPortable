@@ -1,0 +1,1 @@
+        bridge_header_checkbox.toggled.connect(toggle_all_bridge)

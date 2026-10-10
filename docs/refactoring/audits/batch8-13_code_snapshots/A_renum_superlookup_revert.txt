@@ -1,0 +1,1 @@
+                            sender = tm_table.cellWidget(row_idx, 6)

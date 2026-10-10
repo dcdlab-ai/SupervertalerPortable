@@ -1,0 +1,3 @@
+headless imports (with setup.py): 92 ok / 2 fail / 94 total
+FAIL setup: ModuleNotFoundError: No module named 'setuptools'
+FAIL modules.pdf_rescue_Qt: ModuleNotFoundError: No module named 'fitz'

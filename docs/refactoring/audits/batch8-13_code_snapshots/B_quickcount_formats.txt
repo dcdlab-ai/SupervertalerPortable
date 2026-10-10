@@ -1,0 +1,9 @@
+        formats = [
+            ("Word Document", "*.docx"),
+            ("Adobe InDesign Markup", "*.idml"),
+            ("HTML", "*.html *.htm"),
+            ("XLIFF 1.2", "*.xliff *.xlf"),
+            ("PO (gettext)", "*.po"),
+            ("Microsoft Excel", "*.xlsx"),
+            ("Microsoft PowerPoint", "*.pptx"),
+        ]

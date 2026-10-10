@@ -1,0 +1,11 @@
+        export_menu.addSeparator()
+
+
+        # GNU gettext .po / .pot export (Linux/Django/WordPress l10n)
+        export_po_action = QAction(self.tr("&GNU gettext - Translated (.po)..."), self)
+        export_po_action.setToolTip(self.tr("Export the project back to a GNU gettext .po catalogue, preserving comments, references and flags"))
+        export_po_action.triggered.connect(self.export_po_file)
+        export_menu.addAction(export_po_action)
+
+
+        export_menu.addSeparator()

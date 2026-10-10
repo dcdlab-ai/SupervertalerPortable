@@ -1,0 +1,14 @@
+        # v1.10.247: 9 columns now – SuperLookup added at index 6, after
+        # Bridge, so the four per-TM toggles (Read/Write/Bridge/SuperLookup)
+        # cluster together. Last Modified moves to 7, Description to 8.
+        tm_table.setColumnCount(9)
+        tm_table.setHorizontalHeaderLabels(["TM Name", "Languages", "Entries", "Read", "Write", "Bridge", "🔍 SuperLookup", "Last Modified", "Description"])
+        tm_table.horizontalHeader().setStretchLastSection(True)
+        tm_table.setColumnWidth(0, 250)
+        tm_table.setColumnWidth(1, 120)
+        tm_table.setColumnWidth(2, 80)
+        tm_table.setColumnWidth(3, 60)
+        tm_table.setColumnWidth(4, 60)
+        tm_table.setColumnWidth(5, 60)   # Bridge
+        tm_table.setColumnWidth(6, 100)  # SuperLookup
+        tm_table.setColumnWidth(7, 150)  # Last Modified

@@ -1,0 +1,1 @@
+                tm_table.setItem(row, 8, QTableWidgetItem(desc_text))

@@ -1,0 +1,3 @@
+        # v1.10.247: bulk SuperLookup toggle (include/exclude every TM
+        # from SuperLookup in one click). Single DB pass + one refresh,
+        # mirroring the Bridge bulk toggle.

@@ -1,0 +1,271 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b8-13\menu\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b8-13\menu\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+Q)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[LOG] ✓ Alternating row colors applied
+[LOG] ℹ️ Okapi sidecar not installed yet – will offer to download on first DOCX import
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[before] window built (13.7s)
+[before] TOP '&Project'
+[before] MENU   '&New Project'
+[before] MENU   '&Open Project...'
+[before] MENU   'Open &Recent' [submenu]
+[before] MENU     'No recent projects'
+[before] MENU   | separator
+[before] MENU   '&Save'
+[before] MENU   'Save &As...'
+[before] MENU   | separator
+[before] MENU   '&Close Project'
+[before] MENU   | separator
+[before] MENU   '&Import' [submenu]
+[before] MENU     '&Import Document...'
+[before] MENU     '&Text / Markdown File (TXT, MD)...'
+[before] MENU     | separator
+[before] MENU     '📁 &Folder (Multiple Files)...'
+[before] MENU     | separator
+[before] MENU     '&GNU gettext (.po / .pot)...'
+[before] MENU     | separator
+[before] MENU     '🔁 Supervertaler &Re-importable' [submenu]
+[before] MENU       'Bilingual &Table (DOCX) - Update Project...'
+[before] MENU       'Bilingual Te&xt (AI-friendly) - Update Project...'
+[before] MENU     | separator
+[before] MENU     '❓ Supported file formats (online help)...'
+[before] MENU   '&Export' [submenu]
+[before] MENU     '&Export Translated Document...'
+[before] MENU     'Simple &Text File - Translated (TXT)...'
+[before] MENU     | separator
+[before] MENU     '&GNU gettext - Translated (.po)...'
+[before] MENU     | separator
+[before] MENU     '📁 &Folder (Multiple Files)...'
+[before] MENU     | separator
+[before] MENU     '🔗 &Relocate Source Folder...'
+[before] MENU     | separator
+[before] MENU     '🔁 Supervertaler &Re-importable' [submenu]
+[before] MENU       'Bilingual &Table (DOCX)...'
+[before] MENU       'Bilingual Te&xt (AI-friendly)...'
+[before] MENU     | separator
+[before] MENU     'TMX from &Grid (all segments)...'
+[before] MENU     'TMX from &Selected Segments...'
+[before] MENU     'TMX from &TM(s) for Current Project...'
+[before] MENU     | separator
+[before] MENU     '❓ Supported file formats (online help)...'
+[before] MENU   | separator
+[before] MENU   '📋 Project &Info...'
+[before] MENU   | separator
+[before] MENU   'E&xit'
+[before] TOP '&Edit'
+[before] MENU   '&Undo'
+[before] MENU   '&Redo'
+[before] MENU   | separator
+[before] MENU   '&Find...'
+[before] MENU   '&Replace...'
+[before] MENU   | separator
+[before] MENU   '&Go to Segment...\tCtrl+G'
+[before] MENU   | separator
+[before] MENU   '🗑 &Delete Segment(s)'
+[before] TOP 'T&ranslate'
+[before] MENU   '🌐 &Translate Current Segment'
+[before] MENU   '🔧 &Fuzzy Fix Current Segment'
+[before] MENU   '🏷️ Auto-&tag Current Segment'
+[before] MENU   | separator
+[before] MENU   'Batch &Translate' [submenu]
+[before] MENU     'Translate selected not-started segments'
+[before] MENU     'Translate all not-started segments'
+[before] MENU     'Translate all pre-translated segments'
+[before] MENU     'Translate all not-started && pre-translated'
+[before] MENU     'Translate all translatable segments'
+[before] MENU     'Translate all segments (all statuses)'
+[before] MENU     | separator
+[before] MENU     'Translate all empty segments'
+[before] MENU     'Translate all filtered segments'
+[before] TOP '&Bulk Operations'
+[before] MENU   '✅ &Confirm Selected Segments'
+[before] MENU   '🏷️ Change &Status' [submenu]
+[before] MENU     '❌ &Not started'
+[before] MENU     '🤖 &Pre-translated'
+[before] MENU     '✏️ &Draft'
+[before] MENU     '✔ &Confirmed'
+[before] MENU     '🟪 Proo&fread'
+[before] MENU     '⭐ &Approved'
+[before] MENU     '🚫 Re&jected'
+[before] MENU   '🗑️ &Clear Translations'
+[before] MENU   '📋 Copy &Source to Target'
+[before] MENU   '🏷️ &Auto-tag Segments (fix inline tags with AI)…'
+[before] MENU   '🔢 Copy Source to Target (&No Letters)'
+[before] MENU   '💾 &Update Active TM(s)...'
+[before] MENU   | separator
+[before] MENU   '🧪 &Pseudo-translate (Export Test)...'
+[before] MENU   '🧹 Clean &Tags...'
+[before] TOP '&QA'
+[before] MENU   '✅ &Proofreading' [submenu]
+[before] MENU     '✅ &Proofread Translation...'
+[before] MENU     | separator
+[before] MENU     '🗑️ &Delete All Proofreading Comments'
+[before] TOP '&View'
+[before] MENU   '📑 &Navigate To' [submenu]
+[before] MENU     '📝 &Grid'
+[before] MENU     '💾 &TMs'
+[before] MENU     '🏷️ Term&bases'
+[before] MENU     '⚡ &QuickLauncher'
+[before] MENU     '⚙️ &Settings'
+[before] MENU   | separator
+[before] MENU   '📊 &Grid Text Zoom' [submenu]
+[before] MENU     'Grid Zoom &In'
+[before] MENU     'Grid Zoom &Out'
+[before] MENU     | separator
+[before] MENU     'Grid Font &Family' [submenu]
+[before] MENU       'Calibri'
+[before] MENU       'Segoe UI'
+[before] MENU       'Arial'
+[before] MENU       'Consolas'
+[before] MENU       'Verdana'
+[before] MENU       'Times New Roman'
+[before] MENU       'Georgia'
+[before] MENU       'Courier New'
+[before] MENU   | separator
+[before] MENU   '🔍 &Match Panel' [submenu]
+[before] MENU     'Match Panel Zoom &In'
+[before] MENU     'Match Panel Zoom &Out'
+[before] MENU     'Match Panel Zoom &Reset'
+[before] MENU     | separator
+[before] MENU     'Stack TM Panes &Vertically'
+[before] MENU   | separator
+[before] MENU   '📑 TermLens / QuickTrans panel' [submenu]
+[before] MENU     'Hide'
+[before] MENU     'Show above grid'
+[before] MENU     'Show below grid'
+[before] MENU   | separator
+[before] MENU   '📐 &Auto-Resize Rows'
+[before] MENU   | separator
+[before] MENU   '🎨 &Theme Editor...'
+[before] TOP '&Tools'
+[before] MENU   '📄 &PDF Rescue...'
+[before] MENU   '🔍 Super&lookup (Ctrl+K)...'
+[before] MENU   '✏️ T&MX Editor...'
+[before] MENU   '📊 &Statistics (Analyse Against TM)...'
+[before] MENU   '⚡ &Quick Count (pick files, no project)...'
+[before] MENU   | separator
+[before] MENU   '🖼️ &Image Extractor (Superimage)...'
+[before] MENU   '📝 Scratch&pad...'
+[before] MENU   '📋 &Log Window...'
+[before] MENU   '💰 &Token Usage && Costs...'
+[before] MENU   | separator
+[before] MENU   '&Settings...'
+[before] TOP '&Help'
+[before] MENU   'Supervertaler Workbench Help'
+[before] MENU   | separator
+[before] MENU   '⌨️ Keyboard Shortcuts'
+[before] MENU   '📝 Changelog'
+[before] MENU   '🔄 Check for Updates...'
+[before] MENU   '📋 Copy Version Info'
+[before] MENU   '📄 Open Diagnostic Log'
+[before] MENU   '📁 Open Log Folder'
+[before] MENU   | separator
+[before] MENU   '💬 Community Discussions'
+[before] MENU   '🔗 GitHub Repository'
+[before] MENU   | separator
+[before] MENU   'ℹ️ About'
+[before] ITEM Project/Open Project: ok dialogs=1
+[before]   DIALOG fdh.get_open_file_name title='Open Project' filter='Supervertaler Projects (*.svproj);;Legacy Projects (*.json);;All Files (*.*)'
+[before] ITEM Project/Save As: ok dialogs=0
+[before] ITEM Project/Import/Document: ok dialogs=1
+[before]   DIALOG getOpenFileName title='Import document' filter='All supported formats (*.docx *.idml *.html *.htm *.xliff *.xlf *.po *.xlsx *.pptx);;Word Document (*.docx);;Adobe InDesign Markup (*.idml);;HTML (*.html *.htm);;XLIFF 1.2 (*.xliff *.xlf);;PO (gettext) (*.po);;Microsoft Excel (*.xlsx);;Microsoft PowerPoint (*.pptx);;All Files (*.*)'
+[before] ITEM Project/Import/Text-Markdown: ok dialogs=1
+[before]   DIALOG getOpenFileName title='Select Text or Markdown File' filter='Text Files (*.txt *.md);;Markdown (*.md);;Plain Text (*.txt);;All Files (*.*)'
+[before] ITEM Project/Import/Folder: ok dialogs=1
+[before]   DIALOG getExistingDirectory title='Select Folder with Files to Import' filter=''
+[before] ITEM Project/Import/GNU-gettext: EXC TypeError dialogs=0
+[before] ITEM Project/Import/Reimport/Bilingual-Table: ok dialogs=0
+[before] ITEM Project/Import/Reimport/Bilingual-Text: ok dialogs=0
+[before] ITEM Project/Export/Translated-Document: ok dialogs=0
+[before] ITEM Project/Export/Simple-Text: ok dialogs=0
+[before] ITEM Project/Export/GNU-gettext: ok dialogs=0
+[before] ITEM Project/Export/Folder: ok dialogs=0
+[before] ITEM Project/Export/Relocate-Source: ok dialogs=0
+[before] ITEM Project/Export/TMX-from-Grid: ok dialogs=0
+[before] ITEM Project/Export/TMX-from-Selected: ok dialogs=0
+[before] ITEM Project/Export/TMX-from-TM: ok dialogs=0
+[before] ITEM Tools/Quick-Count: ok dialogs=1
+[before]   DIALOG getOpenFileNames title='Quick Count – select file(s)' filter='All supported formats (*.docx *.idml *.html *.htm *.xliff *.xlf *.po *.xlsx *.pptx);;Word Document (*.docx);;Adobe InDesign Markup (*.idml);;HTML (*.html *.htm);;XLIFF 1.2 (*.xliff *.xlf);;PO (gettext) (*.po);;Microsoft Excel (*.xlsx);;Microsoft PowerPoint (*.pptx);;All Files (*.*)'
+[before] ITEM Tools/Statistics: ok dialogs=0
+[before] ITEM TM/Import TMX: ok dialogs=1
+[before]   DIALOG getOpenFileName title='Import TMX File' filter='TMX Files (*.tmx);;All Files (*.*)'
+[before] ITEM TM/Export TM: ok dialogs=0
+[before] MENU PROBE OK (13.7s)
+QThreadStorage: entry 1 destroyed before end of thread 0x28ca3a65610

@@ -1,0 +1,12 @@
+        # v1.10.212: bulk Bridge toggle (Trados visibility for the whole list).
+        def toggle_all_bridge(checked):
+            try:
+                for tm in (tm_metadata_mgr.get_all_tms() or []):
+                    tm_id = tm.get('id')
+                    if tm_id is None:
+                        continue
+                    if hasattr(tm_metadata_mgr, 'set_bridged_to_trados'):
+                        tm_metadata_mgr.set_bridged_to_trados(tm_id, bool(checked))
+            except Exception as e:
+                self.log(f"⚠️ Bulk TM Bridge toggle failed mid-way: {e}")
+            refresh_tm_list()

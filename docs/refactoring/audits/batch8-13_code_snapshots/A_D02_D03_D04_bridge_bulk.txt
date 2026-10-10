@@ -1,0 +1,12 @@
+        # v1.10.212: Bridge bulk toggles. Mirrors the Read/Write button
+        # pair – "Select All Bridge" turns the flag on for every TM,
+        # "Clear All Bridge" off. Late-binding via the toggle_all_bridge
+        # closure defined further down with toggle_all_read/write.
+        bridge_header_checkbox = CheckmarkCheckBox(self.tr("Select All Bridge"))
+        bridge_header_checkbox.setStyleSheet("QCheckBox::indicator:checked { background-color: #FF8C00; }")
+        bulk_layout.addWidget(bridge_header_checkbox)
+
+        tm_clear_all_bridge_btn = QPushButton(self.tr("Clear All Bridge"))
+        tm_clear_all_bridge_btn.setToolTip(self.tr("Uncheck the Bridge flag on every TM (hide all TMs from the Trados plugin)"))
+        tm_clear_all_bridge_btn.clicked.connect(lambda: toggle_all_bridge(False))
+        bulk_layout.addWidget(tm_clear_all_bridge_btn)

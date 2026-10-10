@@ -1,0 +1,3 @@
+        ext = os.path.splitext(file_path)[1].lower()
+        okapi_exts = {'.docx', '.xlsx', '.pptx', '.html', '.htm',
+                      '.xliff', '.xlf', '.idml', '.po'}

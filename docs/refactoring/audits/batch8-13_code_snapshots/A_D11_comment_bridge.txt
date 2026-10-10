@@ -1,0 +1,4 @@
+        # v1.10.247: SuperLookup bulk toggles. "Select All SuperLookup"
+        # includes every TM in SuperLookup, "Clear All SuperLookup" excludes
+        # them. Late-binding via the toggle_all_superlookup closure defined
+        # further down alongside toggle_all_read/write/bridge.

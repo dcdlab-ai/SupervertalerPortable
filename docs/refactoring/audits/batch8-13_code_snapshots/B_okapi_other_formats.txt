@@ -1,0 +1,11 @@
+    # Formats other than DOCX that we route through Okapi extract → merge.
+    # DOCX has its own dedicated menu entry; TMX is for TM import (separate
+    # path); everything else the sidecar reports as supported lands here.
+    OKAPI_OTHER_FORMATS = [
+        ("Adobe InDesign Markup", "*.idml"),
+        ("HTML", "*.html *.htm"),
+        ("XLIFF 1.2", "*.xliff *.xlf"),
+        ("PO (gettext)", "*.po"),
+        ("Microsoft Excel", "*.xlsx"),
+        ("Microsoft PowerPoint", "*.pptx"),
+    ]

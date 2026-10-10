@@ -1,0 +1,10 @@
+        import_menu.addSeparator()  # Separate monolingual from bilingual tools
+
+
+        # GNU gettext .po / .pot import (Linux/Django/WordPress l10n)
+        import_po_action = QAction(self.tr("&GNU gettext (.po / .pot)..."), self)
+        import_po_action.setToolTip(self.tr("Import a GNU gettext message catalogue (Linux/Django/WordPress software localisation)"))
+        import_po_action.triggered.connect(self.import_po_file)
+        import_menu.addAction(import_po_action)
+
+        import_menu.addSeparator()

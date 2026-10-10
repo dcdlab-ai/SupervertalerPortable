@@ -1,0 +1,2 @@
+i/lf    w/crlf  attr/text=auto eol=lf 	Supervertaler.py
+i/lf    w/lf    attr/text=auto eol=lf 	modules/po_handler.py

@@ -1,0 +1,32 @@
+                # v1.10.212: Bridge checkbox (Trados visibility).
+                # Orange-checkmark variant to distinguish from Read (green)
+                # and Write (blue) at a glance. Default off – freelancers
+                # with multiple-client TM libraries opt in per TM.
+                is_bridged = bool(tm.get('bridged_to_trados', False))
+                bridge_checkbox = CheckmarkCheckBox()
+                bridge_checkbox.setStyleSheet(
+                    "QCheckBox::indicator:checked { background-color: #FF8C00; }"
+                )
+                bridge_checkbox.setChecked(is_bridged)
+                bridge_checkbox.setToolTip(
+                    "Bridge: TM is visible to the Supervertaler for Trados plugin "
+                    "(Trados-side wiring lands in a follow-up release)"
+                )
+
+                def on_bridge_toggle(checked, tm_id=tm['id'], row_idx=row):
+                    if hasattr(tm_metadata_mgr, 'set_bridged_to_trados'):
+                        success = tm_metadata_mgr.set_bridged_to_trados(tm_id, bool(checked))
+                        if success:
+                            self.log(
+                                f"✅ TM {tm_id} {'now visible to' if checked else 'hidden from'} Trados plugin"
+                            )
+                        else:
+                            # Revert on failure
+                            sender = tm_table.cellWidget(row_idx, 5)
+                            if sender:
+                                sender.blockSignals(True)
+                                sender.setChecked(not checked)
+                                sender.blockSignals(False)
+
+                bridge_checkbox.toggled.connect(on_bridge_toggle)
+                tm_table.setCellWidget(row, 5, bridge_checkbox)

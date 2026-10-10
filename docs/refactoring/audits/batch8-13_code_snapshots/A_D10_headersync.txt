@@ -1,0 +1,17 @@
+            # Update header checkbox states based on current selection
+            read_header_checkbox.blockSignals(True)
+            write_header_checkbox.blockSignals(True)
+            bridge_header_checkbox.blockSignals(True)
+            superlookup_header_checkbox.blockSignals(True)
+            all_read_checked = all(tm_table.cellWidget(r, 3).isChecked() if tm_table.cellWidget(r, 3) else False for r in range(tm_table.rowCount())) if tm_table.rowCount() > 0 else False
+            all_write_checked = all(tm_table.cellWidget(r, 4).isChecked() if tm_table.cellWidget(r, 4) else False for r in range(tm_table.rowCount())) if tm_table.rowCount() > 0 else False
+            all_bridge_checked = all(tm_table.cellWidget(r, 5).isChecked() if tm_table.cellWidget(r, 5) else False for r in range(tm_table.rowCount())) if tm_table.rowCount() > 0 else False
+            all_superlookup_checked = all(tm_table.cellWidget(r, 6).isChecked() if tm_table.cellWidget(r, 6) else False for r in range(tm_table.rowCount())) if tm_table.rowCount() > 0 else False
+            read_header_checkbox.setChecked(all_read_checked)
+            write_header_checkbox.setChecked(all_write_checked)
+            bridge_header_checkbox.setChecked(all_bridge_checked)
+            superlookup_header_checkbox.setChecked(all_superlookup_checked)
+            read_header_checkbox.blockSignals(False)
+            write_header_checkbox.blockSignals(False)
+            bridge_header_checkbox.blockSignals(False)
+            superlookup_header_checkbox.blockSignals(False)

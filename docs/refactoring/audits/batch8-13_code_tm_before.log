@@ -1,0 +1,131 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b8-13\tm-tab\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b8-13\tm-tab\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Registered ctrl+alt+q (WinAPI)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: ctrl+alt+q
+[LOG] ⌨ Global hotkeys registered (Ctrl+Alt+Q)
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[before] window constructed (7.4s)
+[before] INITIAL TABLE: {"columns": 9, "headers": ["TM Name", "Languages", "Entries", "Read", "Write", "Bridge", "🔍 SuperLookup", "Last Modified", "Description"], "widths": [250, 120, 80, 60, 60, 60, 100, 150, 100], "rows": 0, "cells": []}
+[LOG] ✓ Created TM: Probe TM One (ID: 1, tm_id: probe_tm_one)
+[LOG] ✓ Created TM: Probe TM Two (ID: 2, tm_id: probe_tm_two)
+[LOG] ✓ Alternating row colors applied
+[before] CREATED ids=1,2
+[before] AFTER CREATE: {"columns": 9, "headers": ["TM Name", "Languages", "Entries", "Read", "Write", "Bridge", "🔍 SuperLookup", "Last Modified", "Description"], "widths": [250, 120, 80, 60, 60, 60, 100, 150, 100], "rows": 2, "cells": [["col0:item:Probe TM One", "col1:item:en → ru", "col2:item:0", "col3:CheckmarkCheckBox:checked=False", "col4:BlueCheckmarkCheckBox:checked=True", "col5:CheckmarkCheckBox:checked=False", "col6:TealCheckmarkCheckBox:checked=True", "col7:item:2026-10-10 18:41", "col8:item:desc1"], ["col0:item:Probe TM Two", "col1:item:nl → ru", "col2:item:0", "col3:CheckmarkCheckBox:checked=False", "col4:BlueCheckmarkCheckBox:checked=True", "col5:CheckmarkCheckBox:checked=False", "col6:TealCheckmarkCheckBox:checked=True", "col7:item:2026-10-10 18:41", "col8:item:desc2"]]}
+[before] FLAGS after create: one={'id': 1, 'read': False, 'read_only': False, 'superlookup': True, 'bridged': False} two={'id': 2, 'read': False, 'read_only': False, 'superlookup': True, 'bridged': False}
+[LOG] ✓ Activated TM 1 for project 0
+[LOG] ✅ TM 1 set to readable
+[before] TOGGLE Probe TM One Read col3 (CheckmarkCheckBox) False->True flags={'id': 1, 'read': True, 'read_only': False, 'superlookup': True, 'bridged': False}
+[LOG] ✓ Set TM 1 as read-only
+[LOG] ✅ TM 1 set to read-only
+[before] TOGGLE Probe TM One Write col4 (BlueCheckmarkCheckBox) True->False flags={'id': 1, 'read': True, 'read_only': True, 'superlookup': True, 'bridged': False}
+[LOG] ✓ TM 1 excluded from SuperLookup
+[LOG] ✅ TM 1 excluded from SuperLookup
+[before] TOGGLE Probe TM One SuperLookup col6 (TealCheckmarkCheckBox) True->False flags={'id': 1, 'read': True, 'read_only': True, 'superlookup': False, 'bridged': False}
+[LOG] ✓ Activated TM 2 for project 0
+[LOG] ✅ TM 2 set to readable
+[before] TOGGLE Probe TM Two Read col3 (CheckmarkCheckBox) False->True flags={'id': 2, 'read': True, 'read_only': False, 'superlookup': True, 'bridged': False}
+[LOG] ✓ Set TM 2 as read-only
+[LOG] ✅ TM 2 set to read-only
+[before] TOGGLE Probe TM Two Write col4 (BlueCheckmarkCheckBox) True->False flags={'id': 2, 'read': True, 'read_only': True, 'superlookup': True, 'bridged': False}
+[LOG] ✓ TM 2 excluded from SuperLookup
+[LOG] ✅ TM 2 excluded from SuperLookup
+[before] TOGGLE Probe TM Two SuperLookup col6 (TealCheckmarkCheckBox) True->False flags={'id': 2, 'read': True, 'read_only': True, 'superlookup': False, 'bridged': False}
+[before] HEADER Select All Read: before-click checked=False
+[LOG] ✓ Activated TM 1 for project 0
+[LOG] ✓ Activated TM 2 for project 0
+[before] SELECT-ALL Select All Read col3: header-checked=True rows-checked=[True, True] flags one={'id': 1, 'read': True, 'read_only': True, 'superlookup': False, 'bridged': False} two={'id': 2, 'read': True, 'read_only': True, 'superlookup': False, 'bridged': False}
+[LOG] ✓ Deactivated TM 1 for project 0
+[LOG] ✓ Deactivated TM 2 for project 0
+[before] UNSELECT-ALL Select All Read col3: header-checked=False rows-checked=[False, False]
+[before] HEADER Select All Write: before-click checked=False
+[before] SELECT-ALL Select All Write col4: header-checked=False rows-checked=[False, False] flags one={'id': 1, 'read': False, 'read_only': True, 'superlookup': False, 'bridged': False} two={'id': 2, 'read': False, 'read_only': True, 'superlookup': False, 'bridged': False}
+[before] UNSELECT-ALL Select All Write col4: header-checked=False rows-checked=[False, False]
+[before] HEADER Select All SuperLookup: before-click checked=False
+[LOG] ✓ TM 1 included in SuperLookup
+[LOG] ✓ TM 2 included in SuperLookup
+[before] SELECT-ALL Select All SuperLookup col6: header-checked=True rows-checked=[True, True] flags one={'id': 1, 'read': False, 'read_only': True, 'superlookup': True, 'bridged': False} two={'id': 2, 'read': False, 'read_only': True, 'superlookup': True, 'bridged': False}
+[LOG] ✓ TM 1 excluded from SuperLookup
+[LOG] ✓ TM 2 excluded from SuperLookup
+[before] UNSELECT-ALL Select All SuperLookup col6: header-checked=False rows-checked=[False, False]
+[before] AFTER REFRESH: {"columns": 9, "headers": ["TM Name", "Languages", "Entries", "Read", "Write", "Bridge", "🔍 SuperLookup", "Last Modified", "Description"], "widths": [250, 120, 80, 60, 60, 60, 100, 150, 100], "rows": 2, "cells": [["col0:item:Probe TM One", "col1:item:en → ru", "col2:item:0", "col3:CheckmarkCheckBox:checked=False", "col4:BlueCheckmarkCheckBox:checked=False", "col5:CheckmarkCheckBox:checked=False", "col6:TealCheckmarkCheckBox:checked=False", "col7:item:2026-10-10 18:41", "col8:item:desc1"], ["col0:item:Probe TM Two", "col1:item:nl → ru", "col2:item:0", "col3:CheckmarkCheckBox:checked=False", "col4:BlueCheckmarkCheckBox:checked=False", "col5:CheckmarkCheckBox:checked=False", "col6:TealCheckmarkCheckBox:checked=False", "col7:item:2026-10-10 18:41", "col8:item:desc2"]]}
+[before] SORT col2 asc: names=['Probe TM One', 'Probe TM Two'] indicator=2/SortOrder.AscendingOrder
+[before] SORT col2 desc: names=['Probe TM One', 'Probe TM Two'] indicator=2/SortOrder.DescendingOrder
+[LOG] ✓ Updated TM (ID: 1)
+[before] AFTER RENAME: names=['Probe TM Renamed', 'Probe TM Two']
+[LOG] ✓ Deleted translation units for tm_id: probe_tm_two
+[LOG] ✓ Deleted TM (ID: 2)
+[before] AFTER DELETE: names=['Probe TM Renamed']
+[before] BRIDGE FLAG final: one={'id': 1, 'read': False, 'read_only': True, 'superlookup': False, 'bridged': False}
+[before] TM PROBE OK (8.0s)
+QThreadStorage: entry 1 destroyed before end of thread 0x1c78e5d1810
