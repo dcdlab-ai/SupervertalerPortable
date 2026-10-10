@@ -118,13 +118,19 @@
   BATCH8_9 §9).
 * `_prewarm_ahk`/AHK — оставить как опциональный ускоритель (не удалять).
 * MyMemory включён по умолчанию (500 символов, внешний сервис) — решение о дефолте.
-* **Микро-батч после 8.9 (решение Дмитрия, BATCH8_7 §8 в.2):** удалить чип «🔗 Trados»
-  в Chat и `modules/trados_bridge_client.py` (524 строк): ~123 строки в
-  `chat_view_widget.py` (импорт 23–27, чип 309, блок 332–362, слот 364–399,
-  pref 401–411, ветка toggle 425–431, send-путь 811–817, fetch 835–859) и ~24 строки
-  в `unified_prompt_manager_qt.py` (6337–6358, 6380–6381). Все обращения охраняются;
-  клиент независим от удалённого в 8.7 сервера (читает handshake плагина
-  `trados/runtime/bridge.json`).
+* **Микро-батч после 8.9 (решение Дмитрия, BATCH8_7 §8 в.2) — ВЫПОЛНЕН (8.11,
+  код `d308a93f`, тесты T8.11.1–T8.11.7 подтверждены):** удалены чип «🔗 Trados»
+  в Chat и `modules/trados_bridge_client.py` (524 строк): 129 строк в
+  `chat_view_widget.py`, 26 строк в `unified_prompt_manager_qt.py`.
+* Сироты после 8.11 (решения Дмитрия, BATCH8_11 §9): **удалить UI-слой TM-бриджа**
+  в финальном инвентаре (~40 строк в `_create_tm_list_tab`: колонка «Bridge» индекс 5,
+  чекбоксы, «Select All Bridge»/«Clear All Bridge», `toggle_all_bridge`, tooltip'ы);
+  **оставить** колонку БД `bridged_to_trados` и сеттер `set_bridged_to_trados`
+  (внешний Trados-плагин читает БД напрямую). **Оставить до финальной инвентаризации:**
+  prompt `app_target` «Trados only» (editor combo, `app_value == 'trados'` в
+  unified_prompt_library) как метаданные промптов; superlookup-режим `'trados'`
+  (tag-extraction). **В финальный docs-проход:** док-остатки «Trados» в комментариях
+  (~250+ строк, рекон 8.11 §1.6).
 * Орфанные ключи/данные после 8.7 (инвентаризация в конце Batch #8): ключ
   `general.translator_name` (читается фолбэком «Translator», коммит acfe8880);
   handshake/лог `workbench/runtime/sidekick-bridge.json|.log` (user_data не трогать).
