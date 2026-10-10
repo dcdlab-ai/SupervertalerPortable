@@ -320,7 +320,6 @@ from modules.styled_widgets import (CheckmarkCheckBox, TealCheckmarkCheckBox, Ch
 from modules.statuses import (
     STATUSES,
     DEFAULT_STATUS,
-    StatusDefinition,
     get_status,
 )
 from modules import file_dialog_helper as fdh  # Диалоги файлов с памятью последнего каталога

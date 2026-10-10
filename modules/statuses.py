@@ -1,8 +1,7 @@
 """Centralized status vocabulary for Supervertaler segments."""
 
 from dataclasses import dataclass
-from typing import Dict, Optional
-import re
+from typing import Dict
 
 
 @dataclass(frozen=True)
@@ -180,65 +179,5 @@ def get_status(key: str) -> StatusDefinition:
     """Return status definition for key, falling back to default."""
     resolved = _STATUS_ALIASES.get(key, key)
     return STATUSES.get(resolved, DEFAULT_STATUS)
-
-
-def match_memoq_status(status_text: str) -> tuple[StatusDefinition, Optional[int]]:
-    """Map memoQ status string to a StatusDefinition plus optional match percent."""
-    status_clean = (status_text or "").strip()
-    percent: Optional[int] = None
-
-    if status_clean:
-        match = re.search(r"(\d+)\s*%", status_clean)
-        if match:
-            try:
-                percent = int(match.group(1))
-            except ValueError:
-                percent = None
-
-    lower = status_clean.lower()
-
-    # Build (equivalent, definition) pairs sorted by equivalent length descending.
-    # This ensures specific matches like "pre-translated (101%)" beat generic
-    # ones like "pre-translated", so e.g. CM status isn't lost to pretranslated.
-    _eq_pairs: list[tuple[str, StatusDefinition]] = []
-    for definition in STATUSES.values():
-        for eq in definition.memoQ_equivalents:
-            _eq_pairs.append((eq, definition))
-    _eq_pairs.sort(key=lambda p: len(p[0]), reverse=True)
-
-    for eq, definition in _eq_pairs:
-        if eq in lower:
-            return definition, percent
-
-    if "proofread" in lower and "confirm" in lower:
-        return STATUSES["approved"], percent
-    if "confirm" in lower:
-        return STATUSES["confirmed"], percent
-    if "lock" in lower:
-        return STATUSES["not_started"], percent
-    if "reject" in lower:
-        return STATUSES["rejected"], percent
-    if "proof" in lower:
-        return STATUSES["proofread"], percent
-    if "translate" in lower or "edit" in lower:
-        return STATUSES["draft"], percent
-
-    return DEFAULT_STATUS, percent
-
-
-def compose_memoq_status(
-    status_key: str,
-    match_percent: Optional[int] = None,
-    existing: Optional[str] = None,
-) -> str:
-    """Compose a memoQ status string, preserving existing text when provided."""
-    if existing and existing.strip():
-        return existing.strip()
-
-    status_def = get_status(status_key)
-    base = status_def.memoq_label
-    if match_percent is not None:
-        return f"{base} ({match_percent}%)"
-    return base
 
 

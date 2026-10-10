@@ -113,14 +113,10 @@ class PurpleCheckmarkCheckBox(CheckmarkCheckBox):
     """Purple-themed variant of :class:`CheckmarkCheckBox` – same
     geometry, same hand-painted white checkmark, just a deeper purple
     fill (Material 500 / hover 700) instead of the green default.
-    Used by the voice-dictation-bias UI:
-
-      - Termbase Manager → 🎤 Voice column (one per termbase)
-      - Voice tab → "Also bias from your termbases" toggle
-
-    Both UI surfaces drive the same feature (per-termbase voice-
-    dictation vocabulary biasing); using the same colour keeps the
-    visual identity consistent so users can connect them at a glance.
+    The voice-dictation-bias UI surfaces (Termbase Manager 🎤 Voice
+    column, Voice tab "Also bias from your termbases" toggle) were
+    removed in Batch #8.4; the class is kept for the purple colour
+    identity referenced by the sibling checkmark variants.
 
     The CheckmarkCheckBox parent class handles the paintEvent that
     draws the white checkmark – we only need to override the stylesheet
@@ -167,7 +163,7 @@ class TealCheckmarkCheckBox(CheckmarkCheckBox):
     per-resource toggle controlling whether that TM / termbase is
     searched by SuperLookup. It is deliberately independent of the
     Read flag, so the colour is deliberately distinct from Read (green),
-    Write (blue), Bridge/AI (orange), Project (pink) and Voice (purple) –
+    Write (blue), Bridge/AI (orange) and Project (pink) –
     one glance tells you which switch you're looking at.
     """
 
