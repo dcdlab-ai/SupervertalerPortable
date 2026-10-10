@@ -150,6 +150,19 @@
 * Пройтись по списку фич «простой версии»: Tools-меню (PDF Rescue, TMX Editor,
   Statistics, Quick Count, Image Extractor, Scratchpad, Log Window, Token Usage &
   Cost), QA, AI Assistant, prompt manager — что остаётся/удаляется/переносится.
+* **GNU gettext (.po/.pot) — на удаление (решение Дмитрия, BATCH8_12_CODE §9.2,
+  2026-10-10):** функция не нужна. Состав (предварительный, границы пересчитать
+  AST): пункты меню `import_po_action` 7961–7964 и `export_po_action` 8022–8025,
+  обработчики `import_po_file` (32718–32838) и `export_po_file` (32841–…),
+  `modules/po_handler.py` (POHandler), `current_project.po_source_path`,
+  фильтры «PO (gettext)» (9478, 29751), «.po» в списке открываемых расширений
+  (9455). Дефект-симптом: `@staticmethod` (32713) отделён комментариями и
+  «приклеивается» к `import_po_file(self)` → TypeError «missing self» →
+  «нет реакции» на Import.
+* **Мелочи, зафиксированные в 8.12 (решения Дмитрия, BATCH8_12_CODE §9.2):**
+  `PurpleCheckmarkCheckBox` (styled_widgets.py, 0 потребителей) — удалить в 8.18;
+  pyflakes-предупреждения termbase_manager.py (sqlite3/json/Tuple unused,
+  f-string без плейсхолдеров, 7 шт.) — включить в 8.18.
 
 ## 9. Отложено из апстрима и фич
 
