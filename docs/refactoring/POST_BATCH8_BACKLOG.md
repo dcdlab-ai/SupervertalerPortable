@@ -62,7 +62,12 @@
 * `start.bat` с подменой профиля (USERPROFILE/HOME/APPDATA/LOCALAPPDATA/TEMP/TMP
   в корень сборки) и запуском через pythonw;
 * сокращённый `requirements.txt`;
-* скрипт установки; pip с `--no-cache-dir`.
+* скрипт установки; pip с `--no-cache-dir`;
+* **решение Дмитрия 2026-10-10 (отчёт 8.12 §7 п.9):** батч 8.14 растворяется в P2;
+  удалить из requirements/pyproject: lxml (транзитивен python-docx, из прямого списка),
+  sacrebleu, chardet, pyyaml, markdown, numpy, sounddevice, vosk, ahk, faster-whisper,
+  PyQt6-WebEngine, **pyobjc-framework-Cocoa** (macOS не поддерживаем); чистая установка
+  в embed — единственный честный тест; `pip uninstall ahk` при пересборке тестовой сборки.
 
 ## 5. X1 — выход из программы
 
