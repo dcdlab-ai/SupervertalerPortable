@@ -1,0 +1,169 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b8-12\regress\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b8-12\regress\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Failed to register ctrl+alt+q (may be in use by another application)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+[LOG] ⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⚠ Global hotkeys: some failed to register: ctrl+alt+q
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[before] window built
+[LOG] ✓ Alternating row colors applied
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] ℹ️ Okapi sidecar not installed yet – will offer to download on first DOCX import
+[before] event loop pumped 6s; okapi_sidecar=True
+[LOG] 📄 Importing simple text file: test.txt
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 1760060986704): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 1760061882768): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 3 (obj 1760061884368): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 4 (obj 1760061884688): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 5 (obj 1760061885008): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 5 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 1504016538)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 5 segments from 5 lines (text file)
+[LOG]   (1 empty lines preserved for structure)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 5 segments...
+[LOG] ✅ Termbase batch worker complete: 5 segments in 0.00s (367921 seg/sec, 0 with matches)
+[LOG] ✓ Exported 5 lines (5 segments) to: out_simple.txt
+[LOG]   Encoding: utf-8
+[LOG] 📄 Importing simple text file: test.md
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 1760061893968): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 1760061894288): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 3 (obj 1760061894608): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 4 (obj 1760061894928): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 5 (obj 1760061895248): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 5 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 3003274205)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 5 segments from 5 lines (Markdown file)
+[LOG]   📝 Markdown syntax highlighting enabled
+[LOG]   (2 empty lines preserved for structure)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 5 segments...
+[LOG] ✅ Termbase batch worker complete: 5 segments in 0.00s (582542 seg/sec, 0 with matches)
+[LOG] Importing: test.docx
+[LOG] ℹ️ Showing 'Download Okapi sidecar?' dialog (about 70 MB, has_bundled_jre=True)
+[LOG] ℹ️ User accepted sidecar download – starting fetch
+[LOG] Starting freshly-installed Okapi sidecar…
+[LOG] ✅ Okapi sidecar v0.1.8 ready
+[LOG] 🔧 Extracting via Okapi sidecar (en → en)...
+[LOG] ✅ Okapi extracted 4 segments from 4 text units (filter: okf_openxml)
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 1760061898448): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 1760061897168): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 3 (obj 1760061897488): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 4 (obj 1760133513296): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 4 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 3496542563)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 4 segments from 4 paragraphs
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 4 segments...
+[LOG] ✅ Termbase batch worker complete: 4 segments in 0.00s (294337 seg/sec, 0 with matches)
+[LOG] Merging via Okapi sidecar (4 segments)...
+[LOG] Okapi merge complete: out_translated.docx
+[LOG]       🔢 Export word-count check [out_translated.docx]: 21/21 words (100%; threshold 95%)
+[LOG] Exporting all segments from grid...
+[LOG] Found 4 segments in grid
+[LOG] [TMX Generator] Created TMX with 4 translation units
+[LOG] [TMX Generator] Saved TMX file: D:\Temp\SupervertalerPortable\refactoring\b8-12\regress\out-before\out_grid.tmx
+[LOG] ✓ Exported TMX from grid: D:\Temp\SupervertalerPortable\refactoring\b8-12\regress\out-before\out_grid.tmx (4 segments)
+[before] RESULTS {'import_txt_segments': 5, 'export_simple_txt': '5a12501f934a589c', 'import_md_segments': 5, 'import_docx_segments': 4, 'export_docx': '44828d90090f046d', 'export_tmx': 'c413d56372e69dd9'}
+[before] MODAL-ATTEMPTS 4: ["QDialog.exec QMessageBox 'Supervertaler Workbench'", "QDialog.exec QDialog 'Import Text / Markdown File'", "QDialog.exec QDialog 'Export Simple Text File'", "QDialog.exec QDialog 'Import Text / Markdown File'"]
+QThreadStorage: entry 1 destroyed before end of thread 0x199c5e89e20

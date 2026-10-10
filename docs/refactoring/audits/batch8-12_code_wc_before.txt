@@ -1,0 +1,6 @@
+  57010 Supervertaler.py
+    244 modules/statuses.py
+    263 modules/help_system.py
+   1497 modules/termbase_manager.py
+    498 modules/styled_widgets.py
+  59512 total

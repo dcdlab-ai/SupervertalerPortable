@@ -1,0 +1,59 @@
+=== public names per orphan ===
+extract_tm: ExtractTM, get_extract_path, extract_exists
+feature_manager: FeatureModule, FeatureManager, lazy_import_whisper, lazy_import_chromadb, lazy_import_sentence_transformers, lazy_import_deepl, lazy_import_boto3, lazy_import_hunspell, lazy_import_webengine, lazy_import_fitz, get_feature_manager, check_feature
+find_replace: FindReplaceDialog
+glossary_manager: TermbaseInfo, TermbaseEntry, TermbaseManager
+identifier_conventions: tm_search_key, tm_registry_id, termbase_search_key, tm_search_keys, looks_like_registry_id
+pdf_rescue_tkinter: PDFRescue
+project_home_panel: ProjectHomeItem, ProjectHomePanel
+project_tm: ProjectTM
+prompt_assistant: PromptAssistant
+prompt_library: get_user_data_path, PromptLibrary
+quick_access_sidebar: QuickActionButton, SidebarSection, QuickAccessSidebar
+ribbon_widget: RibbonButton, RibbonGroup, RibbonTab, ColoredTabBar, RibbonWidget, RibbonBuilder
+style_guide_manager: StyleGuideLibrary
+superdocs: __getattr__
+superdocs_viewer_qt: __getattr__
+tracked_changes: TrackedChangesAgent, TrackedChangesBrowser, format_tracked_changes_context
+translation_services: TranslationRequest, TranslationResult, TranslationServices, create_translation_service
+
+=== name hits in consumer code ===
+--- RibbonButton (1 hits)
+    Supervertaler.py:9013: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+--- RibbonGroup (2 hits)
+    Supervertaler.py:9013: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9024: # project_group = RibbonGroup("Project")
+--- RibbonTab (2 hits)
+    Supervertaler.py:9013: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9023: # home_tab = RibbonTab()
+--- RibbonWidget (2 hits)
+    Supervertaler.py:9013: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9016: # self.ribbon = RibbonWidget(self)
+--- TermbaseManager (11 hits)
+    Supervertaler.py:6293: from modules.termbase_manager import TermbaseManager
+    Supervertaler.py:6294: self.termbase_mgr = TermbaseManager(self.db_manager, self.log)
+    Supervertaler.py:14685: терминологию Alt+Up) и ``TermbaseManager.add_term`` и выполняет
+    Supervertaler.py:15893: from modules.termbase_manager import TermbaseManager
+    Supervertaler.py:15894: termbase_mgr = TermbaseManager(self.db_manager, self.log)
+    Supervertaler.py:17119: from modules.termbase_manager import TermbaseManager
+    modules/database_manager.py:650: # sync by TermbaseManager.set_termbase_priority (the single write
+    modules/database_migrations.py:965: # DatabaseManager._create_tables(), and TermbaseManager.set_termbase_priority
+    modules/termbase_import_export.py:76: termbase_manager: TermbaseManager instance
+    modules/termbase_import_export.py:388: termbase_manager: TermbaseManager instance
+    modules/termbase_manager.py:36: class TermbaseManager:
+--- get_user_data_path (12 hits)
+    Supervertaler.py:241: def get_user_data_path() -> Path:
+    Supervertaler.py:6225: self.user_data_path = get_user_data_path()
+    Supervertaler.py:56614: log_dir = get_user_data_path() / "workbench" / "logs"
+    Supervertaler.py:56838: # Берём get_user_data_path() (уровня модуля), а не через
+    Supervertaler.py:56843: _settings_path = get_user_data_path() / "workbench" / "settings" / "settings.json"
+    modules/config_manager.py:127: def get_user_data_path(self) -> str:
+    modules/config_manager.py:216: user_data_path = self.get_user_data_path()
+    modules/config_manager.py:239: user_data_path = self.get_user_data_path()
+    modules/config_manager.py:343: user_data_path = self.get_user_data_path()
+    modules/config_manager.py:360: user_data_path = self.get_user_data_path()
+    modules/config_manager.py:401: 'user_data_path': self.get_user_data_path(),
+    modules/ui_scale.py:75: """Mirror Supervertaler.get_user_data_path() with the lightest possible logic."""
+
+=== names with 0 hits in consumer code (43/49) ===
+ColoredTabBar, ExtractTM, FeatureManager, FeatureModule, FindReplaceDialog, PDFRescue, ProjectHomeItem, ProjectHomePanel, ProjectTM, PromptAssistant, PromptLibrary, QuickAccessSidebar, QuickActionButton, RibbonBuilder, SidebarSection, StyleGuideLibrary, TermbaseEntry, TermbaseInfo, TrackedChangesAgent, TrackedChangesBrowser, TranslationRequest, TranslationResult, TranslationServices, __getattr__, check_feature, create_translation_service, extract_exists, format_tracked_changes_context, get_extract_path, get_feature_manager, lazy_import_boto3, lazy_import_chromadb, lazy_import_deepl, lazy_import_fitz, lazy_import_hunspell, lazy_import_sentence_transformers, lazy_import_webengine, lazy_import_whisper, looks_like_registry_id, termbase_search_key, tm_registry_id, tm_search_key, tm_search_keys

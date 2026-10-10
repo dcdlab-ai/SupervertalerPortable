@@ -1,0 +1,4632 @@
+[
+ {
+  "call": "self._load_language_pair_from_disk()",
+  "resolved": "SupervertalerQt._load_language_pair_from_disk",
+  "ok": true
+ },
+ {
+  "call": "self.init_ui()",
+  "resolved": "SupervertalerQt.init_ui",
+  "ok": true
+ },
+ {
+  "call": "self._get_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._get_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_language_settings()",
+  "resolved": "SupervertalerQt.load_language_settings",
+  "ok": true
+ },
+ {
+  "call": "self.restore_last_project_if_enabled()",
+  "resolved": "SupervertalerQt.restore_last_project_if_enabled",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self._init_usage_statistics()",
+  "resolved": "SupervertalerQt._init_usage_statistics",
+  "ok": true
+ },
+ {
+  "call": "self.restart_auto_backup_timer()",
+  "resolved": "SupervertalerQt.restart_auto_backup_timer",
+  "ok": true
+ },
+ {
+  "call": "self._apply_gemini_proxy()",
+  "resolved": "SupervertalerQt._apply_gemini_proxy",
+  "ok": true
+ },
+ {
+  "call": "self._init_okapi_sidecar_deferred()",
+  "resolved": "SupervertalerQt._init_okapi_sidecar_deferred",
+  "ok": true
+ },
+ {
+  "call": "self.load_font_sizes_from_preferences()",
+  "resolved": "SupervertalerQt.load_font_sizes_from_preferences",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self._sync_bottom_dock_menu()",
+  "resolved": "SupervertalerQt._sync_bottom_dock_menu",
+  "ok": true
+ },
+ {
+  "call": "self.set_termlens_position()",
+  "resolved": "SupervertalerQt.set_termlens_position",
+  "ok": true
+ },
+ {
+  "call": "self.set_termlens_position()",
+  "resolved": "SupervertalerQt.set_termlens_position",
+  "ok": true
+ },
+ {
+  "call": "self.setWindowTitle()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.setGeometry()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.setMinimumSize()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.create_menus()",
+  "resolved": "SupervertalerQt.create_menus",
+  "ok": true
+ },
+ {
+  "call": "self.create_main_layout()",
+  "resolved": "SupervertalerQt.create_main_layout",
+  "ok": true
+ },
+ {
+  "call": "self.setStatusBar()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._setup_progress_indicators()",
+  "resolved": "SupervertalerQt._setup_progress_indicators",
+  "ok": true
+ },
+ {
+  "call": "self.setup_global_shortcuts()",
+  "resolved": "SupervertalerQt.setup_global_shortcuts",
+  "ok": true
+ },
+ {
+  "call": "self.setWindowIcon()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.menuBar()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.update_recent_menu()",
+  "resolved": "SupervertalerQt.update_recent_menu",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.translate_multiple_segments()",
+  "resolved": "SupervertalerQt.translate_multiple_segments",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._switch_main_tab()",
+  "resolved": "SupervertalerQt._switch_main_tab",
+  "ok": true
+ },
+ {
+  "call": "self._switch_main_tab()",
+  "resolved": "SupervertalerQt._switch_main_tab",
+  "ok": true
+ },
+ {
+  "call": "self._switch_main_tab()",
+  "resolved": "SupervertalerQt._switch_main_tab",
+  "ok": true
+ },
+ {
+  "call": "self._switch_main_tab()",
+  "resolved": "SupervertalerQt._switch_main_tab",
+  "ok": true
+ },
+ {
+  "call": "self._switch_main_tab()",
+  "resolved": "SupervertalerQt._switch_main_tab",
+  "ok": true
+ },
+ {
+  "call": "self._toggle_match_panel_tm_layout()",
+  "resolved": "SupervertalerQt._toggle_match_panel_tm_layout",
+  "ok": true
+ },
+ {
+  "call": "self.set_termlens_position()",
+  "resolved": "SupervertalerQt.set_termlens_position",
+  "ok": true
+ },
+ {
+  "call": "self.set_termlens_position()",
+  "resolved": "SupervertalerQt.set_termlens_position",
+  "ok": true
+ },
+ {
+  "call": "self.set_termlens_position()",
+  "resolved": "SupervertalerQt.set_termlens_position",
+  "ok": true
+ },
+ {
+  "call": "self._go_to_settings_tab()",
+  "resolved": "SupervertalerQt._go_to_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._open_url()",
+  "resolved": "SupervertalerQt._open_url",
+  "ok": true
+ },
+ {
+  "call": "self._open_url()",
+  "resolved": "SupervertalerQt._open_url",
+  "ok": true
+ },
+ {
+  "call": "self._open_url()",
+  "resolved": "SupervertalerQt._open_url",
+  "ok": true
+ },
+ {
+  "call": "self._open_url()",
+  "resolved": "SupervertalerQt._open_url",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.change_status_selected()",
+  "resolved": "SupervertalerQt.change_status_selected",
+  "ok": true
+ },
+ {
+  "call": "self.set_font_family()",
+  "resolved": "SupervertalerQt.set_font_family",
+  "ok": true
+ },
+ {
+  "call": "self.setCentralWidget()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.create_grid_view_widget_for_home()",
+  "resolved": "SupervertalerQt.create_grid_view_widget_for_home",
+  "ok": true
+ },
+ {
+  "call": "self.create_translation_memories_tab()",
+  "resolved": "SupervertalerQt.create_translation_memories_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_termbases_tab()",
+  "resolved": "SupervertalerQt.create_termbases_tab",
+  "ok": true
+ },
+ {
+  "call": "self._setup_superlookup_hotkeys()",
+  "resolved": "SupervertalerQt._setup_superlookup_hotkeys",
+  "ok": true
+ },
+ {
+  "call": "self.create_settings_tab()",
+  "resolved": "SupervertalerQt.create_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_reference_images_tab()",
+  "resolved": "SupervertalerQt.create_reference_images_tab",
+  "ok": true
+ },
+ {
+  "call": "self._on_esc_quick_lookup_dismiss()",
+  "resolved": "SupervertalerQt._on_esc_quick_lookup_dismiss",
+  "ok": true
+ },
+ {
+  "call": "self._quick_add_term_with_priority()",
+  "resolved": "SupervertalerQt._quick_add_term_with_priority",
+  "ok": true
+ },
+ {
+  "call": "self._quick_add_term_with_priority()",
+  "resolved": "SupervertalerQt._quick_add_term_with_priority",
+  "ok": true
+ },
+ {
+  "call": "self.insert_match_by_number()",
+  "resolved": "SupervertalerQt.insert_match_by_number",
+  "ok": true
+ },
+ {
+  "call": "self._compare_panel_nav_mt()",
+  "resolved": "SupervertalerQt._compare_panel_nav_mt",
+  "ok": true
+ },
+ {
+  "call": "self._compare_panel_nav_mt()",
+  "resolved": "SupervertalerQt._compare_panel_nav_mt",
+  "ok": true
+ },
+ {
+  "call": "self._compare_panel_nav_tm()",
+  "resolved": "SupervertalerQt._compare_panel_nav_tm",
+  "ok": true
+ },
+ {
+  "call": "self._compare_panel_nav_tm()",
+  "resolved": "SupervertalerQt._compare_panel_nav_tm",
+  "ok": true
+ },
+ {
+  "call": "self._handle_termlens_shortcut()",
+  "resolved": "SupervertalerQt._handle_termlens_shortcut",
+  "ok": true
+ },
+ {
+  "call": "self._get_active_match_shortcut_mode()",
+  "resolved": "SupervertalerQt._get_active_match_shortcut_mode",
+  "ok": true
+ },
+ {
+  "call": "self._get_active_match_shortcut_mode()",
+  "resolved": "SupervertalerQt._get_active_match_shortcut_mode",
+  "ok": true
+ },
+ {
+  "call": "self._get_active_match_shortcut_mode()",
+  "resolved": "SupervertalerQt._get_active_match_shortcut_mode",
+  "ok": true
+ },
+ {
+  "call": "self._get_active_match_shortcut_mode()",
+  "resolved": "SupervertalerQt._get_active_match_shortcut_mode",
+  "ok": true
+ },
+ {
+  "call": "self._update_llm_indicator()",
+  "resolved": "SupervertalerQt._update_llm_indicator",
+  "ok": true
+ },
+ {
+  "call": "self._setup_ollama_keepwarm()",
+  "resolved": "SupervertalerQt._setup_ollama_keepwarm",
+  "ok": true
+ },
+ {
+  "call": "self._apply_ollama_timeout_setting()",
+  "resolved": "SupervertalerQt._apply_ollama_timeout_setting",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._show_confirmed_basis_menu()",
+  "resolved": "SupervertalerQt._show_confirmed_basis_menu",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.show_project_info_dialog()",
+  "resolved": "SupervertalerQt.show_project_info_dialog",
+  "ok": true
+ },
+ {
+  "call": "self._load_settings_section()",
+  "resolved": "SupervertalerQt._load_settings_section",
+  "ok": true
+ },
+ {
+  "call": "self._load_settings_section()",
+  "resolved": "SupervertalerQt._load_settings_section",
+  "ok": true
+ },
+ {
+  "call": "self.windowIcon()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._tray_show_window()",
+  "resolved": "SupervertalerQt._tray_show_window",
+  "ok": true
+ },
+ {
+  "call": "self._ensure_superlookup_top_tab()",
+  "resolved": "SupervertalerQt._ensure_superlookup_top_tab",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.load_llm_settings()",
+  "resolved": "SupervertalerQt.load_llm_settings",
+  "ok": true
+ },
+ {
+  "call": "self._prewarm_ahk()",
+  "resolved": "SupervertalerQt._prewarm_ahk",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self._get_warning_banner()",
+  "resolved": "SupervertalerQt._get_warning_banner",
+  "ok": true
+ },
+ {
+  "call": "self._ensure_shared_filter()",
+  "resolved": "SupervertalerQt._ensure_shared_filter",
+  "ok": true
+ },
+ {
+  "call": "self._ensure_shared_filter()",
+  "resolved": "SupervertalerQt._ensure_shared_filter",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self._create_match_panel()",
+  "resolved": "SupervertalerQt._create_match_panel",
+  "ok": true
+ },
+ {
+  "call": "self._create_preview_tab()",
+  "resolved": "SupervertalerQt._create_preview_tab",
+  "ok": true
+ },
+ {
+  "call": "self.update_warning_banner()",
+  "resolved": "SupervertalerQt.update_warning_banner",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._update_spellcheck_button_style()",
+  "resolved": "SupervertalerQt._update_spellcheck_button_style",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.create_translation_grid()",
+  "resolved": "SupervertalerQt.create_translation_grid",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._create_general_settings_tab()",
+  "resolved": "SupervertalerQt._create_general_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_backup_settings_tab()",
+  "resolved": "SupervertalerQt._create_backup_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_autocorrect_settings_tab()",
+  "resolved": "SupervertalerQt._create_autocorrect_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_ai_settings_tab()",
+  "resolved": "SupervertalerQt._create_ai_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_language_pair_tab()",
+  "resolved": "SupervertalerQt._create_language_pair_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_mt_settings_tab()",
+  "resolved": "SupervertalerQt._create_mt_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_mt_quick_lookup_settings_tab()",
+  "resolved": "SupervertalerQt._create_mt_quick_lookup_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_view_settings_tab()",
+  "resolved": "SupervertalerQt._create_view_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_system_prompts_tab()",
+  "resolved": "SupervertalerQt._create_system_prompts_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_debug_settings_tab()",
+  "resolved": "SupervertalerQt._create_debug_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_segmentation_rules_tab()",
+  "resolved": "SupervertalerQt.create_segmentation_rules_tab",
+  "ok": true
+ },
+ {
+  "call": "self._create_file_types_settings_tab()",
+  "resolved": "SupervertalerQt._create_file_types_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_log_tab()",
+  "resolved": "SupervertalerQt.create_log_tab",
+  "ok": true
+ },
+ {
+  "call": "self._get_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._get_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self._get_ui_chrome_compact()",
+  "resolved": "SupervertalerQt._get_ui_chrome_compact",
+  "ok": true
+ },
+ {
+  "call": "self._update_settings_sidebar_theme()",
+  "resolved": "SupervertalerQt._update_settings_sidebar_theme",
+  "ok": true
+ },
+ {
+  "call": "self._wrap_in_scroll()",
+  "resolved": "SupervertalerQt._wrap_in_scroll",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._apply_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._apply_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self._apply_ui_chrome_compactness()",
+  "resolved": "SupervertalerQt._apply_ui_chrome_compactness",
+  "ok": true
+ },
+ {
+  "call": "self._stop_okapi_sidecar()",
+  "resolved": "SupervertalerQt._stop_okapi_sidecar",
+  "ok": true
+ },
+ {
+  "call": "self._close_detached_log_windows()",
+  "resolved": "SupervertalerQt._close_detached_log_windows",
+  "ok": true
+ },
+ {
+  "call": "self.save_project()",
+  "resolved": "SupervertalerQt.save_project",
+  "ok": true
+ },
+ {
+  "call": "self._stop_okapi_sidecar()",
+  "resolved": "SupervertalerQt._stop_okapi_sidecar",
+  "ok": true
+ },
+ {
+  "call": "self._close_detached_log_windows()",
+  "resolved": "SupervertalerQt._close_detached_log_windows",
+  "ok": true
+ },
+ {
+  "call": "self._stop_okapi_sidecar()",
+  "resolved": "SupervertalerQt._stop_okapi_sidecar",
+  "ok": true
+ },
+ {
+  "call": "self._close_detached_log_windows()",
+  "resolved": "SupervertalerQt._close_detached_log_windows",
+  "ok": true
+ },
+ {
+  "call": "self._init_search_history()",
+  "resolved": "SuperlookupTab._init_search_history",
+  "ok": true
+ },
+ {
+  "call": "self.init_ui()",
+  "resolved": "SuperlookupTab.init_ui",
+  "ok": true
+ },
+ {
+  "call": "self.register_global_hotkey()",
+  "resolved": "SuperlookupTab.register_global_hotkey",
+  "ok": true
+ },
+ {
+  "call": "self.create_tm_results_tab()",
+  "resolved": "SuperlookupTab.create_tm_results_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_termbase_results_tab()",
+  "resolved": "SuperlookupTab.create_termbase_results_tab",
+  "ok": true
+ },
+ {
+  "call": "self.create_settings_tab()",
+  "resolved": "SuperlookupTab.create_settings_tab",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._add_to_search_history()",
+  "resolved": "SuperlookupTab._add_to_search_history",
+  "ok": true
+ },
+ {
+  "call": "self.get_selected_tm_ids()",
+  "resolved": "SuperlookupTab.get_selected_tm_ids",
+  "ok": true
+ },
+ {
+  "call": "self.get_selected_termbase_ids()",
+  "resolved": "SuperlookupTab.get_selected_termbase_ids",
+  "ok": true
+ },
+ {
+  "call": "self.get_search_direction()",
+  "resolved": "SuperlookupTab.get_search_direction",
+  "ok": true
+ },
+ {
+  "call": "self.get_language_filters()",
+  "resolved": "SuperlookupTab.get_language_filters",
+  "ok": true
+ },
+ {
+  "call": "self.populate_language_dropdowns()",
+  "resolved": "SuperlookupTab.populate_language_dropdowns",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.display_tm_results()",
+  "resolved": "SuperlookupTab.display_tm_results",
+  "ok": true
+ },
+ {
+  "call": "self.display_termbase_results()",
+  "resolved": "SuperlookupTab.display_termbase_results",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.perform_lookup()",
+  "resolved": "SuperlookupTab.perform_lookup",
+  "ok": true
+ },
+ {
+  "call": "self.populate_language_dropdowns()",
+  "resolved": "SuperlookupTab.populate_language_dropdowns",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._show_termbase_context_menu()",
+  "resolved": "SupervertalerQt._show_termbase_context_menu",
+  "ok": true
+ },
+ {
+  "call": "self._build_termbase_index()",
+  "resolved": "SupervertalerQt._build_termbase_index",
+  "ok": true
+ },
+ {
+  "call": "self._show_create_termbase_dialog()",
+  "resolved": "SupervertalerQt._show_create_termbase_dialog",
+  "ok": true
+ },
+ {
+  "call": "self._show_term_extraction_dialog()",
+  "resolved": "SupervertalerQt._show_term_extraction_dialog",
+  "ok": true
+ },
+ {
+  "call": "self._import_termbase()",
+  "resolved": "SupervertalerQt._import_termbase",
+  "ok": true
+ },
+ {
+  "call": "self._export_termbase()",
+  "resolved": "SupervertalerQt._export_termbase",
+  "ok": true
+ },
+ {
+  "call": "self._delete_termbase()",
+  "resolved": "SupervertalerQt._delete_termbase",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self._post_termbase_delete_refresh()",
+  "resolved": "SupervertalerQt._post_termbase_delete_refresh",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._build_termbase_index()",
+  "resolved": "SupervertalerQt._build_termbase_index",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._normalize_language_code()",
+  "resolved": "SupervertalerQt._normalize_language_code",
+  "ok": true
+ },
+ {
+  "call": "self._normalize_language_code()",
+  "resolved": "SupervertalerQt._normalize_language_code",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self._build_termbase_index()",
+  "resolved": "SupervertalerQt._build_termbase_index",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_llm_settings()",
+  "resolved": "SupervertalerQt.load_llm_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_provider_enabled_states()",
+  "resolved": "SupervertalerQt.load_provider_enabled_states",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_api_keys()",
+  "resolved": "SupervertalerQt.load_api_keys",
+  "ok": true
+ },
+ {
+  "call": "self.load_proxy_settings()",
+  "resolved": "SupervertalerQt.load_proxy_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_ai_settings_from_ui()",
+  "resolved": "SupervertalerQt._save_ai_settings_from_ui",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_provider_enabled_states()",
+  "resolved": "SupervertalerQt.load_provider_enabled_states",
+  "ok": true
+ },
+ {
+  "call": "self.load_api_keys()",
+  "resolved": "SupervertalerQt.load_api_keys",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_mt_settings_from_ui()",
+  "resolved": "SupervertalerQt._save_mt_settings_from_ui",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_api_keys()",
+  "resolved": "SupervertalerQt.load_api_keys",
+  "ok": true
+ },
+ {
+  "call": "self.load_provider_enabled_states()",
+  "resolved": "SupervertalerQt.load_provider_enabled_states",
+  "ok": true
+ },
+ {
+  "call": "self.load_llm_settings()",
+  "resolved": "SupervertalerQt.load_llm_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_llm_settings()",
+  "resolved": "SupervertalerQt.load_llm_settings",
+  "ok": true
+ },
+ {
+  "call": "self._get_active_custom_profile()",
+  "resolved": "SupervertalerQt._get_active_custom_profile",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._live_save_backup_settings()",
+  "resolved": "SupervertalerQt._live_save_backup_settings",
+  "ok": true
+ },
+ {
+  "call": "self._live_save_backup_settings()",
+  "resolved": "SupervertalerQt._live_save_backup_settings",
+  "ok": true
+ },
+ {
+  "call": "self._live_save_backup_settings()",
+  "resolved": "SupervertalerQt._live_save_backup_settings",
+  "ok": true
+ },
+ {
+  "call": "self._live_save_backup_settings()",
+  "resolved": "SupervertalerQt._live_save_backup_settings",
+  "ok": true
+ },
+ {
+  "call": "self._live_save_backup_settings()",
+  "resolved": "SupervertalerQt._live_save_backup_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self._get_unified_settings_path()",
+  "resolved": "SupervertalerQt._get_unified_settings_path",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_settings_section()",
+  "resolved": "SupervertalerQt._save_settings_section",
+  "ok": true
+ },
+ {
+  "call": "self._get_unified_settings_path()",
+  "resolved": "SupervertalerQt._get_unified_settings_path",
+  "ok": true
+ },
+ {
+  "call": "self._reinitialize_with_new_data_path()",
+  "resolved": "SupervertalerQt._reinitialize_with_new_data_path",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_general_settings_from_ui()",
+  "resolved": "SupervertalerQt._save_general_settings_from_ui",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._persist_autocorrect_settings()",
+  "resolved": "SupervertalerQt._persist_autocorrect_settings",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self._persist_autocorrect_settings()",
+  "resolved": "SupervertalerQt._persist_autocorrect_settings",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._get_ui_chrome_compact()",
+  "resolved": "SupervertalerQt._get_ui_chrome_compact",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_view_settings_from_ui()",
+  "resolved": "SupervertalerQt._save_view_settings_from_ui",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._set_confirmed_progress_basis()",
+  "resolved": "SupervertalerQt._set_confirmed_progress_basis",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._apply_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._apply_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self._get_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._get_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self._apply_global_ui_font_scale()",
+  "resolved": "SupervertalerQt._apply_global_ui_font_scale",
+  "ok": true
+ },
+ {
+  "call": "self._load_settings_section()",
+  "resolved": "SupervertalerQt._load_settings_section",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._save_debug_settings_from_ui()",
+  "resolved": "SupervertalerQt._save_debug_settings_from_ui",
+  "ok": true
+ },
+ {
+  "call": "self._get_warning_banner()",
+  "resolved": "SupervertalerQt._get_warning_banner",
+  "ok": true
+ },
+ {
+  "call": "self._ensure_shared_filter()",
+  "resolved": "SupervertalerQt._ensure_shared_filter",
+  "ok": true
+ },
+ {
+  "call": "self._ensure_shared_filter()",
+  "resolved": "SupervertalerQt._ensure_shared_filter",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self._create_match_panel()",
+  "resolved": "SupervertalerQt._create_match_panel",
+  "ok": true
+ },
+ {
+  "call": "self._create_preview_tab()",
+  "resolved": "SupervertalerQt._create_preview_tab",
+  "ok": true
+ },
+ {
+  "call": "self.update_warning_banner()",
+  "resolved": "SupervertalerQt.update_warning_banner",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._update_spellcheck_button_style()",
+  "resolved": "SupervertalerQt._update_spellcheck_button_style",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.create_translation_grid()",
+  "resolved": "SupervertalerQt.create_translation_grid",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_quick_filter()",
+  "resolved": "SupervertalerQt.apply_quick_filter",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.apply_sort()",
+  "resolved": "SupervertalerQt.apply_sort",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._widget_is_alive()",
+  "resolved": "SupervertalerQt._widget_is_alive",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self._set_tag_view_mode()",
+  "resolved": "SupervertalerQt._set_tag_view_mode",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.toggle_invisible_display()",
+  "resolved": "SupervertalerQt.toggle_invisible_display",
+  "ok": true
+ },
+ {
+  "call": "self.load_general_settings()",
+  "resolved": "SupervertalerQt.load_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.get_effective_import_options()",
+  "resolved": "SupervertalerQt.get_effective_import_options",
+  "ok": true
+ },
+ {
+  "call": "self._build_import_options_widget()",
+  "resolved": "SupervertalerQt._build_import_options_widget",
+  "ok": true
+ },
+ {
+  "call": "self._read_import_option_widgets()",
+  "resolved": "SupervertalerQt._read_import_option_widgets",
+  "ok": true
+ },
+ {
+  "call": "self.save_general_settings()",
+  "resolved": "SupervertalerQt.save_general_settings",
+  "ok": true
+ },
+ {
+  "call": "self.tr()",
+  "resolved": "Qt base-class API",
+  "ok": true
+ },
+ {
+  "call": "self.log()",
+  "resolved": "SupervertalerQt.log",
+  "ok": true
+ },
+ {
+  "call": "self._load_general_settings_from_file()",
+  "resolved": "SupervertalerQt._load_general_settings_from_file",
+  "ok": true
+ }
+]

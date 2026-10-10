@@ -1,0 +1,2 @@
+headless imports: 92 ok / 1 fail / 93 total
+FAIL modules.pdf_rescue_Qt: ModuleNotFoundError: No module named 'fitz'

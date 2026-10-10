@@ -1,0 +1,10 @@
+    100 tk
+     19 messagebox
+      8 dialog
+      5 ttk
+      3 tabs
+      2 layout
+      2 import_tab
+      2 filedialog
+      1 e
+      1 LLMClient

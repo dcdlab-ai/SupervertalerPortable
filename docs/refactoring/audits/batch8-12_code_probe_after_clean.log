@@ -1,0 +1,138 @@
+[after] scenario=clean data_dir=D:\Temp\SupervertalerPortable\refactoring\b8-12\probes\iso-clean-after\Supervertaler pre-start snapshot: 0 files
+[USER MODE] Using 'user_data/' folder
+[after] QApplication ok (0.2s)
+[after] modal dialogs neutralized (logging)
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b8-12\probes\iso-clean-after\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b8-12\probes\iso-clean-after\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Failed to register ctrl+alt+q (may be in use by another application)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+[LOG] ⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⚠ Global hotkeys: some failed to register: ctrl+alt+q
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[after] SupervertalerQt constructed (8.7s)
+[after] user_data_path: D:\Temp\SupervertalerPortable\refactoring\b8-12\probes\iso-clean-after\Supervertaler
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[after] _warm_up_top_tabs() ok
+[after] main_tabs (6): ['📝 Editor', '💾 TMs', '🏷️ Termbases', '✨ AI', '🔍 SuperLookup', '⚙️ Settings']
+[after] settings pages (14): ['⚙️ General', '💾 Backup', '✍️ AutoCorrect', '🤖 AI Settings', '🌐 Language Pair', '🌐 MT Settings', '⚡ QuickTrans', '🔍 View Settings', '📝 System Prompts', '🐛 Debug', '📏 Segmentation Rules', '📄 File Types', '⌨️ Keyboard Shortcuts', '📋 Log']
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[after] ChatViewWidget instances: 2
+[after] CHIPS view#0 (ChatViewWidget): [('label', 'Context:', False, None), ('doc', '📄 Document', False, False), ('tm', '💾 TMs', False, False), ('termbase', '📚 Termbases', False, False), ('files', '📎 Files', False, False), ('stretch', '', None, None)]
+[after] CHIPSTATE view#0: {'doc': False, 'tm': False, 'termbase': False, 'files': False}
+[after] CHIPS view#1 (ChatViewWidget): [('label', 'Context:', False, None), ('doc', '📄 Document', False, False), ('tm', '💾 TMs', False, False), ('termbase', '📚 Termbases', False, False), ('files', '📎 Files', False, False), ('stretch', '', None, None)]
+[after] CHIPSTATE view#1: {'doc': False, 'tm': False, 'termbase': False, 'files': False}
+[after] COUNTERS chatview#0: QTimer=0 QThread=0
+[after] COUNTERS chatview#1: QTimer=0 QThread=0
+[after] COUNTERS prompt_manager_qt: (not a QObject)
+[after] COUNTERS pm.chat_backend: QTimer=0 QThread=0
+[after] COUNTERS pm._ai_tab_chat_view: QTimer=0 QThread=0
+[after] COUNTERS pm._grid_chat_view: QTimer=0 QThread=0
+[after] POLLER/CLIENT: module modules.trados_bridge_client absent
+[after] QThreadPool.globalInstance: active=0 max=20
+[after] QApplication.findChildren(QThread): 0
+[LOG] ✓ Alternating row colors applied
+[after] window.close() ok
+[after] DATA-TREE (28 entries under D:\Temp\SupervertalerPortable\refactoring\b8-12\probes\iso-clean-after\Supervertaler):
+[after] TREE prompt_library
+[after] TREE prompt_library/Proofread
+[after] TREE prompt_library/Proofread/Default
+[after] TREE prompt_library/Proofread/Default/Default Proofreading Prompt.md
+[after] TREE prompt_library/Proofread/Default/UK to US English Localization.md
+[after] TREE prompt_library/QuickLauncher
+[after] TREE prompt_library/QuickLauncher/Default
+[after] TREE prompt_library/QuickLauncher/Default/Assess how I translated the current segment.md
+[after] TREE prompt_library/QuickLauncher/Default/Define.md
+[after] TREE prompt_library/QuickLauncher/Default/Explain
+[after] TREE prompt_library/QuickLauncher/Default/Explain/Explain selection (in general).md
+[after] TREE prompt_library/Translate
+[after] TREE prompt_library/Translate/Default
+[after] TREE prompt_library/Translate/Default/Default Translation Prompt.md
+[after] TREE resources
+[after] TREE resources/supervertaler.db
+[after] TREE resources/supervertaler.db-shm
+[after] TREE resources/supervertaler.db-wal
+[after] TREE workbench
+[after] TREE workbench/ai_assistant
+[after] TREE workbench/ai_assistant/attachments
+[after] TREE workbench/ai_assistant/attachments/20261010
+[after] TREE workbench/ai_assistant/conversations
+[after] TREE workbench/ai_assistant/index.json
+[after] TREE workbench/dictionaries
+[after] TREE workbench/settings
+[after] TREE workbench/settings/settings.json
+[after] TREE workbench/settings/themes.json
+[after] PROBE OK (9.0s)
+QThreadStorage: entry 1 destroyed before end of thread 0x1d958843a10

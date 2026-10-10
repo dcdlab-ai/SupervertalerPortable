@@ -1,0 +1,9 @@
+    Used by the voice-dictation-bias UI:
+
+      - Termbase Manager → 🎤 Voice column (one per termbase)
+      - Voice tab → "Also bias from your termbases" toggle
+
+    Both UI surfaces drive the same feature (per-termbase voice-
+    dictation vocabulary biasing); using the same colour keeps the
+    visual identity consistent so users can connect them at a glance.
+

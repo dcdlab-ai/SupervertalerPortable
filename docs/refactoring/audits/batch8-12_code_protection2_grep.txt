@@ -1,0 +1,95 @@
+--- identifier_conventions (1 hits)
+    modules/termbase_manager.py:1035: # modules/identifier_conventions.py.
+--- project_tm (3 hits)
+    modules/translation_memory.py:770: 'project_tm': {'entries': {e['source']: e['target'] for e in self.get_tm_entries('project')}},
+    modules/translation_memory.py:783: if 'project_tm' in data and 'entries' in data['project_tm']:
+    modules/translation_memory.py:784: for src, tgt in data['project_tm']['entries'].items():
+--- prompt_library (41 hits)
+    Supervertaler.py:23226: system_prompts_file = self.user_data_path / "prompt_library" / "system_prompts_layer1.json"
+    Supervertaler.py:23257: system_prompts_file = self.user_data_path / "prompt_library" / "system_prompts_layer1.json"
+    Supervertaler.py:40708: prompt_data = self.prompt_manager_qt.prompt_library.get_prompt(filename)
+    Supervertaler.py:40719: prompt_data = self.prompt_manager_qt.prompt_library.get_prompt(filename)
+    Supervertaler.py:40730: prompt_data = self.prompt_manager_qt.prompt_library.get_prompt(filename)
+    modules/ai_actions.py:35: def __init__(self, prompt_library, parent_app=None, log_callback=None):
+    modules/ai_actions.py:40: prompt_library: UnifiedPromptLibrary instance
+    modules/ai_actions.py:44: self.prompt_library = prompt_library
+    modules/ai_actions.py:159: self.prompt_library.load_all_prompts()
+    modules/ai_actions.py:244: for path, prompt_data in self.prompt_library.prompts.items():
+    modules/ai_actions.py:283: if path not in self.prompt_library.prompts:
+    modules/ai_actions.py:286: prompt_data = self.prompt_library.prompts[path]
+    modules/ai_actions.py:357: success = self.prompt_library.save_prompt(relative_path, prompt_data)
+    modules/ai_actions.py:364: self.prompt_library.set_primary_prompt(relative_path)
+    modules/ai_actions.py:392: if path not in self.prompt_library.prompts:
+    modules/ai_actions.py:396: prompt_data = self.prompt_library.prompts[path].copy()
+    modules/ai_actions.py:409: success = self.prompt_library.save_prompt(path, prompt_data)
+    modules/ai_actions.py:434: if path not in self.prompt_library.prompts:
+    modules/ai_actions.py:437: name = self.prompt_library.prompts[path].get('name', path)
+    modules/ai_actions.py:438: success = self.prompt_library.delete_prompt(path)
+    modules/ai_actions.py:467: for path, prompt_data in self.prompt_library.prompts.items():
+    modules/ai_actions.py:510: success = self.prompt_library.create_folder(path)
+    modules/ai_actions.py:535: success = self.prompt_library.toggle_quick_run(path)
+    modules/ai_actions.py:538: is_quick_run = self.prompt_library.prompts[path].get('quick_run', False)
+    modules/ai_actions.py:555: quick_run = self.prompt_library.get_quick_run_prompts()
+    modules/ai_actions.py:569: structure = self.prompt_library.get_folder_structure()
+    modules/ai_actions.py:699: if path not in self.prompt_library.prompts:
+    modules/ai_actions.py:704: self.prompt_library.set_primary_prompt(path)
+    modules/ai_actions.py:707: 'message': f"✓ Activated as primary prompt: {self.prompt_library.prompts[path].get('name', path)}"
+    modules/ai_actions.py:711: if path not in self.prompt_library.attached_prompts:
+    modules/ai_actions.py:712: self.prompt_library.attached_prompts.append(path)
+    modules/ai_actions.py:713: self.prompt_library.save_active_state()
+    modules/ai_actions.py:716: 'message': f"✓ Attached prompt: {self.prompt_library.prompts[path].get('name', path)}"
+    modules/config_manager.py:37: "prompt_library/domain_expertise",
+    modules/config_manager.py:38: "prompt_library/project_prompts",
+    modules/config_manager.py:39: "prompt_library/style_guides",
+    modules/prompt_library_migration.py:32: prompt_library_dir: Path to user_data/prompt_library
+    modules/unified_prompt_library.py:33: library_dir: Path to unified library directory (user_data/prompt_library)
+    modules/unified_prompt_manager_qt.py:1046: self.prompt_library_dir = self.user_data_path / "prompt_library"
+    modules/unified_prompt_manager_qt.py:1047: # Use prompt_library directly, not prompt_library/Library
+    modules/unified_prompt_manager_qt.py:1099: prompt_library=self.library,
+--- ribbon_widget (1 hits)
+    Supervertaler.py:9012: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+--- TermbaseManager (11 hits)
+    Supervertaler.py:6292: from modules.termbase_manager import TermbaseManager
+    Supervertaler.py:6293: self.termbase_mgr = TermbaseManager(self.db_manager, self.log)
+    Supervertaler.py:14684: терминологию Alt+Up) и ``TermbaseManager.add_term`` и выполняет
+    Supervertaler.py:15892: from modules.termbase_manager import TermbaseManager
+    Supervertaler.py:15893: termbase_mgr = TermbaseManager(self.db_manager, self.log)
+    Supervertaler.py:17118: from modules.termbase_manager import TermbaseManager
+    modules/database_manager.py:650: # sync by TermbaseManager.set_termbase_priority (the single write
+    modules/database_migrations.py:965: # DatabaseManager._create_tables(), and TermbaseManager.set_termbase_priority
+    modules/termbase_import_export.py:76: termbase_manager: TermbaseManager instance
+    modules/termbase_import_export.py:388: termbase_manager: TermbaseManager instance
+    modules/termbase_manager.py:36: class TermbaseManager:
+--- RibbonButton (1 hits)
+    Supervertaler.py:9012: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+--- RibbonGroup (2 hits)
+    Supervertaler.py:9012: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9023: # project_group = RibbonGroup("Project")
+--- RibbonTab (2 hits)
+    Supervertaler.py:9012: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9022: # home_tab = RibbonTab()
+--- RibbonWidget (2 hits)
+    Supervertaler.py:9012: # from modules.ribbon_widget import RibbonWidget, RibbonTab, RibbonGroup, RibbonButton
+    Supervertaler.py:9015: # self.ribbon = RibbonWidget(self)
+--- StatusDefinition (16 hits)
+    modules/statuses.py:8: class StatusDefinition:
+    modules/statuses.py:33: STATUSES: Dict[str, StatusDefinition] = {
+    modules/statuses.py:34: "not_started": StatusDefinition(
+    modules/statuses.py:43: "pretranslated": StatusDefinition(
+    modules/statuses.py:53: "draft": StatusDefinition(
+    modules/statuses.py:62: "confirmed": StatusDefinition(
+    modules/statuses.py:72: "proofread": StatusDefinition(
+    modules/statuses.py:82: "rejected": StatusDefinition(
+    modules/statuses.py:92: "approved": StatusDefinition(
+    modules/statuses.py:102: "pm": StatusDefinition(
+    modules/statuses.py:114: "cm": StatusDefinition(
+    modules/statuses.py:126: "tm_100": StatusDefinition(
+    modules/statuses.py:136: "tm_fuzzy": StatusDefinition(
+    modules/statuses.py:146: "repetition": StatusDefinition(
+    modules/statuses.py:156: "machine_translated": StatusDefinition(
+    modules/statuses.py:178: def get_status(key: str) -> StatusDefinition:
+--- CLIPBOARD (1 hits)
+    modules/database_manager.py:3210: # CLIPBOARD HISTORY
+
+TOTAL hits: 81
+zero-hit identifiers: 62/73

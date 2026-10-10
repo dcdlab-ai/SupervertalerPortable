@@ -1,0 +1,17 @@
+pyflakes warnings (repo): 640
+undefined-name lines: 149
+modules/statuses.py: 0 warnings
+
+modules/help_system.py: 0 warnings
+
+modules/termbase_manager.py: 7 warnings
+modules/termbase_manager.py:14:1: 'sqlite3' imported but unused
+modules/termbase_manager.py:15:1: 'json' imported but unused
+modules/termbase_manager.py:16:1: 'typing.Tuple' imported but unused
+modules/termbase_manager.py:249:26: f-string is missing placeholders
+modules/termbase_manager.py:364:26: f-string is missing placeholders
+modules/termbase_manager.py:371:26: f-string is missing placeholders
+modules/termbase_manager.py:398:22: f-string is missing placeholders
+
+modules/styled_widgets.py: 0 warnings
+

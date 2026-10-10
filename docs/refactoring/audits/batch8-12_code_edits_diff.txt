@@ -1,0 +1,225 @@
+diff --git a/Supervertaler.py b/Supervertaler.py
+index fbc33ad4..52505b47 100644
+--- a/Supervertaler.py
++++ b/Supervertaler.py
+@@ -320,7 +320,6 @@ from modules.styled_widgets import (CheckmarkCheckBox, TealCheckmarkCheckBox, Ch
+ from modules.statuses import (
+     STATUSES,
+     DEFAULT_STATUS,
+-    StatusDefinition,
+     get_status,
+ )
+ from modules import file_dialog_helper as fdh  # Диалоги файлов с памятью последнего каталога
+diff --git a/modules/help_system.py b/modules/help_system.py
+index 820acaa9..a1693dd9 100644
+--- a/modules/help_system.py
++++ b/modules/help_system.py
+@@ -157,14 +157,6 @@ class Topics:
+     QA_TAGS             = "workbench/qa/tag-validation/"
+     QA_NT               = "workbench/qa/non-translatables/"
+ 
+-    # Voice, Clipboard Manager, and Chat — the old "Companion Tabs"
+-    # grouping was dropped (2026-05-21). Voice and Clipboard Manager are
+-    # now their own top-level sections; Chat moved under AI Translation.
+-    # The old /workbench/sidekick/* URLs 301-redirect to these.
+-    SIDEKICK            = "workbench/voice/overview/"   # legacy alias → Voice
+-    TRADOS_AWARE_CHAT   = "workbench/ai-translation/chat/"
+-    VOICE               = "workbench/voice/overview/"
+-    CLIPBOARD           = "workbench/clipboard/overview/"
+     # QuickTrans. Moved to its own top-level section at
+     # workbench/quicktrans/overview.md (2026-05-21); old /sidekick/
+     # quicktrans-popup/ URL 301-redirects. AI_QUICKLAUNCHER alias kept
+diff --git a/modules/statuses.py b/modules/statuses.py
+index 4c6430d5..c3ad2daf 100644
+--- a/modules/statuses.py
++++ b/modules/statuses.py
+@@ -1,8 +1,7 @@
+ """Centralized status vocabulary for Supervertaler segments."""
+ 
+ from dataclasses import dataclass
+-from typing import Dict, Optional
+-import re
++from typing import Dict
+ 
+ 
+ @dataclass(frozen=True)
+@@ -182,63 +181,3 @@ def get_status(key: str) -> StatusDefinition:
+     return STATUSES.get(resolved, DEFAULT_STATUS)
+ 
+ 
+-def match_memoq_status(status_text: str) -> tuple[StatusDefinition, Optional[int]]:
+-    """Map memoQ status string to a StatusDefinition plus optional match percent."""
+-    status_clean = (status_text or "").strip()
+-    percent: Optional[int] = None
+-
+-    if status_clean:
+-        match = re.search(r"(\d+)\s*%", status_clean)
+-        if match:
+-            try:
+-                percent = int(match.group(1))
+-            except ValueError:
+-                percent = None
+-
+-    lower = status_clean.lower()
+-
+-    # Build (equivalent, definition) pairs sorted by equivalent length descending.
+-    # This ensures specific matches like "pre-translated (101%)" beat generic
+-    # ones like "pre-translated", so e.g. CM status isn't lost to pretranslated.
+-    _eq_pairs: list[tuple[str, StatusDefinition]] = []
+-    for definition in STATUSES.values():
+-        for eq in definition.memoQ_equivalents:
+-            _eq_pairs.append((eq, definition))
+-    _eq_pairs.sort(key=lambda p: len(p[0]), reverse=True)
+-
+-    for eq, definition in _eq_pairs:
+-        if eq in lower:
+-            return definition, percent
+-
+-    if "proofread" in lower and "confirm" in lower:
+-        return STATUSES["approved"], percent
+-    if "confirm" in lower:
+-        return STATUSES["confirmed"], percent
+-    if "lock" in lower:
+-        return STATUSES["not_started"], percent
+-    if "reject" in lower:
+-        return STATUSES["rejected"], percent
+-    if "proof" in lower:
+-        return STATUSES["proofread"], percent
+-    if "translate" in lower or "edit" in lower:
+-        return STATUSES["draft"], percent
+-
+-    return DEFAULT_STATUS, percent
+-
+-
+-def compose_memoq_status(
+-    status_key: str,
+-    match_percent: Optional[int] = None,
+-    existing: Optional[str] = None,
+-) -> str:
+-    """Compose a memoQ status string, preserving existing text when provided."""
+-    if existing and existing.strip():
+-        return existing.strip()
+-
+-    status_def = get_status(status_key)
+-    base = status_def.memoq_label
+-    if match_percent is not None:
+-        return f"{base} ({match_percent}%)"
+-    return base
+-
+-
+diff --git a/modules/styled_widgets.py b/modules/styled_widgets.py
+index 2ebfa2b3..2a4027f5 100644
+--- a/modules/styled_widgets.py
++++ b/modules/styled_widgets.py
+@@ -113,14 +113,10 @@ class PurpleCheckmarkCheckBox(CheckmarkCheckBox):
+     """Purple-themed variant of :class:`CheckmarkCheckBox` – same
+     geometry, same hand-painted white checkmark, just a deeper purple
+     fill (Material 500 / hover 700) instead of the green default.
+-    Used by the voice-dictation-bias UI:
+-
+-      - Termbase Manager → 🎤 Voice column (one per termbase)
+-      - Voice tab → "Also bias from your termbases" toggle
+-
+-    Both UI surfaces drive the same feature (per-termbase voice-
+-    dictation vocabulary biasing); using the same colour keeps the
+-    visual identity consistent so users can connect them at a glance.
++    The voice-dictation-bias UI surfaces (Termbase Manager 🎤 Voice
++    column, Voice tab "Also bias from your termbases" toggle) were
++    removed in Batch #8.4; the class is kept for the purple colour
++    identity referenced by the sibling checkmark variants.
+ 
+     The CheckmarkCheckBox parent class handles the paintEvent that
+     draws the white checkmark – we only need to override the stylesheet
+@@ -167,7 +163,7 @@ class TealCheckmarkCheckBox(CheckmarkCheckBox):
+     per-resource toggle controlling whether that TM / termbase is
+     searched by SuperLookup. It is deliberately independent of the
+     Read flag, so the colour is deliberately distinct from Read (green),
+-    Write (blue), Bridge/AI (orange), Project (pink) and Voice (purple) –
++    Write (blue), Bridge/AI (orange) and Project (pink) –
+     one glance tells you which switch you're looking at.
+     """
+ 
+diff --git a/modules/termbase_manager.py b/modules/termbase_manager.py
+index c9d633b5..d10cfb6d 100644
+--- a/modules/termbase_manager.py
++++ b/modules/termbase_manager.py
+@@ -458,49 +458,6 @@ class TermbaseManager:
+             self.log(f"✗ Error setting termbase ai_inject: {e}")
+             return False
+ 
+-    # ---------- Voice-dictation biasing (v1.10.28) ----------------
+-    # Per-termbase opt-in flag for voice-dictation vocabulary biasing.
+-    # When on, the termbase's target-language terms get appended to
+-    # Whisper's initial_prompt by the Voice tab's "Also bias from
+-    # your termbases" toggle. Shared between Workbench and Trados
+-    # plugin via the common database, no project context required.
+-
+-    def get_termbase_voice_enabled(self, termbase_id: int) -> bool:
+-        """Return whether this termbase contributes to voice-dictation
+-        biasing. Defaults to **False** (opt-in) – users with many
+-        termbases shouldn't get them all biasing dictation unless
+-        they've explicitly ticked the 🎤 Voice column in Termbase
+-        Manager. (v1.10.28 originally defaulted True; v1.10.29
+-        flipped to opt-in based on user feedback.)
+-        """
+-        try:
+-            cursor = self.db_manager.cursor
+-            cursor.execute(
+-                "SELECT voice_dictation_enabled FROM termbases WHERE id = ?",
+-                (termbase_id,),
+-            )
+-            result = cursor.fetchone()
+-            return bool(result[0]) if result and result[0] is not None else False
+-        except Exception as e:
+-            self.log(f"✗ Error getting termbase voice_dictation_enabled: {e}")
+-            return False
+-
+-    def set_termbase_voice_enabled(self, termbase_id: int, enabled: bool) -> bool:
+-        """Set the voice-dictation-biasing flag for a termbase."""
+-        try:
+-            cursor = self.db_manager.cursor
+-            cursor.execute(
+-                "UPDATE termbases SET voice_dictation_enabled = ? WHERE id = ?",
+-                (1 if enabled else 0, termbase_id),
+-            )
+-            self.db_manager.connection.commit()
+-            status = "enabled" if enabled else "disabled"
+-            self.log(f"✓ Voice-dictation bias {status} for termbase {termbase_id}")
+-            return True
+-        except Exception as e:
+-            self.log(f"✗ Error setting termbase voice_dictation_enabled: {e}")
+-            return False
+-
+     def set_termbase_superlookup_enabled(self, termbase_id: int, enabled: bool) -> bool:
+         """Set whether SuperLookup searches this termbase.
+ 
+@@ -528,29 +485,6 @@ class TermbaseManager:
+                 pass
+             return False
+ 
+-    def get_voice_enabled_termbase_ids(self) -> list:
+-        """Return the IDs of every termbase whose voice-dictation
+-        bias flag is **explicitly on**. No project context required
+-        – this is a Workbench-wide setting, not per-project.
+-
+-        Strict ``= 1`` match: NULL and 0 both mean "don't bias",
+-        consistent with the v1.10.29 opt-in default. Returns an
+-        empty list if the user hasn't ticked any termbases yet,
+-        which is the correct behaviour – the Voice tab's "Also bias
+-        from your termbases" toggle is still meaningful, it just
+-        contributes no terms beyond the built-in defaults until the
+-        user picks termbases in Termbase Manager.
+-        """
+-        try:
+-            cursor = self.db_manager.cursor
+-            cursor.execute(
+-                "SELECT id FROM termbases WHERE voice_dictation_enabled = 1"
+-            )
+-            return [row[0] for row in cursor.fetchall()]
+-        except Exception as e:
+-            self.log(f"✗ Error listing voice-enabled termbases: {e}")
+-            return []
+-
+     def get_ai_inject_termbases(self, project_id: Optional[int] = None) -> List[Dict]:
+         """
+         Get all termbases with ai_inject enabled that are active for the given project.

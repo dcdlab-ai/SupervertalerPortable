@@ -1,0 +1,5 @@
+i/lf    w/crlf  attr/text=auto eol=lf 	Supervertaler.py
+i/lf    w/lf    attr/text=auto eol=lf 	modules/help_system.py
+i/lf    w/lf    attr/text=auto eol=lf 	modules/statuses.py
+i/lf    w/lf    attr/text=auto eol=lf 	modules/styled_widgets.py
+i/lf    w/lf    attr/text=auto eol=lf 	modules/termbase_manager.py

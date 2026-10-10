@@ -1,0 +1,3 @@
+    Read flag, so the colour is deliberately distinct from Read (green),
+    Write (blue), Bridge/AI (orange), Project (pink) and Voice (purple) –
+    one glance tells you which switch you're looking at.
