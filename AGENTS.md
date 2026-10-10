@@ -199,6 +199,21 @@ Validated in Batches #2, #3a, #3b — keep doing this:
   too, not only unresolvable ones — this is how the `CheckmarkCheckBox`,
   `contextmanager`, `time` header dependencies were nearly missed in Batch #3b.
 
+### Counting and baseline conventions (Batch #8.13, Dmitry's rules)
+* py_compile is reported as TWO numbers:
+  * canonical baseline: only code outside `docs/` (on `f804d447` it was 115) —
+    does not grow from audit scripts that each batch commits to
+    `docs/refactoring/audits/`;
+  * reference: the total count including scripts (127 after 8.12 audits).
+  Before/after comparisons always run on the same file set; the pass criterion
+  is one: 0 errors.
+* The canonical Tools-smoke baseline table is
+  `docs/refactoring/audits/batch8-13_code_tools_smoke.py` (42 items, no
+  gettext entries, Dmitry's decision). `batch8-12_code_tools_smoke.py` is a
+  historical baseline log — do not modify it. Batches 8.15, 8.18 and later
+  take their smoke baseline from the 8.13 table
+  (canonical baseline log: `batch8-13_code_smoke_baseline813.log`).
+
 ### Behavioral comparison of duplicate/merged implementations (Batch #3c)
 When a batch merges classes into an existing module (or the plan claims code is
 a "duplicate"), prove the behavioral claim before merging:
