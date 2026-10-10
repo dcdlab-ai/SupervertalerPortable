@@ -1,0 +1,8 @@
+TOTAL 111  OK 104  FAIL 7
+FAIL modules.find_replace: ModuleNotFoundError: No module named 'tkinter'
+FAIL modules.glossary_manager: NameError: name 'GlossaryInfo' is not defined
+FAIL modules.pdf_rescue_Qt: ModuleNotFoundError: No module named 'fitz'
+FAIL modules.pdf_rescue_tkinter: ModuleNotFoundError: No module named 'tkinter'
+FAIL modules.prompt_library: ModuleNotFoundError: No module named 'tkinter'
+FAIL modules.tracked_changes: ModuleNotFoundError: No module named 'tkinter'
+FAIL setup: ModuleNotFoundError: No module named 'setuptools'

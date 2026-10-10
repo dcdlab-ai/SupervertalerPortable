@@ -1,0 +1,56 @@
+candidate keys: 485
+
+=== keys with 0 occurrences outside settings_service.py defaults (potential orphans) ===
+anthropic_model: 1 hits [('Supervertaler.py', 1)]
+auto_insert_100: 1 hits [('Supervertaler.py', 1)]
+autohotkey_path: 0 hits []
+aws_secret_key: 1 hits [('Supervertaler.py', 1)]
+azure_region: 1 hits [('Supervertaler.py', 1)]
+claude_enabled: 1 hits [('modules\\translation_services.py', 1)]
+clipboard_privacy: 0 hits []
+context_before: 1 hits [('modules\\statistics_analyzer.py', 1)]
+custom_mt: 1 hits [('Supervertaler.py', 1)]
+deepl_enabled: 1 hits [('modules\\translation_services.py', 1)]
+dictation_settings: 0 hits []
+enable_mt_matching: 1 hits [('modules\\translation_services.py', 1)]
+file_size: 1 hits [('modules\\tmx_editor_qt.py', 1)]
+first_run_completed: 0 hits []
+google_translate_enabled: 1 hits [('modules\\translation_services.py', 1)]
+hide_autohotkey_dialog: 0 hits []
+languagerulename: 1 hits [('modules\\segmentation_rules.py', 1)]
+openai_api_key: 1 hits [('modules\\pdf_rescue_Qt.py', 1)]
+openai_enabled: 1 hits [('modules\\translation_services.py', 1)]
+original_file_path: 1 hits [('modules\\tmx_editor_qt.py', 1)]
+quicklauncher_context_max: 1 hits [('Supervertaler.py', 1)]
+quickmenu_context_max: 1 hits [('Supervertaler.py', 1)]
+show_compare_panel: 1 hits [('Supervertaler.py', 1)]
+show_translation_results_pane: 1 hits [('Supervertaler.py', 1)]
+superlookup_landing_tab: 0 hits []
+use_prompts_in_grid: 1 hits [('Supervertaler.py', 1)]
+voice_dictation_opt_in_reset_applied: 0 hits []
+voice_vocabulary: 0 hits []
+word_count_check_enabled: 1 hits [('Supervertaler.py', 1)]
+word_count_check_threshold: 1 hits [('Supervertaler.py', 1)]
+
+=== reader/writer map for known keys ===
+
+features.clipboard_privacy: 0 hits
+
+superlookup_landing_tab: 0 hits
+
+autohotkey_path: 0 hits
+
+hide_autohotkey_dialog: 0 hits
+
+ui.dictation_settings: 0 hits
+
+ui.voice_vocabulary: 0 hits
+
+ui.voice_dictation_opt_in_reset_applied: 0 hits
+
+general.first_run_completed: 0 hits
+
+general.translator_name: 3 hits
+   Supervertaler.py:32951
+   modules\tmx_editor.py:706
+   modules\tmx_editor_qt.py:956

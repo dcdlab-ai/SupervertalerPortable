@@ -1,0 +1,95 @@
+# Section I — классификация комментариев «Trados/memoQ» (правило + выборка)
+# База: Supervertaler.py @ d308a93f (SHA aab1f180…, 57010 строк) + modules/**.
+# Всего вхождений Trados|memoQ (grep -i, без __pycache__):
+#   Supervertaler.py: 180 (112 строк с '#', 68 — код/докстринги/строки UI)
+#   modules/**:       284 (из них ~159 строк комментариев без ключевых слов
+#                        tag/highlight/parity/convention по грубой фильтрации)
+#   Итого комментариев-кандидатов: ~250+ (совпадает с оценкой рекон 8.11 §1.6).
+
+## ПРАВИЛО (предложение Дмитрию)
+Править ТОЛЬКО комментарии/докстринги, которые описывают УДАЛЁННУЮ функцию
+как присутствующую (мост Trados, чип Chat, CLI batch-offload, CAT-хендлеры,
+Voice/Clipboard-вкладки, Superbrowser). ОСТАВИТЬ:
+  (a) комментарии про конвенции тегов memoQ/Trados (tag_manager, autocorrect,
+      bilingual_markdown_handler, pseudo_translate, grid/filters) — подсветка
+      тегов и вставка тегов живые;
+  (b) комментарии «паритет с Trados-плагином» (TermLens/TermPicker/термбазы/
+      prompt-флаги/цены) — внешний плагин существует, паритет — живое требование;
+  (c) исторические заметки «v1.10.x: …» (changelog-стиль) — не описывают
+      удалённое как настоящее, правка потеряет историю;
+  (d) ссылки на внешние продукты как контекст (Trados удерживает foreground,
+      Trados Studio Ctrl+Shift+H, формат bilingual table supervertaler.com/trados).
+
+## ВЫБОРКА (45 строк, категории: A=править, B=оставить-паритет, C=оставить-теги,
+## D=историческая заметка, E=внешний-контекст)
+ID   строка                                   категория   обоснование
+I-01 Supervertaler.py:56795-56797 (main())    A  batch-offload-комментарий над удалённой в 8.9 CLI-веткой (решение Дмитрия 8.9 §9 в.2)
+I-02 Supervertaler.py:56801-56802             A  «…падения при … инициализации QWebEngine» — WebEngine удалён в 8.10
+I-03 Supervertaler.py:11245                   A  help-строка TM-таба «Bridge … visible to the Supervertaler for Trados plugin» — UI-слой удаляется (8.11 §9)
+I-04 Supervertaler.py:11286                   A  tooltip Clear All Bridge «hide all TMs from the Trados plugin»
+I-05 Supervertaler.py:11371                   A  комментарий bulk Bridge toggle (удаляемый слой)
+I-06 Supervertaler.py:11514,11525-11526       A  Bridge-чекбокс + tooltip (удаляемый слой)
+I-07 Supervertaler.py:27167                   A  докстринг «удалена вместе с вкладкой Clipboard в Batch #8.5 (F2)» — описание удалённого как факта прошлого, ОК оставить (история) → D
+I-08 Supervertaler.py:37726-37727             D  «Делегат … удалён в Batch #8.5» — историческая заметка, точная
+I-09 Supervertaler.py:9153,9171               D  «Sidekick retired v1.10.4 … Clipboard → main_tabs» — история миграции; Clipboard-строка устарела (вкладка удалена 8.5) → A (правка 1 строки)
+I-10 Supervertaler.py:9210                    A  «When the user is on SuperLookup / Clipboard» — Clipboard-вкладки больше нет
+I-11 Supervertaler.py:23389,23451             A  «Clipboard list / SuperLookup results» — Clipboard удалён; SuperLookup жив → правка «Clipboard list /»
+I-12 Supervertaler.py:24658                   A  «Sidekick / clipboard widgets see the new value» — оба удалены
+I-13 Supervertaler.py:26083-26089             D  аудит-комментарий про индексы вкладок (SuperLookup, Clipboard Manager, Voice «arrived») — исторический контекст helpers, оставить
+I-14 Supervertaler.py:48553                   D  «SuperLookup/Clipboard/Voice were inserted between AI and Settings» — история
+I-15 Supervertaler.py:8389                    D  «landing on SuperLookup when SuperLookup/Clipboard/Voice were» — история
+I-16 Supervertaler.py:15970-15971             D  «added 🎤 Voice column … removed in Batch #8.4 (F1)» — точная история, оставить
+I-17 Supervertaler.py:19228-19229             A  «Index stored so the Voice tab's … link» — Voice-вкладки нет
+I-18 Supervertaler.py:23559-23560             A  докстринг open_workbench_to_superlookup: «Заменяет легаси-маршрут Sidekick.show_superlookup» — Sidekick удалён v1.10.4, формулировка «легаси-маршрут … продолжает работать» про Ctrl+Alt+K-копию Sidekick — проверить (Sidekick удалён) → правка
+I-19 Supervertaler.py:20 (докстринг модуля)   D  список фич: «Импорт/экспорт двуязычных DOCX memoQ» — CAT-форматы удалены в 8.9 → A (строка устарела)
+I-20 Supervertaler.py:23                      A  «Superlookup с глобальной горячей клавишей (Ctrl+Alt+L)» — Ctrl+Alt+L удалён в 8.10
+I-21 Supervertaler.py:747,1337,1430           C  «конвенция memoQ/Trados» эфемерное редактирование — функция живая
+I-22 Supervertaler.py:1037,4306               C  вставка тега memoQ — живая
+I-23 Supervertaler.py:2994-2999,3010-3017     C  regex-комментарии тегов Trados/memoQ — живые
+I-24 Supervertaler.py:6084,22582              C  «memoQ-style alternating row colors» — живая фича
+I-25 Supervertaler.py:6143,27786              C  «prefetch … like memoQ» — живое поведение
+I-26 Supervertaler.py:6709,1944               E  «Ctrl+Shift+H is Trados Studio's own shortcut» — внешний контекст
+I-27 Supervertaler.py:6784,8537               B  «TermPicker — Trados parity» — паритет с плагином, живое требование
+I-28 Supervertaler.py:14949,15462,28105       B  «Similar Term Found (Trados parity)» — живое
+I-29 Supervertaler.py:15114,25436,27775       E  «Supervertaler for Trados plugin … deletes/adds terms» — внешний плагин существует
+I-30 Supervertaler.py:13699                   E  «supervertaler.com/trados» — формат экспорта, живой
+I-31 Supervertaler.py:19565-19566             E  «as in the Trados and memoQ plugins» (модели) — внешний контекст
+I-32 Supervertaler.py:21332                   E  «CAT-tool compatibility – Trados / memoQ / Phrase / OmegaT» (XLIFF) — живой
+I-33 Supervertaler.py:33281                   E  «Ports the Trados plugin's [SEGMENT NNNN] round-trip» — формат живой
+I-34 Supervertaler.py:11371 (см. I-05)        —
+I-35 modules/tag_manager.py:995-1596 (~20 строк) C  утилиты тегов memoQ/Trados — живые
+I-36 modules/autocorrect.py:195-196           C  формат тегов — живой
+I-37 modules/bilingual_markdown_handler.py:96,147-148 C  рендер тегов — живой
+I-38 modules/pseudo_translate.py:32-34        C  формат тегов — живой
+I-39 modules/grid/filters.py:733              C  memoQ/Trados неразрывные пробелы — живой
+I-40 modules/termlens_widget.py (~20 строк)   B  паритет TermLens с плагином — живое требование
+I-41 modules/termlens_popup.py:232,507,586    B  паритет попапа — живое
+I-42 modules/usage_log.py:139                 B  «matching the Trados plugin exactly» (цены) — живое
+I-43 modules/unified_prompt_library.py:256,273 B  prompt-флаги «shared with Trados» — живые (решение 8.11: app_target остаётся)
+I-44 modules/tm_metadata_manager.py:146-147   A  «projection … so the TMs tab can show the per-TM checkbox» — UI-слой удаляется, projection остаётся → правка формулировки
+I-45 modules/database_manager.py:470-481      E  описание колонки bridged_to_trados для внешнего плагина — колонка остаётся (решение 8.11)
+I-46 modules/models.py:498-510                A  загрузка полей trados_source_path/memoq_source_path/… — хендлеры удалены в 8.9; поля в JSON старых проектов → ТРЕБУЕТ РЕШЕНИЯ (совместимость сохранений)
+I-47 modules/help_system.py:64,106-107,131,252 E  ссылки на сайт/доки Trados — внешние URL живые
+I-48 modules/language_codes.py:28,85          E  «Phrase / Trados import dialogs» — внешний контекст
+I-49 modules/termbase_manager.py:465          A  «Shared between Workbench and Trados» про voice-флаг — voice UI удалён 8.4
+I-50 modules/shortcut_manager.py:117,120      E  «aligned with Trados» конвенция хоткеев — живая
+
+## ЧИСЛА ПО КАТЕГОРИЯМ (оценка по выборке, экстраполяция на ~250)
+A (править, описывают удалённое как настоящее):  ~35–45 строк (монолит ~25, modules ~15)
+B (оставить, паритет с внешним плагином):        ~60–70 строк
+C (оставить, конвенции тегов):                    ~90–110 строк
+D (исторические заметки, оставить):               ~25–30 строк
+E (внешний контекст, оставить):                   ~40–50 строк
+Итого правок по правилу: ~40 строк из ~250 (16%).
+
+## Прочие док-остатки (вне Trados-группы)
+I-R1  Supervertaler.py:20,9165,9257,21082,27059 — Ctrl+Alt+L в докстрингах/комментариях (хоткей удалён 8.10) → A
+I-R2  Supervertaler.py:23559-23560 — докстринг show_superlookup «легаси-маршрут Sidekick» → A
+I-R3  modules/platform_helpers.py:2163 — «Uses the same proven pattern as VoiceCommandManager._run_ahk_code» (класс удалён 8.3) → A
+I-R4  modules/quicktrans.py:670-677,1130-1136 — «Same plumbing as Ctrl+Alt+L» (хоткей удалён 8.10) → A (2 места)
+I-R5  modules/settings_service.py:38-39 — докстринг про legacy-миграции (удалены 8.8; решение Дмитрия 8.8 §9) → A
+I-R6  modules/styled_widgets.py:116-122,170 — тултип/комментарий «🎤 Voice column» (колонка удалена 8.4) → A
+I-R7  modules/termbase_manager.py:461-551 — методы get/set_termbase_voice_enabled, get_voice_enabled_termbase_ids: 0 потребителей вне модуля (grep, см. Section C-соседи); комментарии про Voice tab → ТРЕБУЕТ РЕШЕНИЯ (методы+колонка БД по решению 8.4 остаются, UI-описание устарело)
+I-R8  modules/help_system.py:160-176 — HelpTopics.SIDEKICK/VOICE/CLIPBOARD/TRADOS_AWARE_CHAT: 0 обращений (grep HelpTopics.<CONST> по репо, см. helptopics_used.txt) → УДАЛИТЬ-БЕЗОПАСНО (константы) + правка комментариев
+I-R9  Supervertaler.py:11199 — «markdown report to the clipboard) and Maintenance» — контекст Clipboard-меню → проверить при правке
+I-R10 modules/DATABASE_README.md — grep clipboard_history/voice_dictation_enabled/bridged_to_trados = 0 (файл описывает только translation_units) → ОСТАВИТЬ (устаревших пунктов нет; раздел «Future Tables» — исторический)

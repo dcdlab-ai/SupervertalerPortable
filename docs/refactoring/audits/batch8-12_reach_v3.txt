@@ -1,0 +1,20 @@
+targets=112 live=95 orphan=17
+
+=== ORPHANS (AST-direct, roots incl. tools/tests) ===
+modules.extract_tm
+modules.feature_manager
+modules.find_replace
+modules.glossary_manager
+modules.identifier_conventions
+modules.pdf_rescue_tkinter
+modules.project_home_panel
+modules.project_tm
+modules.prompt_assistant
+modules.prompt_library
+modules.quick_access_sidebar
+modules.ribbon_widget
+modules.style_guide_manager
+modules.superdocs
+modules.superdocs_viewer_qt
+modules.tracked_changes
+modules.translation_services
