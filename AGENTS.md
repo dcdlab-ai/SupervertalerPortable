@@ -38,6 +38,19 @@ At the end of every batch/step also update `PROJECT_STATUS.md` (progress table, 
 line count, "next step" section with re-derived AST boundaries) and commit it with the
 final batch commit.
 
+### Batch workflow: coordinator / executor (role discipline)
+The agent is ONLY an executor. The coordinator (Dmitry) reviews reports, issues the
+go/no-go verdict, plans the next stages, and writes the per-batch prompts.
+* A new batch (including any implementation/removal batch) starts ONLY on Dmitry's
+  explicit command AND with Dmitry's prompt file. No prompt — no start. "Proceeding to
+  the next step in the agreed order" is NOT a start command.
+* After a batch report is delivered, the agent stops and waits for the coordinator's
+  verdict; it does not plan, schedule, or begin the next batch on its own.
+* `git push` is executed ONLY on Dmitry's explicit command. Commits stay local until
+  that command.
+* Decisions recorded in a report (e.g. answers to the report's questions) authorize the
+  content of a future batch, not its start.
+
 ### Temporary files and test artifacts
 Use the dedicated project temporary workspace:
 `D:\Temp\SupervertalerPortable\`
