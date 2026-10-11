@@ -16,11 +16,18 @@ import base64
 import io
 
 try:
-    from PIL import Image, ImageTk
+    from PIL import Image
     PIL_AVAILABLE = True
 except ImportError:
     PIL_AVAILABLE = False
     Image = None
+
+# ImageTk нужен только tkinter-версии превью (_update_thumbnails); в
+# embed-сборках без tkinter он отсутствовал бы вместе с Image и валил
+# весь PIL-импорт. Batch #8.15f.
+try:
+    from PIL import ImageTk
+except ImportError:
     ImageTk = None
 
 
