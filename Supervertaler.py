@@ -48865,6 +48865,7 @@ class SupervertalerQt(QMainWindow):
 
                     QTimer.singleShot(0, on_ok)
                 except Exception as e:
+                    err_text = str(e)
 
                     def on_err():
                         if not is_active_request():
@@ -48872,7 +48873,7 @@ class SupervertalerQt(QMainWindow):
                         if bool(getattr(self, "_update_check_user_canceled", False)):
                             finish()
                             return
-                        show_offline_error(str(e))
+                        show_offline_error(err_text)
                         finish()
 
                     QTimer.singleShot(0, on_err)
