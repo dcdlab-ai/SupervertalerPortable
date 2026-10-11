@@ -49848,6 +49848,9 @@ class SupervertalerQt(QMainWindow):
             images = None
             if self.figure_context and self.figure_context.has_images():
                 try:
+                    from modules.llm_clients import LLMClient
+                    from modules.figure_context_manager import pil_image_to_base64_png
+
                     # Detect figure references in source text
                     figure_refs = self.figure_context.detect_figure_references(segment.source)
                     if figure_refs:
@@ -49864,7 +49867,7 @@ class SupervertalerQt(QMainWindow):
                                 else:
                                     # OpenAI and Claude use base64 PNG
                                     images = [
-                                        (ref, self.figure_context.pil_image_to_base64_png(img))
+                                        (ref, pil_image_to_base64_png(img))
                                         for ref, img in images_for_text
                                     ]
                                 self.log(f"  ✅ Including {len(images)} figure images: {', '.join(figure_refs)}")
