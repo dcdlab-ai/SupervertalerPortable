@@ -11323,10 +11323,13 @@ class SupervertalerQt(QMainWindow):
                     if tm_id is None:
                         continue
                     # checked = writable, read_only is the opposite.
-                    if hasattr(tm_metadata_mgr, 'set_tm_read_only'):
-                        tm_metadata_mgr.set_tm_read_only(tm_id, not checked)
+                    tm_metadata_mgr.set_read_only(tm_id, not checked)
             except Exception as e:
                 self.log(f"⚠️ Bulk TM Write toggle failed mid-way: {e}")
+            try:
+                self.invalidate_translation_cache(smart_invalidation=False)
+            except Exception:
+                pass
             refresh_tm_list()
 
         # v1.10.247: bulk SuperLookup toggle (include/exclude every TM
