@@ -1,0 +1,1 @@
+{"scenario": "legacy", "mt_state_keys": ["mt_google_translate", "mt_deepl", "mt_microsoft", "mt_amazon", "mt_modernmt", "mt_mymemory"], "active_mt_profile": null, "quicktrans_mt_providers": [], "verdict": true}
