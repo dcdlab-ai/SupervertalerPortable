@@ -166,7 +166,7 @@ class CompactMatchItem(QFrame):
         provider_text_color = secondary_text_color  # Reuse the secondary text color from above
         provider_label.setStyleSheet(f"font-size: 7px; color: {provider_text_color}; padding: 0px; margin: 0px; font-weight: {font_weight};")
         provider_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        provider_label.setFixedWidth(28)  # Tiny column, just wide enough for "GPT", "MMT", etc.
+        provider_label.setFixedWidth(28)  # Tiny column, just wide enough for "GPT", "CMT", etc.
         provider_label.setFixedHeight(18)
         # Add tooltip with full provider name (only if code exists)
         if match.provider_code:

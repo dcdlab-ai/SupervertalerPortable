@@ -28,12 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # rows (MTSuggestionItem) and the docked panel (QuickTransPanel) so the colour
 # coding stays consistent everywhere.
 PROVIDER_COLORS = {
-    "GT":  "#4285F4",   # Google blue
-    "DL":  "#042B48",   # DeepL dark blue
-    "MS":  "#00A4EF",   # Microsoft blue
-    "AT":  "#FF9900",   # Amazon orange
-    "MMT": "#6B4EE6",   # ModernMT purple
-    "MM":  "#2ECC71",   # MyMemory green
+    "CMT": "#00897B",   # Custom MT teal
     "CL":  "#D97706",   # Claude amber
     "GPT": "#10A37F",   # OpenAI green
     "GEM": "#4285F4",   # Gemini blue
@@ -115,7 +110,7 @@ def _canonical_lang_name(value):
 class MTSuggestion:
     """A single MT suggestion from a provider"""
     provider_name: str  # Full name: "Google Translate", "DeepL", etc.
-    provider_code: str  # Short code: "GT", "DL", etc.
+    provider_code: str  # Short code: "CMT", "CL", "GPT", etc.
     translation: str
     is_error: bool = False
 
