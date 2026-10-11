@@ -76,22 +76,9 @@ OUTPUT ONLY THE SEGMENT MARKERS. DO NOT ADD EXPLANATIONS BEFORE OR AFTER."""
         try:
             from modules.llm_clients import LLMClient
 
-            if self.provider == 'openai':
-                api_key = self.api_keys.get('openai', '')
-            elif self.provider == 'claude':
-                api_key = self.api_keys.get('claude', '')
-            elif self.provider == 'gemini':
-                api_key = self.api_keys.get('gemini', '')
-            elif self.provider == 'mistral':
-                api_key = self.api_keys.get('mistral', '')
-            elif self.provider == 'deepseek':
-                api_key = self.api_keys.get('deepseek', '')
-            elif self.provider == 'ollama':
-                api_key = self.api_keys.get('ollama', '') or 'not-needed'
-            elif self.provider == 'custom_openai':
-                api_key = self.custom_api_key or self.api_keys.get('custom_openai', '') or 'not-needed'
-            else:
-                api_key = ''
+            # Batch #9.3: единственный провайдер — custom_openai; ключ профиля
+            # приоритетнее api_keys.txt, последняя ступень — 'not-needed'
+            api_key = self.custom_api_key or self.api_keys.get('custom_openai', '') or 'not-needed'
 
             llm_client = LLMClient(api_key=api_key, provider=self.provider, model=self.model, base_url=self.base_url, http_proxy=self.http_proxy)
         except Exception as e:

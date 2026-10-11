@@ -4482,16 +4482,14 @@ If the text refers to figures (e.g., 'Figure 1A'), relevant images may be provid
             if not refs:
                 return None
 
-            if provider == "gemini":
-                # Gemini accepts PIL.Image directly.
-                images_payload = [(ref, image_map[ref]) for ref in refs]
-            else:
-                # OpenAI / Claude: base64 PNG.
-                from modules.figure_context_manager import pil_image_to_base64_png
-                images_payload = [
-                    (ref, pil_image_to_base64_png(image_map[ref]))
-                    for ref in refs
-                ]
+            # Batch #9.3: единственный провайдер — custom_openai (base64 PNG);
+            # gemini-ветка удалена вместе с провайдером. Логика фигур (G5)
+            # не менялась: тот же payload-формат, что был для не-gemini путей.
+            from modules.figure_context_manager import pil_image_to_base64_png
+            images_payload = [
+                (ref, pil_image_to_base64_png(image_map[ref]))
+                for ref in refs
+            ]
         except Exception as e:
             self.log_message(f"[AI Assistant] Could not encode figure images: {e} — running text-only")
             return None

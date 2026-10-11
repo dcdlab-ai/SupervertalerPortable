@@ -352,18 +352,15 @@ class QuickTransProviderMixin:
         return providers
 
     def _add_llm_providers(self, providers: List, api_keys: Dict, mt_quick_settings: Dict):
-        """Add LLM providers (Claude, OpenAI, Gemini, Mistral, DeepSeek,
-        OpenRouter, Ollama, Custom) to the providers list. The order here
-        mirrors the AI/LLM Providers section of the QuickTrans settings dialog."""
+        """Add LLM providers to the providers list.
+
+        Batch #9.3: облачные LLM (Claude/OpenAI/Gemini/Mistral/DeepSeek/
+        OpenRouter) и Ollama удалены — остаётся только Custom (активный
+        профиль custom_openai). Чекбоксы удалённых провайдеров в QuickTrans-
+        табе (mtql_claude и т.п.) до 9.4 остаются в UI, но чипов не создают;
+        «Local LLM» после 9.4 показывается как профиль Custom."""
         # LLM provider definitions: (name, code, api_key_name, settings_key)
         llm_defs = [
-            ("Claude", "CL", "claude", "mtql_claude"),
-            ("OpenAI", "GPT", "openai", "mtql_openai"),
-            ("Gemini", "GEM", "gemini", "mtql_gemini"),
-            ("Mistral", "MIS", "mistral", "mtql_mistral"),
-            ("DeepSeek", "DS", "deepseek", "mtql_deepseek"),
-            ("OpenRouter", "OR", "openrouter", "mtql_openrouter"),
-            ("Ollama", "OLL", "ollama", "mtql_ollama"),
             ("Custom", "CUS", "custom_openai", "mtql_custom_openai"),
         ]
 
@@ -405,12 +402,10 @@ class QuickTransProviderMixin:
             else:
                 api_keys = load_api_keys()
 
-            if provider == 'gemini':
-                api_key = api_keys.get('gemini') or api_keys.get('google')
-            else:
-                api_key = api_keys.get(provider)
+            api_key = api_keys.get(provider)
 
-            if not api_key and provider not in ('ollama', 'custom_openai'):
+            # Batch #9.3: custom_openai не требует ключа в api_keys.txt
+            if not api_key and provider != 'custom_openai':
                 return f"[Error: No API key for {provider}]"
 
             # Reuse main app client wiring when available (supports custom profiles/base_url)

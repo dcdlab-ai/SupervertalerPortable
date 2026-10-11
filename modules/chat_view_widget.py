@@ -618,14 +618,12 @@ class ChatViewWidget(QWidget):
             else:
                 api_keys = load_api_keys()
 
-            # Determine API key
-            if provider_key == 'ollama':
-                api_key = 'not-needed'
-            else:
-                key_name = 'google' if provider_key == 'gemini' else provider_key
-                api_key = api_keys.get(key_name, '')
+            # Determine API key (Batch #9.3: ollama-ветка удалена; custom_openai
+            # не требует ключа в api_keys.txt — ключ живёт в профиле)
+            key_name = 'google' if provider_key == 'gemini' else provider_key
+            api_key = api_keys.get(key_name, '')
 
-            if not api_key and provider_key not in ('ollama', 'custom_openai'):
+            if not api_key and provider_key != 'custom_openai':
                 self._backend.add_message(
                     "system",
                     f"\u26A0 No API key found for {provider_key}. Configure it in Settings."

@@ -1,0 +1,7 @@
+pyflakes warnings (repo): 573
+undefined-name lines: 126
+unique undefined names: 4
+  filedialog: 2
+  messagebox: 19
+  tk: 100
+  ttk: 5
