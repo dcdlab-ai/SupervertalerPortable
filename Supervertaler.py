@@ -20423,6 +20423,7 @@ class SupervertalerQt(QMainWindow):
             custom_radio=custom_radio, custom_endpoint_input=custom_endpoint_input,
             custom_model_input=custom_model_input, custom_enable_cb=custom_enable_cb,
             custom_profile_combo=custom_profile_combo, custom_key_input=custom_key_input,
+            custom_profiles_snapshot=settings,
             mistral_radio=mistral_radio, mistral_combo=mistral_combo,
             mistral_enable_cb=mistral_enable_cb,
             deepseek_radio=deepseek_radio, deepseek_combo=deepseek_combo,
@@ -23826,7 +23827,8 @@ class SupervertalerQt(QMainWindow):
                                    deepseek_radio=None, deepseek_combo=None,
                                    openrouter_radio=None, openrouter_combo=None,
                                    openrouter_enable_cb=None,
-                                   ollama_timeout_spin=None):
+                                   ollama_timeout_spin=None,
+                                   custom_profiles_snapshot=None):
         """Сохраняет все настройки ИИ из единой вкладки AI Settings."""
         # Определяем выбранный провайдер
         if openai_radio.isChecked():
@@ -23855,9 +23857,12 @@ class SupervertalerQt(QMainWindow):
             if selected:
                 ollama_model = selected
 
-        # Собираем список профилей из состояния UI
+        # Собираем список профилей из ЖИВОГО снимка диалога (кнопки «+»/«−»
+        # мутируют его всю сессию; см. _create_ai_settings_tab). Перечитывание
+        # диска здесь теряло добавленные за сессию профили и воскрешало
+        # удалённые (баг из R9 §1.3). Остальные ключи — как раньше, с диска.
         existing_settings = self.load_llm_settings()
-        profiles = existing_settings.get('custom_openai_profiles', [])
+        profiles = (custom_profiles_snapshot or existing_settings).get('custom_openai_profiles', [])
         active_profile_name = ''
 
         if custom_profile_combo and custom_profile_combo.count() > 0:
@@ -23868,10 +23873,17 @@ class SupervertalerQt(QMainWindow):
                 profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
                 profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
             active_profile_name = custom_profile_combo.currentText()
+            # Активным может стать только существующий профиль: если имя из
+            # комбо в списке не найдено, берём первый (пустой список — пусто).
+            if not any(p.get('name') == active_profile_name for p in profiles):
+                active_profile_name = profiles[0].get('name', '') if profiles else ''
 
-        # For legacy compat, also store flat fields from active profile
-        active_endpoint = custom_endpoint_input.text().strip() if custom_endpoint_input else ''
-        active_model = custom_model_input.text().strip() if custom_model_input else ''
+        # For legacy compat, store flat fields from the ACTIVE profile of the
+        # list (после синка выше это те же видимые поля; при нуле профилей —
+        # пустые строки, зеркала больше не расходятся с профилями).
+        active_profile = next((p for p in profiles if p.get('name') == active_profile_name), None)
+        active_endpoint = (active_profile or {}).get('endpoint', '')
+        active_model = (active_profile or {}).get('model', '')
 
         # Start from what is already saved: llm_settings also holds keys this
         # tab does not own (the QuickTrans custom MT profiles), and replacing
