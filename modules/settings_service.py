@@ -349,7 +349,11 @@ class SettingsService:
             'mt_microsoft': True,
             'mt_amazon': True,
             'mt_modernmt': True,
-            'mt_mymemory': True
+            # v1.10.373 (Batch #8.15): MyMemory defaults to OFF for new
+            # installs. Existing users who have the key saved keep their
+            # value (setdefault below never overwrites and never writes
+            # to disk on its own).
+            'mt_mymemory': False
         }
 
         try:
