@@ -19084,9 +19084,6 @@ class SupervertalerQt(QMainWindow):
         lang_tab = self._create_language_pair_tab()
         settings_tabs.addTab(scroll_area_wrapper(lang_tab), self.tr("🌐 Language Pair"))
 
-        # ===== TAB 4: MT Settings =====
-        mt_tab = self._create_mt_settings_tab()
-        settings_tabs.addTab(scroll_area_wrapper(mt_tab), self.tr("🌐 MT Settings"))
 
         # ===== TAB 5: QuickTrans Settings =====
         # Prior to v1.10.10 this was a stub pointing users to
@@ -20432,117 +20429,6 @@ class SupervertalerQt(QMainWindow):
         
         return tab
     
-    def _create_mt_settings_tab(self):
-        """Создаёт содержимое вкладки настроек MT."""
-        from PyQt6.QtWidgets import QCheckBox, QGroupBox, QPushButton
-        
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
-        
-        enabled_providers = self.load_provider_enabled_states()
-        
-        # Enable/Disable MT Providers
-        mt_provider_group = QGroupBox(self.tr("Machine Translation Providers"))
-        mt_provider_layout = QVBoxLayout()
-        
-        mt_info = QLabel(
-            "Enable or disable individual MT providers. Supervertaler will use the first available enabled provider in priority order:\n"
-            "1. Google Translate, 2. DeepL, 3. Microsoft Translator, 4. Amazon Translate, 5. ModernMT, 6. MyMemory"
-        )
-        mt_info.setWordWrap(True)
-        mt_info.setStyleSheet("font-size: 9pt; color: #666; padding: 5px;")
-        mt_provider_layout.addWidget(mt_info)
-        
-        google_translate_enable_cb = CheckmarkCheckBox(self.tr("Enable Google Translate"))
-        google_translate_enable_cb.setChecked(enabled_providers.get('mt_google_translate', True))
-        mt_provider_layout.addWidget(google_translate_enable_cb)
-        
-        deepl_enable_cb = CheckmarkCheckBox(self.tr("Enable DeepL"))
-        deepl_enable_cb.setChecked(enabled_providers.get('mt_deepl', True))
-        mt_provider_layout.addWidget(deepl_enable_cb)
-        
-        microsoft_enable_cb = CheckmarkCheckBox(self.tr("Enable Microsoft Translator"))
-        microsoft_enable_cb.setChecked(enabled_providers.get('mt_microsoft', True))
-        mt_provider_layout.addWidget(microsoft_enable_cb)
-        
-        amazon_enable_cb = CheckmarkCheckBox(self.tr("Enable Amazon Translate"))
-        amazon_enable_cb.setChecked(enabled_providers.get('mt_amazon', True))
-        mt_provider_layout.addWidget(amazon_enable_cb)
-        
-        modernmt_enable_cb = CheckmarkCheckBox(self.tr("Enable ModernMT"))
-        modernmt_enable_cb.setChecked(enabled_providers.get('mt_modernmt', True))
-        mt_provider_layout.addWidget(modernmt_enable_cb)
-        
-        mymemory_enable_cb = CheckmarkCheckBox(self.tr("Enable MyMemory (Free tier)"))
-        mymemory_enable_cb.setChecked(enabled_providers.get('mt_mymemory', True))
-        mt_provider_layout.addWidget(mymemory_enable_cb)
-        
-        mt_provider_group.setLayout(mt_provider_layout)
-        layout.addWidget(mt_provider_group)
-        
-        # Inline MT API Keys
-        mt_api_keys_group = QGroupBox(self.tr("🔑 MT API Keys"))
-        mt_keys_form = QFormLayout()
-        mt_keys_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-
-        current_keys = self.load_api_keys()
-        if not hasattr(self, '_api_key_inputs'):
-            self._api_key_inputs = {}
-
-        mt_key_fields = [
-            ("Google Translate:", "google_translate", "AIza...", True),
-            ("DeepL:", "deepl", "your-deepl-key", True),
-            ("Microsoft Translate:", "microsoft_translate", "your-azure-key", True),
-            ("Microsoft Region:", "microsoft_translate_region", "global", False),
-            ("Amazon Access Key:", "amazon_translate", "AKIA...", True),
-            ("Amazon Secret Key:", "amazon_translate_secret", "your-secret", True),
-            ("Amazon Region:", "amazon_translate_region", "us-east-1", False),
-            ("ModernMT:", "modernmt", "your-modernmt-key", True),
-            ("MyMemory:", "mymemory", "your-mymemory-key", True),
-        ]
-
-        for label, key_name, placeholder, is_secret in mt_key_fields:
-            row = QHBoxLayout()
-            key_input = QLineEdit()
-            key_input.setPlaceholderText(placeholder)
-            key_input.setText(current_keys.get(key_name, ''))
-            if is_secret:
-                key_input.setEchoMode(QLineEdit.EchoMode.Password)
-            row.addWidget(key_input)
-
-            if is_secret:
-                toggle_btn = QPushButton(self.tr("Show"))
-                toggle_btn.setFixedWidth(50)
-                toggle_btn.setCheckable(True)
-                toggle_btn.clicked.connect(
-                    lambda checked, inp=key_input, btn=toggle_btn:
-                        (inp.setEchoMode(QLineEdit.EchoMode.Normal if checked else QLineEdit.EchoMode.Password),
-                         btn.setText("Hide" if checked else "Show"))
-                )
-                row.addWidget(toggle_btn)
-
-            container = QWidget()
-            container.setLayout(row)
-            mt_keys_form.addRow(label, container)
-            self._api_key_inputs[key_name] = key_input
-
-        mt_api_keys_group.setLayout(mt_keys_form)
-        layout.addWidget(mt_api_keys_group)
-        
-        # Save button
-        save_btn = QPushButton(self.tr("💾 Save MT Settings"))
-        save_btn.setStyleSheet("font-weight: bold; padding: 8px;")
-        save_btn.clicked.connect(lambda: self._save_mt_settings_from_ui(
-            google_translate_enable_cb, deepl_enable_cb, microsoft_enable_cb,
-            amazon_enable_cb, modernmt_enable_cb, mymemory_enable_cb
-        ))
-        layout.addWidget(save_btn)
-        
-        layout.addStretch()
-
-        return tab
 
     # _create_quicktrans_stub_tab and _open_quicktrans_in_sidekick
     # were removed in v1.10.10. Pre-retirement they advertised that
@@ -24000,26 +23886,6 @@ class SupervertalerQt(QMainWindow):
             api_keys['gemini'] = api_keys['google']
         self.save_api_keys(api_keys)
 
-    def _save_mt_settings_from_ui(self, google_cb, deepl_cb, microsoft_cb, amazon_cb, modernmt_cb, mymemory_cb):
-        """Сохраняет настройки машинного перевода из интерфейса."""
-        # Save API keys from inline fields
-        self._save_api_keys_from_ui()
-
-        enabled_states = {
-            'mt_google_translate': google_cb.isChecked(),
-            'mt_deepl': deepl_cb.isChecked(),
-            'mt_microsoft': microsoft_cb.isChecked(),
-            'mt_amazon': amazon_cb.isChecked(),
-            'mt_modernmt': modernmt_cb.isChecked(),
-            'mt_mymemory': mymemory_cb.isChecked()
-        }
-        # Merge with existing LLM settings
-        existing = self.load_provider_enabled_states()
-        enabled_states.update({k: v for k, v in existing.items() if k.startswith('llm_')})
-        self.save_provider_enabled_states(enabled_states)
-        
-        self.log("✓ MT settings saved")
-        QMessageBox.information(self, "Settings Saved", "MT settings have been saved successfully.")
     
     def _save_general_settings_from_ui(self, restore_cb, allow_replace_cb, auto_propagate_cb,
                                        llm_spin=None, mt_spin=None, tm_limit_spin=None, tb_spin=None,
