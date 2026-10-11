@@ -17285,10 +17285,17 @@ class SupervertalerQt(QMainWindow):
                 source_text = source_text[:MAX_CHARS]
                 truncated = True
 
-            # Build the configured LLM client
+            # Build the configured LLM client (Batch #9.3: custom_openai +
+            # гейт «не настроено» — без профиля с endpoint запрос не стартует)
             settings = self.load_llm_settings()
-            provider = settings.get('provider', 'openai')
-            model = settings.get(f"{provider}_model")
+            provider = settings.get('provider', 'custom_openai')
+            model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
+            if not self._custom_llm_ready(settings):
+                QMessageBox.warning(
+                    self, "Custom LLM profile is not configured",
+                    "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                    "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+                return
             api_keys = self.load_api_keys()
             client = self.create_llm_client(provider, model, api_keys, settings=settings)
 
@@ -50839,7 +50846,11 @@ class SupervertalerQt(QMainWindow):
                 # не запускается — вежливое сообщение вместо ошибок на каждый
                 # сегмент в фоновом воркере.
                 if not self._custom_llm_ready(settings):
-                    QMessageBox.warning(
+                    # локальный импорт: в translate_batch ниже будет локальный
+                    # from PyQt6.QtWidgets import QMessageBox (бюджет-блок) — он затеняет
+                    # имя для всей функции
+                    from PyQt6.QtWidgets import QMessageBox as _QMessageBox
+                    _QMessageBox.warning(
                         self, "Custom LLM profile is not configured",
                         "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
                         "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")

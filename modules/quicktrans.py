@@ -411,6 +411,10 @@ class QuickTransProviderMixin:
             # Reuse main app client wiring when available (supports custom profiles/base_url)
             if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, 'create_llm_client'):
                 llm_settings = self.parent_app.load_llm_settings() if hasattr(self.parent_app, 'load_llm_settings') else None
+                # «Не настроено» (Batch #9.3): без активного профиля Custom с
+                # endpoint — вежливая строка чипа вместо сетевой ошибки.
+                if hasattr(self.parent_app, '_custom_llm_ready') and                         not self.parent_app._custom_llm_ready(llm_settings):
+                    return "[Custom LLM profile is not configured — Settings → AI Settings]"
                 resolved_model = model
                 if not resolved_model and llm_settings:
                     resolved_model = llm_settings.get(f"{provider}_model")

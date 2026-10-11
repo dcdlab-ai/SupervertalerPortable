@@ -1,0 +1,33 @@
+{
+ "tag": "spec",
+ "trap_hits": [],
+ "A_provider_migrated": true,
+ "A_disk_provider_untouched": true,
+ "A_ready_is_None": true,
+ "B_single_no_network": true,
+ "B_single_target_empty": true,
+ "B_batch_no_network": true,
+ "B_batch_no_targets": true,
+ "B_proofread_no_network": true,
+ "B_matchpanel_silent": true,
+ "B_chat_client_None": true,
+ "B_chat_no_network": true,
+ "B_quicktrans_message": true,
+ "B_quicktrans_no_network": true,
+ "C_page_list": null,
+ "C_radios_found": [
+  "Anthropic Claude",
+  "Custom (OpenAI-Compatible API)",
+  "DeepSeek",
+  "Google Gemini",
+  "Local LLM",
+  "Mistral AI",
+  "OpenAI",
+  "OpenRouter"
+ ],
+ "C_save_btn": "💾 Save AI Settings",
+ "C_saves_ok": 8,
+ "C_provider_still_custom": true,
+ "trap_hits_total": [],
+ "verdict": "OK"
+}

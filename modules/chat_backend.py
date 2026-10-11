@@ -119,10 +119,9 @@ class ChatBackend(QObject):
                 provider = "custom_openai"
 
             if provider:
-                key_name = "google" if provider == "gemini" else provider
-                api_key = (api_keys.get(key_name) or api_keys.get("gemini")
-                           or api_keys.get("openai") or api_keys.get("claude")
-                           or api_keys.get("google"))
+                # Batch #9.3: provider здесь всегда custom_openai; ключ из
+                # api_keys.txt — только fallback (ключ профиля резолвит фабрика)
+                api_key = api_keys.get(provider)
 
                 # custom_openai doesn't require a key in api_keys.txt: the
                 # key (if any) lives on the active custom profile, and the
@@ -138,6 +137,13 @@ class ChatBackend(QObject):
                 if hasattr(self._parent_app, 'create_llm_client') and (api_key or keyless_ok):
                     settings = (self._parent_app.load_llm_settings()
                                 if hasattr(self._parent_app, 'load_llm_settings') else None)
+                    # «Не настроено» (Batch #9.3): без активного профиля Custom
+                    # с endpoint клиент не создаётся — иначе openai-SDK ушёл бы
+                    # на api.openai.com с ключом-заглушкой.
+                    if hasattr(self._parent_app, '_custom_llm_ready') and                             not self._parent_app._custom_llm_ready(settings):
+                        self._log("[ChatBackend] Custom LLM profile is not "
+                                  "configured — Settings → AI Settings")
+                        return
                     self.llm_client = self._parent_app.create_llm_client(
                         provider, model, api_keys, settings=settings)
                     resolved = getattr(self.llm_client, 'model', model) or 'default'
