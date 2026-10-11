@@ -110,13 +110,13 @@ class ChatBackend(QObject):
                 if hasattr(self._parent_app, 'current_model'):
                     model = self._parent_app.current_model
 
-            if not provider:
-                if api_keys.get("openai"):
-                    provider = "openai"
-                elif api_keys.get("claude"):
-                    provider = "claude"
-                elif api_keys.get("google") or api_keys.get("gemini"):
-                    provider = "gemini"
+            # Batch #9.3: облачные LLM-провайдеры и Ollama удалены; провайдер
+            # один — custom_openai (активный профиль Custom). Настройки со
+            # старым провайдером мигрируются молча в
+            # SettingsService.load_llm_settings, поэтому устаревший/пустой
+            # current_provider здесь тоже сводится к custom_openai.
+            if provider != 'custom_openai':
+                provider = "custom_openai"
 
             if provider:
                 key_name = "google" if provider == "gemini" else provider
@@ -124,10 +124,10 @@ class ChatBackend(QObject):
                            or api_keys.get("openai") or api_keys.get("claude")
                            or api_keys.get("google"))
 
-                # custom_openai / ollama don't require a key in api_keys.txt:
-                # the key (if any) lives on the active custom profile, and the
+                # custom_openai doesn't require a key in api_keys.txt: the
+                # key (if any) lives on the active custom profile, and the
                 # factory supplies a 'not-needed' placeholder otherwise.
-                keyless_ok = provider in ('custom_openai', 'ollama')
+                keyless_ok = provider == 'custom_openai'
 
                 # Prefer the main app's factory: it resolves base_url, the active
                 # custom-endpoint profile (endpoint + per-profile model + key),

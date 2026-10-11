@@ -48194,33 +48194,11 @@ class SupervertalerQt(QMainWindow):
     def _normalize_custom_endpoint(url):
         """Дополняет endpoint профиля Custom схемой, если её нет.
 
-        «127.0.0.1:3445/v1» → «http://127.0.0.1:3445/v1»: loopback/частные
-        адреса (localhost, 127.*, 10.*, 192.168.*, 172.16–31.*, *.local, ::1)
-        получают http://, остальные — https://. Значения со схемой («http://…»,
-        «HTTPS://…») и протокол-относительные («//host/v1») возвращаются
-        без изменений, пустая строка — без изменений. Порт, путь и хвостовой
-        «/» не трогаются."""
-        u = (url or '').strip()
-        if not u or '://' in u or u.startswith('//'):
-            return u
-        host = u.split('/', 1)[0]
-        if host.startswith('['):                       # IPv6-литерал [::1]:8080
-            host = host[1:].split(']', 1)[0]
-        elif host.count(':') == 1:                     # host:port
-            host = host.rsplit(':', 1)[0]
-        # host.count(':') >= 2 — «голый» IPv6 (::1), оставляем как есть
-        if host == 'localhost' or host == '::1' or host.endswith('.local'):
-            scheme = 'http://'
-        else:
-            parts = host.split('.')
-            if (len(parts) == 4 and all(p.isdigit() for p in parts)
-                    and (parts[0] in ('127', '10')
-                         or (parts[0] == '192' and parts[1] == '168')
-                         or (parts[0] == '172' and parts[1].isdigit() and 16 <= int(parts[1]) <= 31))):
-                scheme = 'http://'
-            else:
-                scheme = 'https://'
-        return scheme + u
+        Делегат: единственная реализация —
+        SettingsService.normalize_custom_endpoint (Batch #9.3a; правило
+        9.1b перенесено в settings_service, чтобы миграция legacy-конфига
+        при загрузке настроек работала по тому же правилу)."""
+        return SettingsService.normalize_custom_endpoint(url)
 
     def _get_active_custom_profile(self, settings=None):
         """Возвращает словарь активного профиля custom_openai (endpoint, model,

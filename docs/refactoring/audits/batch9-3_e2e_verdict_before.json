@@ -1,0 +1,159 @@
+{
+ "tag": "before",
+ "port": 54745,
+ "requests": [
+  {
+   "path": "/v1/chat/completions",
+   "auth": "Bearer prof-key-123",
+   "model": "fake-llm",
+   "roles": [
+    "user"
+   ],
+   "n_messages": 1,
+   "user_len": 3213,
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing pro"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "auth": "Bearer prof-key-123",
+   "model": "custom-model",
+   "roles": [
+    "system",
+    "user"
+   ],
+   "n_messages": 2,
+   "user_len": 652,
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must p"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "auth": "Bearer prof-key-123",
+   "model": "fake-llm",
+   "roles": [
+    "user"
+   ],
+   "n_messages": 1,
+   "user_len": 1254,
+   "head": "You are a translation proofreader. Your task is to analyze translations for erro"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "auth": "Bearer prof-key-123",
+   "model": "fake-llm",
+   "roles": [
+    "system",
+    "user"
+   ],
+   "n_messages": 2,
+   "user_len": 9,
+   "head": "Say hello"
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Proofreading in Progress'"
+ ],
+ "current_provider": "custom_openai",
+ "current_model": "",
+ "imported_segments": 5,
+ "row_immediate": -1,
+ "row_after_select": 1,
+ "row_final": 1,
+ "single": {
+  "target": "Goedemorgen",
+  "status": "draft",
+  "requests": [
+   {
+    "path": "/v1/chat/completions",
+    "auth": "Bearer prof-key-123",
+    "model": "fake-llm",
+    "roles": [
+     "user"
+    ],
+    "n_messages": 1,
+    "user_len": 3213,
+    "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing pro"
+   }
+  ],
+  "n_requests": 1,
+  "log": [
+   "  (1 empty lines preserved for structure)",
+   "📍 Project language pair: EN → NL",
+   "✅ Built termbase index: 0 terms in 0.00s",
+   "🔄 Starting background termbase batch processor for 5 segments...",
+   "✅ Termbase batch worker complete: 5 segments in 0.00s (374491 seg/sec, 0 with matches)",
+   "  Including 5 surrounding segments (5 before/after)",
+   "✓ Added to TM: This is a test.... → Goedemorgen...",
+   "✓ Segment #2 translated with custom_openai/fake-llm"
+  ],
+  "row": 1,
+  "src_head": "This is a test."
+ },
+ "batch3": {
+  "targets": [
+   "Goedemorgen2",
+   "Goedemorgen3",
+   ""
+  ],
+  "requests": [
+   {
+    "path": "/v1/chat/completions",
+    "auth": "Bearer prof-key-123",
+    "model": "custom-model",
+    "roles": [
+     "system",
+     "user"
+    ],
+    "n_messages": 2,
+    "user_len": 652,
+    "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must p"
+   }
+  ],
+  "n_requests": 1
+ },
+ "matchpanel": {
+  "llm_matches": [],
+  "requests": [],
+  "n_requests": 0
+ },
+ "proofread2": {
+  "notes": {},
+  "requests": [
+   {
+    "path": "/v1/chat/completions",
+    "auth": "Bearer prof-key-123",
+    "model": "fake-llm",
+    "roles": [
+     "user"
+    ],
+    "n_messages": 1,
+    "user_len": 1254,
+    "head": "You are a translation proofreader. Your task is to analyze translations for erro"
+   }
+  ],
+  "n_requests": 1
+ },
+ "chat": {
+  "response": "Goedemorgen",
+  "meta_provider": "custom_openai",
+  "meta_model": "fake-llm",
+  "requests": [
+   {
+    "path": "/v1/chat/completions",
+    "auth": "Bearer prof-key-123",
+    "model": "fake-llm",
+    "roles": [
+     "system",
+     "user"
+    ],
+    "n_messages": 2,
+    "user_len": 9,
+    "head": "Say hello"
+   }
+  ],
+  "n_requests": 1
+ },
+ "verdict": "OK"
+}
