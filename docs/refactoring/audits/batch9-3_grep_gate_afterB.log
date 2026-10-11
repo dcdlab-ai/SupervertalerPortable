@@ -1,0 +1,79 @@
+== Supervertaler.py (монолит) ==
+  allowed check_ollama_status: 3 (comment/разрешённые зоны)
+  allowed get_google_translation: 2 (comment/разрешённые зоны)
+  allowed provider == 'claude': 1 (comment/разрешённые зоны)
+  allowed provider == 'deepseek': 1 (comment/разрешённые зоны)
+  allowed provider == 'gemini': 2 (comment/разрешённые зоны)
+  allowed provider == 'mistral': 1 (comment/разрешённые зоны)
+  allowed provider == 'ollama': 1 (comment/разрешённые зоны)
+  allowed provider == 'openai': 1 (comment/разрешённые зоны)
+  allowed provider == 'openrouter': 1 (comment/разрешённые зоны)
+== modules/llm_clients.py ==
+  FAIL DEEPSEEK_MODELS:
+    modules/llm_clients.py:225: DEEPSEEK_MODELS = {
+  FAIL _call_claude_with_usage:
+    modules/llm_clients.py:865: result, usage = self._call_claude_with_usage(prompt, max_tokens=max_tokens, images=images, system_prompt=syste
+    modules/llm_clients.py:1009: def _call_claude_with_usage(self, prompt: str, max_tokens: Optional[int] = None, images: Optional[List] = None
+  allowed _call_claude_with_usage: 1 (comment/разрешённые зоны)
+  FAIL _call_gemini_rest:
+    modules/llm_clients.py:1421: return self._call_gemini_rest(
+    modules/llm_clients.py:1504: def _call_gemini_rest(self, prompt: str, max_tokens: Optional[int] = None,
+  FAIL _call_gemini_with_usage:
+    modules/llm_clients.py:867: result, usage = self._call_gemini_with_usage(prompt, max_tokens=max_tokens, images=images, system_prompt=syste
+    modules/llm_clients.py:1104: def _call_gemini_with_usage(self, prompt: str, max_tokens: Optional[int] = None, images: Optional[List] = None
+  FAIL _call_ollama:
+    modules/llm_clients.py:869: result = self._call_ollama(prompt, max_tokens=max_tokens, system_prompt=system_prompt)
+    modules/llm_clients.py:1577: def _call_ollama(self, prompt: str, max_tokens: Optional[int] = None, system_prompt: Optional[str] = None) -> 
+    modules/llm_clients.py:1611: print(f"🟠 _call_ollama START: model={self.model}, prompt_len={len(prompt)}, max_tokens={tokens_to_use}")
+  FAIL check_ollama_status:
+    modules/llm_clients.py:472: def check_ollama_status(cls, endpoint: str = None) -> Dict:
+  FAIL get_claude_model_info:
+    modules/llm_clients.py:432: def get_claude_model_info(cls, model_id: Optional[str] = None) -> Dict:
+    modules/llm_clients.py:444: models = LLMClient.get_claude_model_info()
+    modules/llm_clients.py:449: info = LLMClient.get_claude_model_info("claude-sonnet-5-5")
+  FAIL get_claude_translation:
+    modules/llm_clients.py:1835: def get_claude_translation(text: str, source_lang: str, target_lang: str, context: str = "") -> Dict:
+  FAIL get_google_translation:
+    modules/llm_clients.py:1911: def get_google_translation(text: str, source_lang: str, target_lang: str) -> Dict:
+  FAIL get_ollama_model_info:
+    modules/llm_clients.py:457: def get_ollama_model_info(cls, model_id: Optional[str] = None) -> Dict:
+  FAIL get_openai_translation:
+    modules/llm_clients.py:1785: def get_openai_translation(text: str, source_lang: str, target_lang: str, context: str = "") -> Dict:
+  FAIL google.generativeai:
+    modules/llm_clients.py:1107: import google.generativeai as genai
+    modules/llm_clients.py:1438: import google.generativeai as genai
+  allowed google.generativeai: 1 (comment/разрешённые зоны)
+  FAIL import anthropic:
+    modules/llm_clients.py:1020: import anthropic
+    modules/llm_clients.py:1332: import anthropic
+  FAIL provider == 'claude':
+    modules/llm_clients.py:864: elif self.provider == "claude":
+  FAIL provider == 'deepseek':
+    modules/llm_clients.py:580: if self.provider == "deepseek" and not self.base_url:
+  FAIL provider == 'gemini':
+    modules/llm_clients.py:866: elif self.provider == "gemini":
+  FAIL provider == 'mistral':
+    modules/llm_clients.py:576: if self.provider == "mistral" and not self.base_url:
+  FAIL provider == 'ollama':
+    modules/llm_clients.py:868: elif self.provider == "ollama":
+  FAIL provider == 'openrouter':
+    modules/llm_clients.py:584: if self.provider == "openrouter" and not self.base_url:
+    modules/llm_clients.py:915: if self.provider == "openrouter":
+    modules/llm_clients.py:942: self.provider == "openrouter"
+    modules/llm_clients.py:1205: if self.provider == "openrouter":
+    modules/llm_clients.py:1248: self.provider == "openrouter"
+== modules/settings_service.py ==
+  CLEAN (0 hits)
+== modules/chat_backend.py ==
+  FAIL provider == 'gemini':
+    modules/chat_backend.py:122: key_name = "google" if provider == "gemini" else provider
+== modules/chat_view_widget.py ==
+  CLEAN (0 hits)
+== modules/quicktrans.py ==
+  CLEAN (0 hits)
+== modules/unified_prompt_manager_qt.py ==
+  CLEAN (0 hits)
+== modules/workers/proofread.py ==
+  CLEAN (0 hits)
+== modules/translation_results_panel.py ==
+  CLEAN (0 hits)

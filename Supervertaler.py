@@ -5597,13 +5597,9 @@ class PreTranslationWorker(QThread):
 
             # Загружаем API-ключи
             api_keys = self.parent_app.load_api_keys()
-            api_key = api_keys.get(self.provider_name) or (api_keys.get('google') if self.provider_name == 'gemini' else None)
-            if self.provider_name == 'custom_openai':
-                # API-ключ профиля приоритетнее api_keys.txt
-                if self.custom_api_key:
-                    api_key = self.custom_api_key
-                elif not api_key:
-                    api_key = api_keys.get('custom_openai', '') or 'not-needed'
+            # Batch #9.3: единственный провайдер — custom_openai; ключ профиля
+            # приоритетнее api_keys.txt, последняя ступень — 'not-needed'
+            api_key = self.custom_api_key or api_keys.get('custom_openai', '') or 'not-needed'
 
             # Собираем пользовательский промпт из библиотеки промптов
             custom_prompt = None
@@ -5667,13 +5663,9 @@ class PreTranslationWorker(QThread):
 
             # Загружаем API-ключи
             api_keys = self.parent_app.load_api_keys()
-            api_key = api_keys.get(self.provider_name) or (api_keys.get('google') if self.provider_name == 'gemini' else None)
-            if self.provider_name == 'custom_openai':
-                # API-ключ профиля приоритетнее api_keys.txt
-                if self.custom_api_key:
-                    api_key = self.custom_api_key
-                elif not api_key:
-                    api_key = api_keys.get('custom_openai', '') or 'not-needed'
+            # Batch #9.3: единственный провайдер — custom_openai; ключ профиля
+            # приоритетнее api_keys.txt, последняя ступень — 'not-needed'
+            api_key = self.custom_api_key or api_keys.get('custom_openai', '') or 'not-needed'
 
             # Build batch prompt – split into a static cacheable system prompt
             # (base instructions, glossary, project context) and a per-batch
@@ -5880,12 +5872,7 @@ class PreTranslationWorker(QThread):
             target_lang = getattr(self.parent_app.current_project, 'target_lang', 'nl')
 
             api_keys = self.parent_app.load_api_keys()
-            api_key = api_keys.get(self.provider_name) or (api_keys.get('google') if self.provider_name == 'gemini' else None)
-            if self.provider_name == 'custom_openai':
-                if self.custom_api_key:
-                    api_key = self.custom_api_key
-                elif not api_key:
-                    api_key = api_keys.get('custom_openai', '') or 'not-needed'
+            api_key = self.custom_api_key or api_keys.get('custom_openai', '') or 'not-needed'
 
             custom_prompt = None
             if self.prompt_manager:
@@ -5932,12 +5919,7 @@ class PreTranslationWorker(QThread):
             source_lang = getattr(self.parent_app.current_project, 'source_lang', 'en')
             target_lang = getattr(self.parent_app.current_project, 'target_lang', 'nl')
             api_keys = self.parent_app.load_api_keys()
-            api_key = api_keys.get(self.provider_name) or (api_keys.get('google') if self.provider_name == 'gemini' else None)
-            if self.provider_name == 'custom_openai':
-                if self.custom_api_key:
-                    api_key = self.custom_api_key
-                elif not api_key:
-                    api_key = api_keys.get('custom_openai', '') or 'not-needed'
+            api_key = self.custom_api_key or api_keys.get('custom_openai', '') or 'not-needed'
             client = LLMClient(
                 api_key=api_key, provider=self.provider_name, model=self.model,
                 base_url=self.base_url, http_proxy=self.http_proxy,
@@ -10023,12 +10005,11 @@ class SupervertalerQt(QMainWindow):
             if not LLMClient.model_supports_vision(provider, model):
                 resp = QMessageBox.question(
                     self,
-                    "Active model doesn't support vision",
+                    "Vision not enabled for Custom profile",
                     f"The active AI model — <b>{provider} / {model}</b> — does "
                     "not accept image input, so the 🤖 AI label step can't run.\n\n"
-                    "Switch to a vision-capable model (Claude Sonnet/Opus 4.x, "
-                    "GPT-4o or newer, Gemini) in Settings and try again, or "
-                    "click <b>OK</b> to proceed with text-pattern detection only.",
+                    "Vision for Custom profile is not enabled yet. Click "
+                    "<b>OK</b> to proceed with text-pattern detection only.",
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
                     QMessageBox.StandardButton.Ok,
                 )
@@ -10107,8 +10088,8 @@ class SupervertalerQt(QMainWindow):
         )
 
         # Build and return the actual callback. Closes over chat_backend
-        # and provider so each call ships an image in the correct format
-        # for the provider (PIL for Gemini, base64 PNG for the rest).
+        # and provider; each call ships base64 PNG (Batch #9.3: gemini-ветка
+        # удалена вместе с провайдером).
         def _ai_label_fn(image_bytes: bytes, surrounding_text: str,
                          media_path: str):
             try:
@@ -10121,12 +10102,9 @@ class SupervertalerQt(QMainWindow):
                 if pil_img.mode not in ('RGB', 'RGBA'):
                     pil_img = pil_img.convert('RGB')
 
-                if provider == 'gemini':
-                    images_payload = [('figure', pil_img)]
-                else:
-                    images_payload = [
-                        ('figure', pil_image_to_base64_png(pil_img))
-                    ]
+                images_payload = [
+                    ('figure', pil_image_to_base64_png(pil_img))
+                ]
 
                 snippet = (surrounding_text or '').strip()
                 if len(snippet) > 1500:
@@ -39505,11 +39483,11 @@ class SupervertalerQt(QMainWindow):
         
         layout.addSpacing(10)
         
-        # LLM provider info
+        # LLM provider info (Batch #9.3: модель — из активного профиля Custom,
+        # как и всюду: плоский ключ custom_openai_model протухает)
         settings = self.load_llm_settings()
-        llm_provider = settings.get('provider', 'openai')
-        model_key = f'{llm_provider}_model'
-        llm_model = settings.get(model_key, 'gpt-5.5')
+        llm_provider = settings.get('provider', 'custom_openai')
+        llm_model = self._resolve_provider_model(settings, llm_provider, 'gpt-5.5')
         
         llm_info = QLabel(f"📊 Using: {llm_provider.title()} ({llm_model})")
         llm_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px 0;")
@@ -39625,6 +39603,14 @@ class SupervertalerQt(QMainWindow):
     
     def _run_proofreading(self, segments_to_check, provider, model, custom_prompt="", settings=None):
         """Запускает вычитку выбранных сегментов в фоновом потоке."""
+        # «Не настроено» (Batch #9.3): без активного профиля Custom с endpoint
+        # вычитка не запускается — вежливое сообщение вместо ошибок батчей.
+        if provider == 'custom_openai' and not self._custom_llm_ready(settings):
+            QMessageBox.warning(
+                self, "Custom LLM profile is not configured",
+                "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+            return
         # Create progress dialog
         progress_dialog = QDialog(self)
         progress_dialog.setWindowTitle(self.tr("Proofreading in Progress"))
@@ -39664,7 +39650,7 @@ class SupervertalerQt(QMainWindow):
         api_keys = self.load_api_keys()
         base_url = None
         custom_api_key = None
-        if provider == 'custom_openai' and settings:
+        if settings:
             profile = self._get_active_custom_profile(settings)
             if profile:
                 profile_key = (profile.get('api_key') or '').strip()
@@ -39683,7 +39669,7 @@ class SupervertalerQt(QMainWindow):
             target_lang=self.current_project.target_lang,
             base_url=base_url,
             custom_api_key=custom_api_key,
-            http_proxy=self._get_proxy_url() if provider != 'gemini' else None,
+            http_proxy=self._get_proxy_url(),
         )
 
         # Keep reference to prevent GC
@@ -48200,6 +48186,21 @@ class SupervertalerQt(QMainWindow):
         при загрузке настроек работала по тому же правилу)."""
         return SettingsService.normalize_custom_endpoint(url)
 
+    def _custom_llm_ready(self, settings=None):
+        """Активный профиль Custom с непустым endpoint — единственная рабочая
+        конфигурация LLM после Batch #9.3 (провайдер custom_openai).
+
+        Возвращает словарь профиля или None. Читатели «не настроено» дают
+        единое сообщение "Custom LLM profile is not configured — Settings →
+        AI Settings" вместо сетевой ошибки на api.openai.com с ключом-
+        заглушкой."""
+        if settings is None:
+            settings = self.load_llm_settings()
+        profile = self._get_active_custom_profile(settings)
+        if profile and (profile.get('endpoint') or '').strip():
+            return profile
+        return None
+
     def _get_active_custom_profile(self, settings=None):
         """Возвращает словарь активного профиля custom_openai (endpoint, model,
                 api_key).
@@ -48360,27 +48361,30 @@ class SupervertalerQt(QMainWindow):
     def create_llm_client(self, provider, model, api_keys, settings=None):
         """Создаёт LLMClient с корректным base_url и обработкой прокси."""
         from modules.llm_clients import LLMClient
-        api_key = api_keys.get(provider) or (api_keys.get('google') if provider == 'gemini' else None)
+        # Batch #9.3: провайдер один — custom_openai. Облачные ветки
+        # (openrouter base_url, ключи по имени провайдера, gemini-env-прокси)
+        # удалены. Чужой provider (например, выбор из ещё не удалённого
+        # меню моделей чата, до 9.4) — понятная ValueError: запросы в
+        # облака больше не исполняются.
+        if provider != 'custom_openai':
+            raise ValueError(
+                f"Provider '{provider}' has been removed — use a Custom "
+                f"(OpenAI-compatible) profile in Settings → AI Settings")
+        if settings is None:
+            settings = self.load_llm_settings()
+        profile = self._get_active_custom_profile(settings)
         base_url = None
-        if provider == 'openrouter':
-            base_url = 'https://openrouter.ai/api/v1'
-        elif provider == 'custom_openai':
-            if settings is None:
-                settings = self.load_llm_settings()
-            profile = self._get_active_custom_profile(settings)
-            if profile:
-                base_url = profile.get('endpoint') or None
-                # Active profile's model is the source of truth; only fall
-                # back to a passed-in model if the profile has none set.
-                model = (profile.get('model') or '').strip() or model or 'custom-model'
-                # Profile API key takes priority, then api_keys.txt fallback
-                profile_key = (profile.get('api_key') or '').strip()
-                api_key = profile_key or api_keys.get('custom_openai', '') or 'not-needed'
-            elif not api_key:
-                api_key = api_keys.get('custom_openai', '') or 'not-needed'
+        api_key = api_keys.get('custom_openai', '') or 'not-needed'
+        if profile:
+            base_url = profile.get('endpoint') or None
+            # Active profile's model is the source of truth; only fall
+            # back to a passed-in model if the profile has none set.
+            model = (profile.get('model') or '').strip() or model or 'custom-model'
+            # Profile API key takes priority, then api_keys.txt fallback
+            profile_key = (profile.get('api_key') or '').strip()
+            api_key = profile_key or api_key
         # Pass proxy URL to client (None if proxy disabled or not configured)
-        # Gemini uses env vars instead (set by _apply_gemini_proxy at startup/settings save)
-        http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+        http_proxy = self._get_proxy_url()
         return LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy)
 
     def load_provider_enabled_states(self) -> Dict[str, bool]:
@@ -49409,104 +49413,30 @@ class SupervertalerQt(QMainWindow):
         # Get model based on provider (active profile wins for custom_openai)
         model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
 
-        # Ollama and custom_openai don't strictly need API keys
-        if provider == 'ollama':
-            api_keys = {'ollama': 'not-needed'}  # Placeholder - Ollama doesn't use API keys
-        elif provider == 'custom_openai':
-            api_keys = self.load_api_keys()  # Key is optional for custom endpoints
-        else:
-            # Load API keys for cloud providers
-            api_keys = self.load_api_keys()
-            if not api_keys:
-                reply = QMessageBox.question(
-                    self, "API Keys Missing",
-                    "No API keys found. Would you like to configure them now?\n\n"
-                    f"Keys should be in: {self.user_data_path / 'api_keys.txt'}",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if reply == QMessageBox.StandardButton.Yes:
-                    self._go_to_settings_tab("AI Settings")
-                return
+        # Batch #9.3: единственный провайдер — custom_openai; ключ
+        # опционален (приоритет: ключ активного профиля, затем api_keys,
+        # затем 'not-needed').
+        api_keys = self.load_api_keys()
 
-            # Check if API key exists for selected provider
-            # Note: 'gemini' and 'google' are aliases for the same API key
-            has_api_key = provider in api_keys or (provider == 'gemini' and 'google' in api_keys)
-            if not has_api_key:
-                reply = QMessageBox.question(
-                    self, f"{provider.title()} API Key Missing",
-                    f"{provider.title()} API key not found in api_keys.txt\n\n"
-                    f"Would you like to configure it now?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if reply == QMessageBox.StandardButton.Yes:
-                    self._go_to_settings_tab()
-                return
+        # «Не настроено»: активного профиля Custom с endpoint нет —
+        # вежливое сообщение вместо сетевой ошибки (запрос ушёл бы на
+        # api.openai.com с ключом-заглушкой).
+        if not self._custom_llm_ready(settings):
+            QMessageBox.warning(
+                self, "Custom LLM profile is not configured",
+                "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+            return
         
         try:
+
             self.status_bar.showMessage(f"Translating segment #{segment.id} with {provider} ({model})...")
             QApplication.processEvents()  # Update UI
             
-            # For Ollama (local LLM), show a progress dialog since it can take a while
             progress_dialog = None
             elapsed_timer = None
             start_time = None
-            
-            if provider == 'ollama':
-                from PyQt6.QtCore import QTimer, QElapsedTimer
-                import time
-                
-                progress_dialog = QDialog(self)
-                progress_dialog.setWindowTitle(self.tr("Local LLM Translation"))
-                progress_dialog.setModal(False)  # Non-modal so we can update it
-                progress_dialog.setMinimumWidth(400)
-                progress_layout = QVBoxLayout(progress_dialog)
-                
-                progress_header = QLabel(f"<h3>🖥️ Translating with Local LLM</h3>")
-                progress_layout.addWidget(progress_header)
-                
-                progress_info = QLabel(
-                    f"<b>Model:</b> {model}<br>"
-                    f"<b>Segment:</b> #{segment.id}<br><br>"
-                    f"<i>Local LLM translation may take 10-60 seconds depending on your hardware...</i>"
-                )
-                progress_info.setWordWrap(True)
-                progress_layout.addWidget(progress_info)
-                
-                # Animated progress bar (indeterminate)
-                progress_bar = QProgressBar()
-                progress_bar.setRange(0, 0)  # Indeterminate mode
-                progress_bar.setTextVisible(False)
-                progress_layout.addWidget(progress_bar)
-                
-                # Elapsed time label
-                elapsed_label = QLabel(self.tr("⏱️ Elapsed: 0 seconds"))
-                elapsed_label.setStyleSheet("color: #333; font-weight: bold; padding: 5px 0;")
-                progress_layout.addWidget(elapsed_label)
-                
-                progress_status = QLabel(self.tr("⏳ Processing... (CPU usage is normal)"))
-                progress_status.setStyleSheet("color: #666; padding: 5px 0;")
-                progress_layout.addWidget(progress_status)
-                
-                # Store references
-                progress_dialog.status_label = progress_status
-                progress_dialog.elapsed_label = elapsed_label
-                
-                # Setup elapsed time counter
-                start_time = time.time()
-                
-                def update_elapsed():
-                    if start_time and hasattr(progress_dialog, 'elapsed_label'):
-                        elapsed = int(time.time() - start_time)
-                        progress_dialog.elapsed_label.setText(f"⏱️ Elapsed: {elapsed} seconds")
-                        QApplication.processEvents()
-                
-                elapsed_timer = QTimer()
-                elapsed_timer.timeout.connect(update_elapsed)
-                elapsed_timer.start(1000)  # Update every second
-                
-                progress_dialog.show()
-                QApplication.processEvents()
-            
+
             # Use modular LLM client with user's settings
             client = self.create_llm_client(provider, model, api_keys, settings=settings)
 
@@ -49585,84 +49515,11 @@ class SupervertalerQt(QMainWindow):
                 self.status_bar.showMessage(f"✓ Segment #{segment.id} translated from TM (100% match)", 3000)
                 return
             
-            # Build prompt - use optimized prompt for local LLM (Ollama)
+            # Build prompt from the prompt library (Batch #9.3: локальная
+            # Ollama-ветка промпта удалена вместе с провайдером).
             custom_prompt = None
             
-            if provider == 'ollama':
-                # Use a focused but context-aware prompt for local LLMs
-                source_lang = self.current_project.source_lang
-                target_lang = self.current_project.target_lang
-                
-                # Get 2-3 surrounding segments for context (not 5+ like cloud LLMs)
-                context_lines = []
-                surrounding_count = 2  # Fewer segments for faster inference
-                
-                try:
-                    start_idx = max(0, current_row - surrounding_count)
-                    end_idx = min(len(self.current_project.segments), current_row + surrounding_count + 1)
-                    
-                    for i in range(start_idx, end_idx):
-                        seg = self.current_project.segments[i]
-                        if i == current_row:
-                            continue  # Skip current segment
-                        if seg.target and seg.target.strip():
-                            # Show already translated segments as reference
-                            context_lines.append(f"• {seg.source[:80]}{'...' if len(seg.source) > 80 else ''}")
-                            context_lines.append(f"  → {seg.target[:80]}{'...' if len(seg.target) > 80 else ''}")
-                except:
-                    pass
-                
-                # Build optimized prompt
-                prompt_parts = [f"You are a professional translator ({source_lang} → {target_lang})."]
-                
-                
-                # Add surrounding segment context
-                if context_lines:
-                    context_section = "\n".join(context_lines)
-                    prompt_parts.append("")
-                    prompt_parts.append("Context from surrounding segments:")
-                    prompt_parts.append(context_section)
-                
-                # Add the segment to translate
-                prompt_parts.append("")
-                # Inline-tag preservation – only when the segment carries numbered
-                # <N> markers, so plain segments aren't burdened with the rule.
-                if re.search(r'</?\d+/?>', segment.source or ''):
-                    prompt_parts.append(
-                        "Keep any numbered tags (<1>…</1> paired, <2/> standalone) exactly as "
-                        "written, with the same numbers. A paired tag MUST wrap the translated "
-                        "word(s) it wrapped in the source – never output an empty pair like <1></1> "
-                        "with the text left outside it.")
-                # FuzzyFixer reference for local LLMs (rendered from the same
-                # editable template used for cloud providers).
-                if fuzzy_match and fuzzy_match.get('source') and fuzzy_match.get('target') \
-                        and hasattr(self, 'prompt_manager_qt') and self.prompt_manager_qt:
-                    try:
-                        instruction = self.prompt_manager_qt.get_fuzzy_fixer_template()
-                        try:
-                            _ff_pct = int(round(float(fuzzy_match.get('match_pct', 0) or 0)))
-                        except (TypeError, ValueError):
-                            _ff_pct = 0
-                        instruction = instruction.replace("{{TM_SOURCE}}", fuzzy_match.get('source', ''))
-                        instruction = instruction.replace("{{TM_TARGET}}", fuzzy_match.get('target', ''))
-                        instruction = instruction.replace("{{MATCH_PCT}}", str(_ff_pct))
-                        instruction = instruction.replace("{{TM_NAME}}", fuzzy_match.get('tm_name', '') or 'TM')
-                        instruction = instruction.replace("{{SOURCE_TEXT}}", segment.source)
-                        prompt_parts.append("")
-                        prompt_parts.append(instruction)
-                    except Exception as e:
-                        self.log(f"⚠ Could not add FuzzyFixer reference to Ollama prompt: {e}")
-
-                prompt_parts.append("Translate this segment accurately. Output ONLY the translation:")
-                prompt_parts.append(segment.source)
-                prompt_parts.append("")
-                prompt_parts.append("Translation:")
-
-                custom_prompt = "\n".join(prompt_parts)
-                
-                self.log(f"  Using optimized Ollama prompt ({len(custom_prompt)} chars, {len(context_lines)//2} context segs)")
-            
-            elif hasattr(self, 'prompt_manager_qt') and self.prompt_manager_qt:
+            if hasattr(self, 'prompt_manager_qt') and self.prompt_manager_qt:
                 try:
                     # Get surrounding segments if enabled
                     surrounding_segments = general_prefs.get('surrounding_segments', 5)
@@ -49974,28 +49831,19 @@ class SupervertalerQt(QMainWindow):
 
         clean_target = strip_all_tags(segment.target)
 
-        # Resolve provider/model/keys (same approach as translate_current_segment)
+        # Resolve provider/model/keys (Batch #9.3: только custom_openai)
         settings = self.load_llm_settings()
-        provider = settings.get('provider', 'openai')
+        provider = settings.get('provider', 'custom_openai')
         model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
-        if provider == 'ollama':
-            api_keys = {'ollama': 'not-needed'}
-        else:
-            api_keys = self.load_api_keys() or {}
-            has_key = (provider in api_keys
-                       or (provider == 'gemini' and 'google' in api_keys)
-                       or provider == 'custom_openai')
-            if not has_key:
-                reply = QMessageBox.question(
-                    self, f"{provider.title()} API Key Missing",
-                    f"{provider.title()} API key not found. Configure it now?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                if reply == QMessageBox.StandardButton.Yes:
-                    self._go_to_settings_tab("AI Settings")
-                return
+        if not self._custom_llm_ready(settings):
+            QMessageBox.warning(
+                self, "Custom LLM profile is not configured",
+                "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+            return
 
         try:
-            client = self.create_llm_client(provider, model, api_keys, settings)
+            client = self.create_llm_client(provider, model, self.load_api_keys() or {}, settings)
         except Exception as e:
             QMessageBox.critical(self, "AutoTagger", f"Could not initialise the AI client:\n\n{e}")
             return
@@ -50307,22 +50155,17 @@ class SupervertalerQt(QMainWindow):
         provider = settings.get('provider', 'openai')
         model = self._resolve_provider_model(settings, provider, None)
 
-        # Load API keys
-        api_keys = self.load_api_keys()
-        if provider == 'ollama':
-            api_key = api_keys.get('ollama', '') or 'not-needed'
-        elif provider == 'custom_openai':
-            profile = self._get_active_custom_profile(settings)
-            profile_key = (profile.get('api_key') or '').strip() if profile else ''
-            api_key = profile_key or api_keys.get('custom_openai', '') or 'not-needed'
-        else:
-            if not api_keys:
-                QMessageBox.warning(self, "QuickLauncher", "No API keys found. Configure them in Settings first.")
-                return
-            api_key = api_keys.get(provider) or (api_keys.get('google') if provider == 'gemini' else None)
-            if not api_key:
-                QMessageBox.warning(self, "QuickLauncher", f"No API key found for provider '{provider}'.")
-                return
+        # Batch #9.3: только custom_openai — ключ активного профиля
+        # приоритетнее, api_keys — fallback, 'not-needed' — последняя ступень.
+        profile = self._custom_llm_ready(settings)
+        if not profile:
+            QMessageBox.warning(
+                self, "Custom LLM profile is not configured",
+                "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+            return
+        api_key = ((profile.get('api_key') or '').strip()
+                   or self.load_api_keys().get('custom_openai', '') or 'not-needed')
 
         try:
             self.status_bar.showMessage(f"⚡ QuickLauncher: running '{prompt_relative_path}'…")
@@ -50336,11 +50179,8 @@ class SupervertalerQt(QMainWindow):
                 target_text=current_target_text
             )
 
-            base_url = None
-            if provider == 'custom_openai':
-                profile = self._get_active_custom_profile(settings)
-                base_url = profile.get('endpoint') or None if profile else None
-            http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+            base_url = profile.get('endpoint') or None
+            http_proxy = self._get_proxy_url()
             client = LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy)
 
             # Use translate() with empty text and custom_prompt for generic AI completion
@@ -50571,41 +50411,26 @@ class SupervertalerQt(QMainWindow):
         if reply != QMessageBox.StandardButton.Yes:
             return
 
-        # Resolve LLM provider/model/keys
+        # Resolve LLM provider/model/keys (Batch #9.3: только custom_openai)
         settings = self.load_llm_settings()
-        provider = settings.get('provider', 'openai')
+        provider = settings.get('provider', 'custom_openai')
         model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
-        if provider == 'ollama':
-            api_keys = {'ollama': 'not-needed'}
-        else:
-            api_keys = self.load_api_keys() or {}
-            has_key = (provider in api_keys
-                       or (provider == 'gemini' and 'google' in api_keys)
-                       or provider == 'custom_openai')
-            if not has_key:
-                r = QMessageBox.question(
-                    self, f"{provider.title()} API Key Missing",
-                    f"{provider.title()} API key not found. Configure it now?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-                if r == QMessageBox.StandardButton.Yes:
-                    self._go_to_settings_tab("AI Settings")
-                return
+        profile = self._custom_llm_ready(settings)
+        if not profile:
+            QMessageBox.warning(
+                self, "Custom LLM profile is not configured",
+                "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+            return
 
-        custom_base_url = None
-        custom_api_key = None
-        if provider == 'custom_openai':
-            profile = self._get_active_custom_profile(settings)
-            if profile:
-                custom_base_url = profile.get('endpoint') or None
-                pk = (profile.get('api_key') or '').strip()
-                if pk:
-                    custom_api_key = pk
+        custom_base_url = profile.get('endpoint') or None
+        custom_api_key = (profile.get('api_key') or '').strip() or None
 
         worker = PreTranslationWorker(
             self, targets, 'LLM', provider, model,
             prompt_manager=self.prompt_manager_qt if hasattr(self, 'prompt_manager_qt') else None,
             base_url=custom_base_url, custom_api_key=custom_api_key,
-            http_proxy=self._get_proxy_url() if provider != 'gemini' else None,
+            http_proxy=self._get_proxy_url(),
             autotag_only=True,
         )
         dialog = LiveProgressDialog(self, len(targets), f"AutoTagger ({provider} | {model})")
@@ -50745,8 +50570,8 @@ class SupervertalerQt(QMainWindow):
         if is_retry_pass:
             # Use stored settings from previous pass - skip dialog entirely
             translation_provider_type = getattr(self, '_batch_provider_type', 'LLM')
-            translation_provider_name = getattr(self, '_batch_provider_name', 'openai')
-            model = getattr(self, '_batch_model', 'gpt-5.5')
+            translation_provider_name = getattr(self, '_batch_provider_name', 'custom_openai')
+            model = getattr(self, '_batch_model', 'custom-model')
             tm_exact_only = getattr(self, '_batch_tm_exact_only', False)  # Retrieve TM exact-only setting
             api_keys = self.load_api_keys()
             settings = self.load_llm_settings()
@@ -50860,9 +50685,8 @@ class SupervertalerQt(QMainWindow):
 
             # Show current LLM settings
             settings = self.load_llm_settings()
-            llm_provider = settings.get('provider', 'openai')
-            model_key = f'{llm_provider}_model'
-            llm_model = settings.get(model_key, 'gpt-5.5')
+            llm_provider = settings.get('provider', 'custom_openai')
+            llm_model = self._resolve_provider_model(settings, llm_provider, 'gpt-5.5')
 
             if llm_provider == 'custom_openai':
                 profile = self._get_active_custom_profile(settings)
@@ -51007,26 +50831,18 @@ class SupervertalerQt(QMainWindow):
                     return
 
             else:
-                # Use LLM provider
+                # Use LLM provider (Batch #9.3: только custom_openai; ключ
+                # опционален — профиль/api_keys/'not-needed')
                 translation_provider_type = 'LLM'
-            
-                # Ollama doesn't need API keys - it's local
-                if llm_provider == 'ollama':
-                    api_keys = {'ollama': 'not-needed'}  # Placeholder - Ollama doesn't use API keys
-                elif llm_provider == 'custom_openai':
-                    pass  # Key is optional for custom endpoints
-                elif not api_keys:
-                    QMessageBox.critical(
-                        self, "API Keys Missing",
-                        "Please configure your API keys in Settings first."
-                    )
-                    return
-                # Note: 'gemini' and 'google' are aliases for the same API key
-                elif llm_provider not in api_keys and not (llm_provider == 'gemini' and 'google' in api_keys):
-                    QMessageBox.critical(
-                        self, f"{llm_provider.title()} API Key Missing",
-                        f"Please configure your {llm_provider.title()} API key in Settings."
-                    )
+
+                # «Не настроено»: без активного профиля Custom с endpoint батч
+                # не запускается — вежливое сообщение вместо ошибок на каждый
+                # сегмент в фоновом воркере.
+                if not self._custom_llm_ready(settings):
+                    QMessageBox.warning(
+                        self, "Custom LLM profile is not configured",
+                        "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
+                        "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
                     return
 
                 translation_provider_name = llm_provider
@@ -51370,7 +51186,7 @@ class SupervertalerQt(QMainWindow):
             glossary_terms=glossary_terms,
             base_url=custom_base_url,
             custom_api_key=custom_api_key,
-            http_proxy=self._get_proxy_url() if translation_provider_name != 'gemini' else None,
+            http_proxy=self._get_proxy_url(),
             use_fuzzy_fixer=use_fuzzy_fixer,
             fuzzy_match_map=fuzzy_match_map,
         )
@@ -51497,16 +51313,14 @@ class SupervertalerQt(QMainWindow):
         if not enabled_providers.get(enabled_key, True):
             return  # Provider is disabled, skip LLM
 
-        # Get API key for provider
-        api_key_value = api_keys.get(provider) or (api_keys.get('google') if provider == 'gemini' else None)
-        if not api_key_value and provider not in ('ollama', 'custom_openai'):
-            return  # No API key for selected provider
-        # Resolve custom_openai profile for API key and base_url
-        _custom_profile = None
-        if provider == 'custom_openai':
-            _custom_profile = self._get_active_custom_profile(settings)
-            profile_key = (_custom_profile.get('api_key') or '').strip() if _custom_profile else ''
-            api_key_value = profile_key or api_key_value or 'not-needed'
+        # Batch #9.3: только custom_openai. Фоновый путь Match Panel: без
+        # активного профиля Custom с endpoint — тихий выход (без сообщений
+        # на каждый сегмент).
+        _custom_profile = self._custom_llm_ready(settings)
+        if not _custom_profile:
+            return  # Custom LLM profile is not configured — silent skip
+        api_key_value = ((_custom_profile.get('api_key') or '').strip()
+                         or api_keys.get('custom_openai', '') or 'not-needed')
 
         # Get model based on provider (active profile wins for custom_openai)
         model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
@@ -51521,8 +51335,8 @@ class SupervertalerQt(QMainWindow):
                 from modules.llm_clients import LLMClient
                 from modules.translation_results_panel import TranslationMatch
 
-                base_url = _custom_profile.get('endpoint') or None if _custom_profile else None
-                http_proxy = self._get_proxy_url() if provider != 'gemini' else None
+                base_url = _custom_profile.get('endpoint') or None
+                http_proxy = self._get_proxy_url()
                 client = LLMClient(
                     api_key=api_key_value,
                     provider=provider,
@@ -51561,13 +51375,8 @@ class SupervertalerQt(QMainWindow):
                     # Check if this segment is still selected
                     current_row = self.table.currentRow()
                     if current_row == row_index:
-                        # Map provider to code
-                        provider_code_map = {
-                            'openai': 'GPT',
-                            'claude': 'CL',
-                            'gemini': 'GEM'
-                        }
-                        provider_code = provider_code_map.get(provider, 'LLM')
+                        # Batch #9.3: единственный LLM-провайдер — Custom
+                        provider_code = 'CUS'
                         
                         # Create LLM match
                         llm_match = TranslationMatch(
@@ -52737,148 +52546,56 @@ class SupervertalerQt(QMainWindow):
                 import traceback
                 self.log(f"⚠ Traceback: {traceback.format_exc()}")
         
-        # 🧠 DIRECT LLM SEARCH: Large Language Model matches  
+        # 🧠 DIRECT LLM SEARCH: LLM-совпадение от активного профиля Custom
+        # (Batch #9.3: единственный LLM-провайдер — custom_openai; облачные
+        # ветки OpenAI/Claude/Gemini удалены).
         if self.enable_llm_matching:
             try:
-                self.log(f"🧠 DIRECT LLM SEARCH: Getting LLM translations for '{segment.source[:50]}...'")
-                self.log(f"🧠 DIRECT LLM SEARCH: LLM matching is enabled: {self.enable_llm_matching}")
-                
-                # Import LLM wrapper functions
-                from modules.llm_clients import get_openai_translation, get_claude_translation
-                self.log("🧠 DIRECT LLM SEARCH: Successfully imported LLM wrapper functions")
-                
-                # Use existing LLM infrastructure from Prompt Manager
-                api_keys = self.load_api_keys()
-                self.log(f"🧠 DIRECT LLM SEARCH: Loaded API keys: {list(api_keys.keys()) if api_keys else 'None'}")
-                if not api_keys:
-                    self.log("⚠ No API keys found for LLM translation")
-                    return
-                
+                self.log(f"🧠 DIRECT LLM SEARCH: Getting Custom LLM translation for '{segment.source[:50]}...'")
+
                 settings = self.load_llm_settings()
-                
-                # Check if we should use prompts for grid translations (configurable)
+                profile = self._custom_llm_ready(settings)
+                if not profile:
+                    self.log("⚠ Custom LLM profile is not configured (no endpoint) — LLM match skipped")
+                    return
+
+                from modules.llm_clients import LLMClient
+
                 use_prompts_in_grid = settings.get('use_prompts_in_grid', False)  # Default: simple translations
                 self.log(f"🧠 LLM Grid Translations - Use Prompts: {use_prompts_in_grid}")
-                
-                # Get OpenAI translation using existing infrastructure
-                if 'openai' in api_keys:
-                    try:
-                        self.log("🧠 DIRECT LLM SEARCH: Attempting OpenAI translation...")
-                        from modules.llm_clients import LLMClient
-                        self.log("🧠 DIRECT LLM SEARCH: LLMClient imported for OpenAI")
-                        
-                        openai_model = settings.get('openai_model', 'gpt-5.5')
-                        self.log(f"🧠 DIRECT LLM SEARCH: Using OpenAI model: {openai_model}")
-                        client = LLMClient(
-                            api_key=api_keys['openai'],
-                            provider='openai',
-                            model=openai_model,
-                            http_proxy=self._get_proxy_url()
-                        )
-                        self.log("🧠 DIRECT LLM SEARCH: LLMClient initialized for OpenAI")
-                        
-                        translation = client.translate(
-                            text=segment.source,
-                            source_lang=source_lang_code or 'nl',
-                            target_lang=target_lang_code or 'en'
-                        )
-                        self.log(f"🧠 DIRECT LLM SEARCH: OpenAI translation result: {translation[:100] if translation else 'None'}...")
-                        
-                        if translation and translation.strip():
-                            match = TranslationMatch(
-                                source=segment.source,
-                                target=translation.strip(),
-                                relevance=88,  # Good confidence for LLM
-                                metadata={'model': openai_model, 'provider': 'OpenAI'},
-                                match_type="LLM",
-                                compare_source=segment.source,
-                                provider_code='OA'
-                            )
-                            matches_dict["LLM"].append(match)
-                            self.log(f"✓ Added OpenAI match: {translation[:50]}...")
-                        else:
-                            self.log("⚠ OpenAI translation was empty or None")
-                            
-                    except Exception as e:
-                        self.log(f"⚠ Error getting OpenAI translation: {e}")
-                        import traceback
-                        self.log(f"⚠ OpenAI error traceback: {traceback.format_exc()}")
-                
-                # Get Claude translation using existing infrastructure
-                if 'claude' in api_keys:
-                    try:
-                        from modules.llm_clients import LLMClient
-                        
-                        claude_model = settings.get('claude_model', 'claude-sonnet-5-5')
-                        client = LLMClient(
-                            api_key=api_keys['claude'],
-                            provider='claude',
-                            model=claude_model,
-                            http_proxy=self._get_proxy_url()
-                        )
-                        
-                        translation = client.translate(
-                            text=segment.source,
-                            source_lang=source_lang_code or 'nl',
-                            target_lang=target_lang_code or 'en'
-                        )
-                        
-                        if translation and translation.strip():
-                            match = TranslationMatch(
-                                source=segment.source,
-                                target=translation.strip(),
-                                relevance=90,  # High confidence for Claude
-                                metadata={'model': claude_model, 'provider': 'Claude'},
-                                match_type="LLM",
-                                compare_source=segment.source,
-                                provider_code='CL'
-                            )
-                            matches_dict["LLM"].append(match)
-                            self.log(f"✓ Added Claude match: {translation[:50]}...")
-                            
-                    except Exception as e:
-                        self.log(f"⚠ Error getting Claude translation: {e}")
-                
-                # Get Gemini translation using existing infrastructure
-                # Check for both 'gemini' and 'google' keys for backward compatibility
-                gemini_api_key = api_keys.get('gemini') or api_keys.get('google')
-                if gemini_api_key:
-                    try:
-                        self.log("🧠 DIRECT LLM SEARCH: Attempting Gemini translation...")
-                        from modules.llm_clients import LLMClient
-                        self.log("🧠 DIRECT LLM SEARCH: LLMClient imported for Gemini")
-                        
-                        gemini_model = settings.get('gemini_model', 'gemini-3.1-flash-lite')
-                        self.log(f"🧠 DIRECT LLM SEARCH: Using Gemini model: {gemini_model}")
-                        client = LLMClient(
-                            api_key=gemini_api_key,
-                            provider='gemini',
-                            model=gemini_model
-                        )
-                        self.log("🧠 DIRECT LLM SEARCH: LLMClient initialized for Gemini")
-                        
-                        translation = client.translate(
-                            text=segment.source,
-                            source_lang=source_lang_code or 'nl',
-                            target_lang=target_lang_code or 'en'
-                        )
-                        
-                        if translation and translation.strip():
-                            match = TranslationMatch(
-                                source=segment.source,
-                                target=translation.strip(),
-                                relevance=85,  # Good confidence for Gemini
-                                metadata={'model': gemini_model, 'provider': 'Gemini'},
-                                match_type="LLM",
-                                compare_source=segment.source,
-                                provider_code='GM'
-                            )
-                            matches_dict["LLM"].append(match)
-                            self.log(f"✓ Added Gemini match: {translation[:50]}...")
-                            
-                    except Exception as e:
-                        self.log(f"⚠ Error getting Gemini translation: {e}")
-                    
+
+                model = self._resolve_provider_model(settings, 'custom_openai', 'gpt-5.5')
+                api_key = ((profile.get('api_key') or '').strip()
+                           or self.load_api_keys().get('custom_openai', '') or 'not-needed')
+                client = LLMClient(
+                    api_key=api_key,
+                    provider='custom_openai',
+                    model=model,
+                    base_url=profile.get('endpoint') or None,
+                    http_proxy=self._get_proxy_url()
+                )
+
+                translation = client.translate(
+                    text=segment.source,
+                    source_lang=source_lang_code or 'nl',
+                    target_lang=target_lang_code or 'en'
+                )
+
+                if translation and translation.strip():
+                    match = TranslationMatch(
+                        source=segment.source,
+                        target=translation.strip(),
+                        relevance=88,  # Good confidence for LLM
+                        metadata={'model': model, 'provider': 'Custom LLM'},
+                        match_type="LLM",
+                        compare_source=segment.source,
+                        provider_code='CUS'
+                    )
+                    matches_dict["LLM"].append(match)
+                    self.log(f"✓ Added Custom LLM match: {translation[:50]}...")
+                else:
+                    self.log("⚠ Custom LLM translation was empty or None")
+
             except Exception as e:
                 self.log(f"⚠ Error in LLM translation process: {e}")
     

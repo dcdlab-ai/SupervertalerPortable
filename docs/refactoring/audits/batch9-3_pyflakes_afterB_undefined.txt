@@ -1,0 +1,573 @@
+Supervertaler.py:113:1: 'contextlib.contextmanager' imported but unused
+Supervertaler.py:116:1: 'dataclasses.dataclass' imported but unused
+Supervertaler.py:116:1: 'dataclasses.asdict' imported but unused
+Supervertaler.py:116:1: 'dataclasses.field' imported but unused
+Supervertaler.py:119:1: 'modules.platform_helpers.IS_WINDOWS' imported but unused
+Supervertaler.py:119:1: 'modules.platform_helpers.IS_LINUX' imported but unused
+Supervertaler.py:119:1: 'modules.platform_helpers.get_hidden_subprocess_flags' imported but unused
+Supervertaler.py:120:1: 'modules.ui_scale.scaled_pt' imported but unused
+Supervertaler.py:320:1: 'modules.statuses.STATUSES' imported but unused
+Supervertaler.py:326:1: 'modules.spellcheck_manager.SpellcheckManager' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.runs_to_tagged_text' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.tagged_text_to_runs' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.apply_formatting_tags' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.protect_tags_from_linebreak' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.extract_all_tags' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._normalize_ws_for_compare' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._normalize_for_word_compare' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._reinsert_tags_into_target' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._classify_tag' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._tags_well_formed' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.validate_tag_transfer' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.count_pipe_symbols' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager.get_tag_pair' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._INLINE_TAG_RE' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._TAG_LINEBREAK_PROTECT_RE' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._ALL_TAGS_PATTERN' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._AUTOTAG_TAG_PATTERN' imported but unused
+Supervertaler.py:339:1: 'modules.tag_manager._WORD_COMPARE_FOLD' imported but unused
+Supervertaler.py:377:1: 'modules.event_filters.GridTableEventFilter' imported but unused
+Supervertaler.py:378:1: 'modules.dialogs.AdvancedFiltersDialog' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QTableWidgetSelectionRange' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QMenuBar' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QToolBar' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QTabBar' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QTreeWidget' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QTreeWidgetItem' imported but unused
+Supervertaler.py:414:5: 'PyQt6.QtWidgets.QToolButton' imported but unused
+Supervertaler.py:426:5: 'PyQt6.QtGui.QIcon' imported but unused
+Supervertaler.py:426:5: 'PyQt6.QtGui.QTextBlockFormat' imported but unused
+Supervertaler.py:426:5: 'PyQt6.QtGui.QCursor' imported but unused
+Supervertaler.py:430:5: 'PyQt6.sip' imported but unused
+Supervertaler.py:433:5: redefinition of unused 'subprocess' from line 111
+Supervertaler.py:473:5: `global _hotkey_manager` is unused: name is never assigned in scope
+Supervertaler.py:853:45: redefinition of unused 'field' from line 116
+Supervertaler.py:937:45: redefinition of unused 'field' from line 116
+Supervertaler.py:1056:15: f-string is missing placeholders
+Supervertaler.py:1130:41: f-string is missing placeholders
+Supervertaler.py:1163:41: f-string is missing placeholders
+Supervertaler.py:1794:13: local variable 'is_effective_project' is assigned to but never used
+Supervertaler.py:2029:5: redefinition of unused 'keyPressEvent' from line 1421
+Supervertaler.py:2082:5: redefinition of unused '_handle_quick_add_to_glossary_priority' from line 1645
+Supervertaler.py:2373:5: redefinition of unused '_get_main_window' from line 1651
+Supervertaler.py:4596:41: f-string is missing placeholders
+Supervertaler.py:4629:41: f-string is missing placeholders
+Supervertaler.py:4731:13: local variable 'new_text' is assigned to but never used
+Supervertaler.py:4982:9: local variable 'offset' is assigned to but never used
+Supervertaler.py:5034:9: local variable 'pos' is assigned to but never used
+Supervertaler.py:5039:13: local variable 'term' is assigned to but never used
+Supervertaler.py:5040:13: local variable 'translation' is assigned to but never used
+Supervertaler.py:5106:17: 'PyQt6.QtGui.QColor' imported but unused
+Supervertaler.py:5106:17: 'PyQt6.QtGui.QAbstractTextDocumentLayout' imported but unused
+Supervertaler.py:5106:17: 'PyQt6.QtGui.QPalette' imported but unused
+Supervertaler.py:5107:17: 'PyQt6.QtCore.QSizeF' imported but unused
+Supervertaler.py:5336:9: 're' imported but unused
+Supervertaler.py:5362:23: f-string is missing placeholders
+Supervertaler.py:5507:27: f-string is missing placeholders
+Supervertaler.py:5527:23: f-string is missing placeholders
+Supervertaler.py:5713:39: f-string is missing placeholders
+Supervertaler.py:6456:22: f-string is missing placeholders
+Supervertaler.py:6473:9: redefinition of unused 'QIcon' from line 426
+Supervertaler.py:7003:9: redefinition of unused 'QCursor' from line 426
+Supervertaler.py:7442:34: f-string is missing placeholders
+Supervertaler.py:7446:34: f-string is missing placeholders
+Supervertaler.py:7450:30: f-string is missing placeholders
+Supervertaler.py:7619:9: local variable 'e' is assigned to but never used
+Supervertaler.py:7625:9: 'PyQt6.QtCore.QTimer' imported but unused
+Supervertaler.py:7811:9: redefinition of unused 'QCursor' from line 426
+Supervertaler.py:8919:9: 'PyQt6.QtWidgets.QWidget' imported but unused
+Supervertaler.py:8919:9: 'PyQt6.QtWidgets.QHBoxLayout' imported but unused
+Supervertaler.py:8919:9: redefinition of unused 'QToolBar' from line 414
+Supervertaler.py:9078:9: redefinition of unused 'UnifiedPromptManagerQt' from line 9021
+Supervertaler.py:10234:21: local variable 'docx_name' is assigned to but never used
+Supervertaler.py:10252:60: f-string is missing placeholders
+Supervertaler.py:10256:30: f-string is missing placeholders
+Supervertaler.py:10495:53: f-string is missing placeholders
+Supervertaler.py:10594:26: f-string is missing placeholders
+Supervertaler.py:11264:9: local variable 'project_id' is assigned to but never used
+Supervertaler.py:11630:22: f-string is missing placeholders
+Supervertaler.py:11639:22: f-string is missing placeholders
+Supervertaler.py:11833:9: 'PyQt6.QtWidgets.QRadioButton' imported but unused
+Supervertaler.py:12720:5: redefinition of unused '_INLINE_TAG_RE' from line 339
+Supervertaler.py:13604:26: f-string is missing placeholders
+Supervertaler.py:13606:26: f-string is missing placeholders
+Supervertaler.py:13608:26: f-string is missing placeholders
+Supervertaler.py:13610:26: f-string is missing placeholders
+Supervertaler.py:13669:13: 'docx.shared.Emu' imported but unused
+Supervertaler.py:15414:33: local variable 'new_match' is assigned to but never used
+Supervertaler.py:15557:46: f-string is missing placeholders
+Supervertaler.py:15562:42: f-string is missing placeholders
+Supervertaler.py:15580:42: f-string is missing placeholders
+Supervertaler.py:16698:17: local variable 'e' is assigned to but never used
+Supervertaler.py:16785:38: f-string is missing placeholders
+Supervertaler.py:17004:9: 'modules.termbase_manager.TermbaseManager' imported but unused
+Supervertaler.py:17649:9: local variable 'project_id' is assigned to but never used
+Supervertaler.py:18469:9: 'PyQt6.QtWidgets.QRadioButton' imported but unused
+Supervertaler.py:18469:9: 'PyQt6.QtWidgets.QButtonGroup' imported but unused
+Supervertaler.py:19022:9: 'PyQt6.QtWidgets.QScrollArea' imported but unused
+Supervertaler.py:19335:9: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+Supervertaler.py:19597:13: 'modules.local_llm_setup.check_ollama_status' imported but unused
+Supervertaler.py:19597:13: 'modules.local_llm_setup.RECOMMENDED_MODELS' imported but unused
+Supervertaler.py:19607:9: local variable 'e' is assigned to but never used
+Supervertaler.py:19850:21: redefinition of unused 'check_ollama_status' from line 19597
+Supervertaler.py:20421:9: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+Supervertaler.py:20432:9: local variable 'enabled_providers' is assigned to but never used
+Supervertaler.py:20461:9: redefinition of unused 'QComboBox' from line 20421
+Supervertaler.py:20461:9: redefinition of unused 'QPushButton' from line 20421
+Supervertaler.py:20999:9: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+Supervertaler.py:21235:38: f-string is missing placeholders
+Supervertaler.py:22187:9: redefinition of unused 'QColorDialog' from line 21928
+Supervertaler.py:22188:9: redefinition of unused 'QColor' from line 21929
+Supervertaler.py:23395:9: 'PyQt6.QtWidgets.QTextEdit' imported but unused
+Supervertaler.py:23534:25: f-string is missing placeholders
+Supervertaler.py:24476:13: f-string is missing placeholders
+Supervertaler.py:25103:9: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:26104:9: 'PyQt6.QtCore.Qt' imported but unused
+Supervertaler.py:26107:9: local variable 'scrollbar' is assigned to but never used
+Supervertaler.py:26244:9: local variable 'match_limits' is assigned to but never used
+Supervertaler.py:26278:9: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:26462:30: f-string is missing placeholders
+Supervertaler.py:26475:9: 'PyQt6.QtWidgets.QRadioButton' imported but unused
+Supervertaler.py:26475:9: 'PyQt6.QtWidgets.QButtonGroup' imported but unused
+Supervertaler.py:26758:9: redefinition of unused 'QIcon' from line 426
+Supervertaler.py:27083:26: f-string is missing placeholders
+Supervertaler.py:27358:38: f-string is missing placeholders
+Supervertaler.py:27360:34: f-string is missing placeholders
+Supervertaler.py:27365:34: f-string is missing placeholders
+Supervertaler.py:27498:30: f-string is missing placeholders
+Supervertaler.py:28174:13: local variable 'total_cached' is assigned to but never used
+Supervertaler.py:28798:30: f-string is missing placeholders
+Supervertaler.py:28800:26: f-string is missing placeholders
+Supervertaler.py:28802:22: f-string is missing placeholders
+Supervertaler.py:28807:22: f-string is missing placeholders
+Supervertaler.py:29082:13: local variable 'current_sort_state' is assigned to but never used
+Supervertaler.py:29156:9: 'datetime.datetime' imported but unused
+Supervertaler.py:29936:21: local variable 'new_proj_btn' is assigned to but never used
+Supervertaler.py:29950:34: f-string is missing placeholders
+Supervertaler.py:30110:13: redefinition of unused 'dataclass' from line 116
+Supervertaler.py:30111:13: 'typing.List' imported but unused
+Supervertaler.py:30111:13: 'typing.Dict' imported but unused
+Supervertaler.py:30111:13: 'typing.Any' imported but unused
+Supervertaler.py:30112:13: 'datetime.datetime' imported but unused
+Supervertaler.py:30600:26: f-string is missing placeholders
+Supervertaler.py:30602:26: f-string is missing placeholders
+Supervertaler.py:31406:9: 'datetime.datetime' imported but unused
+Supervertaler.py:31426:22: f-string is missing placeholders
+Supervertaler.py:31521:30: f-string is missing placeholders
+Supervertaler.py:31671:18: f-string is missing placeholders
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QDialog' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QVBoxLayout' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QHBoxLayout' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QLabel' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QPushButton' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QTableWidget' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QTableWidgetItem' imported but unused
+Supervertaler.py:31703:9: 'PyQt6.QtWidgets.QHeaderView' imported but unused
+Supervertaler.py:31792:17: local variable 'old_path' is assigned to but never used
+Supervertaler.py:31833:9: 'PyQt6.QtWidgets.QComboBox' imported but unused
+Supervertaler.py:31833:9: 'PyQt6.QtWidgets.QProgressDialog' imported but unused
+Supervertaler.py:32333:18: f-string is missing placeholders
+Supervertaler.py:32355:9: 'docx.shared.Inches' imported but unused
+Supervertaler.py:32355:9: 'docx.shared.Pt' imported but unused
+Supervertaler.py:32472:9: 're' imported but unused
+Supervertaler.py:32565:17: local variable 'e' is assigned to but never used
+Supervertaler.py:32813:13: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:32995:13: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:33621:34: f-string is missing placeholders
+Supervertaler.py:33698:18: f-string is missing placeholders
+Supervertaler.py:33710:22: f-string is missing placeholders
+Supervertaler.py:34248:9: 'PyQt6.QtWidgets.QMenu' imported but unused
+Supervertaler.py:35192:9: 'PyQt6.QtGui.QMouseEvent' imported but unused
+Supervertaler.py:35480:13: local variable 'has_li_bullet' is assigned to but never used
+Supervertaler.py:36807:13: import 're' from line 294 shadowed by loop variable
+Supervertaler.py:37961:9: redefinition of unused 'contextmanager' from line 113
+Supervertaler.py:38092:29: 'modules.statuses.STATUSES' imported but unused
+Supervertaler.py:38092:29: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:38480:33: local variable 'source_lang_code' is assigned to but never used
+Supervertaler.py:38482:33: local variable 'target_lang_code' is assigned to but never used
+Supervertaler.py:38740:38: f-string is missing placeholders
+Supervertaler.py:39009:9: local variable 'count' is assigned to but never used
+Supervertaler.py:39042:22: f-string is missing placeholders
+Supervertaler.py:39732:22: f-string is missing placeholders
+Supervertaler.py:39735:22: f-string is missing placeholders
+Supervertaler.py:39935:9: redefinition of unused 'STATUSES' from line 320
+Supervertaler.py:40290:22: f-string is missing placeholders
+Supervertaler.py:40292:18: f-string is missing placeholders
+Supervertaler.py:40314:22: f-string is missing placeholders
+Supervertaler.py:40317:18: f-string is missing placeholders
+Supervertaler.py:40351:30: f-string is missing placeholders
+Supervertaler.py:40601:34: f-string is missing placeholders
+Supervertaler.py:40625:22: f-string is missing placeholders
+Supervertaler.py:40743:9: local variable 'new_proj_btn' is assigned to but never used
+Supervertaler.py:40756:22: f-string is missing placeholders
+Supervertaler.py:41045:33: import 're' from line 294 shadowed by loop variable
+Supervertaler.py:41131:25: f-string is missing placeholders
+Supervertaler.py:41144:25: f-string is missing placeholders
+Supervertaler.py:41145:25: f-string is missing placeholders
+Supervertaler.py:41447:25: import 're' from line 41371 shadowed by loop variable
+Supervertaler.py:41782:9: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+Supervertaler.py:41782:9: 'PyQt6.QtWidgets.QGroupBox' imported but unused
+Supervertaler.py:41782:9: 'PyQt6.QtWidgets.QSplitter' imported but unused
+Supervertaler.py:41782:9: redefinition of unused 'QToolButton' from line 414
+Supervertaler.py:42539:9: 're' imported but unused
+Supervertaler.py:43663:46: f-string is missing placeholders
+Supervertaler.py:43830:9: 'PyQt6.QtWidgets.QRadioButton' imported but unused
+Supervertaler.py:44014:9: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+Supervertaler.py:44014:9: 'PyQt6.QtWidgets.QInputDialog' imported but unused
+Supervertaler.py:44018:9: 'PyQt6.QtCore.Qt' imported but unused
+Supervertaler.py:44915:38: f-string is missing placeholders
+Supervertaler.py:46786:9: 'threading' imported but unused
+Supervertaler.py:47115:22: f-string is missing placeholders
+Supervertaler.py:47438:13: local variable 'old_status' is assigned to but never used
+Supervertaler.py:47736:38: f-string is missing placeholders
+Supervertaler.py:49211:5: redefinition of unused 'closeEvent' from line 26994
+Supervertaler.py:49610:38: f-string is missing placeholders
+Supervertaler.py:50637:13: local variable 'api_keys' is assigned to but never used
+Supervertaler.py:50678:17: local variable 'mt_warning' is assigned to but never used
+Supervertaler.py:51045:26: f-string is missing placeholders
+Supervertaler.py:51072:22: f-string is missing placeholders
+Supervertaler.py:51077:22: f-string is missing placeholders
+Supervertaler.py:51243:26: f-string is missing placeholders
+Supervertaler.py:51244:26: f-string is missing placeholders
+Supervertaler.py:51246:26: f-string is missing placeholders
+Supervertaler.py:51410:34: f-string is missing placeholders
+Supervertaler.py:51899:13: 'modules.translation_results_panel.TranslationMatch' imported but unused
+Supervertaler.py:51943:13: local variable 'matches_dict' is assigned to but never used
+Supervertaler.py:52210:38: f-string is missing placeholders
+Supervertaler.py:52223:26: f-string is missing placeholders
+Supervertaler.py:52458:38: f-string is missing placeholders
+Supervertaler.py:52500:38: f-string is missing placeholders
+Supervertaler.py:54560:19: f-string is missing placeholders
+Supervertaler.py:54807:17: local variable 'project_id' is assigned to but never used
+Supervertaler.py:54857:27: f-string is missing placeholders
+Supervertaler.py:54981:9: 'sys as _sys' imported but unused
+Supervertaler.py:54983:13: 'modules.platform_helpers.CrossPlatformKeySender' imported but unused
+Supervertaler.py:55214:19: f-string is missing placeholders
+Supervertaler.py:55231:27: f-string is missing placeholders
+modules\ai_actions.py:27:1: 'typing.Optional' imported but unused
+modules\ai_actions.py:27:1: 'typing.Any' imported but unused
+modules\ai_attachment_manager.py:8:1: 'os' imported but unused
+modules\ai_attachment_manager.py:13:1: 'typing.Tuple' imported but unused
+modules\autocorrect.py:49:1: 'typing.Set' imported but unused
+modules\bilingual_markdown_handler.py:77:1: 'dataclasses.field' imported but unused
+modules\bilingual_markdown_handler.py:78:1: 'typing.Callable' imported but unused
+modules\bilingual_markdown_handler.py:255:18: f-string is missing placeholders
+modules\bilingual_markdown_handler.py:257:18: f-string is missing placeholders
+modules\bilingual_markdown_handler.py:258:18: f-string is missing placeholders
+modules\chat_view_widget.py:11:1: 'io.BytesIO' imported but unused
+modules\chat_view_widget.py:14:1: 'PyQt6.QtGui.QFont' imported but unused
+modules\chat_view_widget.py:14:1: 'PyQt6.QtGui.QAction' imported but unused
+modules\chat_view_widget.py:15:1: 'PyQt6.QtWidgets.QSizePolicy' imported but unused
+modules\config_manager.py:329:30: f-string is missing placeholders
+modules\database_manager.py:24:1: 'typing.Tuple' imported but unused
+modules\database_manager.py:25:1: 'pathlib.Path' imported but unused
+modules\database_manager.py:1887:9: 'modules.tmx_generator.get_lang_match_variants' imported but unused
+modules\database_manager.py:2026:9: local variable 'e' is assigned to but never used
+modules\database_migrations.py:7:1: 'sqlite3' imported but unused
+modules\database_migrations.py:8:1: 'typing.Optional' imported but unused
+modules\database_migrations.py:274:5: redefinition of unused 'sqlite3' from line 7
+modules\dialogs\live_progress.py:159:31: f-string is missing placeholders
+modules\document_analyzer.py:16:1: 'typing.Optional' imported but unused
+modules\document_analyzer.py:16:1: 'typing.Tuple' imported but unused
+modules\docx_handler.py:12:5: 'docx.shared.Pt' imported but unused
+modules\docx_handler.py:12:5: 'docx.shared.RGBColor' imported but unused
+modules\docx_handler.py:12:5: 'docx.shared.Inches' imported but unused
+modules\docx_handler.py:13:5: 'docx.enum.text.WD_ALIGN_PARAGRAPH' imported but unused
+modules\docx_handler.py:280:17: local variable 'e' is assigned to but never used
+modules\docx_handler.py:301:9: local variable 'e' is assigned to but never used
+modules\docx_handler.py:921:15: f-string is missing placeholders
+modules\find_replace_qt.py:21:1: 'os' imported but unused
+modules\find_replace_qt.py:23:1: 'typing.Callable' imported but unused
+modules\find_replace_qt.py:26:1: 'PyQt6.QtWidgets.QLineEdit' imported but unused
+modules\find_replace_qt.py:26:1: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+modules\grid\filters.py:36:1: 'typing.List' imported but unused
+modules\grid\pagination.py:389:5: local variable 'total_pages' is assigned to but never used
+modules\image_extractor.py:54:1: 'pathlib.Path' imported but unused
+modules\keyboard_shortcuts_widget.py:7:1: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+modules\keyboard_shortcuts_widget.py:7:1: 'PyQt6.QtWidgets.QStyleOptionButton' imported but unused
+modules\keyboard_shortcuts_widget.py:13:1: 'PyQt6.QtCore.QEvent' imported but unused
+modules\keyboard_shortcuts_widget.py:13:1: 'PyQt6.QtCore.QPointF' imported but unused
+modules\keyboard_shortcuts_widget.py:13:1: 'PyQt6.QtCore.QRect' imported but unused
+modules\keyboard_shortcuts_widget.py:14:1: 'PyQt6.QtGui.QPainter' imported but unused
+modules\keyboard_shortcuts_widget.py:14:1: 'PyQt6.QtGui.QPen' imported but unused
+modules\keyboard_shortcuts_widget.py:14:1: 'PyQt6.QtGui.QColor' imported but unused
+modules\keyboard_shortcuts_widget.py:188:17: f-string is missing placeholders
+modules\keyboard_shortcuts_widget.py:500:9: local variable 'all_shortcuts' is assigned to but never used
+modules\llm_clients.py:1290:19: f-string is missing placeholders
+modules\llm_clients.py:1292:19: f-string is missing placeholders
+modules\llm_clients.py:1439:13: 'PIL.Image' imported but unused
+modules\llm_clients.py:1519:13: 'PIL.Image' imported but unused
+modules\llm_clients.py:1689:38: f-string is missing placeholders
+modules\llm_clients.py:1691:23: f-string is missing placeholders
+modules\llm_clients.py:1714:23: f-string is missing placeholders
+modules\llm_clients.py:1808:15: f-string is missing placeholders
+modules\llm_clients.py:1810:15: f-string is missing placeholders
+modules\llm_clients.py:1858:15: f-string is missing placeholders
+modules\llm_clients.py:1860:15: f-string is missing placeholders
+modules\local_llm_setup.py:34:1: 'typing.Tuple' imported but unused
+modules\local_llm_setup.py:35:1: 'dataclasses.dataclass' imported but unused
+modules\local_llm_setup.py:38:1: 'PyQt6.QtWidgets.QFrame' imported but unused
+modules\local_llm_setup.py:38:1: 'PyQt6.QtWidgets.QSizePolicy' imported but unused
+modules\local_llm_setup.py:43:1: 'PyQt6.QtCore.Qt' imported but unused
+modules\local_llm_setup.py:44:1: 'PyQt6.QtGui.QFont' imported but unused
+modules\local_llm_setup.py:768:9: 'time' imported but unused
+modules\merge_prompt_dialog.py:27:1: 'PyQt6.QtCore.Qt' imported but unused
+modules\okapi_sidecar.py:35:1: 'typing.Tuple' imported but unused
+modules\pdf_rescue_Qt.py:14:1: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+modules\pdf_rescue_Qt.py:14:1: 'PyQt6.QtWidgets.QFrame' imported but unused
+modules\pdf_rescue_Qt.py:14:1: 'PyQt6.QtWidgets.QStyleOptionButton' imported but unused
+modules\pdf_rescue_Qt.py:20:1: 'PyQt6.QtCore.QTimer' imported but unused
+modules\pdf_rescue_Qt.py:20:1: 'PyQt6.QtCore.QPointF' imported but unused
+modules\pdf_rescue_Qt.py:20:1: 'PyQt6.QtCore.QRect' imported but unused
+modules\pdf_rescue_Qt.py:21:1: 'PyQt6.QtGui.QPainter' imported but unused
+modules\pdf_rescue_Qt.py:21:1: 'PyQt6.QtGui.QPen' imported but unused
+modules\pdf_rescue_Qt.py:21:1: 'PyQt6.QtGui.QColor' imported but unused
+modules\pdf_rescue_Qt.py:21:1: 'PyQt6.QtGui.QStandardItem' imported but unused
+modules\pdf_rescue_Qt.py:431:39: f-string is missing placeholders
+modules\pdf_rescue_Qt.py:1416:39: f-string is missing placeholders
+modules\pdf_rescue_Qt.py:1649:9: 'PyQt6.QtGui.QClipboard' imported but unused
+modules\pdf_rescue_Qt.py:1664:5: redefinition of unused 'QApplication' from line 14
+modules\pdf_rescue_Qt.py:1664:5: redefinition of unused 'QTextEdit' from line 14
+modules\pdf_rescue_Qt.py:1664:5: redefinition of unused 'QLabel' from line 14
+modules\pdf_rescue_Qt.py:1665:5: redefinition of unused 'Qt' from line 20
+modules\platform_helpers.py:171:13: local variable 'SW_SHOW' is assigned to but never used
+modules\platform_helpers.py:1055:13: 'pynput.keyboard.GlobalHotKeys' imported but unused
+modules\platform_helpers.py:1367:13: 'AppKit' imported but unused
+modules\platform_helpers.py:1371:17: 'Cocoa' imported but unused
+modules\platform_helpers.py:2150:13: local variable 'action' is assigned to but never used
+modules\prompt_library_migration.py:20:1: 'os' imported but unused
+modules\prompt_library_migration.py:134:22: f-string is missing placeholders
+modules\prompt_library_migration.py:153:22: f-string is missing placeholders
+modules\quicktrans.py:20:1: 'PyQt6.QtGui.QFont' imported but unused
+modules\quicktrans.py:23:1: 'threading' imported but unused
+modules\quicktrans.py:321:13: local variable 'enabled_providers' is assigned to but never used
+modules\settings_service.py:534:26: f-string is missing placeholders
+modules\settings_sidebar.py:17:1: 'PyQt6.QtGui.QFont' imported but unused
+modules\shortcut_manager.py:9:1: 'PyQt6.QtGui.QKeySequence' imported but unused
+modules\shortcut_manager.py:10:1: 'PyQt6.QtCore.QSettings' imported but unused
+modules\shortcut_manager.py:1071:25: f-string is missing placeholders
+modules\shortcut_manager.py:1074:25: f-string is missing placeholders
+modules\superlookup.py:20:1: 'typing.Tuple' imported but unused
+modules\superlookup.py:142:19: f-string is missing placeholders
+modules\superlookup.py:180:23: f-string is missing placeholders
+modules\termbase_entry_editor.py:22:1: 'PyQt6.QtWidgets.QToolButton' imported but unused
+modules\termbase_entry_editor.py:1459:17: local variable '_e' is assigned to but never used
+modules\termbase_import_export.py:26:1: 'typing.Optional' imported but unused
+modules\termbase_manager.py:14:1: 'sqlite3' imported but unused
+modules\termbase_manager.py:15:1: 'json' imported but unused
+modules\termbase_manager.py:16:1: 'typing.Tuple' imported but unused
+modules\termbase_manager.py:249:26: f-string is missing placeholders
+modules\termbase_manager.py:364:26: f-string is missing placeholders
+modules\termbase_manager.py:371:26: f-string is missing placeholders
+modules\termbase_manager.py:398:22: f-string is missing placeholders
+modules\termlens_popup.py:53:1: 'typing.Union' imported but unused
+modules\termlens_widget.py:14:1: 'PyQt6.QtWidgets.QToolTip' imported but unused
+modules\termlens_widget.py:14:1: 'PyQt6.QtWidgets.QLayoutItem' imported but unused
+modules\termlens_widget.py:14:1: 'PyQt6.QtWidgets.QSizePolicy' imported but unused
+modules\termlens_widget.py:14:1: 'PyQt6.QtWidgets.QMessageBox' imported but unused
+modules\termlens_widget.py:18:1: 'PyQt6.QtGui.QCursor' imported but unused
+modules\termlens_widget.py:19:1: 'typing.Tuple' imported but unused
+modules\termlens_widget.py:573:9: local variable 'no_match_color' is assigned to but never used
+modules\termlens_widget.py:623:13: local variable 'termbase_name' is assigned to but never used
+modules\tm_editor_dialog.py:14:1: 'PyQt6.QtWidgets.QWidget' imported but unused
+modules\tm_editor_dialog.py:15:1: 'PyQt6.QtCore.Qt' imported but unused
+modules\tm_manager_qt.py:11:1: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+modules\tm_manager_qt.py:18:1: 'PyQt6.QtGui.QColor' imported but unused
+modules\tm_manager_qt.py:23:1: 'typing.List' imported but unused
+modules\tm_manager_qt.py:23:1: 'typing.Dict' imported but unused
+modules\tm_manager_qt.py:66:21: local variable 'lang' is assigned to but never used
+modules\tm_manager_qt.py:274:9: local variable 'clip' is assigned to but never used
+modules\tm_metadata_manager.py:10:1: 'sqlite3' imported but unused
+modules\tm_replace.py:17:1: 'typing.List' imported but unused
+modules\tmx_editor.py:29:1: 're' imported but unused
+modules\tmx_editor.py:30:1: 'typing.Tuple' imported but unused
+modules\tmx_editor.py:344:25: undefined name 'tk'
+modules\tmx_editor.py:351:30: undefined name 'tk'
+modules\tmx_editor.py:370:25: undefined name 'tk'
+modules\tmx_editor.py:393:19: undefined name 'tk'
+modules\tmx_editor.py:397:21: undefined name 'tk'
+modules\tmx_editor.py:411:21: undefined name 'tk'
+modules\tmx_editor.py:419:21: undefined name 'tk'
+modules\tmx_editor.py:425:22: undefined name 'tk'
+modules\tmx_editor.py:437:19: undefined name 'tk'
+modules\tmx_editor.py:441:9: undefined name 'tk'
+modules\tmx_editor.py:443:9: undefined name 'tk'
+modules\tmx_editor.py:445:9: undefined name 'tk'
+modules\tmx_editor.py:448:9: undefined name 'tk'
+modules\tmx_editor.py:451:9: undefined name 'tk'
+modules\tmx_editor.py:453:9: undefined name 'tk'
+modules\tmx_editor.py:456:9: undefined name 'tk'
+modules\tmx_editor.py:459:9: undefined name 'tk'
+modules\tmx_editor.py:461:9: undefined name 'tk'
+modules\tmx_editor.py:463:9: undefined name 'tk'
+modules\tmx_editor.py:468:22: undefined name 'tk'
+modules\tmx_editor.py:471:9: undefined name 'tk'
+modules\tmx_editor.py:474:9: undefined name 'tk'
+modules\tmx_editor.py:475:31: undefined name 'ttk'
+modules\tmx_editor.py:479:9: undefined name 'tk'
+modules\tmx_editor.py:481:9: undefined name 'tk'
+modules\tmx_editor.py:482:31: undefined name 'ttk'
+modules\tmx_editor.py:487:9: undefined name 'tk'
+modules\tmx_editor.py:492:24: undefined name 'tk'
+modules\tmx_editor.py:495:9: undefined name 'tk'
+modules\tmx_editor.py:498:9: undefined name 'tk'
+modules\tmx_editor.py:499:36: undefined name 'tk'
+modules\tmx_editor.py:503:9: undefined name 'tk'
+modules\tmx_editor.py:504:36: undefined name 'tk'
+modules\tmx_editor.py:508:9: undefined name 'tk'
+modules\tmx_editor.py:510:9: undefined name 'tk'
+modules\tmx_editor.py:515:22: undefined name 'tk'
+modules\tmx_editor.py:519:18: undefined name 'tk'
+modules\tmx_editor.py:522:9: undefined name 'tk'
+modules\tmx_editor.py:525:30: undefined name 'tk'
+modules\tmx_editor.py:530:24: undefined name 'tk'
+modules\tmx_editor.py:534:21: undefined name 'tk'
+modules\tmx_editor.py:537:9: undefined name 'tk'
+modules\tmx_editor.py:539:36: undefined name 'tk'
+modules\tmx_editor.py:543:33: undefined name 'tk'
+modules\tmx_editor.py:548:21: undefined name 'tk'
+modules\tmx_editor.py:551:9: undefined name 'tk'
+modules\tmx_editor.py:553:36: undefined name 'tk'
+modules\tmx_editor.py:557:33: undefined name 'tk'
+modules\tmx_editor.py:562:21: undefined name 'tk'
+modules\tmx_editor.py:565:30: undefined name 'tk'
+modules\tmx_editor.py:571:32: undefined name 'tk'
+modules\tmx_editor.py:583:26: undefined name 'tk'
+modules\tmx_editor.py:588:21: undefined name 'ttk'
+modules\tmx_editor.py:601:15: undefined name 'ttk'
+modules\tmx_editor.py:602:15: undefined name 'ttk'
+modules\tmx_editor.py:630:22: undefined name 'tk'
+modules\tmx_editor.py:633:27: undefined name 'tk'
+modules\tmx_editor.py:638:21: undefined name 'tk'
+modules\tmx_editor.py:641:9: undefined name 'tk'
+modules\tmx_editor.py:643:9: undefined name 'tk'
+modules\tmx_editor.py:645:9: undefined name 'tk'
+modules\tmx_editor.py:647:9: undefined name 'tk'
+modules\tmx_editor.py:652:27: undefined name 'tk'
+modules\tmx_editor.py:658:29: undefined name 'tk'
+modules\tmx_editor.py:678:20: undefined name 'messagebox'
+modules\tmx_editor.py:683:18: undefined name 'tk'
+modules\tmx_editor.py:688:9: undefined name 'tk'
+modules\tmx_editor.py:690:22: undefined name 'tk'
+modules\tmx_editor.py:693:9: undefined name 'tk'
+modules\tmx_editor.py:694:21: undefined name 'tk'
+modules\tmx_editor.py:698:9: undefined name 'tk'
+modules\tmx_editor.py:699:21: undefined name 'tk'
+modules\tmx_editor.py:703:9: undefined name 'tk'
+modules\tmx_editor.py:704:25: undefined name 'tk'
+modules\tmx_editor.py:715:17: undefined name 'messagebox'
+modules\tmx_editor.py:737:21: undefined name 'tk'
+modules\tmx_editor.py:739:9: undefined name 'tk'
+modules\tmx_editor.py:741:9: undefined name 'tk'
+modules\tmx_editor.py:747:20: undefined name 'messagebox'
+modules\tmx_editor.py:751:21: undefined name 'filedialog'
+modules\tmx_editor.py:773:17: undefined name 'messagebox'
+modules\tmx_editor.py:792:13: undefined name 'messagebox'
+modules\tmx_editor.py:799:21: undefined name 'filedialog'
+modules\tmx_editor.py:814:17: undefined name 'messagebox'
+modules\tmx_editor.py:821:13: undefined name 'messagebox'
+modules\tmx_editor.py:825:13: undefined name 'messagebox'
+modules\tmx_editor.py:841:9: undefined name 'messagebox'
+modules\tmx_editor.py:845:9: undefined name 'messagebox'
+modules\tmx_editor.py:849:18: undefined name 'tk'
+modules\tmx_editor.py:855:9: undefined name 'tk'
+modules\tmx_editor.py:856:20: undefined name 'tk'
+modules\tmx_editor.py:864:9: undefined name 'tk'
+modules\tmx_editor.py:865:20: undefined name 'tk'
+modules\tmx_editor.py:887:21: undefined name 'tk'
+modules\tmx_editor.py:889:9: undefined name 'tk'
+modules\tmx_editor.py:891:9: undefined name 'tk'
+modules\tmx_editor.py:895:21: undefined name 'tk'
+modules\tmx_editor.py:897:9: undefined name 'tk'
+modules\tmx_editor.py:899:9: undefined name 'tk'
+modules\tmx_editor.py:904:9: undefined name 'messagebox'
+modules\tmx_editor.py:919:18: undefined name 'tk'
+modules\tmx_editor.py:923:9: undefined name 'tk'
+modules\tmx_editor.py:927:22: undefined name 'tk'
+modules\tmx_editor.py:930:19: undefined name 'tk'
+modules\tmx_editor.py:931:21: undefined name 'tk'
+modules\tmx_editor.py:940:9: undefined name 'tk'
+modules\tmx_editor.py:946:13: undefined name 'messagebox'
+modules\tmx_editor.py:949:18: undefined name 'tk'
+modules\tmx_editor.py:953:9: undefined name 'tk'
+modules\tmx_editor.py:957:22: undefined name 'tk'
+modules\tmx_editor.py:974:13: undefined name 'tk'
+modules\tmx_editor.py:975:21: undefined name 'tk'
+modules\tmx_editor.py:984:9: undefined name 'tk'
+modules\tmx_editor.py:985:9: undefined name 'tk'
+modules\tmx_editor.py:989:9: undefined name 'tk'
+modules\tmx_editor.py:990:9: undefined name 'tk'
+modules\tmx_editor.py:1004:21: undefined name 'tk'
+modules\tmx_editor.py:1006:9: undefined name 'tk'
+modules\tmx_editor.py:1008:9: undefined name 'tk'
+modules\tmx_editor.py:1029:17: f-string is missing placeholders
+modules\tmx_editor.py:1038:9: undefined name 'messagebox'
+modules\tmx_editor.py:1246:5: redefinition of unused 'edit_selected_tu' from line 843
+modules\tmx_editor.py:1366:13: undefined name 'messagebox'
+modules\tmx_editor.py:1391:13: undefined name 'messagebox'
+modules\tmx_editor.py:1394:13: undefined name 'messagebox'
+modules\tmx_editor.py:1398:9: undefined name 'messagebox'
+modules\tmx_editor.py:1402:9: undefined name 'messagebox'
+modules\tmx_editor.py:1441:24: undefined name 'messagebox'
+modules\tmx_editor_qt.py:20:1: 'PyQt6.QtWidgets.QStyleOptionViewItem' imported but unused
+modules\tmx_editor_qt.py:20:1: 'PyQt6.QtWidgets.QStyleOptionButton' imported but unused
+modules\tmx_editor_qt.py:28:1: 'PyQt6.QtCore.pyqtSignal' imported but unused
+modules\tmx_editor_qt.py:29:1: 'PyQt6.QtGui.QShortcut' imported but unused
+modules\tmx_editor_qt.py:29:1: 'PyQt6.QtGui.QContextMenuEvent' imported but unused
+modules\tmx_editor_qt.py:29:1: 'PyQt6.QtGui.QPen' imported but unused
+modules\tmx_editor_qt.py:29:1: 'PyQt6.QtGui.QPolygonF' imported but unused
+modules\tmx_editor_qt.py:32:1: 're' imported but unused
+modules\tmx_editor_qt.py:37:1: 'modules.tmx_editor.TmxHeader' imported but unused
+modules\tmx_editor_qt.py:80:13: redefinition of unused 'QStyleOptionButton' from line 20
+modules\tmx_editor_qt.py:1269:9: local variable 'e' is assigned to but never used
+modules\tmx_editor_qt.py:1798:21: f-string is missing placeholders
+modules\tmx_editor_qt.py:1801:22: f-string is missing placeholders
+modules\tmx_editor_qt.py:1827:17: f-string is missing placeholders
+modules\tmx_editor_qt.py:1830:18: f-string is missing placeholders
+modules\tmx_editor_qt.py:2062:5: redefinition of unused 'create_status_bar' from line 917
+modules\tmx_editor_qt.py:2294:9: 're' imported but unused
+modules\tmx_editor_qt.py:2294:9: redefinition of unused 're' from line 32
+modules\tmx_editor_qt.py:2346:9: redefinition of unused 're' from line 32
+modules\tmx_editor_qt.py:2347:9: 'html' imported but unused
+modules\tmx_editor_qt.py:2575:5: redefinition of unused 'os' from line 30
+modules\translation_memory.py:712:9: 'modules.tmx_generator.languages_are_compatible' imported but unused
+modules\translation_memory.py:718:9: local variable 'tmx_bases' is assigned to but never used
+modules\translation_results_panel.py:21:1: 'PyQt6.QtGui.QFont' imported but unused
+modules\translation_results_panel.py:21:1: 'PyQt6.QtGui.QTextCursor' imported but unused
+modules\translation_results_panel.py:397:9: 'PyQt6.QtWidgets.QHBoxLayout' imported but unused
+modules\translation_results_panel.py:574:13: local variable 'is_project_termbase' is assigned to but never used
+modules\translation_results_panel.py:950:9: local variable 'separator_color' is assigned to but never used
+modules\translation_results_panel.py:1677:9: local variable 'tm_id' is assigned to but never used
+modules\translation_results_panel.py:1969:9: 'PyQt6.QtWidgets.QMenu' imported but unused
+modules\unified_prompt_library.py:12:1: 'json' imported but unused
+modules\unified_prompt_library.py:175:21: redefinition of unused 'json' from line 12
+modules\unified_prompt_library.py:559:17: redefinition of unused 'json' from line 12
+modules\unified_prompt_library.py:782:13: local variable 'new_prefix' is assigned to but never used
+modules\unified_prompt_manager_qt.py:17:1: 'PyQt6.QtWidgets.QCheckBox' imported but unused
+modules\unified_prompt_manager_qt.py:17:1: 'PyQt6.QtWidgets.QSizePolicy' imported but unused
+modules\unified_prompt_manager_qt.py:17:1: 'PyQt6.QtWidgets.QListWidget' imported but unused
+modules\unified_prompt_manager_qt.py:17:1: 'PyQt6.QtWidgets.QListWidgetItem' imported but unused
+modules\unified_prompt_manager_qt.py:26:1: 'PyQt6.QtCore.QSettings' imported but unused
+modules\unified_prompt_manager_qt.py:27:1: 'PyQt6.QtGui.QAction' imported but unused
+modules\unified_prompt_manager_qt.py:27:1: 'PyQt6.QtGui.QIcon' imported but unused
+modules\unified_prompt_manager_qt.py:30:1: 'modules.llm_clients.LLMClient' imported but unused
+modules\unified_prompt_manager_qt.py:30:1: 'modules.llm_clients.load_api_keys' imported but unused
+modules\unified_prompt_manager_qt.py:35:1: 'modules.shortcut_display.format_shortcut_for_display' imported but unused
+modules\unified_prompt_manager_qt.py:3375:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:3734:38: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4345:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4347:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4349:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4351:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4353:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:4452:13: redefinition of unused 'LLMClient' from line 30
+modules\unified_prompt_manager_qt.py:4627:42: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:6279:30: f-string is missing placeholders
+modules\unified_prompt_manager_qt.py:6286:34: f-string is missing placeholders
+modules\usage_log.py:19:1: 'os' imported but unused
+modules\usage_statistics.py:28:1: 'typing.Optional' imported but unused
+modules\usage_statistics.py:143:5: 'PyQt6.QtWidgets.QLabel' imported but unused
+modules\usage_statistics.py:144:5: 'PyQt6.QtCore.Qt' imported but unused
+modules\usage_statistics.py:145:5: 'PyQt6.QtGui.QDesktopServices' imported but unused
+modules\usage_statistics.py:146:5: 'PyQt6.QtCore.QUrl' imported but unused
+modules\usage_statistics.py:164:5: local variable 'no_btn' is assigned to but never used
