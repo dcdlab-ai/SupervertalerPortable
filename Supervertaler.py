@@ -5569,27 +5569,22 @@ class PreTranslationWorker(QThread):
             return None
     
     def _translate_with_mt(self, segment):
-        """Переводит один сегмент через машинный перевод (MT)."""
-        # Здесь вызывались бы MT-методы parent_app
-        # Реализация зависит от выбранного MT-провайдера
+        """Переводит один сегмент через custom MT endpoint (активный профиль)."""
         try:
-            # Получаем языки источника/перевода
             source_lang = getattr(self.parent_app.current_project, 'source_lang', 'en')
             target_lang = getattr(self.parent_app.current_project, 'target_lang', 'nl')
-            
-            # Загружаем API-ключи
-            api_keys = self.parent_app.load_api_keys()
-            
-            # Вызываем соответствующий MT-сервис
-            if self.provider_name == 'Google Translate':
-                return self.parent_app.call_google_translate(segment.source, source_lang, target_lang, api_keys.get('google_translate'))
-            elif self.provider_name == 'DeepL':
-                return self.parent_app.call_deepl(segment.source, source_lang, target_lang, api_keys.get('deepl'))
-            # При необходимости добавляются другие MT-провайдеры
+            # С Batch #9.2 единственный MT-движок — custom MT endpoint:
+            # call_custom_mt сам резолвит активный профиль. parent_app уже
+            # используется воркером в TM/LLM-режимах — новых потоковых рисков нет.
+            result = self.parent_app.call_custom_mt(segment.source, source_lang, target_lang)
+            if result and not result.startswith('['):
+                return result
+            print(f"MT translation skipped: {result}")
             return None
         except Exception as e:
             print(f"MT translation error: {e}")
             return None
+
     
     def _translate_with_llm(self, segment):
         """Переводит один сегмент через LLM."""
@@ -51000,22 +50995,14 @@ class SupervertalerQt(QMainWindow):
 
             # Load API keys to check what's available
             api_keys = self.load_api_keys()
-            enabled_providers = self.load_provider_enabled_states()
 
-            # Show available MT providers
-            mt_providers_available = []
-            if enabled_providers.get('mt_google_translate', True) and api_keys.get('google_translate'):
-                mt_providers_available.append('Google Translate')
-            if enabled_providers.get('mt_deepl', True) and api_keys.get('deepl'):
-                mt_providers_available.append('DeepL')
-            if enabled_providers.get('mt_microsoft', True) and (api_keys.get('microsoft_translate') or api_keys.get('azure_translate')):
-                mt_providers_available.append('Microsoft Translator')
-            if enabled_providers.get('mt_amazon', True) and (api_keys.get('amazon_translate') or api_keys.get('aws_translate')):
-                mt_providers_available.append('Amazon Translate')
-            if enabled_providers.get('mt_modernmt', True) and api_keys.get('modernmt'):
-                mt_providers_available.append('ModernMT')
-            if enabled_providers.get('mt_mymemory', True):
-                mt_providers_available.append('MyMemory')
+            # С Batch #9.2 единственный MT-движок — custom MT endpoint: вариант
+            # доступен, если есть хотя бы один включённый профиль с endpoint.
+            _custom_mt_available = any(
+                (p.get('enabled', True) and (p.get('endpoint') or '').strip())
+                for p in self._get_custom_mt_profiles())
+            mt_providers_available = ['Custom MT'] if _custom_mt_available else []
+
 
             mt_label_text = "🌐 MT (Machine Translation)"
             if mt_providers_available:
@@ -51048,9 +51035,8 @@ class SupervertalerQt(QMainWindow):
             mt_checkbox.toggled.connect(on_mt_toggled)
 
             if not mt_providers_available:
-                mt_warning = QLabel(self.tr("⚠️ Configure MT API keys in Settings → MT Settings to enable"))
-                mt_warning.setStyleSheet("color: #ff6b6b; font-size: 9pt; padding-left: 25px;")
-                provider_layout.addWidget(mt_warning)
+                mt_warning = QLabel(self.tr("⚠️ Configure a custom MT endpoint in Settings → QuickTrans to enable"))
+
 
             provider_group.setLayout(provider_layout)
             dialog_layout.addWidget(provider_group)
@@ -51195,15 +51181,16 @@ class SupervertalerQt(QMainWindow):
                 self.log(f"📖 Using Translation Memory for batch pre-translation{mode_str}{confirm_str}")
             
             elif use_mt:
-                # Use MT provider
+                # Use MT provider (custom MT endpoint, active profile)
                 translation_provider_type = 'MT'
-                translation_provider_name = mt_providers_available[0] if mt_providers_available else None
-                if not translation_provider_name:
+                translation_provider_name = 'Custom MT'
+                if not mt_providers_available:
                     QMessageBox.critical(
                         self, "No MT Provider",
-                        "No Machine Translation provider available. Please configure MT API keys in Settings."
+                        "No custom MT endpoint configured. Add a profile in Settings → QuickTrans."
                     )
                     return
+
             else:
                 # Use LLM provider
                 translation_provider_type = 'LLM'
