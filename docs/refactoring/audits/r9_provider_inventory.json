@@ -1,0 +1,2898 @@
+{
+ "Supervertaler.py": {
+  "openai": {
+   "<module-level>": [
+    14,
+    17
+   ],
+   "PreTranslationWorker._autotag_segment_llm (5925-5957)": [
+    5941,
+    5945
+   ],
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5676,
+    5681,
+    5688,
+    5775
+   ],
+   "PreTranslationWorker._translate_single_with_llm (5878-5923)": [
+    5889,
+    5893
+   ],
+   "PreTranslationWorker._translate_with_llm (5594-5657)": [
+    5606,
+    5611
+   ],
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    53158,
+    53159,
+    53161,
+    53164,
+    53166,
+    53167,
+    53168,
+    53183,
+    53188,
+    53190,
+    53196,
+    53198
+   ],
+   "SupervertalerQt.__init__ (6011-6419)": [
+    6114
+   ],
+   "SupervertalerQt._add_mt_and_llm_matches (53245-53432)": [
+    53296,
+    53312,
+    53313,
+    53315,
+    53317,
+    53319,
+    53320,
+    53322,
+    53323,
+    53324,
+    53327,
+    53334,
+    53341,
+    53347,
+    53349,
+    53352,
+    53354
+   ],
+   "SupervertalerQt._clean_provider_prefix (53434-53439)": [
+    53435,
+    53437,
+    53438
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19397,
+    19398,
+    19399,
+    19400,
+    19403,
+    19408,
+    19413,
+    19418,
+    19423,
+    19429,
+    19433,
+    19434,
+    19435,
+    19449,
+    19450,
+    19451,
+    19453,
+    19454,
+    19458,
+    19459,
+    19462,
+    19463,
+    19464,
+    19465,
+    19467,
+    19468,
+    19594,
+    19595,
+    19645,
+    19647,
+    19658,
+    19659,
+    19728,
+    19749,
+    19768,
+    19776,
+    19796,
+    19799,
+    19806,
+    19837,
+    19838,
+    19851,
+    19860,
+    19906,
+    19929,
+    19977,
+    19978,
+    19979,
+    20001,
+    20002,
+    20066,
+    20414,
+    20415,
+    20417
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20625,
+    20640,
+    20643,
+    20805,
+    20826,
+    20827,
+    20883,
+    20885,
+    20886,
+    20887,
+    20888,
+    20897,
+    20905
+   ],
+   "SupervertalerQt._fetch_llm_translation_async (51616-51742)": [
+    51627,
+    51637,
+    51639,
+    51641,
+    51646,
+    51701
+   ],
+   "SupervertalerQt._get_active_custom_profile (48343-48370)": [
+    48344,
+    48352,
+    48353,
+    48365,
+    48366
+   ],
+   "SupervertalerQt._on_main_tab_changed (10834-10862)": [
+    10854
+   ],
+   "SupervertalerQt._resolve_provider_model (7582-7597)": [
+    7585,
+    7586,
+    7593
+   ],
+   "SupervertalerQt._run_proofreading (39776-39911)": [
+    39813,
+    39817
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23812,
+    23813,
+    23815,
+    23832,
+    23833,
+    23847,
+    23849,
+    23860,
+    23882,
+    23889,
+    23890,
+    23891,
+    23892,
+    23906,
+    23912
+   ],
+   "SupervertalerQt._save_llm_settings_from_ui (23730-23810)": [
+    23730,
+    23731,
+    23733,
+    23739,
+    23740,
+    23748,
+    23759,
+    23772
+   ],
+   "SupervertalerQt._show_term_extraction_dialog (17131-17560)": [
+    17317
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7603,
+    7610,
+    7628
+   ],
+   "SupervertalerQt.autotag_current_segment (50079-50186)": [
+    50106,
+    50114
+   ],
+   "SupervertalerQt.autotag_segments_bulk (50666-50780)": [
+    50703,
+    50711,
+    50723
+   ],
+   "SupervertalerQt.call_custom_mt (48394-48485)": [
+    48395,
+    48422,
+    48428
+   ],
+   "SupervertalerQt.create_llm_client (48487-48511)": [
+    48494,
+    48505,
+    48507
+   ],
+   "SupervertalerQt.load_general_settings (37283-37379)": [
+    37362
+   ],
+   "SupervertalerQt.run_grid_quicklauncher_prompt (50383-50536)": [
+    50432,
+    50434,
+    50441,
+    50444,
+    50467
+   ],
+   "SupervertalerQt.show_about (49270-49332)": [
+    49306
+   ],
+   "SupervertalerQt.show_proofread_dialog (39594-39774)": [
+    39660
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50875,
+    50880,
+    50999,
+    51003,
+    51151,
+    51462,
+    51465
+   ],
+   "SupervertalerQt.translate_current_segment (49508-49964)": [
+    49534,
+    49536,
+    49539,
+    49542,
+    49871
+   ]
+  },
+  "claude": {
+   "<module-level>": [
+    17
+   ],
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5685,
+    5687,
+    5773,
+    5774
+   ],
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    53200,
+    53201,
+    53203,
+    53206,
+    53208,
+    53209,
+    53210,
+    53225,
+    53230,
+    53232,
+    53238,
+    53240
+   ],
+   "SupervertalerQt.__init__ (6011-6419)": [
+    6115
+   ],
+   "SupervertalerQt._add_mt_and_llm_matches (53245-53432)": [
+    53296,
+    53356,
+    53357,
+    53361,
+    53363,
+    53364,
+    53365,
+    53379,
+    53380,
+    53386,
+    53389
+   ],
+   "SupervertalerQt._build_image_extract_ai_callback (9988-10196)": [
+    10034,
+    10080
+   ],
+   "SupervertalerQt._clean_provider_prefix (53434-53439)": [
+    53435,
+    53437,
+    53438
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19402,
+    19403,
+    19404,
+    19405,
+    19472,
+    19473,
+    19474,
+    19476,
+    19479,
+    19480,
+    19481,
+    19482,
+    19484,
+    19485,
+    19486,
+    19488,
+    19491,
+    19492,
+    19493,
+    19496,
+    19497,
+    19498,
+    19501,
+    19502,
+    19503,
+    19504,
+    19505,
+    19592,
+    19593,
+    19606,
+    19820,
+    19821,
+    19822,
+    19839,
+    19840,
+    19852,
+    19861,
+    19907,
+    19930,
+    19981,
+    19982,
+    19983,
+    20066,
+    20414,
+    20415,
+    20417
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20800,
+    20801,
+    20802,
+    20803,
+    20824,
+    20825
+   ],
+   "SupervertalerQt._fetch_llm_translation_async (51616-51742)": [
+    51702
+   ],
+   "SupervertalerQt._refresh_proofreading_comments_list (46024-46142)": [
+    46064
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23812,
+    23813,
+    23815,
+    23834,
+    23835,
+    23883,
+    23887,
+    23907
+   ],
+   "SupervertalerQt._save_llm_settings_from_ui (23730-23810)": [
+    23730,
+    23731,
+    23733,
+    23741,
+    23742,
+    23760,
+    23773
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7613
+   ],
+   "SupervertalerQt.create_reference_images_tab (9532-9877)": [
+    9680
+   ],
+   "SupervertalerQt.export_for_ai (31054-31333)": [
+    31066
+   ],
+   "SupervertalerQt.run_grid_quicklauncher_prompt (50383-50536)": [
+    50411
+   ],
+   "SupervertalerQt.show_about (49270-49332)": [
+    49306
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50934
+   ],
+   "SupervertalerQt.translate_current_segment (49508-49964)": [
+    49871
+   ]
+  },
+  "gemini": {
+   "<module-level>": [
+    17
+   ],
+   "PreTranslationWorker._autotag_segment_llm (5925-5957)": [
+    5940
+   ],
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5675,
+    5775
+   ],
+   "PreTranslationWorker._translate_single_with_llm (5878-5923)": [
+    5888
+   ],
+   "PreTranslationWorker._translate_with_llm (5594-5657)": [
+    5605
+   ],
+   "SupervertalerQt.__init__ (6011-6419)": [
+    6385,
+    6386
+   ],
+   "SupervertalerQt._add_mt_and_llm_matches (53245-53432)": [
+    53391,
+    53392,
+    53393,
+    53394,
+    53396,
+    53398,
+    53400,
+    53401,
+    53403,
+    53404,
+    53405,
+    53407,
+    53419,
+    53420,
+    53426,
+    53429
+   ],
+   "SupervertalerQt._apply_gemini_proxy (48330-48341)": [
+    48330,
+    48331
+   ],
+   "SupervertalerQt._build_image_extract_ai_callback (9988-10196)": [
+    10035,
+    10082,
+    10116,
+    10129
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19407,
+    19408,
+    19409,
+    19410,
+    19509,
+    19510,
+    19511,
+    19513,
+    19514,
+    19515,
+    19516,
+    19517,
+    19518,
+    19521,
+    19522,
+    19523,
+    19524,
+    19525,
+    19528,
+    19529,
+    19530,
+    19531,
+    19533,
+    19534,
+    19596,
+    19597,
+    19823,
+    19824,
+    19825,
+    19841,
+    19842,
+    19853,
+    19862,
+    19908,
+    19931,
+    19985,
+    19986,
+    19987,
+    20066,
+    20414,
+    20415,
+    20417
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20809,
+    20810,
+    20811,
+    20812,
+    20828,
+    20829,
+    20836,
+    20837,
+    20838
+   ],
+   "SupervertalerQt._fetch_llm_translation_async (51616-51742)": [
+    51636,
+    51660,
+    51703
+   ],
+   "SupervertalerQt._run_proofreading (39776-39911)": [
+    39836
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23812,
+    23813,
+    23815,
+    23836,
+    23837,
+    23884,
+    23908,
+    24000,
+    24001
+   ],
+   "SupervertalerQt._save_api_keys_from_ui (24006-24017)": [
+    24014,
+    24015,
+    24016
+   ],
+   "SupervertalerQt._save_llm_settings_from_ui (23730-23810)": [
+    23730,
+    23731,
+    23733,
+    23743,
+    23744,
+    23761,
+    23774
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7616
+   ],
+   "SupervertalerQt.autotag_current_segment (50079-50186)": [
+    50113
+   ],
+   "SupervertalerQt.autotag_segments_bulk (50666-50780)": [
+    50710,
+    50735
+   ],
+   "SupervertalerQt.create_llm_client (48487-48511)": [
+    48490,
+    48509,
+    48510
+   ],
+   "SupervertalerQt.create_reference_images_tab (9532-9877)": [
+    9681
+   ],
+   "SupervertalerQt.run_grid_quicklauncher_prompt (50383-50536)": [
+    50449,
+    50470
+   ],
+   "SupervertalerQt.show_about (49270-49332)": [
+    49306
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50934,
+    51159,
+    51160,
+    51508
+   ],
+   "SupervertalerQt.translate_current_segment (49508-49964)": [
+    49559,
+    49560,
+    49867,
+    49868
+   ]
+  },
+  "google_mt": {
+   "PreTranslationWorker._translate_with_mt (5571-5592)": [
+    5584,
+    5585
+   ],
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    52981,
+    52982,
+    53009,
+    53018,
+    53027
+   ],
+   "SupervertalerQt.__init__ (6011-6419)": [
+    6112
+   ],
+   "SupervertalerQt._add_mt_and_llm_matches (53245-53432)": [
+    53254,
+    53265,
+    53278,
+    53280,
+    53282,
+    53285
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    20066
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20597
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20462,
+    20463,
+    20464,
+    20499,
+    20542
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51758,
+    51762,
+    51763,
+    51764,
+    51794,
+    51795,
+    51796,
+    51824
+   ],
+   "SupervertalerQt._save_mt_settings_from_ui (24019-24038)": [
+    24025
+   ],
+   "SupervertalerQt.call_google_translate (51869-51922)": [
+    51869,
+    51877,
+    51902,
+    51920,
+    51922
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50944,
+    50945
+   ]
+  },
+  "mistral": {
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5734
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19412,
+    19413,
+    19414,
+    19415,
+    19538,
+    19539,
+    19540,
+    19542,
+    19543,
+    19544,
+    19545,
+    19547,
+    19548,
+    19549,
+    19551,
+    19552,
+    19553,
+    19554,
+    19556,
+    19557,
+    19598,
+    19807,
+    19826,
+    19843,
+    19844,
+    19854,
+    19863,
+    19909,
+    19932,
+    19989,
+    19990,
+    19991,
+    20066,
+    20426,
+    20427
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20815,
+    20816,
+    20817,
+    20830
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23824,
+    23825,
+    23838,
+    23839,
+    23885,
+    23909
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7619
+   ]
+  },
+  "deepseek": {
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5775
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19417,
+    19418,
+    19419,
+    19420,
+    19561,
+    19562,
+    19563,
+    19565,
+    19566,
+    19567,
+    19568,
+    19570,
+    19571,
+    19572,
+    19573,
+    19575,
+    19576,
+    19577,
+    19578,
+    19580,
+    19581,
+    19698,
+    19764,
+    19807,
+    19827,
+    19845,
+    19846,
+    19855,
+    19864,
+    19910,
+    19933,
+    20428
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20819,
+    20820,
+    20821
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23826,
+    23840,
+    23841,
+    23886
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7622
+   ]
+  },
+  "openrouter": {
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5687,
+    5774
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19422,
+    19423,
+    19424,
+    19425,
+    19585,
+    19586,
+    19587,
+    19589,
+    19590,
+    19591,
+    19601,
+    19602,
+    19603,
+    19604,
+    19606,
+    19609,
+    19610,
+    19611,
+    19615,
+    19616,
+    19617,
+    19847,
+    19848,
+    19856,
+    19865,
+    19911,
+    19934,
+    19993,
+    19994,
+    19995,
+    20429,
+    20430
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20823
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23827,
+    23828,
+    23842,
+    23843,
+    23887,
+    23910
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7625
+   ],
+   "SupervertalerQt.create_llm_client (48487-48511)": [
+    48492,
+    48493
+   ]
+  },
+  "ollama": {
+   "SupervertalerQt._apply_ollama_timeout_setting (7657-7666)": [
+    7657,
+    7658,
+    7660,
+    7663,
+    7664,
+    7666
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19364,
+    19427,
+    19428,
+    19429,
+    19430,
+    19431,
+    19621,
+    19622,
+    19623,
+    19627,
+    19630,
+    19631,
+    19632,
+    19635,
+    19639,
+    19640,
+    19641,
+    19642,
+    19643,
+    19866,
+    19867,
+    19876,
+    19877,
+    19880,
+    19881,
+    19889,
+    19890,
+    19901,
+    19902,
+    19904,
+    19912,
+    19913,
+    19935,
+    19943,
+    19947,
+    19997,
+    19998,
+    19999,
+    20066,
+    20075,
+    20076,
+    20077,
+    20079,
+    20080,
+    20081,
+    20082,
+    20086,
+    20090,
+    20091,
+    20092,
+    20093,
+    20094,
+    20095,
+    20096,
+    20097,
+    20098,
+    20103,
+    20104,
+    20105,
+    20107,
+    20108,
+    20111,
+    20112,
+    20113,
+    20115,
+    20116,
+    20414,
+    20416,
+    20417,
+    20420,
+    20431
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20910,
+    20911,
+    20912,
+    20913,
+    20914,
+    20915,
+    20916,
+    20918,
+    20919,
+    20920,
+    20921,
+    20922,
+    20923,
+    20924,
+    20925,
+    20926,
+    20927
+   ],
+   "SupervertalerQt._fetch_llm_translation_async (51616-51742)": [
+    51637
+   ],
+   "SupervertalerQt._ping_ollama_keepwarm (7686-7719)": [
+    7686,
+    7687,
+    7694,
+    7697,
+    7698,
+    7714,
+    7716
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23812,
+    23814,
+    23815,
+    23818,
+    23829,
+    23844,
+    23845,
+    23851,
+    23852,
+    23853,
+    23854,
+    23856,
+    23888,
+    23894,
+    23895,
+    23897,
+    23911,
+    23949,
+    23972,
+    23973,
+    23974,
+    23976
+   ],
+   "SupervertalerQt._save_general_settings_from_ui (24040-24235)": [
+    24133
+   ],
+   "SupervertalerQt._save_llm_settings_from_ui (23730-23810)": [
+    23730,
+    23732,
+    23733,
+    23745,
+    23746,
+    23750,
+    23751,
+    23752,
+    23753,
+    23755,
+    23762,
+    23775
+   ],
+   "SupervertalerQt._setup_ollama_keepwarm (7646-7655)": [
+    7646,
+    7647,
+    7652,
+    7655
+   ],
+   "SupervertalerQt._setup_progress_indicators (7513-7580)": [
+    7577,
+    7578,
+    7579,
+    7580
+   ],
+   "SupervertalerQt._start_ollama_keepwarm_timer (7668-7678)": [
+    7668,
+    7669,
+    7672,
+    7673,
+    7674,
+    7676,
+    7677,
+    7678
+   ],
+   "SupervertalerQt._stop_ollama_keepwarm_timer (7680-7684)": [
+    7680,
+    7681,
+    7682,
+    7683,
+    7684
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7607
+   ],
+   "SupervertalerQt.autotag_current_segment (50079-50186)": [
+    50108,
+    50109
+   ],
+   "SupervertalerQt.autotag_segments_bulk (50666-50780)": [
+    50705,
+    50706
+   ],
+   "SupervertalerQt.create_settings_tab (19047-19168)": [
+    19082
+   ],
+   "SupervertalerQt.run_grid_quicklauncher_prompt (50383-50536)": [
+    50439,
+    50440
+   ],
+   "SupervertalerQt.show_about (49270-49332)": [
+    49306
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    51148,
+    51149,
+    51150
+   ],
+   "SupervertalerQt.translate_current_segment (49508-49964)": [
+    49539,
+    49540,
+    49541,
+    49576,
+    49581,
+    49715,
+    49718,
+    49781,
+    49790
+   ]
+  },
+  "custom_openai": {
+   "PreTranslationWorker._autotag_segment_llm (5925-5957)": [
+    5941,
+    5945
+   ],
+   "PreTranslationWorker._translate_batch_with_llm (5659-5835)": [
+    5676,
+    5681
+   ],
+   "PreTranslationWorker._translate_single_with_llm (5878-5923)": [
+    5889,
+    5893
+   ],
+   "PreTranslationWorker._translate_with_llm (5594-5657)": [
+    5606,
+    5611
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    19435,
+    19658,
+    19659,
+    19728,
+    19749,
+    19768,
+    19776,
+    19796,
+    19799,
+    20002
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20886,
+    20888,
+    20897,
+    20905
+   ],
+   "SupervertalerQt._fetch_llm_translation_async (51616-51742)": [
+    51637,
+    51639,
+    51641,
+    51646
+   ],
+   "SupervertalerQt._get_active_custom_profile (48343-48370)": [
+    48344,
+    48352,
+    48353,
+    48365,
+    48366
+   ],
+   "SupervertalerQt._resolve_provider_model (7582-7597)": [
+    7585,
+    7586,
+    7593
+   ],
+   "SupervertalerQt._run_proofreading (39776-39911)": [
+    39813,
+    39817
+   ],
+   "SupervertalerQt._save_ai_settings_from_ui (23812-24004)": [
+    23847,
+    23860,
+    23889,
+    23890,
+    23891,
+    23892,
+    23912
+   ],
+   "SupervertalerQt._update_llm_indicator (7599-7644)": [
+    7628
+   ],
+   "SupervertalerQt.autotag_current_segment (50079-50186)": [
+    50114
+   ],
+   "SupervertalerQt.autotag_segments_bulk (50666-50780)": [
+    50711,
+    50723
+   ],
+   "SupervertalerQt.call_custom_mt (48394-48485)": [
+    48422,
+    48428
+   ],
+   "SupervertalerQt.create_llm_client (48487-48511)": [
+    48494,
+    48505,
+    48507
+   ],
+   "SupervertalerQt.run_grid_quicklauncher_prompt (50383-50536)": [
+    50432,
+    50441,
+    50444,
+    50467
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    51003,
+    51151,
+    51462,
+    51465
+   ],
+   "SupervertalerQt.translate_current_segment (49508-49964)": [
+    49536,
+    49539,
+    49542
+   ]
+  },
+  "custom_mt": {
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20628,
+    20633,
+    20634,
+    20641,
+    20645,
+    20651,
+    20652,
+    20653,
+    20654,
+    20656,
+    20658,
+    20659,
+    20668,
+    20669,
+    20670,
+    20671,
+    20672,
+    20673,
+    20674,
+    20675,
+    20676,
+    20677,
+    20683,
+    20684,
+    20685,
+    20689,
+    20691,
+    20692,
+    20693,
+    20698,
+    20706,
+    20707,
+    20708,
+    20709,
+    20710,
+    20711,
+    20712,
+    20714,
+    20715,
+    20716,
+    20717,
+    20718,
+    20721,
+    20722,
+    20723,
+    20724,
+    20725,
+    20726,
+    20727,
+    20736,
+    20739,
+    20740,
+    20741,
+    20745,
+    20746,
+    20748,
+    20753,
+    20754,
+    20756,
+    20757,
+    20758,
+    20759,
+    20760,
+    20761,
+    20764,
+    20765
+   ],
+   "SupervertalerQt._get_active_custom_mt_profile (48378-48392)": [
+    48378,
+    48387,
+    48388
+   ],
+   "SupervertalerQt._get_custom_mt_profiles (48372-48376)": [
+    48372,
+    48376
+   ],
+   "SupervertalerQt._save_mt_quick_lookup_settings (20942-20980)": [
+    20964,
+    20965,
+    20966,
+    20967,
+    20969,
+    20970,
+    20971,
+    20972,
+    20973,
+    20975,
+    20976
+   ],
+   "SupervertalerQt.call_custom_mt (48394-48485)": [
+    48394,
+    48404,
+    48421
+   ]
+  },
+  "mt_deepl": {
+   "<module-level>": [
+    311
+   ],
+   "PreTranslationWorker._translate_with_mt (5571-5592)": [
+    5586,
+    5587
+   ],
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    53029,
+    53030,
+    53032,
+    53038,
+    53049,
+    53057,
+    53066
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    20066
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20598
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20466,
+    20500
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51758,
+    51765,
+    51766,
+    51767,
+    51797,
+    51799,
+    51825
+   ],
+   "SupervertalerQt.call_deepl (51924-51996)": [
+    51925,
+    51927,
+    51931,
+    51934,
+    51936,
+    51953,
+    51958,
+    51994,
+    51996
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50946,
+    50947
+   ]
+  },
+  "mt_msft": {
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    20067
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20599
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20470,
+    20501,
+    20502
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51768,
+    51770,
+    51801,
+    51802,
+    51826
+   ],
+   "SupervertalerQt.call_microsoft_translate (51998-52053)": [
+    51998,
+    51999,
+    52005,
+    52007,
+    52010,
+    52030,
+    52031,
+    52051,
+    52053
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50948,
+    50949
+   ]
+  },
+  "mt_amazon": {
+   "<module-level>": [
+    311
+   ],
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    53068,
+    53069,
+    53071,
+    53072,
+    53078,
+    53089,
+    53097,
+    53106
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20600
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20474,
+    20503,
+    20504,
+    20505
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51771,
+    51773,
+    51804,
+    51805,
+    51806,
+    51807,
+    51827
+   ],
+   "SupervertalerQt.call_amazon_translate (52055-52110)": [
+    52055,
+    52056,
+    52058,
+    52063,
+    52066,
+    52069,
+    52073,
+    52092,
+    52108,
+    52110
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50950,
+    50951
+   ]
+  },
+  "mt_modernmt": {
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    20067
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20601
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20478,
+    20479,
+    20480,
+    20506,
+    20543
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51758,
+    51774,
+    51775,
+    51776,
+    51808,
+    51809,
+    51810,
+    51828
+   ],
+   "SupervertalerQt._save_mt_settings_from_ui (24019-24038)": [
+    24019,
+    24029
+   ],
+   "SupervertalerQt.call_modernmt (52112-52162)": [
+    52112,
+    52113,
+    52119,
+    52122,
+    52141,
+    52142,
+    52160,
+    52162
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50952,
+    50953
+   ]
+  },
+  "mt_mymemory": {
+   "SupervertalerQt._REMOVED_add_mt_and_llm_matches_progressive (52970-53243)": [
+    53108,
+    53109,
+    53111,
+    53112,
+    53113,
+    53119,
+    53130,
+    53138,
+    53147
+   ],
+   "SupervertalerQt._create_ai_settings_tab (19363-20437)": [
+    20067
+   ],
+   "SupervertalerQt._create_mt_quick_lookup_settings_tab (20559-20940)": [
+    20602
+   ],
+   "SupervertalerQt._create_mt_settings_tab (20439-20549)": [
+    20456,
+    20482,
+    20483,
+    20484,
+    20507,
+    20543
+   ],
+   "SupervertalerQt._fetch_mt_translation_async (51744-51867)": [
+    51758,
+    51777,
+    51778,
+    51779,
+    51780,
+    51811,
+    51812,
+    51813,
+    51829
+   ],
+   "SupervertalerQt._save_mt_settings_from_ui (24019-24038)": [
+    24019,
+    24030
+   ],
+   "SupervertalerQt.call_mymemory (52164-52213)": [
+    52164,
+    52165,
+    52169,
+    52171,
+    52192,
+    52193,
+    52208,
+    52211,
+    52213
+   ],
+   "SupervertalerQt.translate_batch (50782-51614)": [
+    50954,
+    50955
+   ]
+  }
+ },
+ "modules\\ai_actions.py": {
+  "claude": {
+   "AIActionSystem.parse_and_execute (65-185)": [
+    79
+   ]
+  }
+ },
+ "modules\\ai_attachment_manager.py": {},
+ "modules\\ai_file_viewer_dialog.py": {},
+ "modules\\autocorrect.py": {
+  "claude": {
+   "<module-level>": [
+    473
+   ]
+  }
+ },
+ "modules\\autostart.py": {},
+ "modules\\bilingual_markdown_handler.py": {},
+ "modules\\chat_backend.py": {
+  "openai": {
+   "ChatBackend.init_llm_client (97-165)": [
+    114,
+    115,
+    124,
+    127,
+    130,
+    135,
+    147
+   ],
+   "ChatBackend.send_ai_request (181-251)": [
+    234
+   ]
+  },
+  "claude": {
+   "ChatBackend.get_model_display_name (171-175)": [
+    172
+   ],
+   "ChatBackend.init_llm_client (97-165)": [
+    116,
+    117,
+    124
+   ]
+  },
+  "gemini": {
+   "ChatBackend.init_llm_client (97-165)": [
+    118,
+    119,
+    122,
+    123,
+    149
+   ]
+  },
+  "openrouter": {
+   "ChatBackend.init_llm_client (97-165)": [
+    134
+   ]
+  },
+  "ollama": {
+   "ChatBackend.init_llm_client (97-165)": [
+    127,
+    130
+   ]
+  },
+  "custom_openai": {
+   "ChatBackend.init_llm_client (97-165)": [
+    127,
+    130,
+    135,
+    147
+   ]
+  }
+ },
+ "modules\\chat_message_delegate.py": {
+  "deepseek": {
+   "ChatMessageDelegate._draw_metadata (433-473)": [
+    446
+   ]
+  },
+  "openrouter": {
+   "ChatMessageDelegate._draw_metadata (433-473)": [
+    446
+   ]
+  },
+  "ollama": {
+   "ChatMessageDelegate._draw_metadata (433-473)": [
+    443
+   ]
+  }
+ },
+ "modules\\chat_view_widget.py": {
+  "openai": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    628,
+    636,
+    639
+   ],
+   "ChatViewWidget._show_model_menu (540-601)": [
+    559
+   ]
+  },
+  "claude": {
+   "ChatViewWidget._show_model_menu (540-601)": [
+    558
+   ]
+  },
+  "gemini": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    625,
+    649
+   ],
+   "ChatViewWidget._show_model_menu (540-601)": [
+    563,
+    564,
+    565,
+    566
+   ]
+  },
+  "mistral": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    653,
+    654
+   ],
+   "ChatViewWidget._show_model_menu (540-601)": [
+    569
+   ]
+  },
+  "openrouter": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    655,
+    656
+   ],
+   "ChatViewWidget._show_model_menu (540-601)": [
+    571
+   ]
+  },
+  "ollama": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    622,
+    628
+   ],
+   "ChatViewWidget._show_model_menu (540-601)": [
+    570
+   ]
+  },
+  "custom_openai": {
+   "ChatViewWidget._on_model_selected (603-675)": [
+    628,
+    636,
+    639
+   ]
+  }
+ },
+ "modules\\config_manager.py": {},
+ "modules\\database_manager.py": {},
+ "modules\\database_migrations.py": {},
+ "modules\\document_analyzer.py": {},
+ "modules\\docx_comments.py": {},
+ "modules\\docx_handler.py": {},
+ "modules\\event_filters.py": {},
+ "modules\\figure_context_manager.py": {},
+ "modules\\file_dialog_helper.py": {},
+ "modules\\find_replace_qt.py": {},
+ "modules\\help_system.py": {
+  "ollama": {
+   "<module-level>": [
+    87
+   ]
+  }
+ },
+ "modules\\i18n.py": {},
+ "modules\\image_extractor.py": {},
+ "modules\\keyboard_shortcuts_widget.py": {},
+ "modules\\language_codes.py": {},
+ "modules\\lang_detect.py": {},
+ "modules\\llm_clients.py": {
+  "openai": {
+   "<module-level>": [
+    9,
+    186,
+    198,
+    204,
+    255,
+    257,
+    261,
+    263,
+    375
+   ],
+   "LLMClient.__init__ (549-588)": [
+    549,
+    555,
+    558,
+    572
+   ],
+   "LLMClient._call_claude_with_usage (1009-1102)": [
+    1086,
+    1098
+   ],
+   "LLMClient._call_gemini_with_usage (1104-1179)": [
+    1172
+   ],
+   "LLMClient._call_openai (1181-1319)": [
+    1181,
+    1182,
+    1184,
+    1185,
+    1187,
+    1190,
+    1193,
+    1213,
+    1214,
+    1246,
+    1290,
+    1292,
+    1296,
+    1304,
+    1313
+   ],
+   "LLMClient._call_openai_with_usage (893-1007)": [
+    893,
+    894,
+    900,
+    904,
+    906,
+    923,
+    939,
+    971,
+    975,
+    980,
+    998,
+    1002
+   ],
+   "LLMClient.model_supports_vision (534-547)": [
+    539
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    862,
+    863
+   ],
+   "get_openai_translation (1785-1832)": [
+    1785,
+    1787,
+    1799,
+    1802,
+    1803,
+    1805,
+    1808,
+    1809,
+    1810,
+    1819,
+    1827
+   ],
+   "main (1760-1781)": [
+    1766
+   ]
+  },
+  "claude": {
+   "<module-level>": [
+    10,
+    15,
+    28,
+    31,
+    186,
+    199,
+    205,
+    243,
+    244,
+    245,
+    249,
+    250,
+    251,
+    380,
+    381,
+    382,
+    383,
+    384,
+    385,
+    386,
+    387,
+    397,
+    399,
+    401,
+    402,
+    403,
+    410,
+    411,
+    412,
+    418,
+    419,
+    420
+   ],
+   "LLMClient.__init__ (549-588)": [
+    555
+   ],
+   "LLMClient._call_claude (1321-1409)": [
+    1321,
+    1322,
+    1332,
+    1335,
+    1348,
+    1351,
+    1352,
+    1354,
+    1359,
+    1372,
+    1385,
+    1388,
+    1400
+   ],
+   "LLMClient._call_claude_with_usage (1009-1102)": [
+    1009,
+    1010,
+    1020,
+    1022,
+    1032,
+    1035,
+    1036,
+    1070,
+    1079,
+    1083,
+    1098
+   ],
+   "LLMClient._call_gemini_with_usage (1104-1179)": [
+    1172
+   ],
+   "LLMClient._call_openai (1181-1319)": [
+    1185,
+    1246,
+    1247,
+    1249,
+    1255
+   ],
+   "LLMClient._call_openai_with_usage (893-1007)": [
+    897,
+    899,
+    938,
+    941,
+    943,
+    948,
+    986,
+    998,
+    1001
+   ],
+   "LLMClient.get_claude_model_info (432-454)": [
+    432,
+    434,
+    444,
+    449,
+    453,
+    454
+   ],
+   "LLMClient.model_supports_vision (534-547)": [
+    539
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    864,
+    865
+   ],
+   "get_claude_translation (1835-1882)": [
+    1835,
+    1837,
+    1849,
+    1852,
+    1853,
+    1855,
+    1858,
+    1859,
+    1860,
+    1869,
+    1877
+   ]
+  },
+  "gemini": {
+   "<module-level>": [
+    11,
+    186,
+    200,
+    267,
+    268,
+    273,
+    274,
+    389,
+    390,
+    391,
+    392,
+    393
+   ],
+   "LLMClient.__init__ (549-588)": [
+    555
+   ],
+   "LLMClient._call_claude_with_usage (1009-1102)": [
+    1086
+   ],
+   "LLMClient._call_gemini (1411-1502)": [
+    1411,
+    1412,
+    1413,
+    1420,
+    1421,
+    1435,
+    1438,
+    1442,
+    1449,
+    1451,
+    1453,
+    1455,
+    1459,
+    1462,
+    1463,
+    1500
+   ],
+   "LLMClient._call_gemini_rest (1504-1575)": [
+    1504,
+    1507,
+    1509,
+    1529,
+    1542,
+    1550,
+    1571,
+    1574
+   ],
+   "LLMClient._call_gemini_with_usage (1104-1179)": [
+    1104,
+    1105,
+    1107,
+    1111,
+    1114,
+    1116,
+    1131,
+    1158,
+    1163,
+    1173,
+    1174
+   ],
+   "LLMClient.model_supports_vision (534-547)": [
+    539
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    866,
+    867
+   ],
+   "load_api_keys (43-129)": [
+    121,
+    122,
+    123
+   ]
+  },
+  "google_mt": {
+   "get_google_translation (1911-1996)": [
+    1926,
+    1927,
+    1932,
+    1941,
+    1994
+   ]
+  },
+  "mistral": {
+   "<module-level>": [
+    12,
+    186,
+    201,
+    208,
+    209,
+    210,
+    211,
+    216,
+    217,
+    279,
+    280,
+    281
+   ],
+   "LLMClient.__init__ (549-588)": [
+    575,
+    576,
+    577
+   ],
+   "LLMClient._call_openai_with_usage (893-1007)": [
+    940
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    862
+   ]
+  },
+  "deepseek": {
+   "<module-level>": [
+    13,
+    186,
+    202,
+    224,
+    225,
+    226,
+    227,
+    232,
+    233,
+    291,
+    292,
+    293,
+    297,
+    298,
+    299
+   ],
+   "LLMClient.__init__ (549-588)": [
+    579,
+    580,
+    581
+   ],
+   "LLMClient._call_openai (1181-1319)": [
+    1185
+   ],
+   "LLMClient._call_openai_with_usage (893-1007)": [
+    900,
+    939,
+    999,
+    1002
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    862
+   ]
+  },
+  "openrouter": {
+   "<module-level>": [
+    186,
+    205,
+    240,
+    241,
+    242,
+    295,
+    301
+   ],
+   "LLMClient.__init__ (549-588)": [
+    583,
+    584,
+    585
+   ],
+   "LLMClient._call_openai (1181-1319)": [
+    1185,
+    1205,
+    1246,
+    1247,
+    1248,
+    1255
+   ],
+   "LLMClient._call_openai_with_usage (893-1007)": [
+    896,
+    899,
+    915,
+    938,
+    941,
+    942,
+    948,
+    986,
+    999
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    862
+   ]
+  },
+  "ollama": {
+   "<module-level>": [
+    132,
+    134,
+    136,
+    203,
+    305,
+    307
+   ],
+   "LLMClient.__init__ (549-588)": [
+    554,
+    555,
+    571,
+    572
+   ],
+   "LLMClient._call_ollama (1577-1753)": [
+    1577,
+    1579,
+    1581,
+    1593,
+    1603,
+    1604,
+    1605,
+    1611,
+    1612,
+    1622,
+    1648,
+    1665,
+    1666,
+    1689,
+    1691,
+    1693,
+    1707,
+    1708,
+    1714,
+    1720,
+    1724,
+    1730,
+    1731,
+    1732,
+    1733,
+    1734,
+    1740,
+    1749,
+    1753
+   ],
+   "LLMClient.check_ollama_status (472-531)": [
+    472,
+    474,
+    477,
+    481,
+    487,
+    488,
+    491,
+    503,
+    506,
+    507,
+    508,
+    523
+   ],
+   "LLMClient.get_ollama_model_info (457-469)": [
+    457,
+    459,
+    468,
+    469
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    868,
+    869
+   ],
+   "_resolve_ollama_timeout (145-171)": [
+    145,
+    146,
+    155,
+    156
+   ],
+   "_sanitize_ollama_endpoint (174-180)": [
+    174
+   ],
+   "load_api_keys (43-129)": [
+    125,
+    126,
+    127
+   ],
+   "set_ollama_timeout (139-142)": [
+    139,
+    140,
+    141,
+    142
+   ]
+  },
+  "custom_openai": {
+   "<module-level>": [
+    204
+   ],
+   "LLMClient.__init__ (549-588)": [
+    555,
+    558,
+    572
+   ],
+   "LLMClient.translate_with_usage (829-891)": [
+    862,
+    863
+   ]
+  }
+ },
+ "modules\\llm_pricing.py": {
+  "openai": {
+   "<module-level>": [
+    24
+   ],
+   "_cache_multipliers (91-127)": [
+    113,
+    114
+   ]
+  },
+  "claude": {
+   "_cache_multipliers (91-127)": [
+    102,
+    103,
+    104,
+    105
+   ],
+   "_load_pricing (31-70)": [
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68
+   ]
+  },
+  "gemini": {
+   "_cache_multipliers (91-127)": [
+    121,
+    122,
+    123
+   ],
+   "_load_pricing (31-70)": [
+    69
+   ]
+  },
+  "deepseek": {
+   "_cache_multipliers (91-127)": [
+    117,
+    118
+   ]
+  },
+  "openrouter": {
+   "_cache_multipliers (91-127)": [
+    102
+   ]
+  },
+  "ollama": {
+   "<module-level>": [
+    24,
+    28
+   ],
+   "compute_actual_cost (159-192)": [
+    170
+   ],
+   "estimate_cost (130-156)": [
+    135
+   ]
+  },
+  "custom_openai": {
+   "<module-level>": [
+    24
+   ]
+  }
+ },
+ "modules\\local_llm_setup.py": {
+  "google_mt": {
+   "<module-level>": [
+    56
+   ]
+  },
+  "ollama": {
+   "<module-level>": [
+    6,
+    9,
+    15,
+    17,
+    18,
+    20,
+    51,
+    392,
+    458,
+    514,
+    929,
+    1056,
+    1057
+   ],
+   "ConnectionTestWorker.__init__ (463-466)": [
+    466
+   ],
+   "ConnectionTestWorker.run (468-502)": [
+    500
+   ],
+   "LocalLLMSetupDialog.init_ui (533-658)": [
+    551,
+    552,
+    553,
+    555,
+    557,
+    560,
+    561,
+    562,
+    565,
+    566,
+    567,
+    575,
+    577,
+    578
+   ],
+   "LocalLLMSetupDialog.open_ollama_download (752-763)": [
+    752,
+    753,
+    754,
+    757,
+    758,
+    760,
+    762
+   ],
+   "LocalLLMSetupDialog.refresh_status (660-728)": [
+    661,
+    662,
+    663,
+    673,
+    686,
+    688
+   ],
+   "LocalLLMSetupDialog.start_ollama (765-829)": [
+    765,
+    766,
+    770,
+    771,
+    772,
+    773,
+    774,
+    779,
+    789,
+    797,
+    803,
+    811,
+    815,
+    816,
+    818,
+    823,
+    824,
+    826,
+    827,
+    828
+   ],
+   "LocalLLMStatusWidget.refresh_status (984-1021)": [
+    985,
+    986,
+    990,
+    1017,
+    1021
+   ],
+   "ModelDownloadWorker.__init__ (397-401)": [
+    400
+   ],
+   "ModelDownloadWorker.run (406-454)": [
+    407,
+    452
+   ],
+   "_sanitize_ollama_endpoint (159-167)": [
+    159
+   ],
+   "check_ollama_status (175-258)": [
+    175,
+    177,
+    180,
+    184,
+    186,
+    196,
+    200,
+    203,
+    226,
+    227,
+    230,
+    231,
+    232,
+    249
+   ],
+   "get_ollama_endpoint (170-172)": [
+    170,
+    171,
+    172
+   ]
+  }
+ },
+ "modules\\merge_prompt_dialog.py": {},
+ "modules\\models.py": {},
+ "modules\\okapi_sidecar.py": {},
+ "modules\\pdf_rescue_Qt.py": {
+  "openai": {
+   "<module-level>": [
+    4,
+    1711,
+    1712,
+    1714,
+    1718,
+    1719
+   ],
+   "PDFRescueQt._extract_text_from_image (750-791)": [
+    751,
+    781,
+    782
+   ],
+   "PDFRescueQt._extract_with_openai (804-831)": [
+    804,
+    805,
+    830
+   ],
+   "PDFRescueQt._get_provider_from_model (793-802)": [
+    796
+   ],
+   "PDFRescueQt._initialize_clients (63-98)": [
+    65,
+    66,
+    67,
+    69,
+    70,
+    71,
+    73
+   ],
+   "PDFRescueQt._show_full_prompt (560-631)": [
+    583
+   ],
+   "PDFRescueQt.create_tab (107-392)": [
+    201,
+    223,
+    246
+   ]
+  },
+  "claude": {
+   "<module-level>": [
+    4
+   ],
+   "PDFRescueQt._extract_text_from_image (750-791)": [
+    751,
+    783,
+    784
+   ],
+   "PDFRescueQt._extract_with_claude (833-879)": [
+    833,
+    834,
+    852
+   ],
+   "PDFRescueQt._get_provider_from_model (793-802)": [
+    797,
+    798
+   ],
+   "PDFRescueQt._initialize_clients (63-98)": [
+    75,
+    76,
+    77,
+    79,
+    80,
+    81,
+    83,
+    85
+   ],
+   "PDFRescueQt.create_tab (107-392)": [
+    203,
+    204,
+    223,
+    248,
+    249,
+    250
+   ]
+  },
+  "gemini": {
+   "<module-level>": [
+    4
+   ],
+   "PDFRescueQt._extract_text_from_image (750-791)": [
+    751,
+    785,
+    786
+   ],
+   "PDFRescueQt._extract_with_gemini (881-894)": [
+    881,
+    882,
+    889,
+    892
+   ],
+   "PDFRescueQt._get_provider_from_model (793-802)": [
+    799,
+    800
+   ],
+   "PDFRescueQt._initialize_clients (63-98)": [
+    87,
+    88,
+    89,
+    91,
+    92,
+    93,
+    94,
+    96,
+    98
+   ],
+   "PDFRescueQt.create_tab (107-392)": [
+    205,
+    206,
+    223,
+    251,
+    252
+   ]
+  }
+ },
+ "modules\\platform_helpers.py": {
+  "openai": {
+   "hide_subprocess_console_windows (98-134)": [
+    108
+   ]
+  }
+ },
+ "modules\\project_assets.py": {},
+ "modules\\prompt_library_migration.py": {},
+ "modules\\pseudo_translate.py": {},
+ "modules\\pseudo_translate_dialog.py": {},
+ "modules\\quicktrans.py": {
+  "openai": {
+   "<module-level>": [
+    38,
+    1343
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    391,
+    397,
+    403,
+    414
+   ],
+   "QuickTransProviderMixin._call_llm_translation (434-505)": [
+    449,
+    461
+   ],
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    367
+   ]
+  },
+  "claude": {
+   "<module-level>": [
+    37,
+    1343
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    391,
+    396
+   ]
+  },
+  "gemini": {
+   "<module-level>": [
+    39,
+    1343
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    391,
+    398,
+    412,
+    413
+   ],
+   "QuickTransProviderMixin._call_llm_translation (434-505)": [
+    444,
+    445
+   ]
+  },
+  "google_mt": {
+   "<module-level>": [
+    50,
+    117
+   ],
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    334
+   ]
+  },
+  "mistral": {
+   "<module-level>": [
+    40
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    391,
+    399
+   ]
+  },
+  "deepseek": {
+   "<module-level>": [
+    41
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    391,
+    400
+   ]
+  },
+  "openrouter": {
+   "<module-level>": [
+    42
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    392,
+    401
+   ]
+  },
+  "ollama": {
+   "<module-level>": [
+    43
+   ],
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    392,
+    402,
+    414
+   ],
+   "QuickTransProviderMixin._call_llm_translation (434-505)": [
+    449
+   ]
+  },
+  "custom_openai": {
+   "QuickTransProviderMixin._add_llm_providers (390-432)": [
+    403,
+    414
+   ],
+   "QuickTransProviderMixin._call_llm_translation (434-505)": [
+    449,
+    461
+   ]
+  },
+  "custom_mt": {
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    364,
+    368,
+    369,
+    372,
+    379,
+    380,
+    382
+   ]
+  },
+  "mt_deepl": {
+   "<module-level>": [
+    32,
+    117
+   ],
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    335
+   ]
+  },
+  "mt_msft": {
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    336
+   ]
+  },
+  "mt_amazon": {
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    337
+   ]
+  },
+  "mt_modernmt": {
+   "<module-level>": [
+    35
+   ],
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    338
+   ]
+  },
+  "mt_mymemory": {
+   "<module-level>": [
+    36,
+    1341
+   ],
+   "QuickTransProviderMixin._get_enabled_providers (307-388)": [
+    339,
+    348
+   ]
+  }
+ },
+ "modules\\segmentation_rules.py": {},
+ "modules\\segmentation_rules_widget.py": {},
+ "modules\\segment_split_merge.py": {},
+ "modules\\settings_service.py": {
+  "openai": {
+   "SettingsService.load_llm_settings (228-266)": [
+    231,
+    232,
+    236,
+    237,
+    238,
+    239,
+    240,
+    255,
+    257,
+    259,
+    260,
+    261,
+    263
+   ],
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    340,
+    346
+   ]
+  },
+  "claude": {
+   "SettingsService.load_llm_settings (228-266)": [
+    233
+   ],
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    341
+   ]
+  },
+  "gemini": {
+   "SettingsService.load_api_keys (378-386)": [
+    382,
+    383,
+    384
+   ],
+   "SettingsService.load_llm_settings (228-266)": [
+    234
+   ],
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    342
+   ]
+  },
+  "google_mt": {
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    347
+   ]
+  },
+  "mistral": {
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    343
+   ]
+  },
+  "openrouter": {
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    344
+   ]
+  },
+  "ollama": {
+   "SettingsService.load_llm_settings (228-266)": [
+    235
+   ],
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    345
+   ]
+  },
+  "custom_openai": {
+   "SettingsService.load_llm_settings (228-266)": [
+    236,
+    237,
+    238,
+    239,
+    255,
+    257,
+    259,
+    260,
+    261,
+    263
+   ],
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    346
+   ]
+  },
+  "custom_mt": {
+   "SettingsService.load_llm_settings (228-266)": [
+    244,
+    245
+   ]
+  },
+  "mt_modernmt": {
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    351
+   ]
+  },
+  "mt_mymemory": {
+   "SettingsService.load_provider_enabled_states (337-367)": [
+    352,
+    356
+   ]
+  }
+ },
+ "modules\\settings_sidebar.py": {},
+ "modules\\shortcut_display.py": {},
+ "modules\\shortcut_manager.py": {},
+ "modules\\simple_segmenter.py": {},
+ "modules\\spellcheck_manager.py": {},
+ "modules\\statistics_analyzer.py": {},
+ "modules\\statistics_dialog_qt.py": {},
+ "modules\\statuses.py": {},
+ "modules\\styled_widgets.py": {},
+ "modules\\superlookup.py": {
+  "openai": {
+   "SuperlookupEngine.get_mt_translations (225-240)": [
+    237
+   ]
+  },
+  "mt_deepl": {
+   "SuperlookupEngine.get_mt_translations (225-240)": [
+    237
+   ]
+  }
+ },
+ "modules\\tag_manager.py": {},
+ "modules\\termbase_entry_editor.py": {},
+ "modules\\termbase_import_export.py": {},
+ "modules\\termbase_manager.py": {},
+ "modules\\termlens_popup.py": {},
+ "modules\\termlens_widget.py": {},
+ "modules\\term_picker_dialog.py": {},
+ "modules\\theme_manager.py": {},
+ "modules\\tmx_editor.py": {},
+ "modules\\tmx_editor_qt.py": {},
+ "modules\\tmx_generator.py": {},
+ "modules\\tm_editor_dialog.py": {},
+ "modules\\tm_manager_qt.py": {},
+ "modules\\tm_metadata_manager.py": {},
+ "modules\\tm_replace.py": {},
+ "modules\\translation_memory.py": {},
+ "modules\\translation_results_panel.py": {
+  "openai": {
+   "CompactMatchItem.__init__ (51-196)": [
+    181
+   ]
+  },
+  "claude": {
+   "CompactMatchItem.__init__ (51-196)": [
+    180
+   ]
+  },
+  "gemini": {
+   "CompactMatchItem.__init__ (51-196)": [
+    182
+   ]
+  },
+  "google_mt": {
+   "CompactMatchItem.__init__ (51-196)": [
+    174
+   ]
+  },
+  "mt_deepl": {
+   "CompactMatchItem.__init__ (51-196)": [
+    177
+   ]
+  },
+  "mt_msft": {
+   "CompactMatchItem.__init__ (51-196)": [
+    178
+   ]
+  },
+  "mt_amazon": {
+   "CompactMatchItem.__init__ (51-196)": [
+    175
+   ]
+  },
+  "mt_modernmt": {
+   "CompactMatchItem.__init__ (51-196)": [
+    176
+   ]
+  },
+  "mt_mymemory": {
+   "CompactMatchItem.__init__ (51-196)": [
+    179
+   ]
+  }
+ },
+ "modules\\ui_scale.py": {},
+ "modules\\undo_manager.py": {},
+ "modules\\unified_prompt_library.py": {},
+ "modules\\unified_prompt_manager_qt.py": {
+  "openai": {
+   "UnifiedPromptManagerQt._collect_autoprompt_images (4406-4544)": [
+    4489
+   ]
+  },
+  "claude": {
+   "<module-level>": [
+    5023
+   ],
+   "UnifiedPromptManagerQt._collect_autoprompt_images (4406-4544)": [
+    4466,
+    4489,
+    4512
+   ],
+   "UnifiedPromptManagerQt._create_active_config_panel (2224-2493)": [
+    2389
+   ]
+  },
+  "gemini": {
+   "UnifiedPromptManagerQt._collect_autoprompt_images (4406-4544)": [
+    4466,
+    4485,
+    4486,
+    4507,
+    4514
+   ],
+   "UnifiedPromptManagerQt._create_active_config_panel (2224-2493)": [
+    2390
+   ]
+  }
+ },
+ "modules\\usage_log.py": {},
+ "modules\\usage_report_dialog.py": {},
+ "modules\\usage_statistics.py": {},
+ "modules\\__init__.py": {},
+ "modules\\dialogs\\advanced_filters.py": {},
+ "modules\\dialogs\\detached_log.py": {},
+ "modules\\dialogs\\import_progress.py": {},
+ "modules\\dialogs\\live_progress.py": {},
+ "modules\\dialogs\\scratchpad.py": {},
+ "modules\\dialogs\\theme_editor.py": {},
+ "modules\\dialogs\\__init__.py": {},
+ "modules\\grid\\filters.py": {},
+ "modules\\grid\\helpers.py": {},
+ "modules\\grid\\pagination.py": {},
+ "modules\\grid\\__init__.py": {},
+ "modules\\workers\\glossary.py": {},
+ "modules\\workers\\proofread.py": {
+  "openai": {
+   "ProofreadWorker.run (34-164)": [
+    79,
+    80,
+    91,
+    92
+   ]
+  },
+  "claude": {
+   "ProofreadWorker.run (34-164)": [
+    81,
+    82
+   ]
+  },
+  "gemini": {
+   "ProofreadWorker.run (34-164)": [
+    83,
+    84
+   ]
+  },
+  "mistral": {
+   "ProofreadWorker.run (34-164)": [
+    85,
+    86
+   ]
+  },
+  "deepseek": {
+   "ProofreadWorker.run (34-164)": [
+    87,
+    88
+   ]
+  },
+  "ollama": {
+   "ProofreadWorker.run (34-164)": [
+    89,
+    90
+   ]
+  },
+  "custom_openai": {
+   "ProofreadWorker.run (34-164)": [
+    91,
+    92
+   ]
+  }
+ },
+ "modules\\workers\\tm_search.py": {},
+ "modules\\workers\\__init__.py": {}
+}
