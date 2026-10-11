@@ -1,0 +1,84 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b9-1\iso-about-a\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b9-1\iso-about-a\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Failed to register ctrl+alt+q (may be in use by another application)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+[LOG] ⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⚠ Global hotkeys: some failed to register: ctrl+alt+q
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[afterA9-1] window built
+[afterA9-1] about actions: ['ℹ️ About']
+[LOG] ✓ Alternating row colors applied
+[afterA9-1] ABOUT-DIALOG {'class': 'QDialog', 'title': 'About Supervertaler Workbench', 'labels': ['<h2>Supervertaler Workbench v1.10.371</h2>', '<p><b>AI-enhanced tool for translators & writers</b></p>', '<p style="text-align: center;"><b>Project:</b> <a href="https://supervertaler.com/" style="color: #1976D2; text-decoration: none;">supervertaler.com</a><br><b>Author:</b> <a href="https://beijer.uk/" style="color: #1976D2; text-decoration: none;">beijer.uk</a></p>', "<p style='text-align: center;'><b>License:</b> MIT</p><hr><p style='text-align: center; color: #666; font-size: 9pt;'>Built with PyQt6 • Supports OpenAI, Claude, Gemini & Ollama</p>"]}
+[afterA9-1] RESULT OK

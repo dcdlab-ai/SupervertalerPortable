@@ -1,0 +1,17 @@
+[USER MODE] Using 'user_data/' folder
+OK  '127.0.0.1:3445/v1'                    -> 'http://127.0.0.1:3445/v1'
+OK  'localhost:8080'                       -> 'http://localhost:8080'
+OK  'http://x/v1'                          -> 'http://x/v1'
+OK  'HTTPS://api.example.com/v1'           -> 'HTTPS://api.example.com/v1'
+OK  'api.example.com/v1'                   -> 'https://api.example.com/v1'
+OK  ' 192.168.1.5:8000/v1 '                -> 'http://192.168.1.5:8000/v1'
+OK  ''                                     -> ''
+OK  '//host/v1'                            -> '//host/v1'
+OK  '10.0.0.7:1234'                        -> 'http://10.0.0.7:1234'
+OK  '172.16.5.5'                           -> 'http://172.16.5.5'
+OK  '172.32.5.5'                           -> 'https://172.32.5.5'
+OK  '::1'                                  -> 'http://::1'
+OK  '[::1]:11434/v1'                       -> 'http://[::1]:11434/v1'
+OK  'mybox.local:8080'                     -> 'http://mybox.local:8080'
+OK  'https://api.deepseek.com/v1/'         -> 'https://api.deepseek.com/v1/'
+ALL OK
