@@ -329,37 +329,6 @@ class QuickTransProviderMixin:
         mt_quick_settings = self._load_mt_quick_settings()
 
         if include_mt:
-            # Define MT providers: (display_name, code, enabled_key, api_key_name, call_method_name)
-            mt_provider_defs = [
-                ("Google Translate", "GT", "mt_google_translate", "google_translate", "call_google_translate"),
-                ("DeepL", "DL", "mt_deepl", "deepl", "call_deepl"),
-                ("Microsoft Translator", "MS", "mt_microsoft", "microsoft_translate", "call_microsoft_translate"),
-                ("Amazon Translate", "AT", "mt_amazon", "amazon_translate", "call_amazon_translate"),
-                ("ModernMT", "MMT", "mt_modernmt", "modernmt", "call_modernmt"),
-                ("MyMemory", "MM", "mt_mymemory", None, "call_mymemory"),  # MyMemory works without key
-            ]
-
-            for name, code, enabled_key, api_key_name, method_name in mt_provider_defs:
-                # Check if provider is enabled in MT Quick Lookup settings (default: use MT Settings state)
-                quick_lookup_key = f"mtql_{code.lower()}"
-                if not mt_quick_settings.get(quick_lookup_key, enabled_providers.get(enabled_key, True)):
-                    continue
-
-                # Check if API key is available (MyMemory doesn't require one)
-                if api_key_name and not api_keys.get(api_key_name):
-                    continue
-
-                # Get the call method
-                if hasattr(self.parent_app, method_name):
-                    call_method = getattr(self.parent_app, method_name)
-
-                    # Create a wrapper that handles the API key
-                    api_key = api_keys.get(api_key_name) if api_key_name else None
-
-                    def make_caller(m, k):
-                        return lambda text, src, tgt: m(text, src, tgt, k)
-
-                    providers.append((name, code, make_caller(call_method, api_key)))
 
             # Custom MT endpoint(s): when the master 'mtql_custom_mt' toggle is on,
             # each configured profile (with an endpoint) becomes its own MT chip.

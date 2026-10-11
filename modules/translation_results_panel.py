@@ -33,7 +33,7 @@ class TranslationMatch:
     metadata: Dict[str, Any]  # Context, domain, timestamp, etc.
     match_type: str  # "NT", "MT", "TM", "Termbase", "LLM"
     compare_source: Optional[str] = None  # For TM compare boxes
-    provider_code: Optional[str] = None  # Provider code: "GT", "AT", "MMT", "CL", "GPT", "GEM", etc.
+    provider_code: Optional[str] = None  # Provider code: "CMT", "CL", "GPT", "GEM", etc.
 
 
 class CompactMatchItem(QFrame):
@@ -171,15 +171,10 @@ class CompactMatchItem(QFrame):
         # Add tooltip with full provider name (only if code exists)
         if match.provider_code:
             provider_tooltips = {
-                "GT": "Google Translate",
-                "AT": "Amazon Translate",
-                "MMT": "ModernMT",
-                "DL": "DeepL",
-                "MS": "Microsoft Translator",
-                "MM": "MyMemory",
                 "CL": "Claude",
                 "GPT": "OpenAI",
-                "GEM": "Gemini"
+                "GEM": "Gemini",
+                "CMT": "Custom MT"
             }
             # Add any custom termbase codes to tooltips (they'll show termbase name from metadata)
             if match.match_type == 'Termbase' and match.metadata.get('termbase_name'):

@@ -20581,7 +20581,7 @@ class SupervertalerQt(QMainWindow):
         mt_group = QGroupBox(self.tr("🌐 Machine Translation Providers"))
         mt_layout = QVBoxLayout()
 
-        mt_info = QLabel(self.tr("Select which MT engines to query. Only enabled providers with valid API keys are shown."))
+        mt_info = QLabel(self.tr("Select which MT engines to query. Custom MT profiles below appear as their own result."))
         mt_info.setWordWrap(True)
         mt_info.setStyleSheet("font-size: 8pt; color: #666; padding-bottom: 8px;")
         mt_layout.addWidget(mt_info)
@@ -20589,35 +20589,6 @@ class SupervertalerQt(QMainWindow):
         # MT provider checkboxes
         self._mtql_checkboxes = {}
 
-        mt_providers = [
-            ("gt", "Google Translate", "mt_google_translate", "google_translate"),
-            ("dl", "DeepL", "mt_deepl", "deepl"),
-            ("ms", "Microsoft Translator", "mt_microsoft", "microsoft_translate"),
-            ("at", "Amazon Translate", "mt_amazon", "amazon_translate"),
-            ("mmt", "ModernMT", "mt_modernmt", "modernmt"),
-            ("mm", "MyMemory (Free)", "mt_mymemory", None),
-        ]
-
-        for code, name, enabled_key, api_key_name in mt_providers:
-            # Check if provider is available (has API key or doesn't need one)
-            has_key = api_key_name is None or bool(api_keys.get(api_key_name))
-            is_enabled_globally = enabled_providers.get(enabled_key, True)
-
-            checkbox = CheckmarkCheckBox(name)
-            # Default: use global MT enabled state
-            checkbox.setChecked(mt_quick_settings.get(f"mtql_{code}", is_enabled_globally and has_key))
-            checkbox.setEnabled(has_key)
-
-            if not has_key:
-                checkbox.setToolTip(f"API key not configured for {name}")
-                checkbox.setStyleSheet("color: #999;")
-            else:
-                checkbox.setToolTip(f"Include {name} in QuickTrans results")
-
-            self._mtql_checkboxes[f"mtql_{code}"] = checkbox
-            mt_layout.addWidget(checkbox)
-
-        # ----- Custom MT endpoint(s) -----
         # A dedicated OpenAI-compatible MT endpoint (e.g. a local MT proxy),
         # independent of the AI custom endpoint, so MT and AI can point at
         # different services at once. Each profile becomes its own QuickTrans
