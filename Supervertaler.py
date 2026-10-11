@@ -51805,95 +51805,35 @@ class SupervertalerQt(QMainWindow):
         QTimer.singleShot(100, fetch_and_update)
     
     def _fetch_mt_translation_async(self, source_text: str, segment, row_index: int):
-        """Асинхронно получает машинный перевод и добавляет в панель результатов."""
+        """Асинхронно получает машинный перевод и добавляет в панель результатов.
+
+        С Batch #9.2 единственный MT-движок — custom MT endpoint (профили
+        custom_mt_profiles / custom_mt_active_profile). Нет настроенного профиля —
+        вежливый выход: MT-строка в панели просто не появляется (без ошибок)."""
         if not source_text or not source_text.strip():
             return
-        
-        # Check if we have MT API keys configured
-        api_keys = self.load_api_keys()
-        if not api_keys:
-            return  # No API keys configured, skip MT
-        
-        # Check enabled providers
-        enabled_providers = self.load_provider_enabled_states()
-        
-        # Try MT providers in priority order (first available and enabled wins)
-        # Priority: Google Translate > DeepL > Microsoft > Amazon > ModernMT > MyMemory
-        mt_provider = None
-        mt_api_key = None
-        
-        if enabled_providers.get('mt_google_translate', True) and api_keys.get('google_translate'):
-            mt_provider = 'google_translate'
-            mt_api_key = api_keys['google_translate']
-        elif enabled_providers.get('mt_deepl', True) and api_keys.get('deepl'):
-            mt_provider = 'deepl'
-            mt_api_key = api_keys['deepl']
-        elif enabled_providers.get('mt_microsoft', True) and (api_keys.get('microsoft_translate') or api_keys.get('azure_translate')):
-            mt_provider = 'microsoft'
-            mt_api_key = api_keys.get('microsoft_translate') or api_keys.get('azure_translate')
-        elif enabled_providers.get('mt_amazon', True) and (api_keys.get('amazon_translate') or api_keys.get('aws_translate')):
-            mt_provider = 'amazon'
-            mt_api_key = api_keys.get('amazon_translate') or api_keys.get('aws_translate')
-        elif enabled_providers.get('mt_modernmt', True) and api_keys.get('modernmt'):
-            mt_provider = 'modernmt'
-            mt_api_key = api_keys['modernmt']
-        elif enabled_providers.get('mt_mymemory', True) and api_keys.get('mymemory'):
-            mt_provider = 'mymemory'
-            mt_api_key = api_keys.get('mymemory')  # Optional, MyMemory works without key
-        # Note: MyMemory can work without a key, but we only use it if explicitly configured
-        else:
-            return  # No MT API keys available or all providers disabled
-        
-        # Get languages
+
+        profile = self._get_active_custom_mt_profile()
+        if not profile:
+            return
+        if not (profile.get('enabled', True) and (profile.get('endpoint') or '').strip()):
+            return
+
         source_lang = getattr(self.current_project, 'source_lang', 'en')
         target_lang = getattr(self.current_project, 'target_lang', 'nl')
-        
-        # Use QTimer to run in background (non-blocking)
+        provider_name = profile.get('name') or 'Custom MT'
+
         def fetch_and_update():
             try:
                 from modules.translation_results_panel import TranslationMatch
-                
-                # Call appropriate MT service
-                if mt_provider == 'google_translate':
-                    translation = self.call_google_translate(source_text, source_lang, target_lang, mt_api_key)
-                    provider_name = 'Google Translate'
-                elif mt_provider == 'deepl':
-                    translation = self.call_deepl(source_text, source_lang, target_lang, mt_api_key)
-                    provider_name = 'DeepL'
-                elif mt_provider == 'microsoft':
-                    translation = self.call_microsoft_translate(source_text, source_lang, target_lang, mt_api_key)
-                    provider_name = 'Microsoft Translator'
-                elif mt_provider == 'amazon':
-                    # Amazon requires region, check for amazon_translate_region or use default
-                    region = api_keys.get('amazon_translate_region', 'us-east-1')
-                    translation = self.call_amazon_translate(source_text, source_lang, target_lang, mt_api_key, region)
-                    provider_name = 'Amazon Translate'
-                elif mt_provider == 'modernmt':
-                    translation = self.call_modernmt(source_text, source_lang, target_lang, mt_api_key)
-                    provider_name = 'ModernMT'
-                elif mt_provider == 'mymemory':
-                    translation = self.call_mymemory(source_text, source_lang, target_lang, mt_api_key)
-                    provider_name = 'MyMemory'
-                else:
-                    return
-                
+
+                translation = self.call_custom_mt(source_text, source_lang, target_lang, profile)
+
                 if translation and not translation.startswith('['):  # Skip error messages
                     if hasattr(self, 'assistance_widget') and self.assistance_widget:
                         # Check if this segment is still selected
                         current_row = self.table.currentRow()
                         if current_row == row_index:
-                            # Map provider to code
-                            provider_code_map = {
-                                'Google Translate': 'GT',
-                                'DeepL': 'DL',
-                                'Microsoft Translator': 'MS',
-                                'Amazon Translate': 'AT',
-                                'ModernMT': 'MMT',
-                                'MyMemory': 'MM'
-                            }
-                            provider_code = provider_code_map.get(provider_name, 'MT')
-                            
-                            # Create MT match
                             mt_match = TranslationMatch(
                                 source=source_text,
                                 target=translation,
@@ -51904,15 +51844,14 @@ class SupervertalerQt(QMainWindow):
                                 },
                                 match_type='MT',
                                 compare_source=source_text,
-                                provider_code=provider_code
+                                provider_code='CMT'
                             )
-                            
+
                             # Update all results panels with MT match
                             if hasattr(self, 'results_panels'):
                                 current_matches = {"MT": [mt_match]}
                                 for panel in self.results_panels:
                                     try:
-                                        # Get current matches and add MT
                                         if hasattr(panel, 'matches_by_type'):
                                             existing_matches = panel.matches_by_type.copy()
                                             existing_matches["MT"] = [mt_match]
@@ -51921,359 +51860,14 @@ class SupervertalerQt(QMainWindow):
                                             panel.set_matches(current_matches)
                                     except Exception as e:
                                         self.log(f"Error updating panel with MT: {e}")
-                            self.log(f"✓ MT translation ({provider_name}) added to results pane")
+                            self.log(f"✓ MT translation (custom MT: {provider_name}) added to results pane")
             except Exception as e:
                 # Silently fail - don't interrupt workflow
                 self.log(f"MT translation failed (silent): {str(e)}")
-        
+
         # Use QTimer to run async (small delay to avoid blocking, slightly after LLM)
         QTimer.singleShot(150, fetch_and_update)
-    
-    def call_google_translate(self, text: str, source_lang: str, target_lang: str, api_key: str = None) -> str:
-        """Вызывает Google Cloud Translation API через REST API."""
-        try:
-            import requests
-            import html
-            
-            if not api_key:
-                api_keys = self.load_api_keys()
-                api_key = api_keys.get("google_translate")
-            
-            if not api_key:
-                return "[Google Cloud Translation requires API key]"
-            
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-                'hebrew': 'he', 'thai': 'th', 'vietnamese': 'vi', 'indonesian': 'id',
-                'malay': 'ms', 'hindi': 'hi', 'bengali': 'bn', 'tamil': 'ta',
-            }
-            
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-            
-            src_code = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt_code = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            # Call REST API directly
-            url = "https://translation.googleapis.com/language/translate/v2"
-            params = {
-                'key': api_key,
-                'q': text,
-                'source': src_code,
-                'target': tgt_code,
-                'format': 'text'
-            }
-            
-            response = requests.post(url, params=params, timeout=10, proxies=self._get_proxy_dict())
-            response.raise_for_status()
 
-            result = response.json()
-            translated_text = result['data']['translations'][0]['translatedText']
-            # Unescape HTML entities like &quot; &amp; etc.
-            return html.unescape(translated_text)
-
-        except ImportError:
-            return "[Google Translate requires: pip install requests]"
-        except Exception as e:
-            return f"[Google Translate error: {str(e)}]"
-    
-    def call_deepl(self, text: str, source_lang: str, target_lang: str, api_key: str = None) -> str:
-        """Вызывает API DeepL."""
-        try:
-            import deepl
-
-            if not api_key:
-                api_keys = self.load_api_keys()
-                api_key = api_keys.get("deepl")
-
-            if not api_key:
-                return "[DeepL requires API key]"
-
-            translator = deepl.Translator(api_key, proxy=self._get_proxy_dict())
-
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-            }
-
-            # Convert source language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            src_base = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            src_code = src_base.upper()
-
-            # Convert target language - try name mapping first, then handle DeepL variants
-            tgt_lower = target_lang.lower().strip()
-            tgt_base = lang_name_to_code.get(tgt_lower, tgt_lower)
-            tgt_upper = tgt_base.upper().replace('_', '-')
-
-            # DeepL target language mapping - some require specific variants
-            deepl_target_map = {
-                # English variants (EN alone is deprecated)
-                'EN': 'EN-US',      # Default to US English
-                'EN-US': 'EN-US',
-                'EN-GB': 'EN-GB',
-                'EN-AU': 'EN-GB',   # Map Australian to British
-                'EN-CA': 'EN-US',   # Map Canadian to US
-                # Portuguese variants
-                'PT': 'PT-PT',      # Default to European Portuguese
-                'PT-PT': 'PT-PT',
-                'PT-BR': 'PT-BR',
-                # Chinese variants
-                'ZH': 'ZH-HANS',    # Default to Simplified
-                'ZH-CN': 'ZH-HANS',
-                'ZH-TW': 'ZH-HANT',
-                'ZH-HANS': 'ZH-HANS',
-                'ZH-HANT': 'ZH-HANT',
-            }
-
-            # Check if full code matches first, then base code
-            if tgt_upper in deepl_target_map:
-                tgt_code = deepl_target_map[tgt_upper]
-            else:
-                # Extract base code and check
-                base_code = tgt_upper.split('-')[0]
-                if base_code in deepl_target_map:
-                    tgt_code = deepl_target_map[base_code]
-                else:
-                    # Use base code as-is for other languages
-                    tgt_code = base_code
-
-            result = translator.translate_text(text, source_lang=src_code, target_lang=tgt_code)
-            return result.text
-
-        except ImportError:
-            return "[DeepL requires: pip install deepl]"
-        except Exception as e:
-            return f"[DeepL error: {str(e)}]"
-    
-    def call_microsoft_translate(self, text: str, source_lang: str, target_lang: str, api_key: str = None, region: str = None) -> str:
-        """Вызывает API Microsoft Azure Translator."""
-        try:
-            import requests
-
-            api_keys = self.load_api_keys()
-            if not api_key:
-                api_key = api_keys.get("microsoft_translate") or api_keys.get("azure_translate")
-            if not region:
-                region = api_keys.get("microsoft_translate_region") or api_keys.get("azure_region") or "global"
-
-            if not api_key:
-                return "[Microsoft Translator requires API key]"
-
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-                'hebrew': 'he', 'thai': 'th', 'vietnamese': 'vi', 'indonesian': 'id',
-            }
-
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-
-            src_code = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt_code = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            # Microsoft Translator API v3.0
-            endpoint = f"https://api.cognitive.microsofttranslator.com/translate"
-            params = {
-                'api-version': '3.0',
-                'from': src_code,
-                'to': tgt_code
-            }
-            headers = {
-                'Ocp-Apim-Subscription-Key': api_key,
-                'Ocp-Apim-Subscription-Region': region,
-                'Content-Type': 'application/json'
-            }
-            body = [{'text': text}]
-            
-            response = requests.post(endpoint, params=params, headers=headers, json=body, timeout=10, proxies=self._get_proxy_dict())
-            response.raise_for_status()
-
-            result = response.json()
-            return result[0]['translations'][0]['text']
-
-        except ImportError:
-            return "[Microsoft Translator requires: pip install requests]"
-        except Exception as e:
-            return f"[Microsoft Translator error: {str(e)}]"
-    
-    def call_amazon_translate(self, text: str, source_lang: str, target_lang: str, api_key: str = None, region: str = 'us-east-1') -> str:
-        """Вызывает API Amazon Translate (AWS)."""
-        try:
-            import boto3
-            from botocore.exceptions import ClientError
-            
-            api_keys = self.load_api_keys()
-            if not api_key:
-                api_key = api_keys.get("amazon_translate") or api_keys.get("aws_translate")
-            
-            # AWS also needs secret key
-            secret_key = api_keys.get("amazon_translate_secret") or api_keys.get("aws_secret_key")
-            
-            if not api_key or not secret_key:
-                return "[Amazon Translate requires API key and secret key]"
-            
-            # Get region from settings if not provided
-            if not region or region == 'us-east-1':
-                region = api_keys.get("amazon_translate_region", "us-east-1")
-            
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-            }
-            
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-            
-            src_code = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt_code = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            translate_client = boto3.client(
-                'translate',
-                aws_access_key_id=api_key,
-                aws_secret_access_key=secret_key,
-                region_name=region
-            )
-            
-            result = translate_client.translate_text(
-                Text=text,
-                SourceLanguageCode=src_code,
-                TargetLanguageCode=tgt_code
-            )
-            
-            return result['TranslatedText']
-            
-        except ImportError:
-            return "[Amazon Translate requires: pip install boto3]"
-        except Exception as e:
-            return f"[Amazon Translate error: {str(e)}]"
-    
-    def call_modernmt(self, text: str, source_lang: str, target_lang: str, api_key: str = None) -> str:
-        """Вызывает API ModernMT."""
-        try:
-            import requests
-
-            api_keys = self.load_api_keys()
-            if not api_key:
-                api_key = api_keys.get("modernmt")
-
-            if not api_key:
-                return "[ModernMT requires API key]"
-
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-            }
-
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-
-            src_code = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt_code = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            # ModernMT API endpoint
-            url = "https://api.modernmt.com/translate"
-            headers = {
-                'MMT-ApiKey': api_key,
-                'Content-Type': 'application/json'
-            }
-            data = {
-                'q': text,
-                'source': src_code,
-                'target': tgt_code
-            }
-            
-            response = requests.post(url, headers=headers, json=data, timeout=10, proxies=self._get_proxy_dict())
-            response.raise_for_status()
-
-            result = response.json()
-            return result['data']['translation']
-
-        except ImportError:
-            return "[ModernMT requires: pip install requests]"
-        except Exception as e:
-            return f"[ModernMT error: {str(e)}]"
-    
-    def call_mymemory(self, text: str, source_lang: str, target_lang: str, api_key: str = None) -> str:
-        """Вызывает API MyMemory Translation (есть бесплатный тариф, простой REST)."""
-        try:
-            import requests
-
-            # MyMemory is free, but API key provides higher limits
-            api_keys = self.load_api_keys()
-            api_key = api_key or api_keys.get("mymemory")  # Optional, works without key
-
-            # Map full language names to ISO codes
-            lang_name_to_code = {
-                'english': 'en', 'dutch': 'nl', 'german': 'de', 'french': 'fr',
-                'spanish': 'es', 'italian': 'it', 'portuguese': 'pt', 'russian': 'ru',
-                'chinese': 'zh', 'japanese': 'ja', 'korean': 'ko', 'arabic': 'ar',
-                'polish': 'pl', 'swedish': 'sv', 'norwegian': 'no', 'danish': 'da',
-                'finnish': 'fi', 'greek': 'el', 'turkish': 'tr', 'czech': 'cs',
-                'hungarian': 'hu', 'romanian': 'ro', 'bulgarian': 'bg', 'ukrainian': 'uk',
-                'hebrew': 'he', 'thai': 'th', 'vietnamese': 'vi', 'indonesian': 'id',
-                'malay': 'ms', 'hindi': 'hi', 'bengali': 'bn', 'tamil': 'ta',
-            }
-
-            # Convert language - try name mapping first, then code extraction
-            src_lower = source_lang.lower().strip()
-            tgt_lower = target_lang.lower().strip()
-
-            src_code = lang_name_to_code.get(src_lower, src_lower.split('-')[0].split('_')[0])
-            tgt_code = lang_name_to_code.get(tgt_lower, tgt_lower.split('-')[0].split('_')[0])
-            
-            # MyMemory API endpoint
-            url = "https://api.mymemory.translated.net/get"
-            params = {
-                'q': text,
-                'langpair': f"{src_code}|{tgt_code}"
-            }
-            if api_key:
-                params['key'] = api_key
-            
-            response = requests.get(url, params=params, timeout=10, proxies=self._get_proxy_dict())
-            response.raise_for_status()
-
-            result = response.json()
-            if result.get('responseStatus') == 200:
-                return result['responseData']['translatedText']
-            else:
-                return f"[MyMemory error: {result.get('responseDetails', 'Unknown error')}]"
-            
-        except ImportError:
-            return "[MyMemory requires: pip install requests]"
-        except Exception as e:
-            return f"[MyMemory error: {str(e)}]"
     
     def load_api_keys(self) -> Dict[str, str]:
         """Загружает API-ключи из единого файла настроек.
@@ -53312,40 +52906,32 @@ class SupervertalerQt(QMainWindow):
         # 🤖 DIRECT MT SEARCH: Machine Translation matches
         if self.enable_mt_matching:
             try:
-                self.log(f"🤖 DIRECT MT SEARCH: Getting machine translation for '{segment.source[:50]}...'")
-                
-                # Use Google Translate via the wrapper function
-                from modules.llm_clients import get_google_translation
-                
-                self.log(f"🤖 DIRECT MT SEARCH: Calling get_google_translation with source_lang='{source_lang_code or 'auto'}', target_lang='{target_lang_code or 'en'}'")
-                
-                google_result = get_google_translation(
-                    segment.source, 
-                    source_lang_code or 'auto',  # Auto-detect if no source lang 
-                    target_lang_code or 'en'     # Default to English if no target lang
-                )
-                
-                self.log(f"🤖 DIRECT MT SEARCH: Google Translate result: {google_result}")
-                
-                if google_result and google_result.get('translation'):
+                self.log(f"🤖 DIRECT MT SEARCH: Getting custom MT for '{segment.source[:50]}...'")
+
+                # С Batch #9.2 единственный MT-движок — custom MT endpoint.
+                custom_mt_result = self.call_custom_mt(
+                    segment.source, source_lang_code or 'en', target_lang_code or 'en')
+
+                if custom_mt_result and not custom_mt_result.startswith('['):
                     match = TranslationMatch(
                         source=segment.source,
-                        target=google_result['translation'],
+                        target=custom_mt_result,
                         relevance=95,  # High confidence for MT
-                        metadata=google_result.get('metadata', {}),
+                        metadata={'provider': 'Custom MT'},
                         match_type="MT",
                         compare_source=segment.source,
-                        provider_code='GT'
+                        provider_code='CMT'
                     )
                     matches_dict["MT"].append(match)
-                    self.log(f"✓ Added Google Translate match: {google_result['translation'][:50]}...")
-                elif google_result and google_result.get('error'):
-                    self.log(f"⚠ Google Translate error: {google_result.get('error')}")
+                    self.log(f"✓ Added custom MT match: {custom_mt_result[:50]}...")
                 else:
-                    self.log(f"⚠ Google Translate returned no translation")
-                    
+                    self.log("⚠ Custom MT returned no translation (not configured or unreachable)")
+
             except Exception as e:
-                self.log(f"⚠ Error getting Google Translate: {e}")
+                self.log(f"⚠ Error getting custom MT: {e}")
+                import traceback
+                self.log(f"⚠ Traceback: {traceback.format_exc()}")
+
                 import traceback
                 self.log(f"⚠ Traceback: {traceback.format_exc()}")
         
