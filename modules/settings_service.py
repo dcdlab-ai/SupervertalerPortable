@@ -343,17 +343,7 @@ class SettingsService:
             'llm_mistral': True,
             'llm_openrouter': True,
             'llm_ollama': True,
-            'llm_custom_openai': True,
-            'mt_google_translate': True,
-            'mt_deepl': True,
-            'mt_microsoft': True,
-            'mt_amazon': True,
-            'mt_modernmt': True,
-            # v1.10.373 (Batch #8.15): MyMemory defaults to OFF for new
-            # installs. Existing users who have the key saved keep their
-            # value (setdefault below never overwrites and never writes
-            # to disk on its own).
-            'mt_mymemory': False
+            'llm_custom_openai': True
         }
 
         try:
