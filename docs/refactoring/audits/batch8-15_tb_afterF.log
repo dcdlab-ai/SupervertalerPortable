@@ -1,0 +1,96 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\b8-15\tb7\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] No API keys found
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\b8-15\tb7\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Failed to register ctrl+alt+q (may be in use by another application)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+[LOG] ⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⚠ Global hotkeys: some failed to register: ctrl+alt+q
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[afterF7] window built (7.9s)
+[LOG] ✓ Alternating row colors applied
+[LOG] ℹ️ Okapi sidecar not installed yet – will offer to download on first DOCX import
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] ✓ Created termbase: probe_tb812 (ID: 1)
+[LOG] ✓ Added term to termbase 1: house → дом
+[LOG] ✓ Updated term 1
+[LOG] ✓ Deleted term 1
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 1 termbase(s) in database
+[afterF7] SNAP {"add_term": "ok=True", "create_termbase": "id=1", "delete_term": "ok=True", "export_tsv": "ok=True msg=Exported 1 terms to tb_export_afterF7.tsv exists=True", "export_tsv_sha": "280b53e55da0c74a", "import_tsv": "ok=True", "right_panel": "None", "target_after_update": "домик", "termbases_columns": [["Source Term", "Target Term", "Domain", "Notes", "Project", "Client", "Forbidden", "Created", ""], ["Type", "Name", "Languages", "Terms", "Read", "Write", "Project", "AI", "🔍 SuperLookup"]], "termbases_list": [["probe_tb812", "en", "ru"]], "termbases_tab": "QWidget", "termbases_tables": 2, "terms_after_add": 1, "terms_after_delete": 0, "terms_after_import": 1, "update_term": "ok=True"}
+[afterF7] MODAL-ATTEMPTS []
+[afterF7] REGRESS-TB OK (14.4s)
+QThreadStorage: entry 1 destroyed before end of thread 0x14afd6eded0

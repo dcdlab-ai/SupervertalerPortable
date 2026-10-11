@@ -3,9 +3,12 @@
 Дата: 2026-10-11. База: 41b7ece1 (код Batch #8.13b); старт по команде Дмитрия + промпт.
 Эталон монолита: SHA256 `30799778e4462af1f0e8531806c2d5197290d87ae4ae63eb627e6889c5ace166`, 56 689 строк.
 
-**Итог: 5 кодовых коммитов (8.15a…8.15e), монолит 56 689 → 56 524 строк
+**Итог: 6 кодовых коммитов (8.15a…8.15f), монолит 56 689 → 56 524 строк
 (SHA256 `3109531c64a14bd5bd193b43ff5784cead798ed5d1041438699e73c30f88f257`),
-+ `modules/settings_service.py` (SHA256 `d76a28161d870253929124fdb1d92c4f74c88a600b25b9edcba289b982f23464`).**
++ `modules/settings_service.py` (SHA256 `d76a28161d870253929124fdb1d92c4f74c88a600b25b9edcba289b982f23464`)
++ `modules/figure_context_manager.py` (SHA256 `d396c761155f225f00d7d1f073f83d9de4c544fb2e85d340ad5567e3b4c970d3`).**
+
+**Вердикт-дополнение 2026-10-11 (ответы 1–4 Дмитрия):** пакет подтверждён; фикстуры `docs/refactoring/samples/` (Miniature Wargames #520.translation.md + Figure 1A.png) сохранены для G5, изображение использовано в e2e-пробе; вопрос 3 решён коммитом **8.15f** в этом же батче; вопрос 4 — ранний return остаётся, удаление функции проверки обновлений → рекогносцировка P1 (запись в handover).
 
 ## §0 Baseline и дрейф
 
@@ -63,6 +66,11 @@
 
 * Существующий пользователь: ключ в `ui.provider_enabled_states` есть → сохраняется любое значение (setdefault — no-op); ключа нет → False (правило «ключа нет → False»). Риск для существующего пользователя отсутствует (пробы §4.6).
 
+### 8.15f — ImageTk блокировал PIL в embed-среде (рекон + правка по ответу 3 Дмитрия)
+* Симптом из §7 (версии до вердикта): в dev-runtime нет tkinter → `from PIL import Image, ImageTk` (одна строка, `figure_context_manager.py:19`) падал целиком → `PIL_AVAILABLE=False` → `load_from_folder` поднимал «PIL/Pillow library is not installed» @94 → **весь figure-context (и оживлённый 8.15c vision-путь) был мёртв в среде без tkinter**.
+* Использование `ImageTk` по репозиторию: только `figure_context_manager.py:232` внутри `_update_thumbnails` (метод tkinter-версии превью: `import tkinter as tk` @208, `tk.Frame`, `winfo_children`, `ImageTk.PhotoImage`). `update_ui_display`/`_update_thumbnails` внешних вызывающих НЕ имеют (grep монолит+modules) — на Qt-пути мертвы. Других импортов tkinter на Qt-пути нет (`tmx_editor_qt.py:36` — только комментарий).
+* Поскольку `ImageTk` нужен хоть где-то в модуле (мёртвый tkinter-метод, работающий на полных рантаймах) — применена **ветка (b) решения Дмитрия**: раздельные try/except, `ImageTk = None` при отсутствии. Правка только в блоке импорта (7 → 14 строк), остальной модуль не тронут; LF сохранены.
+
 ## §2 Что сделано (зона | строки | действие | sha256)
 
 | Коммит | Пункт | Зона (нумерация base 41b7ece1) | Действие | Строки | Snapshot sha256 |
@@ -72,6 +80,7 @@
 | c183508f 8.15c | E-03a+b | 50018–50047 | 2 локальных импорта в начале try + вызов модульной функции | +3 | `c9831630…` |
 | feeecdd4 8.15d | W | 11319–11330 | `set_read_only(tm_id, not checked)`, снят hasattr, + инвалидация кэша | +3 | `d6ee7380…` |
 | adcebd47 8.15e | M | settings_service.py:352 | `'mt_mymemory': True → False` (+3 строки комментария) | +4 | `2bfbc7d5…` |
+| 4ed6eba4 8.15f | ответ 3 | figure_context_manager.py:18–24 | раздельный импорт Image / ImageTk (try/except ImportError, `ImageTk = None`) | +7 (блок импорта) | `a6903d7c…` |
 
 Монолит: 56 689 → 56 524 (−165). Все правки — строковые замены с проверкой границ assert'ами; EOL сохранены (`\r\r\n` = 0 на каждом шаге); `tm_metadata_manager.py`, `figure_context_manager.py`, regex ссылок на рисунки, PreTranslationWorker — не тронуты.
 
@@ -127,7 +136,21 @@ About через меню (`QAction.trigger()`, полный сигнальны�
 | gemini | images = **null** | `[{ref:'1a', PIL.Image 4×4}]` |
 
 **Контроль оказался сильнее прогноза из решения: images=null у ВСЕХ четырёх, включая gemini** — NameError стоит ДО ветки провайдера. Формат аргументов заглушки соответствует ветке клиента. Дополнительно: сегмент без «Figure» — images=null, текстовые аргументы запроса байтно идентичны до/после (prompt sha `c5368fcd…`/`baad5249…`); custom_openai с НЕ-vision моделью (флаг False) — images=null, в логе «⚠️ Figures detected (1a) but model … doesn't support vision».
-Ограничение среды: в embed-питоне нет tkinter → `ImageTk` → `PIL_AVAILABLE=False` → `load_from_folder` в ЭТОЙ среде недоступен; проба наполняла `figure_context_map` напрямую тем же объектом PIL.Image (см. §7, вопрос 3).
+Ограничение среды (до 8.15f): в embed-питоне нет tkinter → `ImageTk` → `PIL_AVAILABLE=False` → `load_from_folder` в ЭТОЙ среде был недоступен; проба наполняла `figure_context_map` напрямую тем же объектом PIL.Image. **После 8.15f ограничение снято — см. §4.8.**
+
+### §4.8 8.15f спец-пробы (ответ 3 Дмитрия)
+* **load_from_folder в среде без tkinter:** после раздельного импорта `PIL_AVAILABLE=True`, `ImageTk=None`; `load_from_folder` загружает фикстуру Дмитрия `docs/refactoring/samples/Figure 1A.png` (560×196) — «figures loaded via load_from_folder: 1», фигура найдена как ref `1a`. Падения нет.
+* **E-03 сквозной (e2e) сценарий** — сегмент «The assembly is shown in Figure 1A…», папка figures с PNG (копия фикстуры), заглушка LLM, vision-флаг True:
+
+| Провайдер | после 8.15f (e2e через load_from_folder) | контроль baseline (worktree 1d953b0b) |
+|---|---|---|
+| openai | `[{ref:'1a', base64-png, len 11720}]` | LOAD-ERROR «PIL/Pillow library is not installed», images = **null** |
+| claude | `[{ref:'1a', base64-png, len 11720}]` | — (контроль по openai/gemini) |
+| custom_openai | `[{ref:'1a', base64-png, len 11720}]` | — |
+| gemini | `[{ref:'1a', PIL.Image 560×196}]` | LOAD-ERROR, images = **null** |
+
+Контроль доказывает: на baseline (без 8.15a/b/c/f) изображение не прикрепляется ни у одного провайдера — фигуры даже не загружаются из папки.
+* Обойма защит после 8.15f — без изменений от afterE: py_compile 110/0 + 136/0 (справочный 153/0 — 17 новых audit-скриптов батча, канонический счёт не растёт по правилу двух счётчиков), pyflakes 577/126/4 (без новых имён), AST chain 922/0, headless 91/2, S-clean 28, S-upgrade HASH-DIFF пуст, regress RESULTS идентичны, smoke 42 SMOKE OK, About OK, termbase SNAP OK.
 
 ### §4.5 W спец-проба (3 TM в изолированной БД, `batch8-15_w_after_OK.log`)
 Select All Write → все 3 `read_only=False`; снятие → все `True`; кнопка «Clear All Write» → все `True`; построчный чекбокс — только строка 1 переключилась; `invalidate_translation_cache(smart_invalidation=False)` — 4 вызова (по одному на массовое переключение).
@@ -151,20 +174,25 @@ Select All Write → все 3 `read_only=False`; снятие → все `True`;
 
 ## §5 ПАКЕТ ДЛЯ ТЕСТОВОЙ СБОРКИ
 
-**Внимание: в отличие от ожидания промпта («заменить только Supervertaler.py») пакет — ДВА файла** (правка M физически живёт в settings_service.py; см. §8, вопрос 1):
+**Три файла** (подтверждено Дмитрием, ответ 1; 8.15f добавил третий):
 
 | Файл | Действие | SHA256 |
 |---|---|---|
 | `Supervertaler.py` | ЗАМЕНИТЬ | `3109531c64a14bd5bd193b43ff5784cead798ed5d1041438699e73c30f88f257` |
 | `modules/settings_service.py` | ЗАМЕНИТЬ | `d76a28161d870253929124fdb1d92c4f74c88a600b25b9edcba289b982f23464` |
+| `modules/figure_context_manager.py` | ЗАМЕНИТЬ (8.15f) | `d396c761155f225f00d7d1f073f83d9de4c544fb2e85d340ad5567e3b4c970d3` |
 
-Ничего не удалять. `git ls-files --eol`: оба файла i/lf (w/crlf у монолита, w/lf у settings_service — как в репо).
+Ничего не удалять. `git ls-files --eol`: монолит i/lf w/crlf; оба модуля i/lf w/lf (как в репо).
+
+**Pillow на тестовой сборке (по ответу 3):** для e2e-проверки vision/figure-context нужен **Pillow** — устанавливается Дмитрием вручную; в dev-окружении агента используется **pillow 12.3.0** (пробы §4.4/§4.8 выполнены на нём; фикстура 560×196 загружается). Проверка зависимостей: **Pillow>=10.0.0 уже объявлен** — `requirements.txt:17` и `pyproject.toml:65`; находки для P2-списка нет (фича figure-context остаётся, в чистой сборке Pillow ставится по этим файлам; главное — не совпадает ли версия: тестовая сборка ставится из requirements, т.е. >=10.0.0, конкретную версию после установки записать в протокол теста).
+
+**Версии пакетов dev-окружения для сопоставимости** (агент НИЧЕГО не устанавливал в ходе 8.15 — все пробы на существующем рантайме `E:\Dev\python-embed`): PyQt6 6.11.0 · PyQt6-Qt6 6.11.2 · PyQt6-sip 13.12.0 · pillow 12.3.0 · python-docx 1.2.0 · lxml 6.1.3 · chardet 7.6.0 · Markdown 3.10.3 · PyYAML 6.0.3 · requests 2.34.2 · pyflakes 4.0.1 (standalone-библиотека в `D:\Temp\SupervertalerPortable\refactoring\b8-9\pyflakes_lib`, в рантайм не ставилась). В embed-питоне отсутствуют: tkinter (→ ImageTk, см. 8.15f), setuptools (headless: setup.py — известный fail), fitz/PyMuPDF (headless: pdf_rescue_Qt — известный fail).
 
 ## §6 Сценарии ручного тестирования
 
 * **T8.15.1 (E-01):** Help → ℹ️ About — диалог открывается, заголовок «About Supervertaler Workbench», версия v1.10.371, кликабельные ссылки supervertaler.com / beijer.uk.
 * **T8.15.2 (E-02):** только offscreen — путь за ранним return (см. §1/E-02); вручную невоспроизводим до возврата механизма проверки обновлений.
-* **T8.15.3 (E-03, vision):** возможен только с облачным vision-ключом (или локальной vision-моделью через custom_openai, если Дмитрий её поднимет): папка фигур с «Figure 1A.png», сегмент «As shown in Figure 1A…», перевод — в логе «✅ Including 1 figure images», у openai/claude/custom_openai и gemini изображение прикрепляется. Если ручной ключ недоступен — достаточно offscreen-проб §4.4.
+* **T8.15.3 (E-03, vision end-to-end):** папка фигур с «Figure 1A.png» (фикстура `docs/refactoring/samples/Figure 1A.png`), сегмент «As shown in Figure 1A…», vision-модель (облачный ключ или локальная через custom_openai): в логе «✅ Including 1 figure images», изображение прикрепляется у openai/claude/custom_openai и gemini. Offscreen-эквивалент выполнен (§4.8, e2e).
 * **T8.15.4 (E-03, контроль):** тот же сегмент, НЕ-vision модель → «⚠️ … doesn't support vision», перевод текстовый, без изображений.
 * **T8.15.5 (W):** 3 TM → «Select All Write» — у всех Write включается (статус «writable»); «Clear All Write» — снимается у всех; построчный чекбокс работает; повторный перевод в TM с включённым Write пишет, с выключенным — нет; заголовочный чекбокс пересинхронизируется после refresh.
 * **T8.15.6 (M):** чистый старт → Settings → MT: MyMemory выключена; апгрейд-копия с `mt_mymemory: true` → осталась включённой; с `false` → выключена.
@@ -173,23 +201,30 @@ Select All Write → все 3 `read_only=False`; снятие → все `True`;
 ## §7 Непокрытые проверки и находки
 
 1. **Ранний return в check_for_updates** (временное упрощение) — fallback-механизм целиком мёртв в текущей сборке; фикс E-02 латентно-корректный. Отдельно: `QTimer.singleShot(0, …)` из worker-потока не доходит до главного loop'а (наблюдение пробы; то же касается on_ok) — механика доставки колбэков fallback'а вне объёма 8.15, материал для G5/отдельного прохода.
-2. **PIL_AVAILABLE=False в dev-runtime** (нет tkinter → ImageTk): в ЭТОМ рантайме `FigureContextManager.load_from_folder` недоступен — vision-путь нельзя пройти end-to-end с реальной папкой фигур. Проба инъекцией в `figure_context_map` обошла это; поведенческие фиксы не задеты.
-3. **Бродячий файл в репо:** `docs/refactoring/samples/Miniature Wargames #520.translation.md` (untracked, 176 КБ, mtime 27.07.2026, создан 10:20 сегодня в окно baseline-проб; источник установить не удалось — писателя в коде приложения нет, ни в temp, ни в боевых данных файла больше нет). Оставлен на месте незатреканным; вопрос к Дмитрию (§8.4).
+2. ~~PIL_AVAILABLE=False в dev-runtime~~ — **снято 8.15f** (§4.8): раздельный импорт Image/ImageTk, vision/figure-context работает end-to-end в среде без tkinter.
+3. **Фикстуры G5:** `docs/refactoring/samples/Miniature Wargames #520.translation.md` (бродячий файл, найденный 8.15) и `docs/refactoring/samples/Figure 1A.png` (помещён Дмитрием 2026-10-11) — **сохраняются** (ответ 2) как фикстуры G5-аудита figure-context; изображение использовано в e2e-пробах §4.8. Оба файла untracked, в коммиты не входят.
 4. **Одна проба до фикса указателя** дописала файл в b8-11 stage-профиль (§0) — временная область.
 5. У «Select All Write»/«Clear All Write» есть одноимённые дубли на вкладке Termbases (не тронуты; их массовые переключатели работают со своей таблицей — вне объёма).
 6. Smoke baseline не менялся (меню не менялись — 42 пункта на каждом шаге).
+7. `_update_thumbnails`/`update_ui_display` (tkinter-остаток в figure_context_manager.py, внешних вызывающих нет) — кандидаты в модульный проход 8.18 (не тронуты, вне объёма 8.15f).
 
-## §8 Вопросы к Дмитрию
+## §8 Вопросы к Дмитрию — ОТВЕТЫ ПОЛУЧЕНЫ 2026-10-11
 
-1. **Пакет тестовой сборки: два файла** (Supervertaler.py + modules/settings_service.py) вместо ожидаемого одного — подтверждаешь? (Правка M невозможна из монолита: читатели получают словарь из сервиса.)
-2. `docs/refactoring/samples/Miniature Wargames #520.translation.md` — твой артефакт? Удалить / оставить (сейчас untracked, ни во что не входит)?
-3. Блиндаж для vision end-to-end: в dev- и, вероятно, тестовом runtime нет tkinter → `ImageTk` → фигуры не грузятся из папки (`load_from_folder` падает). Стоит ли (a) заменить `ImageTk`-импорт на ленивый/опциональный в figure_context_manager.py (1–2 строки, отдельный микробатч), (b) смириться (vision работает только там, где Pillow полный)?
-4. E-02: оставляем временный ранний return в check_for_updates как есть (фикс латентный) — или планируешь возврат механизма проверки обновлений в отдельном батче?
+1. **Пакет тестовой сборки (два → три файла)** — **ПОДТВЕРЖДЕНО**, с учётом ответов 2–4: добавлен `modules/figure_context_manager.py` (8.15f).
+2. **Фикстуры** — сохраняются для G5-аудита figure-context; `Figure 1A.png` (помещён Дмитрием в `docs/refactoring/samples/` 12:42 2026-10-11) использован в e2e-пробах §4.8.
+3. **Vision end-to-end** — вариант (a), коммит **8.15f** (4ed6eba4) в этом же батче: рекон показал, что `ImageTk` используется только в мёртвом tkinter-методе `_update_thumbnails` (внешних вызывающих у него и `update_ui_display` нет; других tkinter-импортов на Qt-пути нет) → применена ветка (b): раздельный try/except, `ImageTk = None`. Проба: `load_from_folder` загружает фикстуру в среде без tkinter; e2e: изображение в аргументах заглушки у всех 4 провайдеров; контроль baseline — images=null + LOAD-ERROR. Pillow в requirements.txt/pyproject объявлен — P2-находка не нужна (§5).
+4. **check_for_updates** — оставить как есть; удаление функции и пункта меню → рекогносцировка **P1** (рядом со статистикой и автозапуском). Запись в handover: см. ниже.
+
+**P1-запись (удаление функции проверки обновлений — материал для рекогносцировки P1):**
+* Функция: `SupervertalerQt.check_for_updates` (~48603, с временным ранним return «открыть страницу релизов»; внутри — мёртвый fallback-механизм с сетевыми запросами к GitHub API).
+* Вызывающие (ровно два, таймеров нет): пункт меню **Help → «🔄 Check for Updates...»** (`update_check_action.triggered.connect(self.check_for_updates)` @8583) и кнопка **«🔄 Check for Updates...»** в панели версии (@49321, рядом с «📋 Copy Version Info»).
+* Решение Дмитрия 2026-10-11: портативной офлайн-сборке запрос к GitHub не нужен; удалить функцию и оба UI-элемента целиком в P1.
 
 ## Handover (что дальше)
 
-* **G5-аудит figure-context** (после 8.15): regex ссылок (figure_context_manager.py:62), пакетный PreTranslationWorker (0 использования figure_context/images), md-ссылки — материал отдельного решения.
-* **8.18** (по команде + промпт): 63 мёртвых метода монолита группами 10–15 + новый модульный проход по modules/ — включая `set_bridged_to_trados` (29 строк, отдельный раздел в промпте 8.18 — решение 8.13 §9.3.3).
+* **P1 (рекогносцировка):** удаление функции проверки обновлений целиком (§8.4 — функция, пункт меню, кнопка, вызывающие); рядом — статистика и автозапуск. Решение Дмитрия 2026-10-11.
+* **G5-аудит figure-context** (после 8.15): regex ссылок (figure_context_manager.py:62), пакетный PreTranslationWorker (0 использования figure_context/images), md-ссылки, фикстуры `docs/refactoring/samples/` — материал отдельного решения. Vision-путь теперь жив end-to-end (8.15a–c+f) — аудит может проверять реальное поведение.
+* **8.18** (по команде + промпт): 63 мёртвых метода монолита группами 10–15 + новый модульный проход по modules/ — включая `set_bridged_to_trados` (29 строк, отдельный раздел в промпте 8.18 — решение 8.13 §9.3.3) и tkinter-остатки `update_ui_display`/`_update_thumbnails` (§7.7).
 * **8.16** — docs-комментарии в коде (Trados/gettext-остатки в i18n.py:26, models.py, tools/extract_strings.py:10 и т.п.); **8.17** — документы репозитория (CODE_MAP_REFACTOR.md:1150, DEPENDENCY_MAP.md po_handler, раздел J инвентаря).
-* Порядок по решению 8.12: 8.12 ✓ → 8.13 ✓ → **8.15 ✓ (этот отчёт)** → 8.18 → 8.16 → 8.17.
-* Аудит-скрипты и логи: `docs/refactoring/audits/batch8-15_*` (17 скриптов + снапшоты `batch8-15_snapshots/` + before/after логи). Канонический smoke-baseline не менялся (batch8-13_code_tools_smoke.py, 42 пункта).
+* Порядок по решению 8.12: 8.12 ✓ → 8.13 ✓ → **8.15 ✓ (a–f, этот отчёт)** → 8.18 → 8.16 → 8.17.
+* Аудит-скрипты и логи: `docs/refactoring/audits/batch8-15_*` (17 скриптов + снапшоты `batch8-15_snapshots/` + before/after логи, включая §4.8 e2e). Канонический smoke-baseline не менялся (batch8-13_code_tools_smoke.py, 42 пункта).
