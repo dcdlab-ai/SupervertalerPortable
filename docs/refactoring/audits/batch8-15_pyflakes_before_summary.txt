@@ -1,0 +1,13 @@
+pyflakes warnings (repo): 596
+undefined-name lines: 143
+unique undefined names: 10
+  LLMClient: 1
+  dialog: 8
+  e: 1
+  filedialog: 2
+  import_tab: 2
+  layout: 2
+  messagebox: 19
+  tabs: 3
+  tk: 100
+  ttk: 5

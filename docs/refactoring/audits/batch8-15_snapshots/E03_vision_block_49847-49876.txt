@@ -1,0 +1,30 @@
+            # Check for figure references and prepare images if available
+            images = None
+            if self.figure_context and self.figure_context.has_images():
+                try:
+                    # Detect figure references in source text
+                    figure_refs = self.figure_context.detect_figure_references(segment.source)
+                    if figure_refs:
+                        self.log(f"  🖼️ Detected figure references in segment #{segment.id}: {', '.join(figure_refs)}")
+                        # Get images for detected figures
+                        images_for_text = self.figure_context.get_images_for_text(segment.source)
+                        if images_for_text:
+                            # Check if model supports vision
+                            if LLMClient.model_supports_vision(provider, model):
+                                # Convert PIL images to appropriate format for provider
+                                if provider == "gemini":
+                                    # Gemini uses PIL.Image directly
+                                    images = images_for_text
+                                else:
+                                    # OpenAI and Claude use base64 PNG
+                                    images = [
+                                        (ref, self.figure_context.pil_image_to_base64_png(img))
+                                        for ref, img in images_for_text
+                                    ]
+                                self.log(f"  ✅ Including {len(images)} figure images: {', '.join(figure_refs)}")
+                            else:
+                                self.log(f"  ⚠️ Figures detected ({', '.join(figure_refs)}) but model '{model}' doesn't support vision")
+                        else:
+                            self.log(f"  ⚠️ Figure references detected but no matching images found in loaded folder")
+                except Exception as e:
+                    self.log(f"  ⚠️ Could not load figures: {e}")

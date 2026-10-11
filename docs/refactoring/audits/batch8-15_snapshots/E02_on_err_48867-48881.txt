@@ -1,0 +1,15 @@
+                except Exception as e:
+
+                    def on_err():
+                        if not is_active_request():
+                            return
+                        if bool(getattr(self, "_update_check_user_canceled", False)):
+                            finish()
+                            return
+                        show_offline_error(str(e))
+                        finish()
+
+                    QTimer.singleShot(0, on_err)
+
+            threading.Thread(target=worker, daemon=True).start()
+

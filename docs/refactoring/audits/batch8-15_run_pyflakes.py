@@ -1,0 +1,30 @@
+import os, pathlib, sys
+
+OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-15")
+sys.path.insert(0, str(pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
+os.chdir(r"E:\Dev\SupervertalerPortable")
+
+from pyflakes.api import checkPath
+from pyflakes.reporter import Reporter
+
+files = ["Supervertaler.py"] + sorted(str(p) for p in pathlib.Path("modules").rglob("*.py"))
+warning_count = 0
+with open(OUT / f"undefined_names_{sys.argv[1]}.txt", "w", encoding="utf-8") as fh:
+    reporter = Reporter(fh, fh)
+    for f in files:
+        warning_count += checkPath(f, reporter=reporter)
+print("pyflakes warnings (repo):", warning_count)
+
+undef = [l for l in (OUT / f"undefined_names_{sys.argv[1]}.txt").read_text(encoding="utf-8").splitlines()
+         if "undefined name" in l]
+print("undefined-name lines:", len(undef))
+
+import re, collections
+names = collections.Counter()
+for l in undef:
+    m = re.search(r"undefined name '([^']+)'", l)
+    if m:
+        names[m.group(1)] += 1
+print("unique undefined names:", len(names))
+for n, c in sorted(names.items()):
+    print(f"  {n}: {c}")

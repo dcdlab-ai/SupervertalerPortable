@@ -1,0 +1,12 @@
+        def toggle_all_write(checked):
+            try:
+                for tm in (tm_metadata_mgr.get_all_tms() or []):
+                    tm_id = tm.get('id')
+                    if tm_id is None:
+                        continue
+                    # checked = writable, read_only is the opposite.
+                    if hasattr(tm_metadata_mgr, 'set_tm_read_only'):
+                        tm_metadata_mgr.set_tm_read_only(tm_id, not checked)
+            except Exception as e:
+                self.log(f"⚠️ Bulk TM Write toggle failed mid-way: {e}")
+            refresh_tm_list()

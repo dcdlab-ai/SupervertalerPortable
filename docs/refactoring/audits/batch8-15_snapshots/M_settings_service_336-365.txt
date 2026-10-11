@@ -1,0 +1,30 @@
+
+    def load_provider_enabled_states(self) -> Dict[str, bool]:
+        """Загружает состояния включённости провайдеров из предпочтений пользователя."""
+        defaults = {
+            'llm_openai': True,
+            'llm_claude': True,
+            'llm_gemini': True,
+            'llm_mistral': True,
+            'llm_openrouter': True,
+            'llm_ollama': True,
+            'llm_custom_openai': True,
+            'mt_google_translate': True,
+            'mt_deepl': True,
+            'mt_microsoft': True,
+            'mt_amazon': True,
+            'mt_modernmt': True,
+            'mt_mymemory': True
+        }
+
+        try:
+            prefs = self._load_settings_section("ui")
+            saved = prefs.get('provider_enabled_states', defaults)
+            # Ensure new keys exist for older configs
+            for k, v in defaults.items():
+                saved.setdefault(k, v)
+            return saved
+        except:
+            return defaults
+
+    def save_provider_enabled_states(self, states: Dict[str, bool]):
