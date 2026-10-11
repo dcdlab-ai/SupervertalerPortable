@@ -23869,7 +23869,13 @@ class SupervertalerQt(QMainWindow):
             # Sync current field values into the active profile
             idx = custom_profile_combo.currentIndex()
             if 0 <= idx < len(profiles):
-                profiles[idx]['endpoint'] = custom_endpoint_input.text().strip() if custom_endpoint_input else ''
+                _raw_endpoint = custom_endpoint_input.text().strip() if custom_endpoint_input else ''
+                _norm_endpoint = self._normalize_custom_endpoint(_raw_endpoint)
+                profiles[idx]['endpoint'] = _norm_endpoint
+                if custom_endpoint_input is not None and _norm_endpoint != _raw_endpoint:
+                    custom_endpoint_input.setText(_norm_endpoint)  # показать нормализацию в поле
+                profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
+                profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
                 profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
                 profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
             active_profile_name = custom_profile_combo.currentText()
@@ -48352,6 +48358,38 @@ class SupervertalerQt(QMainWindow):
             os.environ.pop("HTTPS_PROXY", None)
             os.environ.pop("HTTP_PROXY", None)
 
+    @staticmethod
+    def _normalize_custom_endpoint(url):
+        """Дополняет endpoint профиля Custom схемой, если её нет.
+
+        «127.0.0.1:3445/v1» → «http://127.0.0.1:3445/v1»: loopback/частные
+        адреса (localhost, 127.*, 10.*, 192.168.*, 172.16–31.*, *.local, ::1)
+        получают http://, остальные — https://. Значения со схемой («http://…»,
+        «HTTPS://…») и протокол-относительные («//host/v1») возвращаются
+        без изменений, пустая строка — без изменений. Порт, путь и хвостовой
+        «/» не трогаются."""
+        u = (url or '').strip()
+        if not u or '://' in u or u.startswith('//'):
+            return u
+        host = u.split('/', 1)[0]
+        if host.startswith('['):                       # IPv6-литерал [::1]:8080
+            host = host[1:].split(']', 1)[0]
+        elif host.count(':') == 1:                     # host:port
+            host = host.rsplit(':', 1)[0]
+        # host.count(':') >= 2 — «голый» IPv6 (::1), оставляем как есть
+        if host == 'localhost' or host == '::1' or host.endswith('.local'):
+            scheme = 'http://'
+        else:
+            parts = host.split('.')
+            if (len(parts) == 4 and all(p.isdigit() for p in parts)
+                    and (parts[0] in ('127', '10')
+                         or (parts[0] == '192' and parts[1] == '168')
+                         or (parts[0] == '172' and parts[1].isdigit() and 16 <= int(parts[1]) <= 31))):
+                scheme = 'http://'
+            else:
+                scheme = 'https://'
+        return scheme + u
+
     def _get_active_custom_profile(self, settings=None):
         """Возвращает словарь активного профиля custom_openai (endpoint, model,
                 api_key).
@@ -48364,20 +48402,27 @@ class SupervertalerQt(QMainWindow):
         profiles = settings.get('custom_openai_profiles', [])
         active_name = settings.get('custom_openai_active_profile', '')
 
-        # Find active profile by name
+        # Find active profile by name (возвращаем НОРМАЛИЗОВАННУЮ КОПИЮ —
+        # сохранённые в settings.json данные не мутируем)
         for p in profiles:
             if p.get('name') == active_name:
-                return p
+                q = dict(p)
+                q['endpoint'] = self._normalize_custom_endpoint(q.get('endpoint', ''))
+                return q
 
         # Fallback to first profile
         if profiles:
-            return profiles[0]
+            q = dict(profiles[0])
+            q['endpoint'] = self._normalize_custom_endpoint(q.get('endpoint', ''))
+            return q
 
         # Legacy fallback: old single-field config (pre-profiles)
         endpoint = settings.get('custom_openai_endpoint', '')
         model = settings.get('custom_openai_model', '')
         if endpoint:
-            return {'name': 'Custom Endpoint', 'endpoint': endpoint, 'model': model, 'api_key': ''}
+            return {'name': 'Custom Endpoint',
+                    'endpoint': self._normalize_custom_endpoint(endpoint),
+                    'model': model, 'api_key': ''}
 
         return None
 
@@ -48400,8 +48445,14 @@ class SupervertalerQt(QMainWindow):
         active_name = settings.get('custom_mt_active_profile', '')
         for p in profiles:
             if p.get('name') == active_name:
-                return p
-        return profiles[0] if profiles else None
+                q = dict(p)
+                q['endpoint'] = self._normalize_custom_endpoint(q.get('endpoint', ''))
+                return q
+        if profiles:
+            q = dict(profiles[0])
+            q['endpoint'] = self._normalize_custom_endpoint(q.get('endpoint', ''))
+            return q
+        return None
 
     def call_custom_mt(self, text: str, source_lang: str, target_lang: str, profile=None) -> str:
         """Переводит через Custom MT endpoint (OpenAI-совместимый, например
