@@ -114,24 +114,10 @@ def load_api_keys() -> Dict[str, str]:
     if api_keys.get('google') and not api_keys.get('gemini'):
         api_keys['gemini'] = api_keys['google']
 
-    # Set environment variable for Ollama endpoint if configured
-    if api_keys.get('ollama_endpoint'):
-        os.environ['OLLAMA_ENDPOINT'] = api_keys['ollama_endpoint']
 
     return api_keys
 
 
-# User-chosen Ollama request timeout in seconds (issue #180), or None for the
-# automatic timeout scaled by model size and prompt length. Set from
-# Settings → AI Settings via set_ollama_timeout(); held at module level so it
-# reaches every LLMClient without threading a parameter through each caller.
-_ollama_timeout_override: Optional[int] = None
-
-
-def set_ollama_timeout(seconds: Optional[int]) -> None:
-    """Set the Ollama request timeout in seconds; 0 or None restores automatic."""
-    global _ollama_timeout_override
-    _ollama_timeout_override = int(seconds) if seconds and int(seconds) > 0 else None
 
 
 @dataclass
@@ -153,154 +139,8 @@ class LLMClient:
         "custom_openai": "custom-model",  # Custom OpenAI-compatible endpoint
     }
 
-    # Available Mistral models with descriptions
-    MISTRAL_MODELS = {
-        "mistral-large-latest": {
-            "name": "Mistral Large",
-            "description": "Flagship model – top-tier reasoning and multilingual quality",
-            "strengths": ["Multilingual", "Complex reasoning", "High accuracy"],
-            "use_case": "Recommended for most translation tasks"
-        },
-        "mistral-small-latest": {
-            "name": "Mistral Small",
-            "description": "Fast and cost-effective – great for high-volume translation",
-            "strengths": ["Fast", "Cost-effective", "Multilingual"],
-            "use_case": "Best for large projects where speed and cost matter"
-        }
-    }
 
-    # Available OpenRouter models (curated selection)
-    # OpenRouter is an API gateway – users can also type any model ID from openrouter.ai/models
-    OPENROUTER_MODELS = {
-        "anthropic/claude-sonnet-5": {
-            "name": "Claude Sonnet 5",
-            "description": "Anthropic flagship Sonnet – near-Opus quality, fast",
-            "strengths": ["General translation", "Multilingual", "Fast"],
-            "use_case": "Recommended for most translation tasks"
-        },
-        "anthropic/claude-opus-5": {
-            "name": "Claude Opus 5",
-            "description": "Anthropic's flagship Opus – 1M context, top-tier reasoning",
-            "strengths": ["Legal translation", "Technical documents", "Complex reasoning", "1M context"],
-            "use_case": "Specialised legal/technical translation, long-context jobs"
-        },
-        "openai/gpt-5.4": {
-            "name": "GPT 5.4",
-            "description": "OpenAI flagship – advanced reasoning",
-            "strengths": ["Complex reasoning", "Multilingual", "High accuracy"],
-            "use_case": "Complex translation tasks"
-        },
-        "openai/gpt-5.4-mini": {
-            "name": "GPT 5.4 Mini",
-            "description": "OpenAI fast & economical",
-            "strengths": ["Fast", "Cost-effective", "Multilingual"],
-            "use_case": "High-volume translation"
-        },
-        "google/gemini-3.1-pro-preview": {
-            "name": "Gemini 3.1 Pro",
-            "description": "Google latest – strong multilingual",
-            "strengths": ["Multilingual", "Large context", "High quality"],
-            "use_case": "General translation"
-        },
-        "google/gemini-3-flash-preview": {
-            "name": "Gemini 3 Flash",
-            "description": "Google fast – great for high volume",
-            "strengths": ["Fast", "Cost-effective", "Multilingual"],
-            "use_case": "High-volume translation"
-        },
-        "mistralai/mistral-small-2603": {
-            "name": "Mistral Small",
-            "description": "Mistral cost-effective – strong European languages",
-            "strengths": ["European languages", "Fast", "Cost-effective"],
-            "use_case": "European language translation"
-        },
-        "qwen/qwen3.6-plus:free": {
-            "name": "Qwen 3.6 Plus (Free)",
-            "description": "Free tier – no cost, good quality",
-            "strengths": ["Free", "Multilingual", "100+ languages"],
-            "use_case": "Testing or budget-constrained projects"
-        },
-        "deepseek/deepseek-v4-pro": {
-            "name": "DeepSeek V4 Pro",
-            "description": "DeepSeek flagship – strong multilingual, competitive pricing",
-            "strengths": ["Multilingual", "Complex reasoning", "Cost-effective"],
-            "use_case": "General translation via OpenRouter"
-        },
-        "deepseek/deepseek-v4-flash": {
-            "name": "DeepSeek V4 Flash",
-            "description": "DeepSeek fast – great for high-volume translation",
-            "strengths": ["Fast", "Cost-effective", "Multilingual"],
-            "use_case": "High-volume translation via OpenRouter"
-        }
-    }
 
-    # Available Ollama models with descriptions (for UI display)
-    # Last audited: February 2026
-    OLLAMA_MODELS = {
-        "translategemma:4b": {
-            "name": "TranslateGemma 4B",
-            "description": "Translation-tuned - fast & lightweight (55 languages)",
-            "size_gb": 3.3,
-            "ram_required": 6,
-            "quality_stars": 4,
-            "strengths": ["Purpose-built for translation", "55 languages incl. Dutch", "Fast"],
-            "use_case": "Quick translation drafts, low-end hardware"
-        },
-        "translategemma:12b": {
-            "name": "TranslateGemma 12B",
-            "description": "Best translation model for size – beats larger general models",
-            "size_gb": 8.1,
-            "ram_required": 12,
-            "quality_stars": 5,
-            "strengths": ["Top translation quality", "55 languages incl. Dutch", "Beats Gemma 3 27B on translation"],
-            "use_case": "Professional translation – best quality/size ratio"
-        },
-        "qwen3:4b": {
-            "name": "Qwen 3 4B",
-            "description": "Fast & lightweight general-purpose (100+ languages)",
-            "size_gb": 2.5,
-            "ram_required": 4,
-            "quality_stars": 3,
-            "strengths": ["Fast", "Low memory", "100+ languages"],
-            "use_case": "Quick drafts, simple text, low-end hardware"
-        },
-        "qwen3:8b": {
-            "name": "Qwen 3 8B",
-            "description": "Excellent general-purpose – strong multilingual",
-            "size_gb": 5.2,
-            "ram_required": 8,
-            "quality_stars": 4,
-            "strengths": ["Excellent multilingual", "100+ languages", "Balanced speed/quality"],
-            "use_case": "General translation, most European languages"
-        },
-        "gemma3:12b": {
-            "name": "Gemma 3 12B",
-            "description": "Google's general-purpose – 140+ languages, multimodal",
-            "size_gb": 8.1,
-            "ram_required": 12,
-            "quality_stars": 5,
-            "strengths": ["140+ languages", "High quality", "Multimodal (text+image)"],
-            "use_case": "Quality-focused translation, technical content"
-        },
-        "qwen3:14b": {
-            "name": "Qwen 3 14B",
-            "description": "Premium quality – excellent for complex text",
-            "size_gb": 9.3,
-            "ram_required": 16,
-            "quality_stars": 5,
-            "strengths": ["Excellent quality", "Complex text", "Nuanced translation"],
-            "use_case": "Premium translations, complex documents"
-        },
-        "aya-expanse:8b": {
-            "name": "Aya Expanse 8B",
-            "description": "Cohere's multilingual model – excellent for Dutch",
-            "size_gb": 5.1,
-            "ram_required": 8,
-            "quality_stars": 5,
-            "strengths": ["Top Dutch support", "High fidelity translation", "23 languages"],
-            "use_case": "Dutch-English translation (Top Pick for Dutch)"
-        }
-    }
     
     # Vision-capable models (support image inputs).
     # Batch #9.3: облачные провайдеры удалены; для custom_openai vision пока
@@ -308,36 +148,6 @@ class LLMClient:
     # отдельным шагом: галка «модель поддерживает vision» в профиле (план 9.5).
     VISION_MODELS = {}
 
-    # Available Claude models with descriptions - the chat's model menu. The newest
-    # Sonnet, Opus and Fable (Michael, 2026-09-28), as in the Trados and memoQ
-    # plugins; prices checked on Anthropic's pricing page the same day. A saved
-    # older model still runs and is still costed (pricing.json keeps it).
-    CLAUDE_MODELS = {
-        "claude-sonnet-5-5": {
-            "name": "Claude Sonnet 5.5",
-            "description": "Newest Sonnet - near-Opus quality at Sonnet cost ($2/$10), 1M context",
-            "released": "2026-09-28",
-            "strengths": ["General translation", "Reasoning", "Tool use", "Knowledge work", "Cost-effective"],
-            "pricing": {"input": 2, "output": 10},  # USD per million tokens
-            "use_case": "Recommended for most translation tasks"
-        },
-        "claude-opus-5-5": {
-            "name": "Claude Opus 5.5",
-            "description": "Anthropic's newest Opus - highest quality at $4/$20, 1M context",
-            "released": "2026-09-22",
-            "strengths": ["Legal translation", "Technical documents", "Complex reasoning", "Highest accuracy", "1M context"],
-            "pricing": {"input": 4, "output": 20},  # USD per million tokens
-            "use_case": "Top choice for hard legal/technical translation and long-context jobs"
-        },
-        "claude-fable-5-1": {
-            "name": "Claude Fable 5.1",
-            "description": "Anthropic's most capable model - deepest reasoning, always-on thinking, 2.5x Opus pricing",
-            "released": "2026-09-01",
-            "strengths": ["Hardest translation problems", "Whole-document review", "Deepest reasoning", "1M context"],
-            "pricing": {"input": 10, "output": 50},  # USD per million tokens
-            "use_case": "For the hardest jobs only - always-on thinking adds billed reasoning tokens per call, so overkill for routine segment translation"
-        }
-    }
 
     # Reasoning models that don't support temperature parameter (must be omitted)
     REASONING_MODELS = ["gpt-5", "o1", "o3"]

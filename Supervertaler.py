@@ -19234,7 +19234,7 @@ class SupervertalerQt(QMainWindow):
         return tab
     
     def _create_ai_settings_tab(self):
-        """Создаёт единую вкладку AI Settings — объединяет настройки LLM, Ollama и AI Assistant."""
+        """Создаёт единую вкладку AI Settings — настройки Custom (OpenAI-Compatible) LLM и AI Assistant."""
         from PyQt6.QtWidgets import QCheckBox, QGroupBox, QPushButton
         
         # The width-cap + left-anchor layout is applied centrally by
@@ -19556,7 +19556,7 @@ class SupervertalerQt(QMainWindow):
         proxy_layout.addLayout(proxy_cred_row)
 
         proxy_note = QLabel(
-            "ⓘ  Applies to: OpenAI, Claude, Gemini, Mistral, Ollama, Google Translate, DeepL,\n"
+            "ⓘ  Applies to: Custom (OpenAI-Compatible), Google Translate, DeepL,"
             "    Microsoft Translator, ModernMT, and MyMemory."
         )
         proxy_note.setStyleSheet("font-size: 9pt; color: #888; padding-left: 4px;")
@@ -48457,7 +48457,7 @@ class SupervertalerQt(QMainWindow):
             "<p style='text-align: center;'><b>License:</b> MIT</p>"
             "<hr>"
             "<p style='text-align: center; color: #666; font-size: 9pt;'>"
-            "Built with PyQt6 • Supports OpenAI, Claude, Gemini & Ollama"
+            "Built with PyQt6 • Supports Custom (OpenAI-Compatible) LLMs"
             "</p>"
         )
         info.setWordWrap(True)
@@ -49906,7 +49906,7 @@ class SupervertalerQt(QMainWindow):
             
             tm_checkbox.toggled.connect(on_tm_selection_changed)
 
-            llm_checkbox = CheckmarkCheckBox(self.tr("🤖 LLM (AI) - Use configured LLM provider (GPT, Claude, Gemini)"))
+            llm_checkbox = CheckmarkCheckBox(self.tr("🤖 LLM (AI) - Use configured LLM provider (Custom OpenAI-Compatible)"))
             llm_checkbox.setChecked(True)  # Default to LLM
             provider_layout.addWidget(llm_checkbox)
 

@@ -84,7 +84,6 @@ class Topics:
     AI_AUTOPROMPT       = "workbench/ai-translation/autoprompt/"
     AI_FUZZY_FIXER      = "workbench/ai-translation/fuzzyfixer/"
     AI_AUTOTAGGER       = "workbench/ai-translation/autotagger/"
-    AI_OLLAMA           = "workbench/ai-translation/ollama/"
 
     # CAT Tool Integration (folder is workbench/cat-tools/ on disk)
     CAT_OVERVIEW        = "workbench/cat-tools/overview/"
