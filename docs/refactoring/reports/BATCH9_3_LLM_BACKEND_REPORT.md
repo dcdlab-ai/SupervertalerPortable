@@ -213,6 +213,12 @@ google→gemini алиас — пинг-кластер 9.4 ещё читает O
   (28655, `pass`) и в бесхозном методе — **кандидат в 8.18** (включая сам
   `_add_mt_and_llm_matches` и, вероятно, чекбокс с его настройкой); (в) видимый LLM-путь Custom —
   QuickTrans (чип CUS, был и раньше из 8 чипов; после 9.3c — единственный).
+  **Решение Дмитрия (2026-10-13):** панель Translation Results в интерфейсе нигде не видна →
+  кластер включается в кандидаты **8.18**: `_add_mt_and_llm_matches`,
+  `_REMOVED_add_mt_and_llm_matches_progressive`, чекбокс «Enable LLM (AI) matching on segment
+  selection» + ключ `enable_llm_matching` в settings, `pass`-блок в prefetch. (История: кластер
+  осиротел до начала нашей работы — в baseline 13bd37fb progressive уже был заглушкой, живых
+  вызовов `_add_mt_and_llm_matches` не было; чекбокс был инертен уже в baseline.)
   (3) Затенение QMessageBox локальным импортом в translate_batch (бюджет-блок) — давний
   латентный паттерн; в этом методе закрыт квалифицированным импортом; те же паттерны в
   create_termbases_tab/_show_edit_terms_dialog/_create_ai_settings_tab — **не трогались**
