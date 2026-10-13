@@ -19371,41 +19371,6 @@ class SupervertalerQt(QMainWindow):
         # Provider radio buttons (custom styled)
         provider_button_group = QButtonGroup(tab)
         
-        openai_radio = CustomRadioButton("OpenAI")
-        openai_radio.setChecked(settings.get('provider', 'openai') == 'openai')
-        provider_button_group.addButton(openai_radio)
-        provider_layout.addWidget(openai_radio)
-
-        claude_radio = CustomRadioButton("Anthropic Claude")
-        claude_radio.setChecked(settings.get('provider', 'openai') == 'claude')
-        provider_button_group.addButton(claude_radio)
-        provider_layout.addWidget(claude_radio)
-
-        gemini_radio = CustomRadioButton("Google Gemini")
-        gemini_radio.setChecked(settings.get('provider', 'openai') == 'gemini')
-        provider_button_group.addButton(gemini_radio)
-        provider_layout.addWidget(gemini_radio)
-
-        mistral_radio = CustomRadioButton("Mistral AI")
-        mistral_radio.setChecked(settings.get('provider', 'openai') == 'mistral')
-        provider_button_group.addButton(mistral_radio)
-        provider_layout.addWidget(mistral_radio)
-
-        deepseek_radio = CustomRadioButton("DeepSeek")
-        deepseek_radio.setChecked(settings.get('provider', 'openai') == 'deepseek')
-        provider_button_group.addButton(deepseek_radio)
-        provider_layout.addWidget(deepseek_radio)
-
-        openrouter_radio = CustomRadioButton("🌐 OpenRouter (200+ models)")
-        openrouter_radio.setChecked(settings.get('provider', 'openai') == 'openrouter')
-        provider_button_group.addButton(openrouter_radio)
-        provider_layout.addWidget(openrouter_radio)
-
-        # Local LLM option (Ollama)
-        ollama_radio = CustomRadioButton("🖥️ Local LLM (Ollama - runs on your computer)")
-        ollama_radio.setChecked(settings.get('provider', 'openai') == 'ollama')
-        provider_button_group.addButton(ollama_radio)
-        provider_layout.addWidget(ollama_radio)
 
         # Custom OpenAI-compatible endpoint
         custom_radio = CustomRadioButton("🔌 Custom (OpenAI-Compatible API)")
@@ -19423,201 +19388,6 @@ class SupervertalerQt(QMainWindow):
         model_label = QLabel(self.tr("Choose the specific model to use:"))
         model_layout.addWidget(model_label)
         
-        # OpenAI models
-        openai_model_label = QLabel(self.tr("<b>OpenAI Models:</b>"))
-        model_layout.addWidget(openai_model_label)
-        
-        openai_combo = QComboBox()
-        openai_combo.addItems([
-            "gpt-5.5 (Recommended - Flagship)",
-            "gpt-5.4-mini (Fast & Economical)"
-        ])
-        openai_combo.setToolTip(
-            "GPT-5.5: OpenAI's flagship – advanced reasoning, excellent for complex translation.\n"
-            "GPT-5.4 Mini: Faster and cheaper, great quality for routine, high-volume work."
-        )
-        current_openai_model = settings.get('openai_model', 'gpt-5.5')
-        for i in range(openai_combo.count()):
-            if current_openai_model in openai_combo.itemText(i).lower():
-                openai_combo.setCurrentIndex(i)
-                break
-        openai_combo.setEnabled(openai_radio.isChecked())
-        model_layout.addWidget(openai_combo)
-        
-        model_layout.addSpacing(10)
-        
-        # Claude models
-        claude_model_label = QLabel(self.tr("<b>Claude Models:</b>"))
-        model_layout.addWidget(claude_model_label)
-        
-        claude_combo = QComboBox()
-        # The newest Sonnet, Opus and Fable (Michael, 2026-09-28), as in the Trados
-        # and memoQ plugins.
-        claude_combo.addItems([
-            "claude-sonnet-5-5 (Recommended)",
-            "claude-opus-5-5 (Premium - Highest Quality)",
-            "claude-fable-5-1 (Maximum - Deepest Reasoning, 2.5x Opus Price)"
-        ])
-        claude_combo.setToolTip(
-            "Claude Sonnet 5.5: Recommended - near-Opus quality at Sonnet cost ($2/$10, 1M context).\n"
-            "Claude Opus 5.5: Anthropic's newest Opus - highest quality for hard\n"
-            "  legal/technical work ($4/$20, 1M context).\n"
-            "Claude Fable 5.1: Anthropic's most capable model overall - always-on reasoning,\n"
-            "  2.5x Opus pricing; for the hardest work when cost is secondary."
-        )
-        current_claude_model = settings.get('claude_model', 'claude-sonnet-5-5')
-        # Exact match on the model ID. A substring test found "claude-sonnet-5"
-        # inside "claude-sonnet-5-5"; and a saved model that is no longer listed
-        # (Sonnet 5, Haiku 4.5, Opus 5...) fell back to the first entry, which
-        # saving Settings then wrote over the user's choice. It is shown instead.
-        for i in range(claude_combo.count()):
-            if claude_combo.itemText(i).split()[0] == current_claude_model:
-                claude_combo.setCurrentIndex(i)
-                break
-        else:
-            if current_claude_model:
-                claude_combo.addItem(f"{current_claude_model} (your current model)")
-                claude_combo.setCurrentIndex(claude_combo.count() - 1)
-        claude_combo.setEnabled(claude_radio.isChecked())
-        model_layout.addWidget(claude_combo)
-        
-        model_layout.addSpacing(10)
-        
-        # Gemini models
-        gemini_model_label = QLabel(self.tr("<b>Gemini Models:</b>"))
-        model_layout.addWidget(gemini_model_label)
-        
-        gemini_combo = QComboBox()
-        gemini_combo.addItems([
-            "gemini-3.1-flash-lite (Recommended - Fast & Economical)",
-            "gemini-3.5-flash (Premium Flash - Higher Cost)",
-            "gemini-2.5-pro (Premium - Complex Reasoning)",
-            "gemini-3.1-pro-preview (Latest - Smartest Gemini)",
-            "gemma-4-26b-a4b-it (Open Model - Lightweight)"
-        ])
-        gemini_combo.setToolTip(
-            "Gemini 3.1 Flash-Lite: Fast and economical – great for routine translation.\n"
-            "Gemini 3.5 Flash: Highest-quality Flash – ~6x the cost of Flash-Lite; for hard segments.\n"
-            "Gemini 2.5 Pro: Premium for complex problems.\n"
-            "Gemini 3.1 Pro Preview: Latest, smartest Gemini for complex tasks.\n"
-            "Gemma 4 26B MoE: Google's open model, lightweight and capable."
-        )
-        current_gemini_model = settings.get('gemini_model', 'gemini-3.1-flash-lite')
-        for i in range(gemini_combo.count()):
-            if current_gemini_model in gemini_combo.itemText(i):
-                gemini_combo.setCurrentIndex(i)
-                break
-        gemini_combo.setEnabled(gemini_radio.isChecked())
-        model_layout.addWidget(gemini_combo)
-
-        model_layout.addSpacing(10)
-
-        # Mistral models
-        mistral_model_label = QLabel(self.tr("<b>Mistral AI Models:</b>"))
-        model_layout.addWidget(mistral_model_label)
-
-        mistral_combo = QComboBox()
-        mistral_combo.addItems([
-            "mistral-large-latest (Recommended - Flagship)",
-            "mistral-small-latest (Fast & Cost-Effective)"
-        ])
-        mistral_combo.setToolTip(
-            "Mistral Large: Flagship model, top-tier reasoning and multilingual quality.\n"
-            "Mistral Small: Fast and cost-effective, great for high-volume translation."
-        )
-        current_mistral_model = settings.get('mistral_model', 'mistral-large-latest')
-        for i in range(mistral_combo.count()):
-            if current_mistral_model in mistral_combo.itemText(i):
-                mistral_combo.setCurrentIndex(i)
-                break
-        mistral_combo.setEnabled(mistral_radio.isChecked())
-        model_layout.addWidget(mistral_combo)
-
-        model_layout.addSpacing(10)
-
-        # DeepSeek models
-        deepseek_model_label = QLabel(self.tr("<b>DeepSeek Models:</b>"))
-        model_layout.addWidget(deepseek_model_label)
-
-        deepseek_combo = QComboBox()
-        deepseek_combo.addItems([
-            "deepseek-v4-pro (Recommended - Flagship)",
-            "deepseek-v4-flash (Fast & Cost-Effective)"
-        ])
-        deepseek_combo.setToolTip(
-            "DeepSeek V4 Pro: Flagship – top-tier reasoning and multilingual quality.\n"
-            "DeepSeek V4 Flash: Fast and cost-effective, great for high-volume translation.\n\n"
-            "Get an API key at platform.deepseek.com."
-        )
-        current_deepseek_model = settings.get('deepseek_model', 'deepseek-v4-pro')
-        for i in range(deepseek_combo.count()):
-            if current_deepseek_model in deepseek_combo.itemText(i):
-                deepseek_combo.setCurrentIndex(i)
-                break
-        deepseek_combo.setEnabled(deepseek_radio.isChecked())
-        model_layout.addWidget(deepseek_combo)
-
-        model_layout.addSpacing(10)
-
-        # OpenRouter models
-        openrouter_model_label = QLabel(self.tr("<b>🌐 OpenRouter Models:</b>"))
-        model_layout.addWidget(openrouter_model_label)
-
-        openrouter_combo = QComboBox()
-        openrouter_combo.setEditable(True)
-        openrouter_combo.addItems([
-            "anthropic/claude-sonnet-5 (Recommended)",
-            "anthropic/claude-opus-5 (Premium)",
-            "openai/gpt-5.4 (Advanced Reasoning)",
-            "openai/gpt-5.4-mini (Fast & Economical)",
-            "google/gemini-3.1-pro-preview (Latest Gemini)",
-            "google/gemini-3-flash-preview (Fast Gemini)",
-            "mistralai/mistral-small-2603 (European Languages)",
-            "qwen/qwen3.6-plus:free (Free)"
-        ])
-        openrouter_combo.setToolTip(
-            "OpenRouter gives you access to 200+ models with a single API key.\n"
-            "Select a model from the dropdown or type any model ID from openrouter.ai/models.\n\n"
-            "Pricing varies per model – see openrouter.ai for details."
-        )
-        current_openrouter_model = settings.get('openrouter_model', 'anthropic/claude-sonnet-5')
-        # Try to select from dropdown, or set as typed text
-        found = False
-        for i in range(openrouter_combo.count()):
-            if current_openrouter_model in openrouter_combo.itemText(i):
-                openrouter_combo.setCurrentIndex(i)
-                found = True
-                break
-        if not found:
-            openrouter_combo.setEditText(current_openrouter_model)
-        openrouter_combo.setEnabled(openrouter_radio.isChecked())
-        model_layout.addWidget(openrouter_combo)
-
-        model_layout.addSpacing(10)
-
-        # Local LLM (Ollama) models
-        ollama_model_label = QLabel(self.tr("<b>🖥️ Local LLM Models (Ollama):</b>"))
-        model_layout.addWidget(ollama_model_label)
-        
-        # Import the LocalLLMStatusWidget for embedded status
-        try:
-            from modules.local_llm_setup import LocalLLMStatusWidget, check_ollama_status, RECOMMENDED_MODELS
-            
-            # Create embedded status widget
-            ollama_status_widget = LocalLLMStatusWidget()
-            ollama_status_widget.setEnabled(ollama_radio.isChecked())
-            model_layout.addWidget(ollama_status_widget)
-            
-            # Store reference for saving settings
-            tab.ollama_status_widget = ollama_status_widget
-            
-        except ImportError as e:
-            # Fallback if module not available
-            ollama_fallback = QLabel(self.tr("⚠️ Local LLM module not available"))
-            ollama_fallback.setStyleSheet("color: orange;")
-            model_layout.addWidget(ollama_fallback)
-            ollama_status_widget = None
-            tab.ollama_status_widget = None
         
         # Custom OpenAI-compatible endpoint settings (with profiles)
         model_layout.addSpacing(10)
@@ -19788,60 +19558,9 @@ class SupervertalerQt(QMainWindow):
         custom_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px;")
         model_layout.addWidget(custom_info)
 
-        # Helper to extract friendly model name from combo text and update radio label
-        def _friendly_model_name(combo_text: str) -> str:
-            """Извлекает ID модели из текста комбобокса вроде 'gpt-5.5 (Recommended)' → 'GPT-5.5'."""
-            model_id = combo_text.split()[0] if combo_text else ""
-            friendly = {
-                "gpt-5.5": "GPT-5.5", "gpt-5.4-mini": "GPT-5.4 Mini",
-                "claude-sonnet-5-5": "Claude Sonnet 5.5", "claude-opus-5-5": "Claude Opus 5.5", "claude-fable-5-1": "Claude Fable 5.1",
-                "claude-sonnet-5": "Claude Sonnet 5", "claude-opus-5": "Claude Opus 5", "claude-fable-5": "Claude Fable 5",
-                "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
-                "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite", "gemini-3.5-flash": "Gemini 3.5 Flash",
-                "gemini-2.5-pro": "Gemini 2.5 Pro",
-                "gemini-3.1-pro-preview": "Gemini 3.1 Pro", "gemma-4-26b-a4b-it": "Gemma 4 26B MoE",
-                "mistral-large-latest": "Mistral Large", "mistral-small-latest": "Mistral Small",
-                "deepseek-v4-pro": "DeepSeek V4 Pro", "deepseek-v4-flash": "DeepSeek V4 Flash",
-            }
-            return friendly.get(model_id, model_id)
-
-        def _update_provider_label(radio, base_name, combo):
-            """Обновляет подпись радиокнопки выбранной моделью: 'Provider (Model)'."""
-            model_name = _friendly_model_name(combo.currentText())
-            radio.setText(f"{base_name} ({model_name})")
-
-        # Connect combo changes to update radio button labels dynamically
-        openai_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(openai_radio, "OpenAI", openai_combo))
-        claude_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(claude_radio, "Anthropic Claude", claude_combo))
-        gemini_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(gemini_radio, "Google Gemini", gemini_combo))
-        mistral_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(mistral_radio, "Mistral AI", mistral_combo))
-        deepseek_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(deepseek_radio, "DeepSeek", deepseek_combo))
-        openrouter_combo.currentIndexChanged.connect(
-            lambda: _update_provider_label(openrouter_radio, "🌐 OpenRouter (200+ models)", openrouter_combo))
-
-        # Set initial labels based on current combo selections
-        _update_provider_label(openai_radio, "OpenAI", openai_combo)
-        _update_provider_label(claude_radio, "Anthropic Claude", claude_combo)
-        _update_provider_label(gemini_radio, "Google Gemini", gemini_combo)
-        _update_provider_label(mistral_radio, "Mistral AI", mistral_combo)
-        _update_provider_label(deepseek_radio, "DeepSeek", deepseek_combo)
-        _update_provider_label(openrouter_radio, "🌐 OpenRouter (200+ models)", openrouter_combo)
 
         # Connect radio buttons to enable/disable combos
         def update_combo_states():
-            openai_combo.setEnabled(openai_radio.isChecked())
-            claude_combo.setEnabled(claude_radio.isChecked())
-            gemini_combo.setEnabled(gemini_radio.isChecked())
-            mistral_combo.setEnabled(mistral_radio.isChecked())
-            deepseek_combo.setEnabled(deepseek_radio.isChecked())
-            openrouter_combo.setEnabled(openrouter_radio.isChecked())
-            if ollama_status_widget:
-                ollama_status_widget.setEnabled(ollama_radio.isChecked())
             _custom_enabled = custom_radio.isChecked()
             custom_profile_combo.setEnabled(_custom_enabled)
             add_profile_btn.setEnabled(_custom_enabled)
@@ -19850,95 +19569,11 @@ class SupervertalerQt(QMainWindow):
             custom_model_input.setEnabled(_custom_enabled)
             custom_key_input.setEnabled(_custom_enabled)
         
-        # Handler to show setup dialog when Ollama is selected but not running
-        def on_ollama_selected(checked):
-            if checked:
-                try:
-                    from modules.local_llm_setup import check_ollama_status, LocalLLMSetupDialog
-                    status = check_ollama_status()
-                    
-                    if not status.get('running', False):
-                        from PyQt6.QtWidgets import QMessageBox
-                        msg = QMessageBox(self)
-                        msg.setWindowTitle(self.tr("Local LLM Setup Required"))
-                        msg.setIcon(QMessageBox.Icon.Information)
-                        msg.setText(
-                            "<b>🖥️ Local LLM (Ollama) Selected</b><br><br>"
-                            "Ollama is not currently running on your computer.<br><br>"
-                            "Would you like to open the setup wizard?"
-                        )
-                        msg.setStandardButtons(
-                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                        )
-                        msg.setDefaultButton(QMessageBox.StandardButton.Yes)
-                        
-                        if msg.exec() == QMessageBox.StandardButton.Yes:
-                            setup_dialog = LocalLLMSetupDialog(self)
-                            setup_dialog.exec()
-                            if ollama_status_widget:
-                                ollama_status_widget.refresh_status()
-                except Exception as e:
-                    self.log(f"Error checking Ollama status: {e}")
-        
-        openai_radio.toggled.connect(update_combo_states)
-        claude_radio.toggled.connect(update_combo_states)
-        gemini_radio.toggled.connect(update_combo_states)
-        mistral_radio.toggled.connect(update_combo_states)
-        deepseek_radio.toggled.connect(update_combo_states)
-        openrouter_radio.toggled.connect(update_combo_states)
-        ollama_radio.toggled.connect(update_combo_states)
-        ollama_radio.toggled.connect(on_ollama_selected)
         custom_radio.toggled.connect(update_combo_states)
         
         model_group.setLayout(model_layout)
         layout.addWidget(model_group)
 
-        # ========== SECTION 2c: API Keys ==========
-        api_keys_group = QGroupBox(self.tr("🔑 LLM API Keys"))
-        api_keys_form = QFormLayout()
-        api_keys_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-
-        current_keys = self.load_api_keys()
-        if not hasattr(self, '_api_key_inputs'):
-            self._api_key_inputs = {}
-
-        llm_key_fields = [
-            ("OpenAI:", "openai", "sk-proj-..."),
-            ("Claude (Anthropic):", "claude", "sk-ant-api03-..."),
-            ("Gemini (Google AI):", "gemini", "AIza..."),
-            ("Mistral AI:", "mistral", "..."),
-            ("DeepSeek:", "deepseek", "sk-..."),
-            ("OpenRouter:", "openrouter", "sk-or-..."),
-            ("Ollama Endpoint:", "ollama_endpoint", "http://localhost:11434"),
-        ]
-
-        for label, key_name, placeholder in llm_key_fields:
-            row = QHBoxLayout()
-            key_input = QLineEdit()
-            key_input.setPlaceholderText(placeholder)
-            key_input.setText(current_keys.get(key_name, ''))
-            if key_name != 'ollama_endpoint':
-                key_input.setEchoMode(QLineEdit.EchoMode.Password)
-            row.addWidget(key_input)
-
-            if key_name != 'ollama_endpoint':
-                toggle_btn = QPushButton(self.tr("Show"))
-                toggle_btn.setFixedWidth(50)
-                toggle_btn.setCheckable(True)
-                toggle_btn.clicked.connect(
-                    lambda checked, inp=key_input, btn=toggle_btn:
-                        (inp.setEchoMode(QLineEdit.EchoMode.Normal if checked else QLineEdit.EchoMode.Password),
-                         btn.setText("Hide" if checked else "Show"))
-                )
-                row.addWidget(toggle_btn)
-
-            container = QWidget()
-            container.setLayout(row)
-            api_keys_form.addRow(label, container)
-            self._api_key_inputs[key_name] = key_input
-
-        api_keys_group.setLayout(api_keys_form)
-        layout.addWidget(api_keys_group)
 
         # ========== SECTION 3: Enable/Disable LLM Providers ==========
         provider_enable_group = QGroupBox(self.tr("✅ Enable/Disable LLM Providers"))
@@ -19951,29 +19586,6 @@ class SupervertalerQt(QMainWindow):
         provider_enable_info.setStyleSheet("font-size: 9pt; color: #666; padding: 5px;")
         provider_enable_layout.addWidget(provider_enable_info)
         
-        openai_enable_cb = CheckmarkCheckBox(self.tr("Enable OpenAI"))
-        openai_enable_cb.setChecked(enabled_providers.get('llm_openai', True))
-        provider_enable_layout.addWidget(openai_enable_cb)
-        
-        claude_enable_cb = CheckmarkCheckBox(self.tr("Enable Claude"))
-        claude_enable_cb.setChecked(enabled_providers.get('llm_claude', True))
-        provider_enable_layout.addWidget(claude_enable_cb)
-        
-        gemini_enable_cb = CheckmarkCheckBox(self.tr("Enable Gemini"))
-        gemini_enable_cb.setChecked(enabled_providers.get('llm_gemini', True))
-        provider_enable_layout.addWidget(gemini_enable_cb)
-
-        mistral_enable_cb = CheckmarkCheckBox(self.tr("Enable Mistral AI"))
-        mistral_enable_cb.setChecked(enabled_providers.get('llm_mistral', True))
-        provider_enable_layout.addWidget(mistral_enable_cb)
-
-        openrouter_enable_cb = CheckmarkCheckBox(self.tr("Enable OpenRouter"))
-        openrouter_enable_cb.setChecked(enabled_providers.get('llm_openrouter', True))
-        provider_enable_layout.addWidget(openrouter_enable_cb)
-
-        ollama_enable_cb = CheckmarkCheckBox(self.tr("Enable Local LLM (Ollama)"))
-        ollama_enable_cb.setChecked(enabled_providers.get('llm_ollama', True))
-        provider_enable_layout.addWidget(ollama_enable_cb)
 
         custom_enable_cb = CheckmarkCheckBox(self.tr("Enable Custom (OpenAI-Compatible)"))
         custom_enable_cb.setChecked(enabled_providers.get('llm_custom_openai', True))
@@ -20049,48 +19661,6 @@ class SupervertalerQt(QMainWindow):
         proxy_group.setLayout(proxy_layout)
         layout.addWidget(proxy_group)
 
-        # ========== SECTION 4: Local LLM (Ollama) Advanced Settings ==========
-        ollama_group = QGroupBox(self.tr("🖥️ Local LLM (Ollama) Advanced Settings"))
-        ollama_layout = QVBoxLayout()
-        
-        ollama_keepwarm_cb = CheckmarkCheckBox(self.tr("Keep model warm (prevent unloading)"))
-        ollama_keepwarm_cb.setChecked(general_settings.get('ollama_keepwarm', False))
-        ollama_keepwarm_cb.setToolTip(
-            "When enabled, sends a small ping to Ollama every 4 minutes\n"
-            "to keep the model loaded in memory for faster translations.\n\n"
-            "Drawback: Model keeps using RAM even when not translating."
-        )
-        ollama_layout.addWidget(ollama_keepwarm_cb)
-
-        # Request timeout (issue #180): slow CPU-only machines can need far
-        # longer than the automatic 3-10 minutes for a single batch request.
-        ollama_timeout_row = QHBoxLayout()
-        ollama_timeout_row.addWidget(QLabel(self.tr("Request timeout:")))
-        ollama_timeout_spin = QSpinBox()
-        ollama_timeout_spin.setRange(0, 1440)
-        ollama_timeout_spin.setSuffix(self.tr(" min"))
-        ollama_timeout_spin.setSpecialValueText(self.tr("Automatic"))
-        ollama_timeout_spin.setValue(int(settings.get('ollama_timeout_minutes', 0) or 0))
-        ollama_timeout_spin.setToolTip(
-            "How long to wait for Ollama to answer a single request.\n\n"
-            "Automatic: 3–10 minutes, depending on model size and prompt length.\n"
-            "Raise it if translations time out on a slow computer (for example\n"
-            "one without a dedicated GPU). Up to 1440 minutes (24 hours)."
-        )
-        ollama_timeout_row.addWidget(ollama_timeout_spin)
-        ollama_timeout_row.addStretch()
-        ollama_layout.addLayout(ollama_timeout_row)
-
-        ollama_info = QLabel(
-            "💡 <b>Tip:</b> Ollama normally unloads models after 5 minutes of inactivity.\n"
-            "Enable 'Keep warm' for faster translations if you translate frequently."
-        )
-        ollama_info.setWordWrap(True)
-        ollama_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px;")
-        ollama_layout.addWidget(ollama_info)
-        
-        ollama_group.setLayout(ollama_layout)
-        layout.addWidget(ollama_group)
         
         # ========== SECTION 5: AI Translation Preferences ==========
         prefs_group = QGroupBox(self.tr("⚙️ AI Translation Preferences"))
@@ -20315,16 +19885,6 @@ class SupervertalerQt(QMainWindow):
         behavior_group = QGroupBox(self.tr("🎯 AI Behavior Settings"))
         behavior_layout = QVBoxLayout()
         
-        # LLM matching toggle
-        llm_matching_cb = CheckmarkCheckBox(self.tr("Enable LLM (AI) matching on segment selection"))
-        llm_matching_cb.setChecked(self.enable_llm_matching)
-        llm_matching_cb.setToolTip(
-            "⚠️ WARNING: LLM translations take 10-20 seconds per segment!\n\n"
-            "When enabled, AI translations are automatically generated when you select a segment.\n"
-            "RECOMMENDED: Keep DISABLED. Use 'Translate with AI' button instead."
-        )
-        behavior_layout.addWidget(llm_matching_cb)
-        self.llm_matching_checkbox = llm_matching_cb
 
         # v1.10.155: "Auto-generate markdown for imported documents" moved to
         # Settings → ⚙️ General → 📥 Document Import. It's triggered at import
@@ -20388,25 +19948,14 @@ class SupervertalerQt(QMainWindow):
         save_btn.setStyleSheet("font-weight: bold; padding: 8px; outline: none;")
         save_btn.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         save_btn.clicked.connect(lambda: self._save_ai_settings_from_ui(
-            openai_radio, claude_radio, gemini_radio, ollama_radio,
-            openai_combo, claude_combo, gemini_combo,
-            tab.ollama_status_widget,
-            openai_enable_cb, claude_enable_cb, gemini_enable_cb, ollama_enable_cb,
             batch_size_spin, surrounding_spin, full_context_cb, context_slider,
             tm_no_check_rb, tm_fuzzy_rb, tm_exact_rb, None, delay_spin,
-            ollama_keepwarm_cb,
-            llm_matching_cb, llm_spin,
+            llm_spin,
             quicklauncher_context_slider,
             custom_radio=custom_radio, custom_endpoint_input=custom_endpoint_input,
             custom_model_input=custom_model_input, custom_enable_cb=custom_enable_cb,
             custom_profile_combo=custom_profile_combo, custom_key_input=custom_key_input,
-            custom_profiles_snapshot=settings,
-            mistral_radio=mistral_radio, mistral_combo=mistral_combo,
-            mistral_enable_cb=mistral_enable_cb,
-            deepseek_radio=deepseek_radio, deepseek_combo=deepseek_combo,
-            openrouter_radio=openrouter_radio, openrouter_combo=openrouter_combo,
-            openrouter_enable_cb=openrouter_enable_cb,
-            ollama_timeout_spin=ollama_timeout_spin
+            custom_profiles_snapshot=settings
         ))
         layout.addWidget(save_btn)
         
@@ -23647,52 +23196,23 @@ class SupervertalerQt(QMainWindow):
         self.log(f"✓ LLM settings saved: Provider={new_settings['provider']}, Batch Size={batch_size_spin.value()}")
         QMessageBox.information(self, "Settings Saved", "LLM settings have been saved successfully.")
     
-    def _save_ai_settings_from_ui(self, openai_radio, claude_radio, gemini_radio, ollama_radio,
-                                   openai_combo, claude_combo, gemini_combo,
-                                   ollama_status_widget,
-                                   openai_enable_cb, claude_enable_cb, gemini_enable_cb, ollama_enable_cb,
-                                   batch_size_spin, surrounding_spin, full_context_cb, context_slider,
-                                   tm_no_check_rb, tm_fuzzy_rb, tm_exact_rb, auto_propagate_cb, delay_spin,
-                                   ollama_keepwarm_cb,
-                                   llm_matching_cb, llm_spin,
-                                   quicklauncher_context_slider,
-                                   custom_radio=None, custom_endpoint_input=None,
-                                   custom_model_input=None, custom_enable_cb=None,
-                                   custom_profile_combo=None, custom_key_input=None,
-                                   mistral_radio=None, mistral_combo=None,
-                                   mistral_enable_cb=None,
-                                   deepseek_radio=None, deepseek_combo=None,
-                                   openrouter_radio=None, openrouter_combo=None,
-                                   openrouter_enable_cb=None,
-                                   ollama_timeout_spin=None,
-                                   custom_profiles_snapshot=None):
-        """Сохраняет все настройки ИИ из единой вкладки AI Settings."""
-        # Определяем выбранный провайдер
-        if openai_radio.isChecked():
-            provider = 'openai'
-        elif claude_radio.isChecked():
-            provider = 'claude'
-        elif gemini_radio.isChecked():
-            provider = 'gemini'
-        elif mistral_radio and mistral_radio.isChecked():
-            provider = 'mistral'
-        elif deepseek_radio and deepseek_radio.isChecked():
-            provider = 'deepseek'
-        elif openrouter_radio and openrouter_radio.isChecked():
-            provider = 'openrouter'
-        elif ollama_radio.isChecked():
-            provider = 'ollama'
-        elif custom_radio and custom_radio.isChecked():
-            provider = 'custom_openai'
-        else:
-            provider = 'openai'  # значение по умолчанию
+    def _save_ai_settings_from_ui(self,
+                                  batch_size_spin, surrounding_spin, full_context_cb, context_slider,
+                                  tm_no_check_rb, tm_fuzzy_rb, tm_exact_rb, auto_propagate_cb, delay_spin,
+                                  llm_spin,
+                                  quicklauncher_context_slider,
+                                  custom_radio=None, custom_endpoint_input=None,
+                                  custom_model_input=None, custom_enable_cb=None,
+                                  custom_profile_combo=None, custom_key_input=None,
+                                  custom_profiles_snapshot=None):
+        """Сохраняет все настройки ИИ из единой вкладки AI Settings.
 
-        # Берём модель Ollama из виджета, если он есть
-        ollama_model = 'translategemma:12b'  # по умолчанию
-        if ollama_status_widget and hasattr(ollama_status_widget, 'get_selected_model'):
-            selected = ollama_status_widget.get_selected_model()
-            if selected:
-                ollama_model = selected
+        Batch #9.4: удалённые провайдеры (OpenAI, Claude, Gemini, Mistral,
+        DeepSeek, OpenRouter, Ollama) из UI убраны — провайдер один,
+        custom_openai (активный профиль Custom). Ключи чужих провайдеров в
+        settings.json не удаляются и не перезаписываются (merge из
+        existing_settings и существующих состояний включённости)."""
+        provider = 'custom_openai'
 
         # Собираем список профилей из ЖИВОГО снимка диалога (кнопки «+»/«−»
         # мутируют его всю сессию; см. _create_ai_settings_tab). Перечитывание
@@ -23711,8 +23231,6 @@ class SupervertalerQt(QMainWindow):
                 profiles[idx]['endpoint'] = _norm_endpoint
                 if custom_endpoint_input is not None and _norm_endpoint != _raw_endpoint:
                     custom_endpoint_input.setText(_norm_endpoint)  # показать нормализацию в поле
-                profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
-                profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
                 profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
                 profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
             active_profile_name = custom_profile_combo.currentText()
@@ -23734,49 +23252,23 @@ class SupervertalerQt(QMainWindow):
         new_settings = dict(existing_settings)
         new_settings.update({
             'provider': provider,
-            'openai_model': openai_combo.currentText().split()[0],
-            'claude_model': claude_combo.currentText().split()[0],
-            'gemini_model': gemini_combo.currentText().split()[0],
-            'mistral_model': mistral_combo.currentText().split()[0] if mistral_combo else 'mistral-large-latest',
-            'deepseek_model': deepseek_combo.currentText().split()[0] if deepseek_combo else 'deepseek-v4-pro',
-            'openrouter_model': openrouter_combo.currentText().split()[0] if openrouter_combo else 'anthropic/claude-sonnet-5',
-            'ollama_model': ollama_model,
             'custom_openai_model': active_model,
             'custom_openai_endpoint': active_endpoint,
             'custom_openai_profiles': profiles,
             'custom_openai_active_profile': active_profile_name
         })
-        if ollama_timeout_spin is not None:
-            new_settings['ollama_timeout_minutes'] = ollama_timeout_spin.value()
         self.save_llm_settings(new_settings)
-        self._apply_ollama_timeout_setting(new_settings)
 
         # Update current provider and model attributes for AI Assistant
-        self.current_provider = new_settings['provider']
-        provider_key = f"{self.current_provider}_model"
-        self.current_model = new_settings.get(provider_key)
+        self.current_provider = provider
+        self.current_model = active_model
 
-        # Save LLM provider enabled states
-        enabled_states = {
-            'llm_openai': openai_enable_cb.isChecked(),
-            'llm_claude': claude_enable_cb.isChecked(),
-            'llm_gemini': gemini_enable_cb.isChecked(),
-            'llm_mistral': mistral_enable_cb.isChecked() if mistral_enable_cb else True,
-            'llm_openrouter': openrouter_enable_cb.isChecked() if openrouter_enable_cb else True,
-            'llm_ollama': ollama_enable_cb.isChecked(),
-            'llm_custom_openai': custom_enable_cb.isChecked() if custom_enable_cb else True
-        }
-        # Merge with existing MT settings
-        existing = self.load_provider_enabled_states()
-        enabled_states.update({k: v for k, v in existing.items() if k.startswith('mt_')})
-        self.save_provider_enabled_states(enabled_states)
-        
-        # Update LLM matching setting
-        self.enable_llm_matching = llm_matching_cb.isChecked()
-
-        # v1.10.155: auto_generate_markdown is now owned by the General tab
-        # (📥 Document Import group). Don't touch it from here so saving AI
-        # settings doesn't clobber a value set on the other tab.
+        # Save LLM provider enabled states: only the Custom flag is owned by
+        # this page now; everything already on disk (mt_*, legacy llm_*) is
+        # preserved untouched.
+        existing_states = self.load_provider_enabled_states()
+        existing_states['llm_custom_openai'] = custom_enable_cb.isChecked() if custom_enable_cb else True
+        self.save_provider_enabled_states(existing_states)
 
         # Save all general settings including AI-related ones
         general_prefs = self.load_general_settings()
@@ -23801,8 +23293,6 @@ class SupervertalerQt(QMainWindow):
         # 'auto_propagate_100' is deprecated — auto-fill is now the single
         # 'auto_fill_100_matches' key owned by the General tab → TM settings.
         general_prefs['lookup_delay'] = delay_spin.value()
-        general_prefs['ollama_keepwarm'] = ollama_keepwarm_cb.isChecked()
-        general_prefs['enable_llm_matching'] = llm_matching_cb.isChecked()
         # v1.10.155: auto_generate_markdown is now saved by the General tab,
         # not here — see _create_general_settings_tab → Document Import group.
 
@@ -23823,22 +23313,16 @@ class SupervertalerQt(QMainWindow):
             general_prefs['fuzzy_fixer_max_pct'] = ff_max
 
         self.save_general_settings(general_prefs)
-        
-        # Handle Ollama keep-warm timer
-        if ollama_keepwarm_cb.isChecked():
-            self._start_ollama_keepwarm_timer()
-        else:
-            self._stop_ollama_keepwarm_timer()
-        
+
         # Apply LLM match limits to results panels
         if hasattr(self, 'results_panels'):
             for panel in self.results_panels:
                 if hasattr(panel, 'match_limits'):
                     panel.match_limits['LLM'] = llm_spin.value()
-        
+
         # Update LLM indicator in status bar
         self._update_llm_indicator()
-        
+
         # Save API keys from inline fields
         self._save_api_keys_from_ui()
 
