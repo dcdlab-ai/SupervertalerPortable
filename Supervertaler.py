@@ -20113,6 +20113,28 @@ class SupervertalerQt(QMainWindow):
         custom_row.addStretch()
         llm_layout.addLayout(custom_row)
 
+        # Batch #9.4f: чип на каждый включённый профиль Custom (pattern of
+        # Custom MT above). Master checkbox mtql_custom_openai gates the group;
+        # mtql_llm_profiles stores the enabled profile names.
+        self._mtql_llm_profile_cbs = {}
+        _llm_profiles = llm_settings.get('custom_openai_profiles') or []
+        _enabled_names = mt_quick_settings.get('mtql_llm_profiles')
+        if _enabled_names is None:
+            _enabled_names = [p.get('name') for p in _llm_profiles if p.get('name')]
+        for _p in _llm_profiles:
+            _pname = _p.get('name')
+            if not _pname:
+                continue
+            _row = QHBoxLayout()
+            _row.setContentsMargins(24, 0, 0, 0)
+            _cb = CheckmarkCheckBox(f"{_pname} – {_p.get('model', '')}")
+            _cb.setChecked(_pname in _enabled_names)
+            _cb.setToolTip(self.tr("Query this Custom profile in QuickTrans"))
+            self._mtql_llm_profile_cbs[_pname] = _cb
+            _row.addWidget(_cb)
+            _row.addStretch()
+            llm_layout.addLayout(_row)
+
 
         llm_group.setLayout(llm_layout)
         layout.addWidget(llm_group)
@@ -20143,6 +20165,11 @@ class SupervertalerQt(QMainWindow):
                 mt_quick_settings[key] = widget.text().strip()
             else:
                 mt_quick_settings[key] = widget.currentData()
+
+        # Batch #9.4f: enabled Custom profile names for QuickTrans chips.
+        if getattr(self, '_mtql_llm_profile_cbs', None):
+            mt_quick_settings['mtql_llm_profiles'] = [
+                name for name, cb in self._mtql_llm_profile_cbs.items() if cb.isChecked()]
 
         general_settings['mt_quick_lookup'] = mt_quick_settings
         self.save_general_settings(general_settings)
@@ -47463,32 +47490,32 @@ class SupervertalerQt(QMainWindow):
         при загрузке настроек работала по тому же правилу)."""
         return SettingsService.normalize_custom_endpoint(url)
 
-    def _custom_llm_ready(self, settings=None):
-        """Активный профиль Custom с непустым endpoint — единственная рабочая
+    def _custom_llm_ready(self, settings=None, profile_name=None):
+        """Профиль Custom с непустым endpoint — единственная рабочая
         конфигурация LLM после Batch #9.3 (провайдер custom_openai).
 
         Возвращает словарь профиля или None. Читатели «не настроено» дают
         единое сообщение "Custom LLM profile is not configured — Settings →
         AI Settings" вместо сетевой ошибки на api.openai.com с ключом-
-        заглушкой."""
+        заглушкой. profile_name (Batch #9.4f) — конкретный профиль чипа.
+        """
         if settings is None:
             settings = self.load_llm_settings()
-        profile = self._get_active_custom_profile(settings)
+        profile = self._get_active_custom_profile(settings, profile_name)
         if profile and (profile.get('endpoint') or '').strip():
             return profile
         return None
 
-    def _get_active_custom_profile(self, settings=None):
-        """Возвращает словарь активного профиля custom_openai (endpoint, model,
-                api_key).
-        
-                Возвращает словарь с ключами name, endpoint, model, api_key — или
-                None, если профиль не настроен. Откатывается к легаси-конфигу
-                одиночных полей для обратной совместимости."""
+    def _get_active_custom_profile(self, settings=None, profile_name=None):
+        """Возвращает словарь профиля custom_openai (endpoint, model, api_key).
+
+        profile_name (Batch #9.4f) — имя конкретного профиля для чипа QuickTrans;
+        без него — активный профиль (активный по имени -> первый -> легаси-конфиг).
+        Возвращает словарь с ключами name, endpoint, model, api_key — или None."""
         if settings is None:
             settings = self.load_llm_settings()
         profiles = settings.get('custom_openai_profiles', [])
-        active_name = settings.get('custom_openai_active_profile', '')
+        active_name = profile_name if profile_name else settings.get('custom_openai_active_profile', '')
 
         # Find active profile by name (возвращаем НОРМАЛИЗОВАННУЮ КОПИЮ —
         # сохранённые в settings.json данные не мутируем)
@@ -47635,7 +47662,7 @@ class SupervertalerQt(QMainWindow):
                 return "[Custom MT: endpoint unreachable.]"
             return f"[Custom MT error: {msg}]"
 
-    def create_llm_client(self, provider, model, api_keys, settings=None):
+    def create_llm_client(self, provider, model, api_keys, settings=None, profile_name=None):
         """Создаёт LLMClient с корректным base_url и обработкой прокси."""
         from modules.llm_clients import LLMClient
         # Batch #9.3: провайдер один — custom_openai. Облачные ветки
@@ -47649,7 +47676,7 @@ class SupervertalerQt(QMainWindow):
                 f"(OpenAI-compatible) profile in Settings → AI Settings")
         if settings is None:
             settings = self.load_llm_settings()
-        profile = self._get_active_custom_profile(settings)
+        profile = self._get_active_custom_profile(settings, profile_name)
         base_url = None
         api_key = api_keys.get('custom_openai', '') or 'not-needed'
         if profile:

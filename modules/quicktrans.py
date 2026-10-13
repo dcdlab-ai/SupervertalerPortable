@@ -350,37 +350,50 @@ class QuickTransProviderMixin:
         Batch #9.3/#9.4: облачные LLM (Claude/OpenAI/Gemini/Mistral/
         DeepSeek/OpenRouter) и Ollama удалены из движка и UI — остаётся
         только Custom (активный профиль custom_openai, чип CUS)."""
-        # LLM provider definitions: (name, code, api_key_name, settings_key)
-        llm_defs = [
-            ("Custom", "CUS", "custom_openai", "mtql_custom_openai"),
-        ]
+        # Batch #9.4f: master checkbox mtql_custom_openai gates the group;
+        # mtql_llm_profiles (list of profile names) selects which profiles get
+        # their own CUS chip. Empty/missing list = every profile with an
+        # endpoint gets a chip (pre-9.4f settings keep working).
+        if not mt_quick_settings.get('mtql_custom_openai', False):
+            return
 
-        for name, code, api_key_name, settings_key in llm_defs:
-            # Check if LLM is enabled in MT Quick Lookup settings (default: disabled)
-            if not mt_quick_settings.get(settings_key, False):
+        llm_settings = {}
+        if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, 'load_llm_settings'):
+            try:
+                llm_settings = self.parent_app.load_llm_settings() or {}
+            except Exception:
+                llm_settings = {}
+        profiles = llm_settings.get('custom_openai_profiles') or []
+        enabled = mt_quick_settings.get('mtql_llm_profiles')
+        _added = 0
+
+        def make_llm_caller(provider_model, profile_name):
+            def call_llm(text, src_lang, tgt_lang):
+                return self._call_llm_translation('custom_openai', text, src_lang, tgt_lang,
+                                                 provider_model, profile_name)
+            return call_llm
+
+        for prof in profiles:
+            pname = prof.get('name')
+            if not pname:
                 continue
-
-            # Check if API key is available
-            # Batch #9.4: единственный LLM — Custom; ключ живёт в профиле,
-            # ключа в api_keys.txt не требует.
-            has_key = True
-
-            if not has_key:
+            if not (prof.get('endpoint') or '').strip():
                 continue
+            if enabled is not None and pname not in enabled:
+                continue
+            providers.append((pname, "CUS",
+                              make_llm_caller((prof.get('model') or '').strip(), pname)))
+            _added += 1
 
-            # Get model from settings or use default
-            model_key = f"{settings_key}_model"
-            model = mt_quick_settings.get(model_key, None)
+        if profiles:
+            return
 
-            # Create LLM translation caller
-            def make_llm_caller(provider_name, provider_key, provider_model):
-                def call_llm(text, src_lang, tgt_lang):
-                    return self._call_llm_translation(provider_key, text, src_lang, tgt_lang, provider_model)
-                return call_llm
+        # No profiles configured: legacy single-field endpoint (pre-profiles
+        # settings.json) keeps the single 'Custom' chip.
+        model = mt_quick_settings.get('mtql_custom_openai_model', None)
+        providers.append(("Custom", "CUS", make_llm_caller(model, None)))
 
-            providers.append((name, code, make_llm_caller(name, api_key_name, model)))
-
-    def _call_llm_translation(self, provider: str, text: str, source_lang: str, target_lang: str, model: str = None) -> str:
+    def _call_llm_translation(self, provider: str, text: str, source_lang: str, target_lang: str, model: str = None, profile_name: str = None) -> str:
         """Call LLM for translation"""
         try:
             from modules.llm_clients import LLMClient, load_api_keys
@@ -406,7 +419,8 @@ class QuickTransProviderMixin:
                 resolved_model = model
                 if not resolved_model and llm_settings:
                     resolved_model = llm_settings.get(f"{provider}_model")
-                client = self.parent_app.create_llm_client(provider, resolved_model, api_keys, settings=llm_settings)
+                client = self.parent_app.create_llm_client(provider, resolved_model, api_keys,
+                                                 settings=llm_settings, profile_name=profile_name)
             else:
                 base_url = None
                 if provider == 'custom_openai':
