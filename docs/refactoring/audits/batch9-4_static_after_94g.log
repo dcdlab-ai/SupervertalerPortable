@@ -1,0 +1,17 @@
+=== chain b94g ===
+total calls: 875, unresolved: 0
+=== pyflakes b94g ===
+pyflakes warnings (repo): 549
+undefined-name lines: 126
+unique undefined names: 4
+  filedialog: 2
+  messagebox: 19
+  tk: 100
+  ttk: 5
+=== py_compile ===
+py_compile CANONICAL (outside docs/): 109 ok / 0 fail / 109 total
+py_compile REFERENCE (all tracked .py):         180 ok / 0 fail / 180 total
+=== headless ===
+headless imports (with setup.py): 90 ok / 2 fail / 92 total
+FAIL setup: ModuleNotFoundError: No module named 'setuptools'
+FAIL modules.pdf_rescue_Qt: ModuleNotFoundError: No module named 'fitz'
