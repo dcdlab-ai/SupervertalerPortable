@@ -7568,49 +7568,26 @@ class SupervertalerQt(QMainWindow):
         return model
 
     def _update_llm_indicator(self):
-        """Обновить индикатор провайдера/модели LLM в статусной строке."""
+        """Обновить индикатор LLM в статусной строке.
+
+        После Batch #9.3 единственный рабочий провайдер — Custom
+        (OpenAI-Compatible): индикатор показывает активный профиль и его модель;
+        если профиль не настроен — сообщение о ненастроенности."""
         try:
             settings = self.load_llm_settings()
-            provider = settings.get('provider', 'openai')
-            model = self._resolve_provider_model(settings, provider, 'gpt-5.5')
-            
-            # Format nicely
-            if provider == 'ollama':
-                icon = "🖥️"
-                display = f"{icon} Local: {model}"
-            elif provider == 'openai':
-                icon = "🤖"
-                display = f"{icon} {model}"
-            elif provider == 'claude':
-                icon = "🟣"
-                display = f"{icon} {model}"
-            elif provider == 'gemini':
-                icon = "💎"
-                display = f"{icon} {model}"
-            elif provider == 'mistral':
-                icon = "🌀"
-                display = f"{icon} {model}"
-            elif provider == 'deepseek':
-                icon = "🐋"
-                display = f"{icon} {model}"
-            elif provider == 'openrouter':
-                icon = "🌐"
-                display = f"{icon} {model}"
-            elif provider == 'custom_openai':
-                icon = "🔌"
-                profile = self._get_active_custom_profile(settings)
-                profile_name = profile.get('name', '') if profile else ''
-                if profile_name:
-                    display = f"{icon} {profile_name}: {model}"
-                else:
-                    display = f"{icon} Custom: {model}"
+            profile = self._custom_llm_ready(settings)
+            if profile:
+                model = (profile.get('model') or '').strip()
+                display = f"🔌 {profile.get('name', 'Custom')}: {model}"
+                tip = (f"Custom (OpenAI-Compatible): {profile.get('name', 'Custom')}\n"
+                       f"Model: {model}\nEndpoint: {profile.get('endpoint', '')}")
             else:
-                display = f"{provider}: {model}"
-            
+                display = "🔌 Custom profile not configured"
+                tip = self.tr("Custom LLM profile is not configured — Settings → AI Settings")
             if hasattr(self, 'llm_indicator_label'):
                 self.llm_indicator_label.setText(display)
-                self.llm_indicator_label.setToolTip(f"LLM Provider: {provider.title()}\nModel: {model}")
-        except Exception as e:
+                self.llm_indicator_label.setToolTip(tip)
+        except Exception:
             if hasattr(self, 'llm_indicator_label'):
                 self.llm_indicator_label.setText("")
     
@@ -19311,7 +19288,15 @@ class SupervertalerQt(QMainWindow):
         # Custom OpenAI-compatible endpoint settings (with profiles)
         model_layout.addSpacing(10)
         custom_model_label = QLabel(self.tr("<b>🔌 Custom (OpenAI-Compatible) Settings:</b>"))
-        model_layout.addWidget(custom_model_label)
+        # Local LLM (read-only): local servers are reached through the Custom
+        # profiles above; management of the local server itself — future batch.
+        local_llm_note = QLabel(self.tr(
+            "ℹ️ Local LLM: local servers are used via the Custom "
+            "(OpenAI-Compatible) profiles above. Local server management is "
+            "coming later."))
+        local_llm_note.setStyleSheet("font-size: 8pt; color: #666;")
+        local_llm_note.setWordWrap(True)
+        model_layout.addWidget(local_llm_note)
 
         # Profile selector row
         profile_row = QHBoxLayout()
