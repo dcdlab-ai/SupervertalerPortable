@@ -19888,8 +19888,6 @@ class SupervertalerQt(QMainWindow):
         # Load current settings
         general_settings = self.load_general_settings()
         mt_quick_settings = general_settings.get('mt_quick_lookup', {})
-        api_keys = self.load_api_keys()
-        enabled_providers = self.load_provider_enabled_states()
 
         # Header info
         header_info = QLabel(
@@ -20087,89 +20085,6 @@ class SupervertalerQt(QMainWindow):
         # LLM provider checkboxes with model selection
         self._mtql_llm_combos = {}
 
-        llm_providers = [
-            ("claude", "Claude", "claude", [
-                ("claude-sonnet-5-5", "Claude Sonnet 5.5 (Recommended)"),
-                ("claude-opus-5-5", "Claude Opus 5.5 (Premium)"),
-                ("claude-fable-5-1", "Claude Fable 5.1 (Maximum)"),
-            ]),
-            ("openai", "OpenAI", "openai", [
-                ("gpt-5.5", "GPT-5.5 (Recommended)"),
-                ("gpt-5.4-mini", "GPT-5.4 Mini (Fast)"),
-            ]),
-            ("gemini", "Gemini (Google AI)", "gemini", [
-                ("gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite (Recommended)"),
-                ("gemini-2.5-pro", "Gemini 2.5 Pro (Premium)"),
-                ("gemini-3.1-pro-preview", "Gemini 3.1 Pro (Latest)"),
-                ("gemma-4-26b-a4b-it", "Gemma 4 26B MoE (Open)"),
-            ]),
-            ("mistral", "Mistral AI", "mistral", [
-                ("mistral-large-latest", "Mistral Large (Recommended)"),
-                ("mistral-small-latest", "Mistral Small (Fast)"),
-            ]),
-            ("deepseek", "DeepSeek", "deepseek", [
-                ("deepseek-v4-pro", "DeepSeek V4 Pro (Recommended)"),
-                ("deepseek-v4-flash", "DeepSeek V4 Flash (Fast)"),
-            ]),
-            ("openrouter", "OpenRouter (200+ models)", "openrouter", [
-                ("anthropic/claude-sonnet-5", "Claude Sonnet 5 (Recommended)"),
-                ("anthropic/claude-opus-5", "Claude Opus 5 (Premium)"),
-                ("openai/gpt-5.4", "GPT-5.4 (Advanced Reasoning)"),
-                ("openai/gpt-5.4-mini", "GPT-5.4 Mini (Fast & Economical)"),
-                ("google/gemini-3.1-pro-preview", "Gemini 3.1 Pro (Latest Gemini)"),
-                ("google/gemini-3-flash-preview", "Gemini 3 Flash (Fast Gemini)"),
-                ("mistralai/mistral-small-2603", "Mistral Small (European Languages)"),
-                ("qwen/qwen3.6-plus:free", "Qwen 3.6 Plus (Free)"),
-            ]),
-        ]
-
-        for code, name, api_key_name, models in llm_providers:
-            # Gemini key may be stored as either 'gemini' or 'google' (backward compat)
-            if api_key_name == 'gemini':
-                has_key = bool(api_keys.get('gemini') or api_keys.get('google'))
-            else:
-                has_key = bool(api_keys.get(api_key_name))
-
-            # Container for checkbox and model combo
-            llm_row = QHBoxLayout()
-
-            checkbox = CheckmarkCheckBox(name)
-            # Default: disabled (LLMs are opt-in)
-            checkbox.setChecked(mt_quick_settings.get(f"mtql_{code}", False))
-            checkbox.setEnabled(has_key)
-
-            if not has_key:
-                checkbox.setToolTip(f"API key not configured for {name}. Add it in AI Settings.")
-                checkbox.setStyleSheet("color: #999;")
-            else:
-                checkbox.setToolTip(f"Include {name} translations in QuickTrans")
-
-            self._mtql_checkboxes[f"mtql_{code}"] = checkbox
-            llm_row.addWidget(checkbox)
-
-            # Model selection combo
-            model_combo = QComboBox()
-            model_combo.setMinimumWidth(200)
-            for model_id, model_name in models:
-                model_combo.addItem(model_name, model_id)
-
-            # Restore saved model selection
-            # A saved model that has left the list is shown rather than replaced:
-            # falling back to the first entry meant the next save overwrote it.
-            saved_model = mt_quick_settings.get(f"mtql_{code}_model")
-            if saved_model:
-                idx = model_combo.findData(saved_model)
-                if idx < 0:
-                    model_combo.addItem(f"{saved_model} (your current model)", saved_model)
-                    idx = model_combo.count() - 1
-                model_combo.setCurrentIndex(idx)
-
-            model_combo.setEnabled(has_key)
-            self._mtql_llm_combos[f"mtql_{code}_model"] = model_combo
-            llm_row.addWidget(model_combo)
-
-            llm_row.addStretch()
-            llm_layout.addLayout(llm_row)
 
         # Custom OpenAI-compatible provider (shows active profile info)
         custom_row = QHBoxLayout()
@@ -20198,24 +20113,6 @@ class SupervertalerQt(QMainWindow):
         custom_row.addStretch()
         llm_layout.addLayout(custom_row)
 
-        # Ollama (local LLM – always available, no API key needed)
-        ollama_row = QHBoxLayout()
-        ollama_cb = CheckmarkCheckBox(self.tr("🖥️ Ollama (Local LLM)"))
-        ollama_cb.setChecked(mt_quick_settings.get("mtql_ollama", False))
-        ollama_cb.setToolTip(self.tr("Use a locally-running Ollama model for translation (no API key needed)"))
-        self._mtql_checkboxes["mtql_ollama"] = ollama_cb
-        ollama_row.addWidget(ollama_cb)
-
-        ollama_model_edit = QLineEdit()
-        ollama_model_edit.setMinimumWidth(200)
-        ollama_model_edit.setPlaceholderText(self.tr("e.g. translategemma:12b"))
-        _ollama_model_saved = mt_quick_settings.get("mtql_ollama_model") or llm_settings.get('ollama_model', 'translategemma:12b')
-        ollama_model_edit.setText(_ollama_model_saved)
-        ollama_model_edit.setToolTip(self.tr("Ollama model name – must be pulled locally (ollama pull <model>)"))
-        self._mtql_llm_combos["mtql_ollama_model"] = ollama_model_edit
-        ollama_row.addWidget(ollama_model_edit)
-        ollama_row.addStretch()
-        llm_layout.addLayout(ollama_row)
 
         llm_group.setLayout(llm_layout)
         layout.addWidget(llm_group)

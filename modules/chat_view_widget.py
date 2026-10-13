@@ -538,139 +538,49 @@ class ChatViewWidget(QWidget):
         self._model_btn.setText(self._backend.get_model_display_name())
 
     def _show_model_menu(self):
-        """Show a provider/model selection menu (like Supervertaler for Trados)."""
-        from modules.llm_clients import LLMClient
+        """Show the active Custom profile/model and a link to AI Settings.
 
+        Batch #9.4: облачные провайдеры и Ollama удалены — чат использует
+        активный профиль Custom (OpenAI-Compatible) из AI Settings; модель
+        переключается там же, не из чата."""
         menu = QMenu(self)
-        menu.setStyleSheet("""
-            QMenu { font-size: 9pt; }
-            QMenu::item:checked { font-weight: bold; }
-        """)
+        menu.setStyleSheet("QMenu { font-size: 9pt; } QMenu::item { padding: 4px 16px; }")
 
-        current_provider = ""
-        current_model = ""
-        if self._backend.llm_client:
-            current_provider = self._backend.llm_client.provider
-            current_model = self._backend.llm_client.model
+        parent_app = getattr(self._backend, '_parent_app', None)
+        settings = None
+        if parent_app is not None and hasattr(parent_app, 'load_llm_settings'):
+            try:
+                settings = parent_app.load_llm_settings()
+            except Exception:
+                settings = None
+        profile = None
+        if parent_app is not None and hasattr(parent_app, '_get_active_custom_profile'):
+            try:
+                profile = parent_app._get_active_custom_profile(settings)
+            except Exception:
+                profile = None
 
-        # Provider → models mapping
-        providers = [
-            ("claude", "Anthropic", LLMClient.CLAUDE_MODELS),
-            ("openai", "OpenAI", {
-                "gpt-5.5": {"name": "GPT-5.5", "description": "Flagship, advanced reasoning"},
-                "gpt-5.4-mini": {"name": "GPT-5.4 Mini", "description": "Fast & economical"},
-            }),
-            ("gemini", "Google", {
-                "gemini-3.1-flash-lite": {"name": "Gemini 3.1 Flash-Lite", "description": "Fast & economical"},
-                "gemini-2.5-pro": {"name": "Gemini 2.5 Pro", "description": "High quality"},
-                "gemini-3.1-pro-preview": {"name": "Gemini 3.1 Pro", "description": "Latest, most capable"},
-                "gemma-4-26b-a4b-it": {"name": "Gemma 4 26B MoE", "description": "Open model, lightweight"},
-            }),
-            ("mistral", "Mistral", LLMClient.MISTRAL_MODELS),
-            ("ollama", "Ollama (local)", LLMClient.OLLAMA_MODELS),
-            ("openrouter", "OpenRouter", LLMClient.OPENROUTER_MODELS),
-        ]
+        if profile:
+            header = menu.addAction(
+                f"🔌 {profile.get('name', 'Custom')} – {profile.get('model', '')}")
+        else:
+            header = menu.addAction("🔌 Custom profile not configured")
+        header.setEnabled(False)
 
-        for provider_key, provider_name, models in providers:
-            if not models:
-                continue
+        menu.addSeparator()
+        act = menu.addAction("AI Settings…")
+        act.triggered.connect(self._open_ai_settings)
 
-            provider_menu = menu.addMenu(provider_name)
-            if provider_key == current_provider:
-                provider_menu.setTitle(f"\u2713 {provider_name}")
-                font = provider_menu.menuAction().font()
-                font.setBold(True)
-                provider_menu.menuAction().setFont(font)
-
-            for model_id, model_info in models.items():
-                name = model_info.get('name', model_id)
-                desc = model_info.get('description', '')
-                action = provider_menu.addAction(name)
-                action.setToolTip(desc)
-                action.setCheckable(True)
-                if provider_key == current_provider and model_id == current_model:
-                    action.setChecked(True)
-                action.setData((provider_key, model_id))
-                action.triggered.connect(
-                    lambda checked, a=action: self._on_model_selected(a)
-                )
-
-        # Show menu above the button
         pos = self._model_btn.mapToGlobal(self._model_btn.rect().topLeft())
         pos.setY(pos.y() - menu.sizeHint().height())
         menu.exec(pos)
 
-    def _on_model_selected(self, action):
-        """Handle model selection from the menu."""
-        data = action.data()
-        if not data or len(data) != 2:
-            return
-        provider_key, model_id = data
+    def _open_ai_settings(self):
+        """Navigate the main window to Settings → AI Settings."""
+        parent_app = getattr(self._backend, '_parent_app', None)
+        if parent_app is not None and hasattr(parent_app, '_go_to_settings_tab'):
+            parent_app._go_to_settings_tab("AI Settings")
 
-        # Update the backend's LLM client with the new provider/model
-        # We need to get API keys and create a new client
-        try:
-            from modules.llm_clients import LLMClient, load_api_keys
-
-            parent_app = self._backend._parent_app
-            if hasattr(parent_app, 'load_api_keys'):
-                api_keys = parent_app.load_api_keys()
-            else:
-                api_keys = load_api_keys()
-
-            # Determine API key (Batch #9.3: ollama-ветка удалена; custom_openai
-            # не требует ключа в api_keys.txt — ключ живёт в профиле)
-            key_name = 'google' if provider_key == 'gemini' else provider_key
-            api_key = api_keys.get(key_name, '')
-
-            if not api_key and provider_key != 'custom_openai':
-                self._backend.add_message(
-                    "system",
-                    f"\u26A0 No API key found for {provider_key}. Configure it in Settings."
-                )
-                return
-
-            factory = getattr(parent_app, 'create_llm_client', None)
-            if provider_key == 'custom_openai' and factory is not None:
-                # Custom endpoints need base_url plus the active profile's model
-                # and key, which only the app factory resolves. The manual path
-                # below never set base_url for custom_openai, so the picker built
-                # a broken client (chat showed "No model" and could not send),
-                # even though QuickTrans – which uses this factory – worked.
-                settings = (parent_app.load_llm_settings()
-                            if hasattr(parent_app, 'load_llm_settings') else None)
-                self._backend.llm_client = factory(
-                    provider_key, model_id, api_keys, settings=settings)
-            else:
-                # Get proxy and base_url
-                http_proxy = None
-                if provider_key != 'gemini' and hasattr(parent_app, '_get_proxy_url'):
-                    http_proxy = parent_app._get_proxy_url()
-
-                base_url = None
-                if provider_key == 'mistral':
-                    base_url = 'https://api.mistral.ai/v1'
-                elif provider_key == 'openrouter':
-                    base_url = 'https://openrouter.ai/api/v1'
-
-                self._backend.llm_client = LLMClient(
-                    api_key=api_key,
-                    provider=provider_key,
-                    model=model_id,
-                    max_tokens=16384,
-                    base_url=base_url,
-                    http_proxy=http_proxy,
-                )
-
-            self._refresh_model_label()
-            resolved_model = getattr(self._backend.llm_client, 'model', model_id) or model_id
-            self._backend.add_message(
-                "system",
-                f"Switched to {provider_key} / {resolved_model}",
-            )
-
-        except Exception as e:
-            self._backend.add_message("system", f"\u26A0 Failed to switch model: {e}")
 
     # ------------------------------------------------------------------
     # Actions

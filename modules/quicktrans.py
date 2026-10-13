@@ -29,13 +29,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # coding stays consistent everywhere.
 PROVIDER_COLORS = {
     "CMT": "#00897B",   # Custom MT teal
-    "CL":  "#D97706",   # Claude amber
-    "GPT": "#10A37F",   # OpenAI green
-    "GEM": "#4285F4",   # Gemini blue
-    "MIS": "#FA520F",   # Mistral orange
-    "DS":  "#4D6BFE",   # DeepSeek blue
-    "OR":  "#6566F1",   # OpenRouter indigo
-    "OLL": "#555555",   # Ollama dark gray
     "CUS": "#9C27B0",   # Custom purple
 }
 
@@ -56,7 +49,7 @@ _PANEL_ICON_BTN_STYLE = """
 # Provider codes that are AI/LLM rather than machine-translation engines, used
 # to group QuickTrans results. Everything not listed here (GT, DL, MS, AT, MMT,
 # MM, and CMT custom-MT) is treated as a machine-translation engine.
-_AI_PROVIDER_CODES = {"CL", "GPT", "GEM", "MIS", "DS", "OR", "OLL", "CUS"}
+_AI_PROVIDER_CODES = {"CUS"}
 
 
 def _is_ai_code(code: str) -> bool:
@@ -110,7 +103,7 @@ def _canonical_lang_name(value):
 class MTSuggestion:
     """A single MT suggestion from a provider"""
     provider_name: str  # Full name: "Google Translate", "DeepL", etc.
-    provider_code: str  # Short code: "CMT", "CL", "GPT", etc.
+    provider_code: str  # Short code: "CMT", "CUS", …
     translation: str
     is_error: bool = False
 
@@ -354,11 +347,9 @@ class QuickTransProviderMixin:
     def _add_llm_providers(self, providers: List, api_keys: Dict, mt_quick_settings: Dict):
         """Add LLM providers to the providers list.
 
-        Batch #9.3: облачные LLM (Claude/OpenAI/Gemini/Mistral/DeepSeek/
-        OpenRouter) и Ollama удалены — остаётся только Custom (активный
-        профиль custom_openai). Чекбоксы удалённых провайдеров в QuickTrans-
-        табе (mtql_claude и т.п.) до 9.4 остаются в UI, но чипов не создают;
-        «Local LLM» после 9.4 показывается как профиль Custom."""
+        Batch #9.3/#9.4: облачные LLM (Claude/OpenAI/Gemini/Mistral/
+        DeepSeek/OpenRouter) и Ollama удалены из движка и UI — остаётся
+        только Custom (активный профиль custom_openai, чип CUS)."""
         # LLM provider definitions: (name, code, api_key_name, settings_key)
         llm_defs = [
             ("Custom", "CUS", "custom_openai", "mtql_custom_openai"),
@@ -370,12 +361,9 @@ class QuickTransProviderMixin:
                 continue
 
             # Check if API key is available
-            if api_key_name == 'gemini':
-                has_key = bool(api_keys.get('gemini') or api_keys.get('google'))
-            elif api_key_name in ('ollama', 'custom_openai'):
-                has_key = True  # No API key needed
-            else:
-                has_key = bool(api_keys.get(api_key_name))
+            # Batch #9.4: единственный LLM — Custom; ключ живёт в профиле,
+            # ключа в api_keys.txt не требует.
+            has_key = True
 
             if not has_key:
                 continue
