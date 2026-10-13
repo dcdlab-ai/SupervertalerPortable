@@ -20181,7 +20181,11 @@ class SupervertalerQt(QMainWindow):
             idx = self._custom_mt_profile_combo.currentIndex()
             if 0 <= idx < len(self._custom_mt_profiles):
                 _clean = lambda s: ''.join(ch for ch in (s or '') if ord(ch) >= 0x20).strip()
-                self._custom_mt_profiles[idx]['endpoint'] = _clean(self._custom_mt_endpoint_input.text())
+                _mt_raw = _clean(self._custom_mt_endpoint_input.text())
+                _mt_norm = self._normalize_custom_endpoint(_mt_raw)
+                self._custom_mt_profiles[idx]['endpoint'] = _mt_norm
+                if _mt_norm != _mt_raw:
+                    self._custom_mt_endpoint_input.setText(_mt_norm)  # показать нормализацию в поле (9.4g, как в AI Settings)
                 self._custom_mt_profiles[idx]['model'] = _clean(self._custom_mt_model_input.text())
                 self._custom_mt_profiles[idx]['api_key'] = _clean(self._custom_mt_key_input.text())
                 self._custom_mt_profiles[idx]['raw_mode'] = self._custom_mt_raw_cb.isChecked()
@@ -47589,7 +47593,7 @@ class SupervertalerQt(QMainWindow):
             def _clean(s):
                 return ''.join(ch for ch in (s or '') if ord(ch) >= 0x20).strip()
 
-            endpoint = _clean(profile.get('endpoint'))
+            endpoint = self._normalize_custom_endpoint(_clean(profile.get('endpoint')))
             if not endpoint:
                 return "[Custom MT: no endpoint configured]"
 
