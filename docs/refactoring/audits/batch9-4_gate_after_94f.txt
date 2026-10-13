@@ -1,0 +1,19 @@
+== Supervertaler.py (монолит) ==
+  allowed get_google_translation: 2 (comment/разрешённые зоны)
+  allowed provider == 'gemini': 1 (comment/разрешённые зоны)
+== modules/llm_clients.py ==
+  CLEAN (0 hits)
+== modules/settings_service.py ==
+  CLEAN (0 hits)
+== modules/chat_backend.py ==
+  CLEAN (0 hits)
+== modules/chat_view_widget.py ==
+  CLEAN (0 hits)
+== modules/quicktrans.py ==
+  CLEAN (0 hits)
+== modules/unified_prompt_manager_qt.py ==
+  CLEAN (0 hits)
+== modules/workers/proofread.py ==
+  CLEAN (0 hits)
+== modules/translation_results_panel.py ==
+  CLEAN (0 hits)

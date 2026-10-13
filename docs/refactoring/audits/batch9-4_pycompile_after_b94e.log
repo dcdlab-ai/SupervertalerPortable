@@ -1,0 +1,2 @@
+py_compile CANONICAL (outside docs/): 109 ok / 0 fail / 109 total
+py_compile REFERENCE (all tracked .py):         167 ok / 0 fail / 167 total

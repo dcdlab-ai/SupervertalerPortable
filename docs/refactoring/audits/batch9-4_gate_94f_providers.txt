@@ -1,0 +1,232 @@
+modules\chat_message_delegate.py:443:        # cost_usd: float for known cost, 0.0 for genuinely free (Ollama),
+modules\chat_message_delegate.py:446:        # OpenRouter model (e.g. deepseek/deepseek-v4-pro) for free.
+modules\ai_actions.py:79:        # Strip markdown code fences if present (Claude often wraps in ```yaml or ```)
+modules\chat_backend.py:113:            # Batch #9.3: облачные LLM-провайдеры и Ollama удалены; провайдер
+modules\chat_backend.py:133:                # OpenRouter's base_url, and proxy handling. The old hand-rolled
+modules\chat_backend.py:155:                    if provider != 'gemini' and hasattr(self._parent_app, '_get_proxy_url'):
+modules\chat_backend.py:178:        """Return a human-readable model name, e.g. 'claude / claude-sonnet-4-6'."""
+modules\chat_backend.py:240:            # KoboldCPP/LM Studio model behind the custom OpenAI provider),
+modules\chat_view_widget.py:543:        Batch #9.4: облачные провайдеры и Ollama удалены — чат использует
+modules\chat_view_widget.py:544:        активный профиль Custom (OpenAI-Compatible) из AI Settings; модель
+Supervertaler.py:14:- Голос: AI-команды и диктовка (100+ языков через OpenAI Whisper)
+Supervertaler.py:17:- Поддержка нескольких LLM: OpenAI GPT, Claude, Google Gemini
+Supervertaler.py:5674:            # rate instead of the full input rate; OpenRouter→Anthropic gets
+Supervertaler.py:5675:            # the same treatment via OpenAI's content-array form. Other
+Supervertaler.py:5721:            # after reports that some models (Mistral Large) began emitting
+Supervertaler.py:5761:            # OpenRouter→Anthropic add explicit cache_control markers;
+Supervertaler.py:5762:            # OpenAI / DeepSeek / Gemini 2.5+ benefit from automatic implicit
+Supervertaler.py:6092:        self.claude_enabled = True  # For demo purposes
+Supervertaler.py:7574:        (OpenAI-Compatible): индикатор показывает активный профиль и его модель;
+Supervertaler.py:7582:                tip = (f"Custom (OpenAI-Compatible): {profile.get('name', 'Custom')}\n"
+Supervertaler.py:9553:            "  • Vision-capable model in Settings (Claude Sonnet/Opus 4.x,\n"
+Supervertaler.py:9554:            "    GPT-4o or newer, Gemini)\n"
+Supervertaler.py:9952:        elif 'sonnet' in model_lc or 'claude' in provider_lc:
+Supervertaler.py:9954:        elif 'gemini' in provider_lc:
+Supervertaler.py:9987:        # and provider; each call ships base64 PNG (Batch #9.3: gemini-ветка
+Supervertaler.py:17193:                    "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:18958:        # ===== TAB 3: AI Settings (LLM, Ollama) =====
+Supervertaler.py:19237:        """Создаёт единую вкладку AI Settings — настройки Custom (OpenAI-Compatible) LLM и AI Assistant."""
+Supervertaler.py:19271:        # Custom OpenAI-compatible endpoint
+Supervertaler.py:19272:        custom_radio = CustomRadioButton("🔌 Custom (OpenAI-Compatible API)")
+Supervertaler.py:19288:        # Custom OpenAI-compatible endpoint settings (with profiles)
+Supervertaler.py:19290:        custom_model_label = QLabel(self.tr("<b>🔌 Custom (OpenAI-Compatible) Settings:</b>"))
+Supervertaler.py:19295:            "(OpenAI-Compatible) profiles above. Local server management is "
+Supervertaler.py:19349:        custom_model_input.setPlaceholderText(self.tr("e.g. qwen-plus, ep-xxxxx, deepseek-chat"))
+Supervertaler.py:19415:                "Profile name (e.g. 'Volcengine Doubao', 'DeepSeek'):"
+Supervertaler.py:19457:            "💡 Works with any OpenAI-compatible API: Volcengine (Doubao), "
+Supervertaler.py:19458:            "Alibaba Tongyi (Qwen), DeepSeek, Mistral, Groq, etc.\n"
+Supervertaler.py:19494:        custom_enable_cb = CheckmarkCheckBox(self.tr("Enable Custom (OpenAI-Compatible)"))
+Supervertaler.py:19559:            "ⓘ  Applies to: Custom (OpenAI-Compatible), Google Translate, DeepL,"
+Supervertaler.py:19914:        # A dedicated OpenAI-compatible MT endpoint (e.g. a local MT proxy),
+Supervertaler.py:19929:        cmt_enable = CheckmarkCheckBox(self.tr("Custom MT endpoint (OpenAI-compatible)"))
+Supervertaler.py:19932:            "Query a custom OpenAI-compatible MT endpoint (e.g. a local MT proxy).\n"
+Supervertaler.py:20089:        # Custom OpenAI-compatible provider (shows active profile info)
+Supervertaler.py:20091:        custom_cb = CheckmarkCheckBox(self.tr("Custom (OpenAI-Compatible)"))
+Supervertaler.py:20093:        custom_cb.setToolTip(self.tr("Use your custom OpenAI-compatible endpoint (configured in AI Settings)"))
+Supervertaler.py:22945:    def _save_llm_settings_from_ui(self, openai_radio, claude_radio, gemini_radio, ollama_radio,
+Supervertaler.py:22946:                                   openai_combo, claude_combo, gemini_combo,
+Supervertaler.py:22947:                                   ollama_status_widget,
+Supervertaler.py:22948:                                   openai_enable_cb, claude_enable_cb, gemini_enable_cb, ollama_enable_cb,
+Supervertaler.py:22956:        elif claude_radio.isChecked():
+Supervertaler.py:22957:            provider = 'claude'
+Supervertaler.py:22958:        elif gemini_radio.isChecked():
+Supervertaler.py:22959:            provider = 'gemini'
+Supervertaler.py:22960:        elif ollama_radio.isChecked():
+Supervertaler.py:22961:            provider = 'ollama'
+Supervertaler.py:22965:        # Get Ollama model from widget if available
+Supervertaler.py:22966:        ollama_model = 'translategemma:12b'  # Default
+Supervertaler.py:22967:        if ollama_status_widget and hasattr(ollama_status_widget, 'get_selected_model'):
+Supervertaler.py:22968:            selected = ollama_status_widget.get_selected_model()
+Supervertaler.py:22970:                ollama_model = selected
+Supervertaler.py:22975:            'claude_model': claude_combo.currentText().split()[0],
+Supervertaler.py:22976:            'gemini_model': gemini_combo.currentText().split()[0],
+Supervertaler.py:22977:            'ollama_model': ollama_model
+Supervertaler.py:22988:            'llm_claude': claude_enable_cb.isChecked(),
+Supervertaler.py:22989:            'llm_gemini': gemini_enable_cb.isChecked(),
+Supervertaler.py:22990:            'llm_ollama': ollama_enable_cb.isChecked()
+Supervertaler.py:23038:        Batch #9.4: удалённые провайдеры (OpenAI, Claude, Gemini, Mistral,
+Supervertaler.py:23039:        DeepSeek, OpenRouter, Ollama) из UI убраны — провайдер один,
+Supervertaler.py:23179:        # Migrate legacy 'google' key to canonical 'gemini' key
+Supervertaler.py:23180:        if api_keys.get('google') and not api_keys.get('gemini'):
+Supervertaler.py:23181:            api_keys['gemini'] = api_keys['google']
+Supervertaler.py:23278:            'ollama_keepwarm': existing_settings.get('ollama_keepwarm', False),  # Preserve AI setting
+Supervertaler.py:30211:                - сервисов ИИ-перевода (ChatGPT, Claude и т.п.);
+Supervertaler.py:38929:                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:45217:        # Per-engine colours so different LLMs (GPT vs Claude vs …) are visually
+Supervertaler.py:47573:        """Переводит через Custom MT endpoint (OpenAI-совместимый, например
+Supervertaler.py:47669:        # (openrouter base_url, ключи по имени провайдера, gemini-env-прокси)
+Supervertaler.py:47676:                f"(OpenAI-compatible) profile in Settings → AI Settings")
+Supervertaler.py:48487:            "Built with PyQt6 • Supports Custom (OpenAI-Compatible) LLMs"
+Supervertaler.py:48732:                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:48823:            # Ollama-ветка промпта удалена вместе с провайдером).
+Supervertaler.py:48901:                                if provider == "gemini":
+Supervertaler.py:48902:                                    # Gemini uses PIL.Image directly
+Supervertaler.py:48905:                                    # OpenAI and Claude use base64 PNG
+Supervertaler.py:49146:                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:49436:        # copy it, ready to paste into an online LLM (Claude.ai, ChatGPT, etc.).
+Supervertaler.py:49469:                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:49727:                "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:49936:            llm_checkbox = CheckmarkCheckBox(self.tr("🤖 LLM (AI) - Use configured LLM provider (Custom OpenAI-Compatible)"))
+Supervertaler.py:50153:                        "Add a Custom (OpenAI-compatible) profile with an endpoint and a model.")
+Supervertaler.py:51734:                # OpenAI
+Supervertaler.py:51737:                        self.log("🧠 PROGRESSIVE LLM: Attempting OpenAI translation...")
+Supervertaler.py:51759:                                metadata={'model': openai_model, 'provider': 'OpenAI'},
+Supervertaler.py:51764:                            # Show OpenAI match immediately
+Supervertaler.py:51766:                            self.log(f"🧠 PROGRESSIVE LLM: Showing OpenAI match")
+Supervertaler.py:51772:                                        self.log(f"Error adding OpenAI match: {e}")
+Supervertaler.py:51774:                        self.log(f"⚠ Error getting OpenAI translation: {e}")
+Supervertaler.py:51776:                # Claude
+Supervertaler.py:51779:                        self.log("🧠 PROGRESSIVE LLM: Attempting Claude translation...")
+Supervertaler.py:51782:                        claude_model = settings.get('anthropic_model', 'claude-3-5-sonnet-20241022')
+Supervertaler.py:51786:                            model=claude_model,
+Supervertaler.py:51801:                                metadata={'model': claude_model, 'provider': 'Claude'},
+Supervertaler.py:51806:                            # Show Claude match immediately
+Supervertaler.py:51808:                            self.log(f"🧠 PROGRESSIVE LLM: Showing Claude match")
+Supervertaler.py:51814:                                        self.log(f"Error adding Claude match: {e}")
+Supervertaler.py:51816:                        self.log(f"⚠ Error getting Claude translation: {e}")
+Supervertaler.py:51859:        # ветки OpenAI/Claude/Gemini удалены).
+Supervertaler.py:51911:        """Удаляет префиксы провайдеров вроде [OpenAI], [Claude] и т.д. из переводов."""
+Supervertaler.py:51913:        # Remove patterns like [OpenAI], [Claude], [ChatGPT], [Anthropic] at the start
+Supervertaler.py:51914:        cleaned = re.sub(r'^\[(?:OpenAI|Claude|ChatGPT|Anthropic|GPT-\d+)\]\s*', '', translation.strip())
+modules\platform_helpers.py:108:    creationflags ourselves – e.g. OpenAI's whisper library shelling out
+modules\pdf_rescue_Qt.py:4:Supports multiple AI providers: OpenAI GPT-4 Vision, Anthropic Claude Vision, Google Gemini Vision
+modules\pdf_rescue_Qt.py:65:        # OpenAI
+modules\pdf_rescue_Qt.py:69:                from openai import OpenAI
+modules\pdf_rescue_Qt.py:70:                self.clients['openai'] = OpenAI(api_key=openai_key)
+modules\pdf_rescue_Qt.py:71:                self.log_message("✓ OpenAI client initialized")
+modules\pdf_rescue_Qt.py:73:                self.log_message(f"⚠ Failed to initialize OpenAI: {e}")
+modules\pdf_rescue_Qt.py:75:        # Anthropic Claude
+modules\pdf_rescue_Qt.py:76:        claude_key = self.api_keys.get('claude') or self.api_keys.get('anthropic')
+modules\pdf_rescue_Qt.py:77:        if claude_key:
+modules\pdf_rescue_Qt.py:80:                self.clients['claude'] = anthropic.Anthropic(api_key=claude_key)
+modules\pdf_rescue_Qt.py:81:                self.log_message("✓ Claude client initialized")
+modules\pdf_rescue_Qt.py:83:                self.log_message("⚠ Claude requested but 'anthropic' library not installed. Run: pip install anthropic")
+modules\pdf_rescue_Qt.py:85:                self.log_message(f"⚠ Failed to initialize Claude: {e}")
+modules\pdf_rescue_Qt.py:87:        # Google Gemini
+modules\pdf_rescue_Qt.py:88:        gemini_key = self.api_keys.get('gemini') or self.api_keys.get('google')
+modules\pdf_rescue_Qt.py:89:        if gemini_key:
+modules\pdf_rescue_Qt.py:92:                genai.configure(api_key=gemini_key)
+modules\pdf_rescue_Qt.py:93:                self.clients['gemini'] = genai
+modules\pdf_rescue_Qt.py:94:                self.log_message("✓ Gemini client initialized")
+modules\pdf_rescue_Qt.py:96:                self.log_message("⚠ Gemini requested but 'google-generativeai' library not installed. Run: pip install google-generativeai")
+modules\pdf_rescue_Qt.py:98:                self.log_message(f"⚠ Failed to initialize Gemini: {e}")
+modules\pdf_rescue_Qt.py:201:        self.model_combo.addItem("--- OpenAI ---")
+modules\pdf_rescue_Qt.py:203:        self.model_combo.addItem("--- Claude (Anthropic) ---")
+modules\pdf_rescue_Qt.py:204:        self.model_combo.addItems(["claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"])
+modules\pdf_rescue_Qt.py:205:        self.model_combo.addItem("--- Gemini (Google) ---")
+modules\pdf_rescue_Qt.py:206:        self.model_combo.addItems(["gemini-3.1-flash-lite", "gemini-2.5-pro", "gemini-3.1-pro-preview"])
+modules\pdf_rescue_Qt.py:223:        self.model_combo.setToolTip("Select AI model for vision OCR processing (OpenAI, Claude, or Gemini)")
+modules\pdf_rescue_Qt.py:246:        model_descriptions = """• gpt-5.5 (Recommended): OpenAI flagship; advanced reasoning, excellent for most documents including complex tables
+modules\pdf_rescue_Qt.py:248:• claude-sonnet-5-5: Newest Sonnet; strong reasoning, reliable on structured layouts and tables
+modules\pdf_rescue_Qt.py:249:• claude-opus-5-5: Anthropic's newest Opus; best for dense, complex or technical documents
+modules\pdf_rescue_Qt.py:250:• claude-fable-5-1: Anthropic's most capable model; for the hardest pages when cost is secondary
+modules\pdf_rescue_Qt.py:251:• gemini-3.1-flash-lite: Fast and economical Google option; good for high-volume, straightforward pages
+modules\pdf_rescue_Qt.py:252:• gemini-2.5-pro: Premium Google option; strong on complex layouts and dense documents"""
+modules\pdf_rescue_Qt.py:583:        title = QLabel("Exact Prompt Sent to OpenAI API")
+modules\pdf_rescue_Qt.py:751:        """Use AI Vision to extract text from image (supports OpenAI, Claude, Gemini)"""
+modules\pdf_rescue_Qt.py:783:            elif provider == "claude":
+modules\pdf_rescue_Qt.py:784:                return self._extract_with_claude(image_path, model, instructions)
+modules\pdf_rescue_Qt.py:785:            elif provider == "gemini":
+modules\pdf_rescue_Qt.py:786:                return self._extract_with_gemini(image_path, model, instructions)
+modules\pdf_rescue_Qt.py:797:        elif model.startswith("claude"):
+modules\pdf_rescue_Qt.py:798:            return "claude"
+modules\pdf_rescue_Qt.py:799:        elif model.startswith("gemini"):
+modules\pdf_rescue_Qt.py:800:            return "gemini"
+modules\pdf_rescue_Qt.py:805:        """Extract text using OpenAI Vision API"""
+modules\pdf_rescue_Qt.py:833:    def _extract_with_claude(self, image_path, model, instructions):
+modules\pdf_rescue_Qt.py:834:        """Extract text using Claude Vision API"""
+modules\pdf_rescue_Qt.py:852:        response = self.clients['claude'].messages.create(
+modules\pdf_rescue_Qt.py:881:    def _extract_with_gemini(self, image_path, model, instructions):
+modules\pdf_rescue_Qt.py:882:        """Extract text using Gemini Vision API"""
+modules\pdf_rescue_Qt.py:889:        gemini_model = self.clients['gemini'].GenerativeModel(model)
+modules\pdf_rescue_Qt.py:892:        response = gemini_model.generate_content([instructions, img])
+modules\pdf_rescue_Qt.py:1718:                    "Could not find OpenAI API key in api_keys.txt\n\n"
+modules\llm_pricing.py:24:# Batch #9.4: Ollama удалён — бесплатных провайдеров нет;
+modules\llm_pricing.py:60:        "claude-fable-5-1": (10.0, 50.0),
+modules\llm_pricing.py:61:        "claude-fable-5": (10.0, 50.0),
+modules\llm_pricing.py:62:        "claude-opus-5-5": (4.0, 20.0),
+modules\llm_pricing.py:63:        "claude-opus-5": (5.0, 25.0),
+modules\llm_pricing.py:64:        "claude-opus-4-8": (5.0, 25.0),
+modules\llm_pricing.py:65:        "claude-sonnet-5-5": (2.0, 10.0),
+modules\llm_pricing.py:66:        "claude-sonnet-5": (2.0, 10.0),
+modules\llm_pricing.py:67:        "claude-sonnet-4-6": (3.0, 15.0),
+modules\llm_pricing.py:68:        "claude-haiku-4-5-20251001": (1.0, 5.0),
+modules\llm_pricing.py:69:        "gemini-3.1-flash-lite": (0.25, 1.50),
+modules\llm_pricing.py:102:    # Anthropic native + OpenRouter→Anthropic: 90% off reads, 25% write surcharge -
+modules\llm_pricing.py:103:    # except that reads are 0.05x on Claude Opus 5.5 and 0.025x on Claude Fable 5.1
+modules\llm_pricing.py:105:    if "claude" in lc or lc.startswith("anthropic/"):
+modules\llm_pricing.py:113:    # OpenAI auto-cache: 50% off cache reads, no separate cache-write surcharge.
+modules\llm_pricing.py:117:    # DeepSeek automatic disk caching: ~90% off cache reads.
+modules\llm_pricing.py:118:    if lc.startswith("deepseek") or "deepseek/" in lc:
+modules\llm_pricing.py:121:    # Gemini 2.5+ implicit caching: 75% off cache reads.
+modules\llm_pricing.py:122:    if (lc.startswith("gemini-2.5") or lc.startswith("gemini-3")
+modules\llm_pricing.py:123:            or lc.startswith("google/gemini-2.5") or lc.startswith("google/gemini-3")):
+modules\llm_pricing.py:135:        - 0.0  when tokens are 0, or for genuinely free providers (ollama).
+modules\llm_pricing.py:170:        - 0.0  when all token counts are 0, or for free providers (ollama).
+modules\llm_clients.py:10:  requests go through the OpenAI SDK (`_call_openai_with_usage`).
+modules\llm_clients.py:11:Cloud providers (OpenAI, Anthropic, Google/Gemini, Mistral, DeepSeek,
+modules\llm_clients.py:12:OpenRouter) and Ollama were removed; a stale provider name raises a clear
+modules\llm_clients.py:113:    # Migrate legacy 'google' key to canonical 'gemini' key
+modules\llm_clients.py:114:    if api_keys.get('google') and not api_keys.get('gemini'):
+modules\llm_clients.py:115:        api_keys['gemini'] = api_keys['google']
+modules\llm_clients.py:126:    provider: Literal["openai", "claude", "gemini", "mistral", "deepseek", "openrouter"]
+modules\llm_clients.py:161:            provider: Provider name ("openai", "claude", "gemini")
+modules\llm_clients.py:481:                f"(OpenAI-compatible) profile in Settings → AI Settings")
+modules\llm_clients.py:506:        """Call an OpenAI-compatible API and return (text, usage_dict).
+modules\llm_clients.py:510:        вызывающих; маркеры кэша провайдеров (OpenRouter→Anthropic)
+modules\llm_clients.py:515:            from openai import OpenAI
+modules\llm_clients.py:517:            raise ImportError("OpenAI library not installed. Install with: pip install openai")
+modules\llm_clients.py:529:        client = OpenAI(**client_kwargs)
+modules\llm_clients.py:559:            raise ValueError(f"OpenAI returned empty response for model {self.model}")
+modules\llm_clients.py:563:            raise ValueError(f"OpenAI returned empty translation for model {self.model}")
+modules\llm_clients.py:568:            # OpenAI native: prompt_tokens_details.cached_tokens reports the
+modules\llm_clients.py:574:            # OpenRouter → Anthropic flavour: passes Anthropic's cache fields
+modules\llm_clients.py:586:                # rate (50% for OpenAI auto-cache, 10% for Anthropic via
+modules\llm_clients.py:587:                # OpenRouter, 10% for DeepSeek auto-cache).
+modules\llm_clients.py:590:                # billed at 1.25× input). Zero for native OpenAI / DeepSeek
+modules\settings_service.py:269:            # Custom, OpenAI-совместимый API). Дефолты моделей удалённых
+modules\settings_service.py:270:            # провайдеров (openai/claude/gemini/ollama) убраны; ключи в уже
+modules\settings_service.py:278:            # Custom MT endpoint(s): a dedicated, separate set of OpenAI-compatible
+modules\settings_service.py:303:            # выбор (openai/claude/gemini/mistral/deepseek/openrouter/ollama/
+modules\settings_service.py:384:        # Batch #9.3: дефолты llm_openai/llm_claude/llm_gemini/llm_mistral/
+modules\settings_service.py:385:        # llm_openrouter/llm_ollama удалены вместе с провайдерами; механизм и
+modules\settings_service.py:415:        # Migrate legacy 'google' key to canonical 'gemini' key
+modules\settings_service.py:416:        if api_keys.get('google') and not api_keys.get('gemini'):
+modules\settings_service.py:417:            api_keys['gemini'] = api_keys['google']
+modules\quicktrans.py:324:            # different OpenAI-compatible services at the same time.
+modules\quicktrans.py:350:        Batch #9.3/#9.4: облачные LLM (Claude/OpenAI/Gemini/Mistral/
+modules\quicktrans.py:351:        DeepSeek/OpenRouter) и Ollama удалены из движка и UI — остаётся
+modules\quicktrans.py:1308:    (Claude, OpenAI, Gemini, ...) are NOT auto-fetched – each gets an
+modules\superlookup.py:237:        # TODO: Integrate with MT providers (DeepL, Google, OpenAI)
+modules\translation_results_panel.py:174:                "CL": "Claude",
+modules\translation_results_panel.py:175:                "GPT": "OpenAI",
+modules\translation_results_panel.py:176:                "GEM": "Gemini",
+modules\unified_prompt_manager_qt.py:2389:            "  • The active model must support vision (Claude Sonnet/Opus,\n"
+modules\unified_prompt_manager_qt.py:2390:            "    GPT-4o and later, Gemini). Text-only models silently skip\n"
+modules\unified_prompt_manager_qt.py:4466:                    "(Claude Sonnet/Opus 4.x, GPT-4o or newer, Gemini) in "
+modules\unified_prompt_manager_qt.py:4486:            # gemini-ветка удалена вместе с провайдером. Логика фигур (G5)
+modules\unified_prompt_manager_qt.py:4487:            # не менялась: тот же payload-формат, что был для не-gemini путей.
+modules\unified_prompt_manager_qt.py:4505:        # Gemini Pro very cheap.
+modules\unified_prompt_manager_qt.py:4510:        elif "sonnet" in model_lc or "claude" in provider_lc:
+modules\unified_prompt_manager_qt.py:4512:        elif "gemini" in provider_lc:
+modules\unified_prompt_manager_qt.py:5021:    #  scaffolding.  Brief input to add these (web-Claude analysis of

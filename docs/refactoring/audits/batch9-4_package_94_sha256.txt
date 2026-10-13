@@ -1,0 +1,8 @@
+ade0e48a6ac94252a4194408a1cfcee10fe5dfdc523232f471cbd026df7edd15  Supervertaler.py  55000 lines
+a55a0033092fdb7b0ea456e6a585151fc0683b1de38ee11eb872e24067ec09b5  modules/quicktrans.py  1628 lines
+47e4def072eaca94624b4e66860de9f02209d7a73508a3779eeb3f1438ac4afa  modules/chat_view_widget.py  934 lines
+1e64c2f1a8d56beee6f7aa533970dac332ededcf40095c855f6d2564b3d41152  modules/llm_clients.py  597 lines
+e46f6c762d29abfb597e58034e0fc5998e9a9cb4a432e2218e89b6d20cc4c5d8  modules/llm_pricing.py  192 lines
+805c397101b50ba6068127c039afefff0b7f82a485b6ecfab4f6bc496fe3f72d  modules/help_system.py  254 lines
+644e19867b580cb281f008ea135d411920259029a9d30a039ffa2645d3387d0b  setup.py  94 lines
+c08b7704f42b40536fd9553f34cff3f94c5a9cd79336fe64c736cdcc64568ab6  modules/local_llm_setup.py  (DELETED, sha of last version)  1071 lines
