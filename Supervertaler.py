@@ -6359,8 +6359,6 @@ class SupervertalerQt(QMainWindow):
         self.last_backup_time = None
         self.restart_auto_backup_timer()
 
-        # Apply proxy env vars for Gemini before any API calls are made
-        self._apply_gemini_proxy()
 
         # Initialize Okapi sidecar (local file-processing service)
         self.okapi_sidecar = None
@@ -7551,10 +7549,6 @@ class SupervertalerQt(QMainWindow):
         # Add as permanent widget (stays on right side)
         self.status_bar.addPermanentWidget(progress_frame)
         
-        # Initialize Ollama keep-warm timer
-        self.ollama_keepwarm_timer = None
-        self._setup_ollama_keepwarm()
-        self._apply_ollama_timeout_setting()
 
     def _resolve_provider_model(self, settings, provider, default='gpt-5.5'):
         """Определить имя модели для провайдера.
@@ -7620,81 +7614,6 @@ class SupervertalerQt(QMainWindow):
             if hasattr(self, 'llm_indicator_label'):
                 self.llm_indicator_label.setText("")
     
-    def _setup_ollama_keepwarm(self):
-        """Настроить таймер поддержания модели Ollama «тёплой» (загруженной в память)."""
-        from PyQt6.QtCore import QTimer
-        
-        # Check settings to see if keep-warm is enabled
-        general_settings = self.load_general_settings()
-        keepwarm_enabled = general_settings.get('ollama_keepwarm', False)
-        
-        if keepwarm_enabled:
-            self._start_ollama_keepwarm_timer()
-
-    def _apply_ollama_timeout_setting(self, llm_settings=None):
-        """Push the user's Ollama request timeout (0 = automatic) to llm_clients."""
-        try:
-            from modules.llm_clients import set_ollama_timeout
-            if llm_settings is None:
-                llm_settings = self.load_llm_settings()
-            minutes = int(llm_settings.get('ollama_timeout_minutes', 0) or 0)
-            set_ollama_timeout(minutes * 60)
-        except Exception as e:
-            self.log(f"⚠ Could not apply Ollama timeout setting: {e}")
-
-    def _start_ollama_keepwarm_timer(self):
-        """Запустить таймер keep-warm для Ollama (пинг каждые 4 минуты)."""
-        from PyQt6.QtCore import QTimer
-        
-        if self.ollama_keepwarm_timer is None:
-            self.ollama_keepwarm_timer = QTimer(self)
-            self.ollama_keepwarm_timer.timeout.connect(self._ping_ollama_keepwarm)
-        
-        # Ping every 4 minutes (Ollama unloads after 5 min of inactivity)
-        self.ollama_keepwarm_timer.start(4 * 60 * 1000)  # 4 minutes in ms
-        self.log("🔥 Ollama keep-warm enabled (pinging every 4 minutes)")
-    
-    def _stop_ollama_keepwarm_timer(self):
-        """Остановить таймер keep-warm для Ollama."""
-        if self.ollama_keepwarm_timer:
-            self.ollama_keepwarm_timer.stop()
-            self.log("❄️ Ollama keep-warm disabled")
-    
-    def _ping_ollama_keepwarm(self):
-        """Отправить в Ollama минимальный запрос, чтобы модель оставалась загруженной."""
-        import threading
-        
-        def ping():
-            try:
-                import requests
-                settings = self.load_llm_settings()
-                if settings.get('provider') != 'ollama':
-                    return
-                
-                model = settings.get('ollama_model', 'translategemma:12b')
-                endpoint = os.environ.get('OLLAMA_ENDPOINT', 'http://localhost:11434').rstrip('/')
-                for _sfx in ('/api', '/v1'):
-                    if endpoint.endswith(_sfx):
-                        endpoint = endpoint[:-len(_sfx)]
-
-                # Send minimal request to keep model warm
-                response = requests.post(
-                    f"{endpoint}/api/generate",
-                    json={
-                        "model": model,
-                        "prompt": "hi",
-                        "options": {"num_predict": 1}  # Generate just 1 token
-                    },
-                    timeout=30
-                )
-                if response.status_code == 200:
-                    print(f"🔥 Ollama keep-warm ping successful ({model})")
-            except Exception as e:
-                print(f"⚠️ Ollama keep-warm ping failed: {e}")
-        
-        # Run in background thread to not block UI
-        threading.Thread(target=ping, daemon=True).start()
-
     def update_progress_stats(self):
         """Обновить подписи индикатора прогресса в статусной строке."""
         try:
@@ -23336,8 +23255,6 @@ class SupervertalerQt(QMainWindow):
                 'password': self.proxy_pass_input.text().strip(),
             }
             self.save_proxy_settings(proxy_settings)
-            # Re-apply Gemini env vars immediately
-            self._apply_gemini_proxy()
 
         self.log(f"✓ AI settings saved: Provider={provider}, Model={self.current_model}")
         QMessageBox.information(self, "Settings Saved", "AI settings have been saved successfully.")
@@ -47653,19 +47570,6 @@ class SupervertalerQt(QMainWindow):
         Обязателен: self-вызовы 60918 / 60943 / 61051 / 61160 / 61208
         (MT-сервисы на библиотеке requests).)"""
         return self.settings_service._get_proxy_dict()
-
-    def _apply_gemini_proxy(self):
-        """Применяет (или убирает) прокси для Google Gemini установкой/снятием
-                переменной окружения HTTPS_PROXY для этого процесса. Вызывается
-                при запуске и при каждом сохранении настроек прокси."""
-        import os
-        url = self._get_proxy_url()
-        if url:
-            os.environ["HTTPS_PROXY"] = url
-            os.environ["HTTP_PROXY"] = url
-        else:
-            os.environ.pop("HTTPS_PROXY", None)
-            os.environ.pop("HTTP_PROXY", None)
 
     @staticmethod
     def _normalize_custom_endpoint(url):
