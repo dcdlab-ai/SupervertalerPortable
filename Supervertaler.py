@@ -20086,36 +20086,15 @@ class SupervertalerQt(QMainWindow):
         self._mtql_llm_combos = {}
 
 
-        # Custom OpenAI-compatible provider (shows active profile info)
-        custom_row = QHBoxLayout()
-        custom_cb = CheckmarkCheckBox(self.tr("Custom (OpenAI-Compatible)"))
-        custom_cb.setChecked(mt_quick_settings.get("mtql_custom_openai", False))
-        custom_cb.setToolTip(self.tr("Use your custom OpenAI-compatible endpoint (configured in AI Settings)"))
-        self._mtql_checkboxes["mtql_custom_openai"] = custom_cb
-        custom_row.addWidget(custom_cb)
-
+        # Batch #9.4i (решение Дмитрия 2026-10-14): мастер-чекбокс
+        # «Custom (OpenAI-Compatible)» и read-only поле модели активного
+        # профиля убраны — LLM-чипы в попапе есть всегда, профили выбирают
+        # чекбоксы профилей ниже.
         llm_settings = self.load_llm_settings()
-        profile = self._get_active_custom_profile(llm_settings)
-        profile_display = ""
-        if profile:
-            profile_display = f"{profile.get('name', 'Custom')} – {profile.get('model', '')}"
-        else:
-            profile_display = mt_quick_settings.get("mtql_custom_openai_model", llm_settings.get('custom_openai_model', ''))
-
-        custom_model_edit = QLineEdit()
-        custom_model_edit.setMinimumWidth(200)
-        custom_model_edit.setPlaceholderText(self.tr("Uses active profile from AI Settings"))
-        custom_model_edit.setText(profile_display)
-        custom_model_edit.setReadOnly(True)
-        custom_model_edit.setStyleSheet("color: #666; background: #f5f5f5;")
-        self._mtql_llm_combos["mtql_custom_openai_model"] = custom_model_edit
-        custom_row.addWidget(custom_model_edit)
-        custom_row.addStretch()
-        llm_layout.addLayout(custom_row)
 
         # Batch #9.4f: чип на каждый включённый профиль Custom (pattern of
-        # Custom MT above). Master checkbox mtql_custom_openai gates the group;
-        # mtql_llm_profiles stores the enabled profile names.
+        # Custom MT above). Batch #9.4i: master checkbox removed — the group
+        # is always on; mtql_llm_profiles stores the enabled profile names.
         self._mtql_llm_profile_cbs = {}
         _llm_profiles = llm_settings.get('custom_openai_profiles') or []
         _enabled_names = mt_quick_settings.get('mtql_llm_profiles')
@@ -20170,6 +20149,15 @@ class SupervertalerQt(QMainWindow):
         if getattr(self, '_mtql_llm_profile_cbs', None):
             mt_quick_settings['mtql_llm_profiles'] = [
                 name for name, cb in self._mtql_llm_profile_cbs.items() if cb.isChecked()]
+
+        # Batch #9.4i: мастер-чекбокс убран; mtql_custom_openai и
+        # mtql_custom_openai_model — инертные легаси-ключи: Save переносит их
+        # из старой секции без изменений (в файле остаются, не читаются,
+        # заново не записываются).
+        _old_mtql = general_settings.get('mt_quick_lookup') or {}
+        for _k in ('mtql_custom_openai', 'mtql_custom_openai_model'):
+            if _k in _old_mtql:
+                mt_quick_settings[_k] = _old_mtql[_k]
 
         general_settings['mt_quick_lookup'] = mt_quick_settings
         self.save_general_settings(general_settings)
