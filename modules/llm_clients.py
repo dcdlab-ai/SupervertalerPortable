@@ -142,27 +142,8 @@ class LLMClient:
 
 
     
-    # Vision-capable models (support image inputs).
-    # Batch #9.5: vision — свойство профиля (галка «Model supports vision»),
-    # whitelist имён моделей больше не используется. VISION_MODELS и
-    # classmethod model_supports_vision — временный shim (всегда False): их
-    # оставшиеся потребители — 3 внешних гейта (монолит, prompt manager),
-    # переводятся на экземплярный флаг в 9.5c, после чего удаляются.
-    VISION_MODELS = {}
-
-
     # Reasoning models that don't support temperature parameter (must be omitted)
     REASONING_MODELS = ["gpt-5", "o1", "o3"]
-
-    @classmethod
-    def model_supports_vision(cls, provider: str, model_name: str) -> bool:
-        """Deprecated shim (Batch #9.5): всегда False.
-
-        Vision теперь — экземплярный флаг профиля (LLMClient.supports_vision).
-        Метод сохранён только для трёх внешних гейтов, переводимых в 9.5c;
-        после их перевода удаляется вместе с VISION_MODELS.
-        """
-        return False
 
     def __init__(self, api_key: str = None, provider: str = "openai", model: Optional[str] = None, max_tokens: int = 16384, base_url: Optional[str] = None, http_proxy: Optional[str] = None, supports_vision: bool = False):
         """

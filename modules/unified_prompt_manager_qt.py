@@ -2386,9 +2386,9 @@ class UnifiedPromptManagerQt:
             "visible components, etc.).\n\n"
             "Requirements:\n"
             "  • Figure images must already be loaded in Section 4.\n"
-            "  • The active model must support vision (Claude Sonnet/Opus,\n"
-            "    GPT-4o and later, Gemini). Text-only models silently skip\n"
-            "    the images.\n\n"
+            "  • The active profile must have 'Model supports vision (image\n"
+            "    input)' ticked in Settings → AI Settings. Profiles without\n"
+            "    the tick silently skip the images.\n\n"
             "Cost impact: roughly +$0.05–$0.30 per AutoPrompt run with a\n"
             "Sonnet-class model and 10–20 figures; more with Opus-class.\n"
             "Negligible vs. the project's translation value, but off by\n"
@@ -4389,8 +4389,9 @@ If the text refers to figures (e.g., 'Figure 1A'), relevant images may be provid
             self.log_message("[AI Assistant] AutoPrompt aborted by user (image-context confirmation cancelled).")
             self._add_chat_message(
                 "system",
-                "⚠ AutoPrompt cancelled. Re-run after switching to a vision-capable "
-                "model, or untick 'Include loaded figure images' to run text-only."
+                "⚠ AutoPrompt cancelled. Re-run after ticking 'Model supports vision "
+                "(image input)' for the active profile in Settings → AI Settings, "
+                "or untick 'Include loaded figure images' to run text-only."
             )
         else:
             # Augment the meta-prompt with a section telling the LLM
@@ -4447,24 +4448,23 @@ If the text refers to figures (e.g., 'Figure 1A'), relevant images may be provid
             )
             return None
 
-        # Gate 3: active model supports vision?
+        # Gate 3: active profile supports vision? (Batch #9.5 — галка профиля)
         try:
-            from modules.llm_clients import LLMClient
             llm_client = getattr(self.chat_backend, "llm_client", None)
             if not llm_client:
                 return None
             provider = llm_client.provider
             model = llm_client.model
-            if not LLMClient.model_supports_vision(provider, model):
+            if not getattr(llm_client, "supports_vision", False):
                 resp = QMessageBox.warning(
                     self.main_widget,
                     "Active model doesn't support vision",
                     f"The active AI model — <b>{provider} / {model}</b> — does "
                     "not accept image input.\n\n"
                     "AutoPrompt will run text-only (images skipped).\n\n"
-                    "To send images, switch to a vision-capable model "
-                    "(Claude Sonnet/Opus 4.x, GPT-4o or newer, Gemini) in "
-                    "Settings first, then re-run AutoPrompt.",
+                    "To send images, tick <b>Model supports vision (image input)</b> "
+                    "for this profile in Settings → AI Settings, then re-run "
+                    "AutoPrompt.",
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
                 )
                 if resp == QMessageBox.StandardButton.Cancel:

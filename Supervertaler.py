@@ -9550,8 +9550,8 @@ class SupervertalerQt(QMainWindow):
             "Scheme / Exhibit) — marketing copy, blog posts, foreign-language\n"
             "documents, photo essays, cookbooks, etc.\n\n"
             "Requirements:\n"
-            "  • Vision-capable model in Settings (Claude Sonnet/Opus 4.x,\n"
-            "    GPT-4o or newer, Gemini)\n"
+            "  • The active Custom profile must have 'Model supports vision\n"
+            "    (image input)' ticked in Settings → AI Settings\n"
             "  • Internet connection\n\n"
             "Cost: ~$0.005–$0.02 per AI-labelled image depending on provider.\n"
             "Only used for images the free text-pattern detector missed —\n"
@@ -9895,17 +9895,17 @@ class SupervertalerQt(QMainWindow):
         provider = getattr(llm_client, 'provider', '')
         model = getattr(llm_client, 'model', '')
 
-        # Gate 3: model supports vision?
+        # Gate 3: profile supports vision? (Batch #9.5 — галка профиля)
         try:
-            from modules.llm_clients import LLMClient
-            if not LLMClient.model_supports_vision(provider, model):
+            if not getattr(llm_client, 'supports_vision', False):
                 resp = QMessageBox.question(
                     self,
                     "Vision not enabled for Custom profile",
                     f"The active AI model — <b>{provider} / {model}</b> — does "
                     "not accept image input, so the 🤖 AI label step can't run.\n\n"
-                    "Vision for Custom profile is not enabled yet. Click "
-                    "<b>OK</b> to proceed with text-pattern detection only.",
+                    "To enable it, tick <b>Model supports vision (image input)</b> "
+                    "for this profile in Settings → AI Settings, then re-run.\n\n"
+                    "Click <b>OK</b> to proceed with text-pattern detection only.",
                     QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
                     QMessageBox.StandardButton.Ok,
                 )
@@ -48905,7 +48905,6 @@ class SupervertalerQt(QMainWindow):
             images = None
             if self.figure_context and self.figure_context.has_images():
                 try:
-                    from modules.llm_clients import LLMClient
                     from modules.figure_context_manager import pil_image_to_base64_png
 
                     # Detect figure references in source text
@@ -48915,8 +48914,9 @@ class SupervertalerQt(QMainWindow):
                         # Get images for detected figures
                         images_for_text = self.figure_context.get_images_for_text(segment.source)
                         if images_for_text:
-                            # Check if model supports vision
-                            if LLMClient.model_supports_vision(provider, model):
+                            # Batch #9.5: vision — галка профиля («Model supports
+                            # vision») у клиента, реально используемого для запроса
+                            if getattr(client, 'supports_vision', False):
                                 # Convert PIL images to appropriate format for provider
                                 if provider == "gemini":
                                     # Gemini uses PIL.Image directly
@@ -48929,7 +48929,7 @@ class SupervertalerQt(QMainWindow):
                                     ]
                                 self.log(f"  ✅ Including {len(images)} figure images: {', '.join(figure_refs)}")
                             else:
-                                self.log(f"  ⚠️ Figures detected ({', '.join(figure_refs)}) but model '{model}' doesn't support vision")
+                                self.log(f"  ⚠️ Figures detected ({', '.join(figure_refs)}) but model '{model}' doesn't support vision — tick 'Model supports vision (image input)' for this profile in Settings → AI Settings to send images")
                         else:
                             self.log(f"  ⚠️ Figure references detected but no matching images found in loaded folder")
                 except Exception as e:
