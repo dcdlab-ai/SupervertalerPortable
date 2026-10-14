@@ -47503,7 +47503,8 @@ class SupervertalerQt(QMainWindow):
 
         profile_name (Batch #9.4f) — имя конкретного профиля для чипа QuickTrans;
         без него — активный профиль (активный по имени -> первый -> легаси-конфиг).
-        Возвращает словарь с ключами name, endpoint, model, api_key — или None."""
+        Возвращает словарь с ключами name, endpoint, model, api_key,
+        supports_vision (Batch #9.5) — или None."""
         if settings is None:
             settings = self.load_llm_settings()
         profiles = settings.get('custom_openai_profiles', [])
@@ -47529,7 +47530,7 @@ class SupervertalerQt(QMainWindow):
         if endpoint:
             return {'name': 'Custom Endpoint',
                     'endpoint': self._normalize_custom_endpoint(endpoint),
-                    'model': model, 'api_key': ''}
+                    'model': model, 'api_key': '', 'supports_vision': False}
 
         return None
 
@@ -47679,9 +47680,15 @@ class SupervertalerQt(QMainWindow):
             # Profile API key takes priority, then api_keys.txt fallback
             profile_key = (profile.get('api_key') or '').strip()
             api_key = profile_key or api_key
+        # Batch #9.5: vision — свойство профиля. Ключ отсутствует/не-bool → False;
+        # settings.json при загрузке не переписывается.
+        supports_vision = profile.get('supports_vision') if profile else None
+        if not isinstance(supports_vision, bool):
+            supports_vision = False
         # Pass proxy URL to client (None if proxy disabled or not configured)
         http_proxy = self._get_proxy_url()
-        return LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy)
+        return LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url,
+                         http_proxy=http_proxy, supports_vision=supports_vision)
 
     def load_provider_enabled_states(self) -> Dict[str, bool]:
         """Загружает состояния включённости провайдеров из предпочтений пользователя.

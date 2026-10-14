@@ -143,9 +143,11 @@ class LLMClient:
 
     
     # Vision-capable models (support image inputs).
-    # Batch #9.3: облачные провайдеры удалены; для custom_openai vision пока
-    # ОТКЛЮЧЁН (model_supports_vision == False для любой модели) — включается
-    # отдельным шагом: галка «модель поддерживает vision» в профиле (план 9.5).
+    # Batch #9.5: vision — свойство профиля (галка «Model supports vision»),
+    # whitelist имён моделей больше не используется. VISION_MODELS и
+    # classmethod model_supports_vision — временный shim (всегда False): их
+    # оставшиеся потребители — 3 внешних гейта (монолит, prompt manager),
+    # переводятся на экземплярный флаг в 9.5c, после чего удаляются.
     VISION_MODELS = {}
 
 
@@ -154,21 +156,15 @@ class LLMClient:
 
     @classmethod
     def model_supports_vision(cls, provider: str, model_name: str) -> bool:
-        """
-        Check if a model supports vision (image) inputs
-        
-        Args:
-            provider: Provider name ("openai", "claude", "gemini")
-            model_name: Model identifier
-            
-        Returns:
-            True if model supports vision, False otherwise
-        """
-        provider = provider.lower()
-        vision_models = cls.VISION_MODELS.get(provider, [])
-        return model_name in vision_models
+        """Deprecated shim (Batch #9.5): всегда False.
 
-    def __init__(self, api_key: str = None, provider: str = "openai", model: Optional[str] = None, max_tokens: int = 16384, base_url: Optional[str] = None, http_proxy: Optional[str] = None):
+        Vision теперь — экземплярный флаг профиля (LLMClient.supports_vision).
+        Метод сохранён только для трёх внешних гейтов, переводимых в 9.5c;
+        после их перевода удаляется вместе с VISION_MODELS.
+        """
+        return False
+
+    def __init__(self, api_key: str = None, provider: str = "openai", model: Optional[str] = None, max_tokens: int = 16384, base_url: Optional[str] = None, http_proxy: Optional[str] = None, supports_vision: bool = False):
         """
         Initialize LLM client
 
@@ -181,6 +177,8 @@ class LLMClient:
             max_tokens: Maximum tokens for responses (default: 16384)
             base_url: Custom API base URL (from the active Custom profile)
             http_proxy: Optional HTTP/HTTPS proxy URL, e.g. "http://user:pass@host:8080"
+            supports_vision: Batch #9.5 — «Model supports vision» из профиля Custom
+                (OpenAI-совместимый эндпоинт). Флаг профиля, не whitelist имён моделей.
         """
         self.provider = provider.lower()
         self.api_key = api_key
@@ -188,6 +186,7 @@ class LLMClient:
         self.max_tokens = max_tokens
         self.base_url = base_url
         self.http_proxy = http_proxy  # e.g. "http://user:pass@127.0.0.1:8080"
+        self.supports_vision = bool(supports_vision)
 
         if not self.model:
             raise ValueError(f"Unknown provider: {provider}")
@@ -468,7 +467,9 @@ class LLMClient:
             if context:
                 prompt = f"Context: {context}\n\n{prompt}"
 
-        if images and not self.model_supports_vision(self.provider, self.model):
+        # Batch #9.5: vision — свойство профиля (галка «Model supports vision»),
+        # не whitelist имён моделей. Без галки изображения не отправляются.
+        if images and not self.supports_vision:
             images = None
 
         _t0 = time.perf_counter()

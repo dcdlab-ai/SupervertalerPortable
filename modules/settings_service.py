@@ -296,7 +296,8 @@ class SettingsService:
                     'name': 'Custom Endpoint',
                     'endpoint': self.normalize_custom_endpoint(saved['custom_openai_endpoint']),
                     'model': saved.get('custom_openai_model', ''),
-                    'api_key': api_keys.get('custom_openai', '')
+                    'api_key': api_keys.get('custom_openai', ''),
+                    'supports_vision': False
                 }]
                 saved['custom_openai_active_profile'] = 'Custom Endpoint'
             # Batch #9.3: молчаливая миграция провайдера — любой сохранённый
