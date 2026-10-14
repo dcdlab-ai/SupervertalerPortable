@@ -349,13 +349,11 @@ class QuickTransProviderMixin:
 
         Batch #9.3/#9.4: облачные LLM (Claude/OpenAI/Gemini/Mistral/
         DeepSeek/OpenRouter) и Ollama удалены из движка и UI — остаётся
-        только Custom (активный профиль custom_openai, чип CUS)."""
-        # Batch #9.4f: master checkbox mtql_custom_openai gates the group;
-        # mtql_llm_profiles (list of profile names) selects which profiles get
-        # their own CUS chip. Empty/missing list = every profile with an
-        # endpoint gets a chip (pre-9.4f settings keep working).
-        if not mt_quick_settings.get('mtql_custom_openai', False):
-            return
+        только Custom (активный профиль custom_openai, чип CUS).
+
+        Batch #9.4i (решение Дмитрия 2026-10-14): мастер-чекбокс
+        mtql_custom_openai убран — чипы есть всегда; mtql_llm_profiles выбирает
+        профили; при пустом списке работает глобальный активный профиль."""
 
         llm_settings = {}
         if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, 'load_llm_settings'):
@@ -385,27 +383,22 @@ class QuickTransProviderMixin:
                               make_llm_caller((prof.get('model') or '').strip(), pname)))
             _added += 1
 
-        if _added == 0 and profiles:
-            # Batch #9.4h (уточнение Дмитрия 2026-10-13): когда в QuickTrans
-            # сняты/удалены ВСЕ профили, попап работает с глобальным активным
-            # профилем из AI Settings как с единственно оставшимся чипом.
+        if _added == 0:
+            # Batch #9.4h/#9.4i (решение Дмитрия 2026-10-13/14): когда в QuickTrans
+            # сняты/удалены ВСЕ профили (или список устарел, или профилей нет вовсе),
+            # попап работает с глобальным активным профилем из AI Settings как с
+            # единственно оставшимся чипом. _get_active_custom_profile разрешает
+            # активный по имени -> первый профиль -> легаси-плоский endpoint.
             active = None
             if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, '_get_active_custom_profile'):
                 try:
                     active = self.parent_app._get_active_custom_profile(llm_settings)
                 except Exception:
                     active = None
-            label = (active.get('name') if active and active.get('name') else 'Custom')
-            providers.append((label, "CUS", make_llm_caller(None, None)))
-            return
-
-        if profiles:
-            return
-
-        # No profiles configured: legacy single-field endpoint (pre-profiles
-        # settings.json) keeps the single 'Custom' chip.
-        model = mt_quick_settings.get('mtql_custom_openai_model', None)
-        providers.append(("Custom", "CUS", make_llm_caller(model, None)))
+            if active and (active.get('endpoint') or '').strip():
+                label = (active.get('name') if active.get('name') else 'Custom')
+                providers.append((label, "CUS", make_llm_caller(None, None)))
+            # Batch #9.4i: профиль не настроен вовсе — чипов нет, ошибок нет.
 
     def _call_llm_translation(self, provider: str, text: str, source_lang: str, target_lang: str, model: str = None, profile_name: str = None) -> str:
         """Call LLM for translation"""
