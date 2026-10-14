@@ -14,9 +14,10 @@
 | 9.5b | `0410bdc4` | UI-чекбокс vision в AI Settings | 54999→55020 | 598 | 6833 | 599 |
 | 9.5c | `7aa98248` | гейты берут флаг профиля + тексты; шим удалён | 55020 | 598→579 | 6833 | 599 |
 | 9.5d | `61639c60` | запрет сохранения пустого endpoint Custom LLM-профиля | 55020→55042 | 579 | 6833 | 599 |
+| 9.5e | `0b9c9ad2` | follow-up по ответам координатора (Q2/Q3/Q4): текст warning через `self.tr()` по формулировке Дмитрия; V6-кейс «пустой список»; legacy-сценарий save-пробы | 55042→55040 | 579 | 6833 | 599 |
 
 Финальное состояние (для пакета тестовой сборки, §5):
-- `Supervertaler.py` — SHA256 `9e7a308075727422a81504c69b6f67e3507ed73dd9ba68ab69280c85c0726e58`, 55042 строки (CRLF)
+- `Supervertaler.py` — SHA256 `fe5f706c1f654b061c64bda60503b427d2035000fac28154cd10e79aa7a70552`, 55040 строк (CRLF)
 - `modules/llm_clients.py` — `7f2b9ee9e2ff7f101f7b1ddbcf764deb59c3c7c7675ccbe7f81453d738226c47`, 579
 - `modules/settings_service.py` — `08a0d943a8b04add8b0255ec5548042b69489a6c34e92c746886b82b68d79667`, 599
 - `modules/unified_prompt_manager_qt.py` — `cec2ef68b48f23148e4a9f7ab9ef2e54f8bcdd94ea89c117ed70e0bc04d00661`, 6833
@@ -57,27 +58,32 @@
 ### 9.5d — запрет пустого endpoint (`61639c60`)
 - `_save_ai_settings_from_ui`: после синка видимых полей активного профиля, **до первой записи на диск** — цикл по всем профилям живого снимка: `if not str(_gp.get('endpoint','')).strip():` → `QMessageBox.warning(self, "Empty Endpoint", …имя профиля…)`, `custom_profile_combo.setCurrentIndex(idx)`, `return`. Файл не меняется, вкладка открыта. Строка из пробелов = пусто. Пустой список профилей разрешён. **Custom MT не проверяется** (пустой MT endpoint разрешён).
 
+### 9.5e — follow-up по ответам координатора (`0b9c9ad2`)
+- **Q2 (текст)**: warning переведён на формулировку Дмитрия и обёрнут в `self.tr()` (как остальные диалоги настроек): заголовок `self.tr("Empty Endpoint")`, тело `self.tr('Profile "{0}" has no endpoint. Fill it in or remove the profile.').format(_gp_name)`. Поведение прежнее: диалог остаётся открытым, на диск ничего не пишется, проблемный профиль выбирается в комбо. 55042→55040 строк (−2: тело диалога стало короче). Вызов находится в `_save_ai_settings_from_ui`, который НЕ входит в AST-chain (chain считает `_create_*_settings_tab`), поэтому chain 873/0 не изменился.
+- **Q3 (V6-кейс)**: в спец-пробу добавлен явный кейс: два профиля → удалить оба («−»×2) → комбо пустое → Save → **успех без warning**, на диске `custom_openai_profiles == []`, зеркала очищены, статус-бар «Custom profile not configured» → **перезапуск** (второй `SupervertalerQt`) строится без ошибок и читает ноль профилей. Спец-проба: **45/45 PASS** (39 прежних + 6 новых проверок).
+- **Q4 (легаси-сценарий)**: сид 9.4a save-пробы принимает аргумент `modern|legacy`. `modern` — активный профиль с `supports_vision: False` (артефакт, правка принята координатором); `legacy` — файл **до-9.5** (ни у одного профиля ключа `supports_vision` нет). Save-проба в legacy-режиме проверяет: профили сохранены (сравнение с игнорированием нового ключа), активный профиль приобрёл `supports_vision=False`, НЕактивные профили ключ НЕ приобрели. Runner `batch9-4_run_94i.sh` гоняет оба сценария: modern ALL OK + legacy ALL OK. Регрессия 9.1 продолжает покрывать файлы, написанные до 9.5.
+
 ---
 
 ## §4. Метрики защит (на каждый коммит; полная таблица логов — §10)
 
-| Метрика | база (9.4i) | 9.5a | 9.5b | 9.5c | 9.5d |
-|---------|------------|------|------|------|------|
-| AST chain (calls/unresolved) | 871/0 | 871/0 | 873/0 (+2 self.tr чекбокса, оба резолвятся) | 873/0 | 873/0 |
-| pyflakes warnings | 549 | 549 | 549 | 548 (−1 удалён неиспользуемый импорт LLMClient) | 548 |
-| pyflakes undefined (lines/names) | 126/4 | 126/4 | 126/4 | 126/4 | 126/4 |
-| py_compile канон (вне docs/) | 109/0 | 109/0 | 109/0 | 109/0 | 109/0 |
-| headless imports | 90/2 (setuptools, fitz) | 90/2 | 90/2 | 90/2 | 90/2 |
-| grep-гейт 8 файлов | CLEAN | CLEAN | CLEAN | CLEAN | CLEAN |
-| offscreen-обойма (S-clean/S-upgrade/regress/smoke/TB/About/save/r9×3/e2e/qtchat/statusbar/profiles/fallback) | зелёная | зелёная | зелёная | зелёная | зелёная |
-| спец-проба probe_95 (V1–V8) | — | — | — | 33/39 (6 FAIL = V6, фича не готова) | **39/39** |
+| Метрика | база (9.4i) | 9.5a | 9.5b | 9.5c | 9.5d | 9.5e |
+|---------|------------|------|------|------|------|------|
+| AST chain (calls/unresolved) | 871/0 | 871/0 | 873/0 (+2 self.tr чекбокса, оба резолвятся) | 873/0 | 873/0 | 873/0 |
+| pyflakes warnings | 549 | 549 | 549 | 548 (−1 удалён неиспользуемый импорт LLMClient) | 548 | 548 |
+| pyflakes undefined (lines/names) | 126/4 | 126/4 | 126/4 | 126/4 | 126/4 | 126/4 |
+| py_compile канон (вне docs/) | 109/0 | 109/0 | 109/0 | 109/0 | 109/0 | 109/0 |
+| headless imports | 90/2 (setuptools, fitz) | 90/2 | 90/2 | 90/2 | 90/2 | 90/2 |
+| grep-гейт 8 файлов | CLEAN | CLEAN | CLEAN | CLEAN | CLEAN | CLEAN |
+| offscreen-обойма (S-clean/S-upgrade/regress/smoke/TB/About/save modern+legacy/r9×3/e2e/qtchat/statusbar/profiles/fallback) | зелёная | зелёная | зелёная | зелёная | зелёная | зелёная |
+| спец-проба probe_95 (V1–V8) | — | — | — | 33/39 (6 FAIL = V6, фича не готова) | **39/39** | **45/45** (+6 V6-Q3) |
 
 Regres-хэши стабильны на всех коммитах: `5a12501f…` / `44828d90…` / `c413d563…`; S-clean 31 TREE; S-upgrade HASH-DIFF пустой; Tools-smoke 42.
 
 **Пояснения к отклонениям:**
 - chain 871→873 (9.5b): ровно +2 вызова `self.tr()` (label + tooltip чекбокса в `_create_ai_settings_tab`), оба резолвятся — diff JSON before/after: added 2, removed 0.
 - pyflakes 549→548 (9.5c): −1 = удалённый неиспользуемый импорт `LLMClient`; множество undefined имён идентично (126 строк / 4 имени, все в `tmx_editor.py`).
-- 9.4a save-probe: с 9.5b Save легитимно дописывает `supports_vision` активному профилю → строгая dict-проверка «profiles preserved» требовала seed с ключом. Сид-скрипт (audit-артефакт, редактируемый) дополнен `supports_vision: False` у активного профиля → ALL OK. r9-сиды и сиды 9.4f/9.4i правки не потребовали (все endpoint-ы непустые; 9.4f/9.4i кликают только «Save QuickTrans», 9.5d их не касается).
+- 9.4a save-probe: с 9.5b Save легитимно дописывает `supports_vision` активному профилю → строгая dict-проверка «profiles preserved» требовала seed с ключом. Сид-скрипт (audit-артефакт, редактируемый) дополнен `supports_vision: False` у активного профиля → ALL OK. **Это изменение артефакта, а не продукта (ответ Q4).** Самый важный случай — файлы, написанные до 9.5, — сохранён отдельным legacy-кейсом (9.5e): сид без ключа `supports_vision`, проверка «активный приобрёл False, неактивные без ключа». r9-сиды и сиды 9.4f/9.4i правки не потребовали (все endpoint-ы непустые; 9.4f/9.4i кликают только «Save QuickTrans», 9.5d их не касается).
 
 ---
 
@@ -85,7 +91,7 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 
 Файлы для обновления в `D:\SupervertalerPortable_test\SupervertalerPortable\` (по правилам замороженной сборки — копия из репо, без локальных патчей):
 
-1. `Supervertaler.py` — `9e7a3080…` / 55042
+1. `Supervertaler.py` — `fe5f706c…` / 55040 (после 9.5e)
 2. `modules/llm_clients.py` — `7f2b9ee9…` / 579
 3. `modules/settings_service.py` — `08a0d943…` / 599
 4. `modules/unified_prompt_manager_qt.py` — `cec2ef68…` / 6833
@@ -104,6 +110,8 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 - **T9.5.6** — профиль с пустым endpoint → Save блокируется: предупреждение с именем профиля, комбо выделяет проблемный профиль, settings.json не меняется, вкладка открыта; строка из пробелов — то же.
 - **T9.5.7** — старый settings.json без `supports_vision` грузится (флаг = False, файл не переписан); ранее сохранённый профиль с пустым endpoint грузится и НЕ удаляется; Save QuickTrans с пустым MT endpoint работает как раньше (MT не блокируется).
 
+**Вердикт координатора (Дмитрий, 2026-10-14):** T9.5.1 **ПОДТВЕРЖДЕНО**, T9.5.2 **ПОДТВЕРЖДЕНО**, T9.5.3 **ПОДТВЕРЖДЕНО**, T9.5.4 **ПОДТВЕРЖДЕНО**, T9.5.5 **ПОДТВЕРЖДЕНО**, T9.5.6 **ПОДТВЕРЖДЕНО**, T9.5.7 **ПОДТВЕРЖДЕНО** (проверено на тестовой сборке с §5-пакетом). Формальный ACCEPT-вердикт по 9.5 — за Дмитрием.
+
 ---
 
 ## §7. Что осталось за покрытием
@@ -121,6 +129,12 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 - **Q3**: пустой список профилей разрешён (провайдер может быть выключен) — подтверждение?
 - **Q4**: сид 9.4a save-probe дополнен `supports_vision` у активного профиля (audit-артефакт) — принимается как правка артефакта?
 
+**Ответы координатора (Дмитрий, 2026-10-14):**
+- **Q1 — Да.** Плоский путь остаётся синтетическим профилем «Custom Endpoint» без чекбокса, `supports_vision` всегда False; ключ при загрузке на диск не записывается. Уже реализовано; проверяется V4 (хеш settings.json до и после загрузки не меняется — в логе спец-пробы).
+- **Q2 — Да, через `self.tr()`,** как остальные диалоги настроек, с именем профиля и подсказкой: «Profile "X" has no endpoint. Fill it in or remove the profile». Диалог остаётся открытым, на диск ничего не пишется, проблемный профиль выбирается в списке. Было реализовано иначе (длинный текст без `self.tr()`) → **поправлено в 9.5e** (`0b9c9ad2`).
+- **Q3 — Подтверждаю.** Запрет касается только профилей, которые есть в списке и у которых endpoint пуст или из пробелов. Сохранение с нулём профилей легально (статус-бар «Custom profile not configured», QuickTrans без чипов). Явный V6-кейс (удалить все → Save → успех → перезапуск без ошибок) добавлен в спец-пробу в 9.5e.
+- **Q4 — Принимается как правка аудит-артефакта,** не продукта. Условие: в отчёте отметить это как изменение артефакта, а старый сценарий «профиль без ключа» сохранить отдельным кейсом. Выполнено в 9.5e: сид с аргументом `modern|legacy`, legacy-сценарий (файл до-9.5) — отдельный кейс в save-пробе и в runner'е; в §4 (пояснение к 9.4a) и §3 (9.5e) зафиксировано.
+
 ---
 
 ## §9. Находки вне рамок батча (в BACKLOG)
@@ -137,9 +151,10 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 ## §10. Логи защит (артефакты)
 
 `docs/refactoring/audits/`:
-- Спец-проба: `batch9-5_probe_vision_and_endpoint.py` (V1–V8), `batch9-5_probe_special.log` (39/39), `batch9-5_probe_special_b95c.log` (33/39, 6 V6-red), `batch9-5_probe_94i_v7.log` (T1–T5 зелёные, ловушка 0).
-- Статика per-commit: `batch9-5_static_base.log`, `batch9-5_static_after_b95a/b/c/d.log`.
-- Offscreen-обойма per-commit: `batch9-5_suite_base.log`, `batch9-5_suite_b95a/b/c/d.log` + отдельные логи проб `batch9-5_probe_b95*_{fb,profiles,qtchat,statusbar_prof,save,r9_a,r9_ctrl,r9_rm}.log`, `batch9-5_probe_after_b95*_{clean,upgrade}.log`, `batch9-5_regress_after_b95*.log`, `batch9-5_smoke_after_b95*.log`, `batch9-5_tb_after_b95*.log`, `batch9-5_about_after_b95*.log`, `batch9-5_e2e_after_b95*.log`, `batch9-5_seed_b95*.log`.
+- Спец-проба: `batch9-5_probe_vision_and_endpoint.py` (V1–V8), `batch9-5_probe_special.log` (39/39), `batch9-5_probe_special_b95c.log` (33/39, 6 V6-red), `batch9-5_probe_94i_v7.log` (T1–T5 зелёные, ловушка 0), `batch9-5_probe_special_b95e.log` (**45/45**, +6 V6-Q3).
+- Статика per-commit: `batch9-5_static_base.log`, `batch9-5_static_after_b95a/b/c/d.log`, `batch9-5_static_after_b95e.log`.
+- Offscreen-обойма per-commit: `batch9-5_suite_base.log`, `batch9-5_suite_b95a/b/c/d.log`, `batch9-5_suite_b95e.log` + отдельные логи проб `batch9-5_probe_b95*_{fb,profiles,qtchat,statusbar_prof,save,r9_a,r9_ctrl,r9_rm}.log`, `batch9-5_probe_b95e_save_legacy.log` (9.5e), `batch9-5_probe_after_b95*_{clean,upgrade}.log`, `batch9-5_regress_after_b95*.log`, `batch9-5_smoke_after_b95*.log`, `batch9-5_tb_after_b95*.log`, `batch9-5_about_after_b95*.log`, `batch9-5_e2e_after_b95*.log`, `batch9-5_seed_b95*.log` (+ `batch9-5_seed_b95e_save_legacy.log`).
+- 9.5e suite: regress-хэши `5a12501f…/44828d90…/c413d563…` стабильны; S-clean 31 TREE; S-upgrade HASH-DIFF пустой; Tools-smoke 42 (PDF-Rescue fitz — предсуществующий); save modern ALL OK + save legacy ALL OK; r9 a/ctrl/rm OK; TB REGRESS-TB OK; About RESULT OK; e2e/qtchat/statusbar/profiles/fallback — без ошибок.
 - Рекон: `docs/refactoring/reports/RECON_95.md`.
 
-**Передача:** Batch #9.5 исполнен (4 коммита, защитная обойма зелёная на каждом, спец-проба 39/39, V7-проба 9.4 зелёная). Ручные T9.5.1–T9.5.7 — за Дмитрием на тестовой сборке (§5 пакет). Агент останавливается и ждёт вердикта координатора. Следующий шаг по плану — G5 (урезанный), затем 8.18, 8.16, 8.17 — по команде Дмитрия и его промпту.
+**Передача:** Batch #9.5 исполнен (5 коммитов 9.5a–9.5e, защитная обойма зелёная на каждом, спец-проба 45/45, V7-проба 9.4 зелёная). Ручные T9.5.1–T9.5.7 — **все ПОДТВЕРЖДЕНЫ** Дмитрием на тестовой сборке; ответы Q1–Q4 учтены в 9.5e. Формальный ACCEPT-вердикт по 9.5 — за Дмитрием. Агент останавливается и ждёт вердикта координатора. Следующий шаг по плану — G5 (урезанный), затем 8.18, 8.16, 8.17 — по команде Дмитрия и его промпту.
