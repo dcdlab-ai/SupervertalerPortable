@@ -385,6 +385,20 @@ class QuickTransProviderMixin:
                               make_llm_caller((prof.get('model') or '').strip(), pname)))
             _added += 1
 
+        if _added == 0 and profiles:
+            # Batch #9.4h (уточнение Дмитрия 2026-10-13): когда в QuickTrans
+            # сняты/удалены ВСЕ профили, попап работает с глобальным активным
+            # профилем из AI Settings как с единственно оставшимся чипом.
+            active = None
+            if hasattr(self, 'parent_app') and self.parent_app and hasattr(self.parent_app, '_get_active_custom_profile'):
+                try:
+                    active = self.parent_app._get_active_custom_profile(llm_settings)
+                except Exception:
+                    active = None
+            label = (active.get('name') if active and active.get('name') else 'Custom')
+            providers.append((label, "CUS", make_llm_caller(None, None)))
+            return
+
         if profiles:
             return
 
