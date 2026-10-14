@@ -103,7 +103,7 @@ say("PROFILES SECTION:", any("Profile:" in t for t in labels),
 ind = getattr(win, "llm_indicator_label", None)
 say("INDICATOR:", repr(ind.text()) if ind else "<absent>")
 
-if scenario == "save":
+if scenario in ("save", "legacy"):
     before = read_all()
     # Record the Custom-enable checkbox state as it appears in the UI
     from PyQt6.QtWidgets import QCheckBox  # noqa: E402
@@ -121,7 +121,26 @@ if scenario == "save":
     llm_a = after.get("ui", {}).get("llm_settings", {})
     checks = []
     checks.append(("provider==custom_openai", llm_a.get("provider") == "custom_openai"))
-    checks.append(("profiles preserved", llm_a.get("custom_openai_profiles") == llm_b.get("custom_openai_profiles")))
+    if scenario == "legacy":
+        # Файл написан ДО 9.5 (ни у одного профиля нет supports_vision).
+        # Save дописывает ключ только активному профилю (из чекбокса вкладки,
+        # unchecked -> False); неактивный профиль остаётся без ключа.
+        # «profiles preserved» = после снятия нового ключа словари равны.
+        def _strip_vision(plist):
+            return [{k: v for k, v in p.items() if k != "supports_vision"} for p in plist]
+        checks.append(("profiles preserved (ignoring new supports_vision)",
+                       _strip_vision(llm_a.get("custom_openai_profiles", []))
+                       == llm_b.get("custom_openai_profiles", [])))
+        _pa = next((p for p in llm_a.get("custom_openai_profiles", [])
+                    if p.get("name") == llm_b.get("custom_openai_active_profile")), {})
+        _na = next((p for p in llm_a.get("custom_openai_profiles", [])
+                    if p.get("name") != llm_b.get("custom_openai_active_profile")), {})
+        checks.append(("legacy: active profile gained supports_vision=False",
+                       _pa.get("supports_vision") is False))
+        checks.append(("legacy: non-active profile has no supports_vision key",
+                       "supports_vision" not in _na))
+    else:
+        checks.append(("profiles preserved", llm_a.get("custom_openai_profiles") == llm_b.get("custom_openai_profiles")))
     checks.append(("active preserved", llm_a.get("custom_openai_active_profile") == llm_b.get("custom_openai_active_profile")))
     checks.append(("custom_mt_profiles intact", llm_a.get("custom_mt_profiles") == llm_b.get("custom_mt_profiles")))
     checks.append(("legacy openai_model intact", llm_a.get("openai_model") == llm_b.get("openai_model")))

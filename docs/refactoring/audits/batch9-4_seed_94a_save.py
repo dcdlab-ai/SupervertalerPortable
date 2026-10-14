@@ -1,18 +1,32 @@
 # -*- coding: utf-8 -*-
-"""Seed settings.json for the 9.4a save probe (foreign keys + 2 profiles)."""
+"""Seed settings.json for the 9.4a save probe (foreign keys + 2 profiles).
+
+Сценарии (argv[2]):
+  modern (default) — активный профиль уже несёт supports_vision (файл,
+      написанный после 9.5b): строгая проверка «profiles preserved»
+      (dict-равенство before/after) сравнивает одинаковые словари.
+  legacy — файл, написанный ДО 9.5 (ни у одного профиля нет ключа
+      supports_vision): отдельный кейс 9.1-регрессии — Save должен
+      дописать ключ только активному профилю, неактивный остаться без
+      ключа, остальные профили/ключи целы.
+"""
 import json, pathlib, sys
 
 iso = pathlib.Path(sys.argv[1])
+scenario = sys.argv[2] if len(sys.argv) > 2 else "modern"
 sd = iso / "Supervertaler" / "workbench" / "settings"
 sd.mkdir(parents=True, exist_ok=True)
 
-# Batch #9.5b: Save записывает supports_vision активного профиля (из чекбокса
-# вкладки; неактивные профили ключом не дополняются). Сидим ключ у активного
-# (Profile B), чтобы строгая проверка «profiles preserved» (dict-равенство
-# before/after) сравнивала одинаковые словари.
 A = {"name": "Profile A", "endpoint": "http://127.0.0.1:1111/v1", "model": "model-a", "api_key": ""}
-B = {"name": "Profile B", "endpoint": "http://127.0.0.1:2222/v1", "model": "model-b", "api_key": "sk-B", "supports_vision": False}
+B = {"name": "Profile B", "endpoint": "http://127.0.0.1:2222/v1", "model": "model-b", "api_key": "sk-B"}
 MT = {"name": "Local proxy", "endpoint": "http://127.0.0.1:1234/v1", "model": "google", "api_key": "", "raw_mode": True, "enabled": True}
+
+if scenario == "modern":
+    # Batch #9.5b: Save записывает supports_vision активного профиля (из
+    # чекбокса вкладки; неактивные профили ключом не дополняются). Сидим ключ
+    # у активного (Profile B), чтобы строгая проверка «profiles preserved»
+    # (dict-равенство before/after) сравнивала одинаковые словари.
+    B["supports_vision"] = False
 
 data = {
     "ui": {

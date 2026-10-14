@@ -458,6 +458,38 @@ llm6 = win.load_llm_settings()
 check("V6 pre-existing empty profile loads, not deleted",
       any(p["name"] == "Profile E" for p in llm6["custom_openai_profiles"]))
 
+# ============ V6 (Q3): delete ALL profiles -> Save succeeds ============
+# Zero profiles is a legal state: the guard validates only profiles that are
+# in the list. Save must succeed, mirrors clear, status bar says
+# "Custom profile not configured", and a fresh window (restart) reads the
+# file without errors.
+write_settings([prof("Profile A", vision=True), prof("Profile B", model="model-b")], active="Profile A")
+tab6c = win._create_ai_settings_tab()
+combo6c = next((c for c in tab6c.findChildren(QComboBox) if c.count() >= 2), None)
+save6c = next((b for b in tab6c.findChildren(QPushButton) if "Save AI Settings" in b.text()), None)
+rm6c = next((b for b in tab6c.findChildren(QPushButton) if b.text() == "−"), None)
+MODAL_LOG.clear()
+combo6c.setCurrentIndex(0); rm6c.click()
+combo6c.setCurrentIndex(0); rm6c.click()
+check("V6 Q3: all profiles removed from combo", combo6c.count() == 0, str(combo6c.count()))
+save6c.click()
+st6c = json.loads(settings_file.read_text(encoding="utf-8"))["ui"]["llm_settings"]
+check("V6 Q3: Save with zero profiles succeeds (no warning)",
+      st6c["custom_openai_profiles"] == [] and not any(m[0] == "warning" for m in MODAL_LOG),
+      str(MODAL_LOG[:2]))
+check("V6 Q3: mirrors cleared",
+      st6c.get("custom_openai_endpoint", "") == "" and st6c.get("custom_openai_active_profile", "") == "",
+      str(st6c.get("custom_openai_endpoint")))
+check("V6 Q3: status bar shows not configured",
+      "not configured" in win.llm_indicator_label.text(), win.llm_indicator_label.text())
+win2 = Supervertaler.SupervertalerQt()
+llm2 = win2.load_llm_settings()
+check("V6 Q3: restart builds and reads zero profiles", llm2["custom_openai_profiles"] == [],
+      str(llm2["custom_openai_profiles"]))
+check("V6 Q3: restart status bar not configured",
+      "not configured" in win2.llm_indicator_label.text(), win2.llm_indicator_label.text())
+win2.close()
+
 # Custom MT save unchanged (no endpoint validation there)
 mt = [{"name": "MT1", "endpoint": "", "model": "mt-m", "api_key": "", "raw_mode": False, "enabled": True}]
 write_settings([prof("Profile A", vision=True)], active="Profile A", mt_profiles=mt)

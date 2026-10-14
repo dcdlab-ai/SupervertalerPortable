@@ -23093,11 +23093,9 @@ class SupervertalerQt(QMainWindow):
             if not str(_gp.get('endpoint', '')).strip():
                 _gp_name = str(_gp.get('name', '')).strip() or f"#{_gp_idx + 1}"
                 QMessageBox.warning(
-                    self, "Empty Endpoint",
-                    f"Profile “{_gp_name}” has no endpoint URL.\n\n"
-                    "Enter the endpoint of the OpenAI-compatible API "
-                    "(for example http://127.0.0.1:3445/v1) before saving, "
-                    "or remove the profile with the “−” button.")
+                    self, self.tr("Empty Endpoint"),
+                    self.tr('Profile "{0}" has no endpoint. Fill it in '
+                            'or remove the profile.').format(_gp_name))
                 if custom_profile_combo is not None:
                     custom_profile_combo.setCurrentIndex(_gp_idx)
                 return

@@ -63,8 +63,14 @@ kill_leftovers
 
 echo "=== save probe ==="
 rm -rf $S/iso-$TAG-save
-$PY -u $S/seed_94a_save.py $S/iso-$TAG-save > $S/seed_${TAG}_save.log 2>&1
+$PY -u $S/seed_94a_save.py $S/iso-$TAG-save modern > $S/seed_${TAG}_save.log 2>&1
 $PY -u $S/probe_94a_save.py . $S/iso-$TAG-save save > $S/probe_${TAG}_save.log 2>&1
+kill_leftovers
+
+echo "=== save probe legacy (pre-9.5 file) ==="
+rm -rf $S/iso-$TAG-save-legacy
+$PY -u $S/seed_94a_save.py $S/iso-$TAG-save-legacy legacy > $S/seed_${TAG}_save_legacy.log 2>&1
+$PY -u $S/probe_94a_save.py . $S/iso-$TAG-save-legacy legacy > $S/probe_${TAG}_save_legacy.log 2>&1
 kill_leftovers
 
 echo "=== r9 a ==="
