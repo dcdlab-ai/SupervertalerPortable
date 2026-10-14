@@ -19373,6 +19373,18 @@ class SupervertalerQt(QMainWindow):
         custom_key_row.addWidget(custom_key_toggle)
         model_layout.addLayout(custom_key_row)
 
+        # Batch #9.5: vision — свойство профиля (галка), не whitelist имён моделей.
+        custom_vision_cb = CheckmarkCheckBox(self.tr("Model supports vision (image input)"))
+        custom_vision_cb.setChecked(False)
+        custom_vision_cb.setEnabled(custom_radio.isChecked())
+        custom_vision_cb.setToolTip(self.tr(
+            "Enable only if the model behind this endpoint accepts images.\n"
+            "When ticked, figure images (Image Extractor AI labels, AutoPrompt\n"
+            "image context, figure-aware segment translation) are sent to this\n"
+            "profile's endpoint. When unticked, image requests are refused\n"
+            "locally — nothing is sent to the server."))
+        model_layout.addWidget(custom_vision_cb)
+
         # Populate fields from active profile
         def _populate_profile_fields(index):
             """Заполняет поля endpoint/model/key из выбранного профиля."""
@@ -19382,10 +19394,13 @@ class SupervertalerQt(QMainWindow):
                 custom_endpoint_input.setText(p.get('endpoint', ''))
                 custom_model_input.setText(p.get('model', ''))
                 custom_key_input.setText(p.get('api_key', ''))
+                _v = p.get('supports_vision')
+                custom_vision_cb.setChecked(_v if isinstance(_v, bool) else False)
             else:
                 custom_endpoint_input.clear()
                 custom_model_input.clear()
                 custom_key_input.clear()
+                custom_vision_cb.setChecked(False)
 
         # Initial population
         if custom_profile_combo.count() > 0:
@@ -19402,10 +19417,12 @@ class SupervertalerQt(QMainWindow):
                 _profiles[idx]['endpoint'] = custom_endpoint_input.text().strip()
                 _profiles[idx]['model'] = custom_model_input.text().strip()
                 _profiles[idx]['api_key'] = custom_key_input.text().strip()
+                _profiles[idx]['supports_vision'] = custom_vision_cb.isChecked()
 
         custom_endpoint_input.editingFinished.connect(_sync_fields_to_profile)
         custom_model_input.editingFinished.connect(_sync_fields_to_profile)
         custom_key_input.editingFinished.connect(_sync_fields_to_profile)
+        custom_vision_cb.toggled.connect(_sync_fields_to_profile)
 
         # Add profile handler
         def _add_custom_profile():
@@ -19422,7 +19439,7 @@ class SupervertalerQt(QMainWindow):
                     from PyQt6.QtWidgets import QMessageBox
                     QMessageBox.warning(self, "Duplicate Name", f"A profile named '{name}' already exists.")
                     return
-                new_profile = {'name': name, 'endpoint': '', 'model': '', 'api_key': ''}
+                new_profile = {'name': name, 'endpoint': '', 'model': '', 'api_key': '', 'supports_vision': False}
                 _profiles.append(new_profile)
                 settings['custom_openai_profiles'] = _profiles
                 custom_profile_combo.addItem(name)
@@ -19472,6 +19489,7 @@ class SupervertalerQt(QMainWindow):
             custom_endpoint_input.setEnabled(_custom_enabled)
             custom_model_input.setEnabled(_custom_enabled)
             custom_key_input.setEnabled(_custom_enabled)
+            custom_vision_cb.setEnabled(_custom_enabled)
         
         custom_radio.toggled.connect(update_combo_states)
         
@@ -19859,6 +19877,7 @@ class SupervertalerQt(QMainWindow):
             custom_radio=custom_radio, custom_endpoint_input=custom_endpoint_input,
             custom_model_input=custom_model_input, custom_enable_cb=custom_enable_cb,
             custom_profile_combo=custom_profile_combo, custom_key_input=custom_key_input,
+            custom_vision_cb=custom_vision_cb,
             custom_profiles_snapshot=settings
         ))
         layout.addWidget(save_btn)
@@ -23024,6 +23043,7 @@ class SupervertalerQt(QMainWindow):
                                   custom_radio=None, custom_endpoint_input=None,
                                   custom_model_input=None, custom_enable_cb=None,
                                   custom_profile_combo=None, custom_key_input=None,
+                                  custom_vision_cb=None,
                                   custom_profiles_snapshot=None):
         """Сохраняет все настройки ИИ из единой вкладки AI Settings.
 
@@ -23053,6 +23073,7 @@ class SupervertalerQt(QMainWindow):
                     custom_endpoint_input.setText(_norm_endpoint)  # показать нормализацию в поле
                 profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
                 profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
+                profiles[idx]['supports_vision'] = custom_vision_cb.isChecked() if custom_vision_cb else profiles[idx].get('supports_vision', False)
             active_profile_name = custom_profile_combo.currentText()
             # Активным может стать только существующий профиль: если имя из
             # комбо в списке не найдено, берём первый (пустой список — пусто).
