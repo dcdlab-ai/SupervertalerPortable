@@ -158,8 +158,8 @@ list-absent=2 (все с endpoint); empty-list=[]; CLIENT A резолвится
 Замена в `D:\SupervertalerPortable_test\SupervertalerPortable\` (решение о пересборке — за Дмитрием):
 
 ```
-ade0e48a6ac94252a4194408a1cfcee10fe5dfdc523232f471cbd026df7edd15  Supervertaler.py (55000)
-a55a0033092fdb7b0ea456e6a585151fc0683b1de38ee11eb872e24067ec09b5  modules/quicktrans.py (1628)
+fb3dce5c13dd30c14403c4384320da6b2e0b625521b556a5d6ae22a91adc4352  Supervertaler.py (54992)
+6a6812be6c7acce66cbb821c83010e66e658abe39ccf286a06945d153fbf8808  modules/quicktrans.py (1635)
 47e4def072eaca94624b4e66860de9f02209d7a73508a3779eeb3f1438ac4afa  modules/chat_view_widget.py (934)
 1e64c2f1a8d56beee6f7aa533970dac332ededcf40095c855f6d2564b3d41152  modules/llm_clients.py (597)
 e46f6c762d29abfb597e58034e0fc5998e9a9cb4a432e2218e89b6d20cc4c5d8  modules/llm_pricing.py (192)
@@ -167,6 +167,9 @@ e46f6c762d29abfb597e58034e0fc5998e9a9cb4a432e2218e89b6d20cc4c5d8  modules/llm_pr
 644e19867b580cb281f008ea135d411920259029a9d30a039ffa2645d3387d0b  setup.py (94)
 c08b7704f42b40536fd9553f34cff3f94c5a9cd79336fe64c736cdcc64568ab6  modules/local_llm_setup.py — УДАЛИТЬ (sha последней версии)
 ```
+
+(Итоговые SHA после 9.4i, 2026-10-14; Supervertaler.py и quicktrans.py обновлены коммитами
+`064c2bbf`/`2e9dd938`, остальные файлы 9.4 — без изменений.)
 
 ---
 
@@ -195,6 +198,11 @@ c08b7704f42b40536fd9553f34cff3f94c5a9cd79336fe64c736cdcc64568ab6  modules/local_
   UI чистый; QuickTrans/чат/перевод через Custom работают.
 - **T9.4.10** Пакетный перевод: чекбокс «(Custom OpenAI-Compatible)»; диалог без GPT/Claude/Gemini.
 - **T9.4.11** Smoke: 42 пункта меню работают (Tools-smoke база 8.13).
+- **T9.4.12** (9.4i, 2026-10-14): 1) в табе QuickTrans нет чекбокса «Custom (OpenAI-Compatible)»,
+  есть чекбоксы профилей; 2) все профили включены → попап: по чипу на профиль; 3) снять один →
+  остаётся чип второго; снять все → попап работает с глобальным активным профилем; 4) профили
+  удалены/пустой endpoint → вежливо, без ошибок; 5) старый settings.json с
+  `mtql_custom_openai: false` → попап всё равно работает.
 
 ---
 
@@ -287,12 +295,17 @@ c08b7704f42b40536fd9553f34cff3f94c5a9cd79336fe64c736cdcc64568ab6  modules/local_
   (`/v1/chat/completions`, `Bearer prof-key-123`, `fake-llm`), в попапе появляется строка
   перевода. С **бесcхемным** endpoint (`127.0.0.1:PORT/v1`) — тоже зелёный (read-path
   нормализация 9.3a).
-- **Причина наблюдения Дмитрия — тестовая сборка (frozen `960be5d8`, v1.10.372, до 9.1b):**
-  там `create_llm_client` берёт endpoint профиля **как есть** (без нормализации схемы), и
-  бесcхемный endpoint вида `192.168.1.5:8080/v1` не работает в OpenAI SDK. Custom MT
-  профили Дмитрия работают, потому что введены со схемой. «Так задумано» — нет: это баг
-  сборки до 9.1b; в коде репозитория путь Custom (AI) нормализуется на чтении.
-- **Решение для сборки:** пересборка пакета §5 (решение Дмитрия) — в нём нормализация уже есть.
+- **Причина наблюдения (уточнено 2026-10-14, после тестов Дмитрия):** первичный диагноз
+  «тестовая сборка до 9.1b» **НЕ подтверждён** — Дмитрий подтверждал T9.1.5 (нормализация
+  схемы endpoint в AI Settings) на этой же тестовой сборке, значит нормализация в сборке есть.
+  Реальная причина — **гейт 9.4f**: попап не переводил, когда мастер-чекбокс
+  «Custom (OpenAI-Compatible)» выключен (`mtql_custom_openai = false`) или список профилей пуст
+  (`mtql_llm_profiles = []`) → ноль CUS-чипов → переводить нечем. Исправлено **9.4h**
+  (пустой список → чип глобального активного профиля) и **9.4i** (мастер-чекбокс убран
+  вовсе, чипы есть всегда). 9.4g (нормализация схемы в Custom MT) остаётся как независимое
+  улучшение.
+- **Решение для сборки:** пересборка пакета §5 (решение Дмитрия) — в нём нормализация и
+  исправления попапа (9.4h/9.4i) уже есть.
 
 ### 10.4 ЗАМЕТКА (авторизованная правка): схема endpoint в Custom MT (QuickTrans-таб)
 
@@ -348,3 +361,60 @@ endpoint SettingsService) + перевод; S5 все сняты + активн�
 
 **T9.4.11 — ПОДТВЕРЖДЕНО (Дмитрий, 2026-10-13).** **Q4 — ПОДТВЕРЖДЕНО**: статус-бар показывает
 глобальный активный профиль.
+
+### 10.7 Batch #9.4i (2026-10-14): QuickTrans — мастер-чекбокс «Custom (OpenAI-Compatible)» убран
+
+**Решение Дмитрия (2026-10-14):** мастер-чекбокс `mtql_custom_openai` в табе QuickTrans
+УБИРАЕТСЯ. LLM-чипы в попапе есть всегда. Чекбоксы профилей (`mtql_llm_profiles`) выбирают,
+какие профили показывать; если ни один не выбран (или список пуст/имена устарели) — работает
+глобальный активный профиль из AI Settings как единственный оставшийся (чип 9.4h). Отключить
+LLM в QuickTrans нельзя — так задумано. Баг «9.4h не работает» (скриншот: мастер снят → попап
+пуст) устраняется удалением самого мастера.
+
+**Рекон (Этап 1, `RECON_94i.md`):** читатели `mtql_custom_openai` — только таб (виджет+реестр
+`_mtql_checkboxes`), гейт `_add_llm_providers`, Save (через реестр); читатели
+`mtql_custom_openai_model` — read-only поле таба и legacy-чип quicktrans.py:407. Динамической
+сборки ключей нет, других читателей нет (СТОП не сработал). Read-only поле модели активного
+профиля после удаления мастера теряет смысл (модели в подписях чекбоксов профилей) — удалено
+вместе с мастером без побочных эффектов. Ключевой нюанс: Save пересобирает секцию
+`mt_quick_lookup` с нуля → для требования «старый ключ не удалять» добавлен явный перенос
+инертных ключей из старой секции.
+
+**Сделано (2 коммита):**
+
+| Коммит | Файл | Зона | Строки | Изменение |
+|---|---|---|---|---|
+| `064c2bbf` (9.4i-1) | Supervertaler.py | `_create_mt_quick_lookup_settings_tab` (19879–20129) | 20089–20114 → 5 | Мастер-строка (custom_cb, custom_row, read-only custom_model_edit, ключ `_mtql_llm_combos`) удалена; `load_llm_settings()` сохранён для цикла 9.4f; комментарий 9.4f обновлён |
+| `064c2bbf` | Supervertaler.py | `_save_mt_quick_lookup_settings` (20131–20187) | +9 (после 20150) | Перенос инертных ключей `mtql_custom_openai`/`mtql_custom_openai_model` из старой секции (в файле остаются, не читаются, заново не пишутся) |
+| `2e9dd938` (9.4i-2) | modules/quicktrans.py | `_add_llm_providers` (347–400) | гейт 353–358 удалён; 382–402 → 16 | Мастер-гейт удалён; legacy-чип «Custom» (плоский endpoint) удалён; fallback 9.4h унифицирован: при нуле чипов чип глобального активного профиля (`_get_active_custom_profile`: активный по имени → первый с endpoint → легаси-плоский), при ненастроенном профиле — чипов нет, ошибок нет |
+
+Монолит **55 004 → 54 992**; quicktrans.py **1 642 → 1 635**. SHA пакета: Supervertaler.py
+`fb3dce5c…`, quicktrans.py `6a6812be…` (§5).
+
+**Спец-проба `probe_94i_master_removed.py` (фейк-endpoint 127.0.0.1, openai в рантайме,
+ловушка сети requests/anthropic/google.generativeai/ollama + socket-страж) — зелёная:**
+- T1 таб: мастера нет; Auto-fetch + чекбоксы профилей есть; read-only поля нет; в реестре
+  `mtql_checkboxes` ключа мастера нет; Save НЕ пишет `mtql_custom_openai` и НЕ удаляет его из
+  файла (false → false, «legacy-model» → «legacy-model»); чужие ключи секции целы.
+- T2 чипы: A,B → два; только B → один; все сняты → чип активного «Profile A» + перевод
+  `Bearer prof-key-A`; список устарел (Ghost) → активный; активное имя dangling → первый с
+  endpoint; пустой endpoint профиля пропущен; профили удалены + плоский endpoint →
+  «Custom Endpoint» + перевод; ничего не настроено → чипов нет, ошибок нет.
+- T3: `mtql_custom_openai` false / true / отсутствует → одинаковый результат (ключ игнорируется).
+- T4: ловушка сети не сработала (TRAP HITS = []).
+- T5 (скриншот Дмитрия): старый файл с мастером=false, профиль «strata» unchecked → чип
+  «strata» + перевод `Bearer prof-key-strata`.
+
+**Обойма после каждого коммита — зелёная** (логи `static_after_94i_1/2.log`,
+`suite_94i_after.log`): chain 871/0 (−4: удалены ровно 4 вызова мастер-строки —
+`self._get_active_custom_profile()` (резолв профиля для read-only поля) + 3× `self.tr()`
+(label/tooltip/placeholder); diff JSON chain before/after: removed 4, added 0); pyflakes 549 (undefined
+126/4 — идентичен); py_compile канон 109/0 (справочный 186/0); headless 90/2 (setuptools,
+fitz); grep-гейт чист; offscreen-набор: fb S1–S5, profiles, qtchat, statusbar, e2e verdict OK,
+S-clean/S-upgrade (HASH-DIFF пуст, index.json — артефакт даты, §10.6), regress 6 sha
+(5a12501f/44828d90/c413d563), smoke 42, TB OK, About OK, save ALL OK, r9 a/ctrl/rm OK.
+
+**T9.4.12 — сценарий для Дмитрия** (добавлен в §6).
+
+**Handover:** 9.5 (vision-галка в Custom-профиле + запрет сохранения профиля с пустым
+endpoint, BACKLOG §9.1/§9.5), затем G5 (урезанный), 8.18, 8.16, 8.17.
