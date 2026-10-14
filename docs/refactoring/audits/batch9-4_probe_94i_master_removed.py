@@ -158,6 +158,14 @@ def write_settings(profiles, enabled, active="Profile A", mtql_extra=None, flat=
     settings_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
 
+# Harness: deferred Okapi sidecar timer (QTimer.singleShot(1500), scheduled in
+# _init_okapi_sidecar_deferred) imports modules.okapi_sidecar -> `import
+# requests` (loopback-only, for the Java sidecar). If event pumping crosses
+# 1.5 s the import fires and the network trap records it. Patch the CLASS
+# method before construction: singleShot captures the bound method at
+# scheduling time, so an instance-attribute patch after construction is too
+# late.
+Supervertaler.SupervertalerQt._start_okapi_sidecar = lambda self: None
 win = Supervertaler.SupervertalerQt()
 say("WINDOW OK")
 qt = win.quicktrans_panel

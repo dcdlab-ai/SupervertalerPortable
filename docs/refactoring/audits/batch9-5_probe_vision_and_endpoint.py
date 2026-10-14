@@ -233,12 +233,15 @@ C = prof("Profile C", model="model-c")
 D = prof("Profile D", ep="", model="model-d", vision=True)
 write_settings([A, B, C, D], active="Profile B")
 
-win = Supervertaler.SupervertalerQt()
 # Okapi sidecar imports `requests` for its 127.0.0.1 Java sidecar; the probe
 # pumps the event loop (translate_current_segment), which would fire the
 # sidecar's QTimer.singleShot(1500) and pollute the network trap. The sidecar
-# is irrelevant to vision/endpoint scenarios -> disable it.
-win._start_okapi_sidecar = lambda: None
+# is irrelevant to vision/endpoint scenarios -> disable it. Patch the CLASS
+# method before construction: singleShot captures the bound method at
+# scheduling time, so an instance-attribute patch after construction is too
+# late (it only looked safe while pumping stayed under 1.5 s).
+Supervertaler.SupervertalerQt._start_okapi_sidecar = lambda self: None
+win = Supervertaler.SupervertalerQt()
 say("WINDOW OK")
 
 # ============ V3/V1 client-level: flag follows profile ============
