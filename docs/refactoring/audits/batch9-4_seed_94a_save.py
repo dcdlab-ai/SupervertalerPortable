@@ -6,8 +6,12 @@ iso = pathlib.Path(sys.argv[1])
 sd = iso / "Supervertaler" / "workbench" / "settings"
 sd.mkdir(parents=True, exist_ok=True)
 
+# Batch #9.5b: Save записывает supports_vision активного профиля (из чекбокса
+# вкладки; неактивные профили ключом не дополняются). Сидим ключ у активного
+# (Profile B), чтобы строгая проверка «profiles preserved» (dict-равенство
+# before/after) сравнивала одинаковые словари.
 A = {"name": "Profile A", "endpoint": "http://127.0.0.1:1111/v1", "model": "model-a", "api_key": ""}
-B = {"name": "Profile B", "endpoint": "http://127.0.0.1:2222/v1", "model": "model-b", "api_key": "sk-B"}
+B = {"name": "Profile B", "endpoint": "http://127.0.0.1:2222/v1", "model": "model-b", "api_key": "sk-B", "supports_vision": False}
 MT = {"name": "Local proxy", "endpoint": "http://127.0.0.1:1234/v1", "model": "google", "api_key": "", "raw_mode": True, "enabled": True}
 
 data = {

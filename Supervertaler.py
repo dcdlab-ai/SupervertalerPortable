@@ -23080,6 +23080,28 @@ class SupervertalerQt(QMainWindow):
             if not any(p.get('name') == active_profile_name for p in profiles):
                 active_profile_name = profiles[0].get('name', '') if profiles else ''
 
+        # Batch #9.5d: профиль Custom LLM с пустым endpoint сохранить нельзя —
+        # он не может выполнить ни один запрос. Проверяются ВСЕ профили живого
+        # снимка (активный — уже после синка видимых полей выше), до первой
+        # записи на диск: при пустом endpoint показываем предупреждение с именем
+        # профиля, выделяем его в комбо и выходим — файл не меняется, вкладка
+        # открыта. Строка из пробелов считается пустой. Пустой список профилей
+        # разрешён (провайдер может быть выключен). Custom MT-профили здесь не
+        # проверяются: их сохранение с пустым endpoint разрешено (решение по
+        # 9.5d — запрет только для Custom LLM-профилей).
+        for _gp_idx, _gp in enumerate(profiles):
+            if not str(_gp.get('endpoint', '')).strip():
+                _gp_name = str(_gp.get('name', '')).strip() or f"#{_gp_idx + 1}"
+                QMessageBox.warning(
+                    self, "Empty Endpoint",
+                    f"Profile “{_gp_name}” has no endpoint URL.\n\n"
+                    "Enter the endpoint of the OpenAI-compatible API "
+                    "(for example http://127.0.0.1:3445/v1) before saving, "
+                    "or remove the profile with the “−” button.")
+                if custom_profile_combo is not None:
+                    custom_profile_combo.setCurrentIndex(_gp_idx)
+                return
+
         # For legacy compat, store flat fields from the ACTIVE profile of the
         # list (после синка выше это те же видимые поля; при нуле профилей —
         # пустые строки, зеркала больше не расходятся с профилями).
