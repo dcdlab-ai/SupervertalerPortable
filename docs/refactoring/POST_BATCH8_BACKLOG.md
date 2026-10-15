@@ -55,6 +55,12 @@
 * usage statistics и автозапуск Windows — удалить целиком;
 * `AA_DontUseNativeDialogs` — переключаемая опция;
 * QuickTrans-реестр (QSettings) остаётся.
+* **Находка G5.1+G5.2 (2026-10-15, отчёт G5_1_2 §9):** каталог
+  `workbench/ai_assistant/attachments/<дата>` создаётся при **каждом** запуске
+  (в т.ч. в offscreen-прогонах) — в S-clean база с динамикой (транзиентные
+  attachments/<дата> + index.json исключаются транзиент-правилом). Кандидат на
+  устранение в P1 (чистота portable-сборки: пустой запуск не должен плодить
+  каталоги).
 
 **P2 сборка:**
 * `._pth` вместо вставки путей в Supervertaler.py (паттерн проверен на тестовой
@@ -272,3 +278,9 @@
   Stage 1.
 * Чистка док-остатков по группе 7 (HelpTopics, platform_helpers,
   styled_widgets/termbase_manager).
+* **Находка G5.1+G5.2 (2026-10-15, отчёт G5_1_2 §9):** CRLF/LF-гигиена —
+  `modules/settings_service.py` стабильно помечен «M» в `git status` при пустом
+  content-диффе (CRLF/LF-артефакт, content-hash 08a0d943 = HEAD);
+  `modules/figure_context_manager.py` штатно LF при CRLF-большинстве в modules/.
+  Кандидат 8.17: нормализация line endings (`.gitattributes` / `core.autocrlf`)
+  для стабильного `git status`.
