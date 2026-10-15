@@ -9606,13 +9606,15 @@ class SupervertalerQt(QMainWindow):
             QPushButton:hover { background-color: #45a049; }
             QPushButton:focus { outline: none; border: none; }
         """)
-        load_context_btn.setToolTip(
+        load_context_btn.setToolTip(self.tr(
             "Load images from a folder that already contains image files\n"
             "(e.g. one you extracted in a previous session, or a folder\n"
             "you assembled by hand). Skips the DOCX extraction step.\n\n"
             "Note: '📁 Add Folder' (above) queues a folder of *Word documents*\n"
-            "to extract from. This button loads a folder of *images* directly."
-        )
+            "to extract from. This button loads a folder of *images* directly.\n\n"
+            "Note: images are not used in batch translation — figure context "
+            "applies to interactive (current-segment) translation only."
+        ))
         load_context_btn.clicked.connect(self._on_load_image_context_folder)
         action_row.addWidget(load_context_btn)
 
