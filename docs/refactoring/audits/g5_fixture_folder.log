@@ -1,0 +1,8 @@
+    [Figure Context] Loaded: Figure 1A.png as '1a'
+    [Figure Context] Loaded: Figure 2.jpg as '2'
+load_from_folder -> 2 images, map keys = ['1a', '2']
+
+=== per-segment get_images_for_text (md import = one line per segment) ===
+  segment 1 (len=854): refs=['1a'] images=['1a']
+  segment 2 (len=990): refs=[] images=[]
+  segment 3 (len=76): refs=['2'] images=['2']

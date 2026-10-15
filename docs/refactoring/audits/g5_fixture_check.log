@@ -1,0 +1,22 @@
+=== fixture lines ===
+  line 1: len=854  tail="n't care, I'm still free - you can't take the sky from me' Eeeh haw! (Figure 1A)"
+  line 2: len=990  tail='to play, map-based campaign system allowing players to decide the fate of Japan.'
+  line 3: len=76  tail='![Image](e:\\Dev\\SupervertalerPortable\\docs\\refactoring\\samples\\Figure 2.jpg)'
+
+=== variant 1: text '(Figure 1A)' in line 1 ===
+  detect refs = ['1a']
+  normalize_figure_ref('Figure 1A.png') = '1a'
+  match: True
+
+=== variant 2: md-embed line 3 ===
+  line = '![Image](e:\\Dev\\SupervertalerPortable\\docs\\refactoring\\samples\\Figure 2.jpg)'
+  detect refs on md line = ['2']
+  md path = 'e:\\Dev\\SupervertalerPortable\\docs\\refactoring\\samples\\Figure 2.jpg'
+  exists = True
+  basename = 'Figure 2.jpg'
+  normalize_figure_ref(basename) = '2'
+  detect refs on basename = ['2']
+
+=== figure folder scan: which files in samples/ get a ref? ===
+  'Figure 1A.png'      -> '1a'
+  'Figure 2.jpg'       -> '2'
