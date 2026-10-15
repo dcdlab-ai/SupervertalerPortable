@@ -78,7 +78,9 @@
 | offscreen-обойма (S-clean/S-upgrade/regress/smoke/TB/About/save modern+legacy/r9×3/e2e/qtchat/statusbar/profiles/fallback) | зелёная | зелёная | зелёная | зелёная | зелёная | зелёная |
 | спец-проба probe_95 (V1–V8) | — | — | — | 33/39 (6 FAIL = V6, фича не готова) | **39/39** | **45/45** (+6 V6-Q3) |
 
-Regres-хэши стабильны на всех коммитах: `5a12501f…` / `44828d90…` / `c413d563…`; S-clean 31 TREE; S-upgrade HASH-DIFF пустой; Tools-smoke 42.
+Regres-хэши стабильны на всех коммитах: `5a12501f…` / `44828d90…` / `c413d563…`; S-clean 30 TREE; S-upgrade HASH-DIFF пустой; Tools-smoke 42.
+
+**Пояснение к S-clean (замечание координатора 2026-10-15):** в §4/§10 стояло «31 TREE» — это grep-подсчёт, включающий строку заголовка `DATA-TREE (30 entries …)`; реальных записей **30** (проверено по `batch9-5_probe_after_b95-base_clean.log`: заголовок + 30 TREE-строк). Эволюция базы: **28** (8.15, `batch8-15_probe_afterF_clean.log`) → **29** (9.4f, `batch9-4_probe_after_94f_clean.log`) → **30** (9.5, база батча). Прирост — каталоги `workbench/ai_assistant/attachments/<дата>` (20261011, 20261013, 20261014) в iso-профиле чата, создаваемые при запуске приложения; состав дерева `prompt_library/resources/workbench` идентичен базе на всех коммитах 9.5 (30 == 30, расхождения между коммитами 9.5 — 0). То есть база S-clean сменилась **до** начала 9.5 (на 9.4f), агент сравнивал каждый коммит с базой батча (b95-base) и расхождений между коммитами не имел; в отчёте это отдельным пунктом не было вынесено — исправлено настоящей правкой.
 
 **Пояснения к отклонениям:**
 - chain 871→873 (9.5b): ровно +2 вызова `self.tr()` (label + tooltip чекбокса в `_create_ai_settings_tab`), оба резолвятся — diff JSON before/after: added 2, removed 0.
@@ -116,7 +118,7 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 
 ## §7. Что осталось за покрытием
 
-- **Ответ реальной vision-модели** не проверялся: fake-сервер возвращает текст; доказано лишь то, что тело запроса содержит `image_url` с base64-PNG (V1) и что гейты его не срезают при флаге.
+- **Ответ реальной vision-модели — проверен** (замечание координатора 2026-10-15; правка §7): прогон на тестовой сборке с llama.cpp (profile Documents, сегмент #12 «Figure 1A», модель `Qwen3.8-27B-GGUF:UD-IQ2_XXS` / `unsloth/qwen3.8-27b`): лог `D:\SupervertalerPortable_test\Supervertaler\profile\Supervertaler\workbench\logs\supervertaler.log` — «Detected figure references in segment #12: 1a» → «✅ Including 1 figure images: 1a» (с галкой) против «⚠️ … doesn't support vision — tick 'Model supports vision (image input)'…» (без галки); ledger `workbench/usage/usage-2026-10.jsonl` — `source: actual`, `ok: true`, вклад картинки в промпт ≈110 токенов (in_regular 1290 с картинкой против 1179 без). Fake-сервер в спец-пробе (V1) доказывал форму тела запроса (`image_url` + base64-PNG); теперь доказан и реальный ответ модели с учётом картинки.
 - **Попап QuickTrans с изображениями** на уровне UI не гонялся (чип → `create_llm_client(profile_name=…)` → флаг резолвится — покрыто на уровне клиента, V3).
 - Границы ЭТАПа 3 не трогались: логика figure-контекста (regex/batch/md-image), Custom MT валидация, авто-детект vision по имени модели, переключение активного профиля в чат-меню, импорт/экспорт профилей, DB-схема, ключи удалённых провайдеров, Local LLM note, кандидаты 8.18.
 
@@ -154,7 +156,8 @@ Regres-хэши стабильны на всех коммитах: `5a12501f…`
 - Спец-проба: `batch9-5_probe_vision_and_endpoint.py` (V1–V8), `batch9-5_probe_special.log` (39/39), `batch9-5_probe_special_b95c.log` (33/39, 6 V6-red), `batch9-5_probe_94i_v7.log` (T1–T5 зелёные, ловушка 0), `batch9-5_probe_special_b95e.log` (**45/45**, +6 V6-Q3).
 - Статика per-commit: `batch9-5_static_base.log`, `batch9-5_static_after_b95a/b/c/d.log`, `batch9-5_static_after_b95e.log`.
 - Offscreen-обойма per-commit: `batch9-5_suite_base.log`, `batch9-5_suite_b95a/b/c/d.log`, `batch9-5_suite_b95e.log` + отдельные логи проб `batch9-5_probe_b95*_{fb,profiles,qtchat,statusbar_prof,save,r9_a,r9_ctrl,r9_rm}.log`, `batch9-5_probe_b95e_save_legacy.log` (9.5e), `batch9-5_probe_after_b95*_{clean,upgrade}.log`, `batch9-5_regress_after_b95*.log`, `batch9-5_smoke_after_b95*.log`, `batch9-5_tb_after_b95*.log`, `batch9-5_about_after_b95*.log`, `batch9-5_e2e_after_b95*.log`, `batch9-5_seed_b95*.log` (+ `batch9-5_seed_b95e_save_legacy.log`).
-- 9.5e suite: regress-хэши `5a12501f…/44828d90…/c413d563…` стабильны; S-clean 31 TREE; S-upgrade HASH-DIFF пустой; Tools-smoke 42 (PDF-Rescue fitz — предсуществующий); save modern ALL OK + save legacy ALL OK; r9 a/ctrl/rm OK; TB REGRESS-TB OK; About RESULT OK; e2e/qtchat/statusbar/profiles/fallback — без ошибок.
+- 9.5e suite: regress-хэши `5a12501f…/44828d90…/c413d563…` стабильны; S-clean 30 TREE (31 = grep с заголовком, см. §4); S-upgrade HASH-DIFF пустой; Tools-smoke 42 (PDF-Rescue fitz — предсуществующий); save modern ALL OK + save legacy ALL OK; r9 a/ctrl/rm OK; TB REGRESS-TB OK; About RESULT OK; e2e/qtchat/statusbar/profiles/fallback — без ошибок.
 - Рекон: `docs/refactoring/reports/RECON_95.md`.
+- **`PROJECT_STATUS.md` обновлён** (требование промпта; коммиты `c6f90fee` и `710febcb`): строка «Обновлено» (9.5 EXECUTED + протестирован Дмитрием, T9.5.1–.7 ПОДТВЕРЖДЕНО, ответы Q1–Q4), секция «Batch #9.5 EXECUTED + протестирован Дмитрием» (5 коммитов, метрики, правки артефактов, AST-границы пересчитаны по `ast.parse` на `0b9c9ad2`), «Кратко» — монолит **55 040**, следующий шаг G5 → 8.18 → 8.16 → 8.17.
 
 **Передача:** Batch #9.5 исполнен (5 коммитов 9.5a–9.5e, защитная обойма зелёная на каждом, спец-проба 45/45, V7-проба 9.4 зелёная). Ручные T9.5.1–T9.5.7 — **все ПОДТВЕРЖДЕНЫ** Дмитрием на тестовой сборке; ответы Q1–Q4 учтены в 9.5e. Формальный ACCEPT-вердикт по 9.5 — за Дмитрием. Агент останавливается и ждёт вердикта координатора. Следующий шаг по плану — G5 (урезанный), затем 8.18, 8.16, 8.17 — по команде Дмитрия и его промпту.
