@@ -4035,8 +4035,6 @@ You are an expert {{SOURCE_LANGUAGE}} to {{TARGET_LANGUAGE}} translator with dee
 - If the target language is **English** or **Irish**, use a **full stop (period)** as the decimal separator and **no space** before the unit (e.g., 17.1 cm).
 - Always follow the **number formatting conventions** of the target language.
 
-If the text refers to figures (e.g., 'Figure 1A'), relevant images may be provided for visual context.
-
 {{SOURCE_LANGUAGE}} text:
 {{SOURCE_TEXT}}"""
     
