@@ -48948,6 +48948,35 @@ class SupervertalerQt(QMainWindow):
                                         for ref, img in images_for_text
                                     ]
                                 self.log(f"  ✅ Including {len(images)} figure images: {', '.join(figure_refs)}")
+                                # Batch G5.1: the model must know an image is attached and
+                                # what to do with it. The block is inserted into the prompt
+                                # text ONLY when at least one image is really sent (vision
+                                # gate passed and images built above). It is placed before
+                                # the final translation delimiter so that the final
+                                # instruction stays the last line of the prompt.
+                                if images and custom_prompt:
+                                    _fig_labels = "; ".join(
+                                        f"Image {i} = Figure {ref.upper()}"
+                                        for i, (ref, _img) in enumerate(images, 1)
+                                    )
+                                    _fig_block = (
+                                        "FIGURE CONTEXT: The following image(s) are attached "
+                                        "to this request as visual context for the figure "
+                                        f"reference(s) in the source segment: {_fig_labels}. "
+                                        "Use them only to resolve ambiguity and choose "
+                                        "terminology. Do NOT translate, transcribe, describe "
+                                        "or comment on any text shown in the images. Return "
+                                        "only the translation of the source segment, with no "
+                                        "numbering or labels."
+                                    )
+                                    if "**YOUR TRANSLATION" in custom_prompt:
+                                        custom_prompt = custom_prompt.replace(
+                                            "**YOUR TRANSLATION",
+                                            _fig_block + "\n\n**YOUR TRANSLATION",
+                                            1
+                                        )
+                                    else:
+                                        custom_prompt += "\n\n" + _fig_block
                             else:
                                 self.log(f"  ⚠️ Figures detected ({', '.join(figure_refs)}) but model '{model}' doesn't support vision — tick 'Model supports vision (image input)' for this profile in Settings → AI Settings to send images")
                         else:

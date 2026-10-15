@@ -180,14 +180,27 @@ try:
 except Exception as e:
     print(f"[{tag}] window.close() FAILED: {e!r}", flush=True)
 
+def is_transient(k):
+    # G5.12 rule (batch-g5-12): dynamic chat-workbench paths excluded from comparison
+    if k.endswith((".db-shm", ".db-wal")):
+        return True
+    if k == "workbench/ai_assistant/attachments" or k.startswith("workbench/ai_assistant/attachments/"):
+        return True
+    if k.endswith("workbench/ai_assistant/index.json"):
+        return True
+    return False
+
+
 if udp is not None and udp.exists():
     tree = sorted(str(p.relative_to(udp)).replace("\\", "/") for p in udp.rglob("*"))
+    n_dyn = sum(1 for t in tree if is_transient(t))
     print(f"[{tag}] DATA-TREE ({len(tree)} entries under {udp}):", flush=True)
+    print(f"[{tag}] DATA-TREE-STATIC ({len(tree) - n_dyn} entries, excl. attachments/<date> + index.json):", flush=True)
     for t in tree:
         print(f"[{tag}] TREE {t}", flush=True)
 if scenario == "upgrade" and data_dir.exists():
     after = snapshot_dir(data_dir)
-    transient = lambda k: k.endswith((".db-shm", ".db-wal"))
+    transient = is_transient
     added = sorted(set(after) - set(before))
     removed = sorted(set(before) - set(after))
     changed = sorted(k for k in (set(after) & set(before)) if after[k] != before[k])
