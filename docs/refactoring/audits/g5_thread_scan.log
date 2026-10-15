@@ -1,0 +1,727 @@
+=== WORKER SETS ===
+  Supervertaler.py: QThread=['PreTranslationWorker'] methods=[('PreTranslationWorker', '_autotag_segment_llm'), ('PreTranslationWorker', '_run_autotag_only'), ('PreTranslationWorker', '_run_fuzzy_fixer_llm'), ('PreTranslationWorker', '_translate_batch_with_llm'), ('PreTranslationWorker', '_translate_from_tm'), ('PreTranslationWorker', '_translate_single_with_llm'), ('PreTranslationWorker', '_translate_with_mt'), ('PreTranslationWorker', 'run')] funcs=['_do_prewarm', '_okapi_worker', 'image_path', 'scaled_pixmap', 'worker']
+  modules\chat_view_widget.py: QThread=[] methods=[] funcs=['pixmap']
+  modules\image_extractor.py: QThread=[] methods=[] funcs=['rels_bytes']
+  modules\platform_helpers.py: QThread=[] methods=[] funcs=['_message_pump']
+  modules\quicktrans.py: QThread=['MTFetchWorker'] methods=[('MTFetchWorker', 'run')] funcs=['fetch_single']
+  modules\statistics_analyzer.py: QThread=['StatisticsWorker'] methods=[('StatisticsWorker', '_analyse'), ('StatisticsWorker', 'run')] funcs=[]
+  modules\tm_manager_qt.py: QThread=['TMCleanupThread', 'TMXImportThread'] methods=[('TMCleanupThread', '_clean_duplicate_sources'), ('TMCleanupThread', '_clean_identical_pairs'), ('TMCleanupThread', '_filter_clause'), ('TMCleanupThread', 'run'), ('TMXImportThread', 'run')] funcs=[]
+  modules\unified_prompt_manager_qt.py: QThread=['_AutoPromptWorker'] methods=[('_AutoPromptWorker', 'run')] funcs=[]
+  modules\usage_statistics.py: QThread=[] methods=[] funcs=['_send_ping_background']
+  modules\workers\glossary.py: QThread=['GlossaryExtractionWorker'] methods=[('GlossaryExtractionWorker', '_parse_pairs'), ('GlossaryExtractionWorker', 'run')] funcs=[]
+  modules\workers\proofread.py: QThread=['ProofreadWorker'] methods=[('ProofreadWorker', 'run')] funcs=[]
+  modules\workers\tm_search.py: QThread=['TMSearchWorker'] methods=[('TMSearchWorker', 'run')] funcs=[]
+
+=== DANGEROUS CALLS (worker=True means inside worker-thread code) ===
+  WORKER  E:\Dev\SupervertalerPortable\Supervertaler.py:48090  [QTimer.singleShot]  in None.worker  :: QTimer.singleShot(0, on_ok)
+  WORKER  E:\Dev\SupervertalerPortable\Supervertaler.py:48103  [QTimer.singleShot]  in None.worker  :: QTimer.singleShot(0, on_err)
+
+=== ALL singleShot/invokeMethod/modal (worker flag) ===
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2062  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_termbase  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2097  [modal-dialog(QMessageBox.warning)]  in None._handle_quick_add_to_glossary_priority  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2578  [QTimer.singleShot]  in None.<lambda@2576>  :: QTimer.singleShot(0, mw.add_comment_from_selection),
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2649  [QTimer.singleShot]  in None.<lambda@2649>  :: lambda: QTimer.singleShot(0, lambda: main_window.show_supervertaler_assistant(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2712  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_nt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:2730  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_nt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:3531  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_termbase  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:3566  [modal-dialog(QMessageBox.warning)]  in None._handle_quick_add_to_glossary_priority  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:3720  [QTimer.singleShot]  in None.<lambda@3718>  :: QTimer.singleShot(0, mw.add_comment_from_selection),
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:3796  [QTimer.singleShot]  in None.<lambda@3796>  :: lambda: QTimer.singleShot(0, lambda: main_window.show_supervertaler_assistant(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:4481  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_nt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:4498  [modal-dialog(QMessageBox.warning)]  in None._handle_add_to_nt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:5181  [QTimer.singleShot]  in None.createEditor  :: QTimer.singleShot(0, lambda: table.resizeRowToContents(index.row()))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:5217  [QTimer.singleShot]  in None.createEditor  :: QTimer.singleShot(0, lambda: table.resizeRowToContents(index.row()))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:6330  [QTimer.singleShot]  in None.__init__  :: QTimer.singleShot(100, self.refresh_theme_colors)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:6352  [QTimer.singleShot]  in None.__init__  :: QTimer.singleShot(500, self.detach_log_window)  # 500ms delay to ensure UI is ready
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:7015  [modal-dialog(QMessageBox.information)]  in None.open_quicklauncher  :: QMessageBox.information(self, "QuickLauncher", "Select a segment in the grid first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:8579  [modal-dialog(QMessageBox.information)]  in None._merge_segment_at_row  :: QMessageBox.information(self, self.tr("Merge segments"), reason)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:8614  [modal-dialog(QMessageBox.information)]  in None._delete_segments_at_rows  :: QMessageBox.information(self, self.tr("Delete segments"),
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:8626  [modal-dialog(QMessageBox.question)]  in None._delete_segments_at_rows  :: resp = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:8659  [modal-dialog(QMessageBox.information)]  in None.delete_current_segments  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9117  [QTimer.singleShot]  in None.create_main_layout  :: QTimer.singleShot(2500, self._warm_up_top_tabs)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9217  [modal-dialog(QMessageBox.information)]  in None.show_statistics_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9267  [modal-dialog(QMessageBox.critical)]  in None.show_statistics_dialog  :: QMessageBox.critical(self, self.tr("Error"), f"Failed to open Statistics:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9340  [modal-dialog(QFileDialog.getOpenFileNames)]  in None.show_quick_statistics_dialog  :: paths, _ = QFileDialog.getOpenFileNames(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9374  [modal-dialog(QMessageBox.warning)]  in None.show_quick_statistics_dialog  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9379  [modal-dialog(QMessageBox.information)]  in None.show_quick_statistics_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9403  [modal-dialog(QMessageBox.critical)]  in None.show_quick_statistics_dialog  :: QMessageBox.critical(self, self.tr("Error"), f"Failed to open Quick Count:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9884  [modal-dialog(QMessageBox.warning)]  in None._build_image_extract_ai_callback  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9901  [modal-dialog(QMessageBox.question)]  in None._build_image_extract_ai_callback  :: resp = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:9963  [modal-dialog(QMessageBox.question)]  in None._build_image_extract_ai_callback  :: confirm = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10071  [modal-dialog(QMessageBox.warning)]  in None._on_extract_images  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10084  [modal-dialog(QMessageBox.warning)]  in None._on_extract_images  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10207  [modal-dialog(QMessageBox.information)]  in None._on_extract_images  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10215  [modal-dialog(QMessageBox.critical)]  in None._on_extract_images  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10289  [modal-dialog(QFileDialog.getExistingDirectory)]  in None._on_load_image_context_folder  :: folder = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10372  [modal-dialog(QMessageBox.information)]  in None._load_image_context_from_path  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10383  [modal-dialog(QMessageBox.warning)]  in None._load_image_context_from_path  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10395  [modal-dialog(QMessageBox.critical)]  in None._load_image_context_from_path  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10404  [modal-dialog(QMessageBox.question)]  in None._on_clear_image_context  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10421  [modal-dialog(QMessageBox.information)]  in None._on_clear_image_context  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10519  [modal-dialog(QMessageBox.critical)]  in None.show_concordance_search  :: QMessageBox.critical(self, "Error", f"Failed to open concordance search:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10537  [modal-dialog(QMessageBox.critical)]  in None.show_tm_manager_tab  :: QMessageBox.critical(self, "Error", f"Failed to open TM Manager:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10559  [modal-dialog(QMessageBox.critical)]  in None._show_tm_maintenance_dialog  :: QMessageBox.critical(self, "Error", f"Failed to open TM Maintenance:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10618  [modal-dialog(QMessageBox.information)]  in None._copy_tm_stats_to_clipboard  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10626  [modal-dialog(QMessageBox.critical)]  in None._copy_tm_stats_to_clipboard  :: QMessageBox.critical(self, "Error", f"Failed to copy TM stats:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10689  [modal-dialog(QMessageBox.question)]  in None.clear_log  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10896  [QTimer.singleShot]  in None.detach_superlookup  :: QTimer.singleShot(100, lambda: (
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:10964  [modal-dialog(QMessageBox.warning)]  in None.detach_superlookup  :: QMessageBox.warning(self, "Error", f"Could not detach Superlookup:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11529  [modal-dialog(QMessageBox.warning)]  in None._set_tm_as_project  :: QMessageBox.warning(self, "Error", "Failed to set TM as Project TM")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11538  [modal-dialog(QMessageBox.warning)]  in None._unset_tm_as_project  :: QMessageBox.warning(self, "Error", "Failed to unset Project TM")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11548  [modal-dialog(QMessageBox.warning)]  in None._toggle_tm_readonly  :: QMessageBox.warning(self, "Error", f"Failed to set TM as {'read-only' if readonly else 'wr
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11572  [modal-dialog(QMessageBox.warning)]  in None.import_tmx_file  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11642  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11649  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(self, "Import Cancelled", f"Import stopped.\n\nPartial entries may
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11660  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11667  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(self, "Import Cancelled", f"Import stopped.\n\nPartial entries may
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11718  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(self, "Import Complete", f"TMX imported!\n\nEntries: {count:,}\nTM
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11721  [modal-dialog(QMessageBox.information)]  in None.import_tmx_file  :: QMessageBox.information(self, "Import Cancelled", f"Import stopped.\n\nPartial entries may
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11725  [modal-dialog(QMessageBox.critical)]  in None.import_tmx_file  :: QMessageBox.critical(self, "Import Error", f"Failed to import TMX:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11814  [modal-dialog(QMessageBox.warning)]  in None.export_document  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:11894  [modal-dialog(QFileDialog.getOpenFileName)]  in None._prompt_for_original_source  :: path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12002  [modal-dialog(QMessageBox.warning)]  in None.export_target_only_docx  :: QMessageBox.warning(self, "No Project", "Please open a project with segments first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12010  [modal-dialog(QMessageBox.warning)]  in None.export_target_only_docx  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12019  [modal-dialog(QMessageBox.question)]  in None.export_target_only_docx  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12053  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_target_only_docx  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12419  [modal-dialog(QMessageBox.information)]  in None.export_target_only_docx  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12429  [modal-dialog(QMessageBox.critical)]  in None.export_target_only_docx  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:12436  [modal-dialog(QMessageBox.critical)]  in None.export_target_only_docx  :: QMessageBox.critical(self, "Export Error", f"Failed to export DOCX:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13116  [modal-dialog(QMessageBox.warning)]  in None._show_export_word_count_warning  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13138  [modal-dialog(QMessageBox.warning)]  in None._try_okapi_merge_export  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13247  [modal-dialog(QMessageBox.information)]  in None._try_okapi_merge_export  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13260  [modal-dialog(QMessageBox.warning)]  in None._try_okapi_merge_export  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13272  [modal-dialog(QMessageBox.warning)]  in None._try_okapi_merge_export  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13342  [modal-dialog(QMessageBox.warning)]  in None._export_review_table  :: QMessageBox.warning(self, "No Data", "No segments to export")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13348  [modal-dialog(QMessageBox.warning)]  in None._export_review_table  :: QMessageBox.warning(self, "No Data", "No segments to export")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13369  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_review_table  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13809  [modal-dialog(QMessageBox.information)]  in None._export_review_table  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13817  [modal-dialog(QMessageBox.critical)]  in None._export_review_table  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13824  [modal-dialog(QMessageBox.critical)]  in None._export_review_table  :: QMessageBox.critical(self, "Export Error", f"Failed to export bilingual table:\n\n{str(e)}
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13832  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_grid  :: QMessageBox.warning(self, "No Project", "Please open a project first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13867  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_grid  :: QMessageBox.warning(self, "No Data", "No segments found in grid")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13886  [modal-dialog(QMessageBox.information)]  in None.export_tmx_from_grid  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13895  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_grid  :: QMessageBox.warning(self, "Export Error", "Failed to save TMX file")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13901  [modal-dialog(QMessageBox.critical)]  in None.export_tmx_from_grid  :: QMessageBox.critical(self, "Export Error", f"Failed to export:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13907  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_selected  :: QMessageBox.warning(self, "No Project", "Please open a project first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13916  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_selected  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13924  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_tmx_from_selected  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13959  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_selected  :: QMessageBox.warning(self, "No Data", "No valid segments selected")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13978  [modal-dialog(QMessageBox.information)]  in None.export_tmx_from_selected  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13987  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_selected  :: QMessageBox.warning(self, "Export Error", "Failed to save TMX file")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13993  [modal-dialog(QMessageBox.critical)]  in None.export_tmx_from_selected  :: QMessageBox.critical(self, "Export Error", f"Failed to export:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:13999  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_tm_database  :: QMessageBox.warning(self, "Error", "Translation memory database not available")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14005  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_tm_database  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14013  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_tmx_from_tm_database  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14058  [modal-dialog(QMessageBox.information)]  in None.export_tmx_from_tm_database  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14067  [modal-dialog(QMessageBox.warning)]  in None.export_tmx_from_tm_database  :: QMessageBox.warning(self, "Export Error", "Failed to save TMX file")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14073  [modal-dialog(QMessageBox.critical)]  in None.export_tmx_from_tm_database  :: QMessageBox.critical(self, "Export Error", f"Failed to export:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14085  [modal-dialog(QMessageBox.question)]  in None.clear_tm_entries  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14095  [modal-dialog(QMessageBox.question)]  in None.clear_tm_entries  :: reply2 = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14115  [modal-dialog(QMessageBox.information)]  in None.clear_tm_entries  :: QMessageBox.information(self, "TM Cleared", "All translation memory entries have been dele
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14119  [modal-dialog(QMessageBox.critical)]  in None.clear_tm_entries  :: QMessageBox.critical(self, "Clear Error", f"Failed to clear TM entries:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14646  [modal-dialog(QMessageBox.warning)]  in None.add_term_pair_to_termbase  :: QMessageBox.warning(self, "No Active Project", "Please open or create a project before add
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14651  [modal-dialog(QMessageBox.critical)]  in None.add_term_pair_to_termbase  :: QMessageBox.critical(self, "Error", "Termbase manager not initialized")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14669  [modal-dialog(QMessageBox.warning)]  in None.add_term_pair_to_termbase  :: QMessageBox.warning(self, "No Termbase", "Please create or activate at least one termbase 
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14710  [modal-dialog(QMessageBox.warning)]  in None.add_term_pair_to_termbase  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14845  [modal-dialog(QMessageBox.information)]  in None.add_term_pair_to_termbase  :: QMessageBox.information(self, "Term Added", f"Successfully added term pair to {success_cou
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14873  [modal-dialog(QMessageBox.warning)]  in None.add_term_pair_to_termbase  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:14885  [modal-dialog(QMessageBox.warning)]  in None.add_term_pair_to_termbase  :: QMessageBox.warning(self, "Error Adding Term", "Failed to add term to any termbase. Check 
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15542  [modal-dialog(QMessageBox.warning)]  in None.add_text_to_non_translatables  :: QMessageBox.warning(self, "No Text", "Please select text before adding to non-translatable
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15548  [modal-dialog(QMessageBox.warning)]  in None.add_text_to_non_translatables  :: QMessageBox.warning(self, "No project", "Open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15552  [modal-dialog(QMessageBox.critical)]  in None.add_text_to_non_translatables  :: QMessageBox.critical(self, "Error", "Termbase manager not initialised.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15557  [modal-dialog(QMessageBox.warning)]  in None.add_text_to_non_translatables  :: QMessageBox.warning(self, "No project ID", "Save the project before adding non-translatabl
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15582  [modal-dialog(QMessageBox.warning)]  in None.add_text_to_non_translatables  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:15609  [modal-dialog(QMessageBox.critical)]  in None.add_text_to_non_translatables  :: QMessageBox.critical(self, "Error", f"Failed to add non-translatable: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16394  [modal-dialog(QMessageBox.question)]  in None.delete_term  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16419  [modal-dialog(QMessageBox.warning)]  in None.delete_term  :: QMessageBox.warning(self, "Error", f"Failed to delete term: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16507  [modal-dialog(QMessageBox.warning)]  in None.add_new_term  :: QMessageBox.warning(self, "Error", f"Failed to add term: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16956  [modal-dialog(QMessageBox.warning)]  in None.create_termbase  :: QMessageBox.warning(dialog, "Error", "Please enter a termbase name")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16965  [modal-dialog(QMessageBox.warning)]  in None.create_termbase  :: QMessageBox.warning(dialog, "Error",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16983  [modal-dialog(QMessageBox.information)]  in None.create_termbase  :: QMessageBox.information(dialog, "Success", f"Termbase '{name}' created successfully!")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:16987  [modal-dialog(QMessageBox.critical)]  in None.create_termbase  :: QMessageBox.critical(dialog, "Error", "Failed to create termbase")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17007  [modal-dialog(QMessageBox.information)]  in None._show_term_extraction_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17150  [modal-dialog(QMessageBox.warning)]  in None._do_extract_terms  :: QMessageBox.warning(dialog, "Error", "No project is currently loaded")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17168  [modal-dialog(QMessageBox.warning)]  in None._do_extract_terms  :: QMessageBox.warning(dialog, "Error", "No source segments found in project")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17175  [modal-dialog(QMessageBox.warning)]  in None._do_extract_terms  :: QMessageBox.warning(dialog, "Error", "Please enter some text to analyze")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17190  [modal-dialog(QMessageBox.warning)]  in None._do_extract_terms  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17262  [modal-dialog(QMessageBox.critical)]  in None.on_extraction_failed  :: QMessageBox.critical(dialog, self.tr("Extraction Failed"),
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17287  [modal-dialog(QMessageBox.critical)]  in None.extract_terms  :: QMessageBox.critical(dialog, "Error", f"Term extraction failed: {str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17303  [modal-dialog(QMessageBox.warning)]  in None._do_create_project_termbase  :: QMessageBox.warning(dialog, "Error", "Please extract terms first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17320  [modal-dialog(QMessageBox.warning)]  in None._do_create_project_termbase  :: QMessageBox.warning(dialog, "Error", "Please select at least one term")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17328  [modal-dialog(QInputDialog.getText)]  in None._do_create_project_termbase  :: name, ok = QInputDialog.getText(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17345  [modal-dialog(QMessageBox.question)]  in None._do_create_project_termbase  :: choice = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17377  [modal-dialog(QMessageBox.critical)]  in None._do_create_project_termbase  :: QMessageBox.critical(dialog, "Error", "Failed to create termbase.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17399  [modal-dialog(QMessageBox.information)]  in None._do_create_project_termbase  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17424  [modal-dialog(QMessageBox.critical)]  in None.create_project_termbase  :: QMessageBox.critical(dialog, "Error", f"Failed to create termbase: {str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17477  [modal-dialog(QInputDialog.getText)]  in None._rename_termbase_dialog  :: new_name, ok = QInputDialog.getText(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17489  [modal-dialog(QMessageBox.information)]  in None._rename_termbase_dialog  :: QMessageBox.information(self, "Success", f"Termbase renamed to '{new_name}'")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17495  [modal-dialog(QMessageBox.critical)]  in None._rename_termbase_dialog  :: QMessageBox.critical(self, "Error", "Failed to rename termbase")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17501  [modal-dialog(QMessageBox.warning)]  in None._delete_termbase  :: QMessageBox.warning(self, "Error", "Please select a termbase to delete")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17507  [modal-dialog(QMessageBox.warning)]  in None._delete_termbase  :: QMessageBox.warning(self, "Error", "Could not read termbase information")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17514  [modal-dialog(QMessageBox.warning)]  in None._delete_termbase  :: QMessageBox.warning(self, "Error", "Could not find termbase ID")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17518  [modal-dialog(QMessageBox.question)]  in None._delete_termbase  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17538  [modal-dialog(QMessageBox.information)]  in None._delete_termbase  :: QMessageBox.information(self, "Success", f"Termbase '{tb_name}' has been deleted")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17545  [modal-dialog(QMessageBox.critical)]  in None._delete_termbase  :: QMessageBox.critical(self, "Error", f"Failed to delete termbase: {str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17576  [modal-dialog(QMessageBox.warning)]  in None._import_termbase  :: QMessageBox.warning(self, "Error", "Please select a termbase to import into")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17582  [modal-dialog(QMessageBox.warning)]  in None._import_termbase  :: QMessageBox.warning(self, "Error", "Could not read termbase information")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17589  [modal-dialog(QMessageBox.warning)]  in None._import_termbase  :: QMessageBox.warning(self, "Error", "Could not find termbase ID")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17594  [modal-dialog(QFileDialog.getOpenFileName)]  in None._import_termbase  :: filepath, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17813  [modal-dialog(QMessageBox.warning)]  in None._export_termbase  :: QMessageBox.warning(self, "Error", "Please select a termbase to export")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17819  [modal-dialog(QMessageBox.warning)]  in None._export_termbase  :: QMessageBox.warning(self, "Error", "Could not read termbase information")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17826  [modal-dialog(QMessageBox.warning)]  in None._export_termbase  :: QMessageBox.warning(self, "Error", "Could not find termbase ID")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17832  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_termbase  :: filepath, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17891  [modal-dialog(QMessageBox.information)]  in None._export_termbase  :: QMessageBox.information(self, "Export Complete", message)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17894  [modal-dialog(QMessageBox.critical)]  in None._export_termbase  :: QMessageBox.critical(self, "Export Failed", message)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17911  [modal-dialog(QMessageBox.warning)]  in None._show_edit_terms_dialog  :: QMessageBox.warning(self, "Error", "Please select a termbase first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17917  [modal-dialog(QMessageBox.warning)]  in None._show_edit_terms_dialog  :: QMessageBox.warning(self, "Error", "Could not find selected termbase")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:17924  [modal-dialog(QMessageBox.warning)]  in None._show_edit_terms_dialog  :: QMessageBox.warning(self, "Error", "Could not find selected termbase")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18002  [modal-dialog(QMessageBox.warning)]  in None.add_term  :: QMessageBox.warning(dialog, "Error", "Both source and target terms are required")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18172  [modal-dialog(QMessageBox.warning)]  in None.edit_selected_term  :: QMessageBox.warning(dialog, "Error", "Please select a term to edit")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18196  [modal-dialog(QMessageBox.warning)]  in None.delete_selected_term  :: QMessageBox.warning(dialog, "Error", "Please select a term to delete")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18204  [modal-dialog(QMessageBox.question)]  in None.delete_selected_term  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18225  [modal-dialog(QMessageBox.critical)]  in None.delete_selected_term  :: QMessageBox.critical(dialog, "Error", f"Failed to delete term: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18316  [modal-dialog(QMessageBox.warning)]  in None._show_create_tm_dialog  :: QMessageBox.warning(self, "Error", "Please enter a TM name")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18320  [modal-dialog(QMessageBox.warning)]  in None._show_create_tm_dialog  :: QMessageBox.warning(self, "Error", "Please enter a TM ID")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18324  [modal-dialog(QMessageBox.warning)]  in None._show_create_tm_dialog  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18344  [modal-dialog(QMessageBox.information)]  in None._show_create_tm_dialog  :: QMessageBox.information(self, "Success", f"Translation Memory '{name}' created successfull
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18347  [modal-dialog(QMessageBox.critical)]  in None._show_create_tm_dialog  :: QMessageBox.critical(self, "Error", "Failed to create TM. The TM name or ID may already ex
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18375  [modal-dialog(QFileDialog.getOpenFileName)]  in None._import_tmx_as_tm  :: filepath, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18446  [modal-dialog(QInputDialog.getText)]  in None._import_tmx_as_tm  :: name, ok = QInputDialog.getText(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18457  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18473  [modal-dialog(QMessageBox.critical)]  in None._import_tmx_as_tm  :: QMessageBox.critical(self, "Error", "TM database not available")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18479  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18558  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18574  [modal-dialog(QMessageBox.critical)]  in None._import_tmx_as_tm  :: QMessageBox.critical(self, "Error", "Failed to create TM metadata")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18586  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(self, "Error", "No TM selected")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18599  [modal-dialog(QMessageBox.critical)]  in None._import_tmx_as_tm  :: QMessageBox.critical(self, "Error", f"TM '{target_tm_id}' not found")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18610  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18689  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18708  [modal-dialog(QMessageBox.warning)]  in None._import_tmx_as_tm  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18717  [modal-dialog(QMessageBox.question)]  in None._import_tmx_as_tm  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18783  [modal-dialog(QMessageBox.information)]  in None._import_tmx_as_tm  :: QMessageBox.information(self, "Success", f"TMX imported successfully into TM '{target_tm_i
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18786  [modal-dialog(QMessageBox.information)]  in None._import_tmx_as_tm  :: QMessageBox.information(self, "Import Cancelled", f"Import stopped.\n\nPartial entries imp
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18789  [modal-dialog(QMessageBox.critical)]  in None._import_tmx_as_tm  :: QMessageBox.critical(self, "Error", "TM database not available")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18794  [modal-dialog(QMessageBox.critical)]  in None._import_tmx_as_tm  :: QMessageBox.critical(self, "Import Error", f"Failed to import TMX:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18800  [modal-dialog(QMessageBox.warning)]  in None._export_tm_to_tmx  :: QMessageBox.warning(self, "Error", "Please select a TM to export")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18808  [modal-dialog(QMessageBox.warning)]  in None._export_tm_to_tmx  :: QMessageBox.warning(self, "Error", "Could not find selected TM")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18814  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_tm_to_tmx  :: filepath, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18837  [modal-dialog(QMessageBox.warning)]  in None._export_tm_to_tmx  :: QMessageBox.warning(self, "Empty TM", "This TM has no entries to export")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18856  [modal-dialog(QMessageBox.information)]  in None._export_tm_to_tmx  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18862  [modal-dialog(QMessageBox.warning)]  in None._export_tm_to_tmx  :: QMessageBox.warning(self, "Export Error", "Failed to save TMX file")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18868  [modal-dialog(QMessageBox.critical)]  in None._export_tm_to_tmx  :: QMessageBox.critical(self, "Export Error", f"Failed to export TM:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18874  [modal-dialog(QMessageBox.warning)]  in None._delete_tm  :: QMessageBox.warning(self, "Error", "Please select a TM to delete")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18885  [modal-dialog(QMessageBox.question)]  in None._delete_tm  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18895  [modal-dialog(QMessageBox.information)]  in None._delete_tm  :: QMessageBox.information(self, "Success", f"TM '{tm_name}' deleted successfully")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18898  [modal-dialog(QMessageBox.critical)]  in None._delete_tm  :: QMessageBox.critical(self, "Error", "Failed to delete TM")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:18904  [modal-dialog(QMessageBox.warning)]  in None._show_tm_editor_dialog  :: QMessageBox.warning(self, "Error", "Please select a TM to edit")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:19028  [QTimer.singleShot]  in None.create_settings_tab  :: QTimer.singleShot(100, lambda: self._apply_global_ui_font_scale(saved_scale))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:19036  [QTimer.singleShot]  in None.create_settings_tab  :: QTimer.singleShot(0, lambda: self._apply_ui_chrome_compactness(True, persist=False))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:19430  [modal-dialog(QInputDialog.getText)]  in None._add_custom_profile  :: name, ok = QInputDialog.getText(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:19440  [modal-dialog(QMessageBox.warning)]  in None._add_custom_profile  :: QMessageBox.warning(self, "Duplicate Name", f"A profile named '{name}' already exists.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:19458  [modal-dialog(QMessageBox.question)]  in None._remove_custom_profile  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20039  [modal-dialog(QInputDialog.getText)]  in None._cmt_add  :: name, ok = QInputDialog.getText(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20045  [modal-dialog(QMessageBox.warning)]  in None._cmt_add  :: QMessageBox.warning(self, "Duplicate Name", f"A profile named '{name}' already exists.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20057  [modal-dialog(QMessageBox.question)]  in None._cmt_del  :: if QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20206  [modal-dialog(QMessageBox.information)]  in None._save_mt_quick_lookup_settings  :: QMessageBox.information(self, "Settings Saved", "QuickTrans settings have been saved.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20582  [modal-dialog(QFileDialog.getExistingDirectory)]  in None.change_data_path  :: folder = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20597  [modal-dialog(QMessageBox.question)]  in None.change_data_path  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20612  [modal-dialog(QMessageBox.question)]  in None.change_data_path  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20632  [modal-dialog(QMessageBox.warning)]  in None.change_data_path  :: QMessageBox.warning(self, "Copy Error", f"Failed to copy data: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:20642  [modal-dialog(QMessageBox.information)]  in None.change_data_path  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21607  [modal-dialog(QColorDialog.getColor)]  in None.choose_tag_color  :: color = QColorDialog.getColor(QColor(current_color), self, "Choose Tag Highlight Color")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21657  [modal-dialog(QColorDialog.getColor)]  in None.choose_badge_text_color  :: color = QColorDialog.getColor(QColor(current_badge_color), self, "Choose Badge Text Color"
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21693  [modal-dialog(QColorDialog.getColor)]  in None.choose_invisible_char_color  :: color = QColorDialog.getColor(QColor(current_invisible_color), self, "Choose Invisible Cha
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21749  [modal-dialog(QColorDialog.getColor)]  in None.choose_even_color  :: color = QColorDialog.getColor(QColor(even_row_color), self, "Choose Even Row Color")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21772  [modal-dialog(QColorDialog.getColor)]  in None.choose_odd_color  :: color = QColorDialog.getColor(QColor(odd_row_color), self, "Choose Odd Row Color")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21820  [modal-dialog(QColorDialog.getColor)]  in None.choose_border_color  :: color = QColorDialog.getColor(QColor(focus_border_color), self, "Choose Focus Border Color
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:21935  [modal-dialog(QColorDialog.getColor)]  in None.choose_dotted_color  :: color = QColorDialog.getColor(QColor(dotted_underline_color), self, "Choose Dotted Underli
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22412  [modal-dialog(QMessageBox.information)]  in None._save_system_prompt_from_ui  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22432  [modal-dialog(QMessageBox.question)]  in None._reset_system_prompt  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22605  [QTimer.singleShot]  in None._bring_workbench_forward  :: QTimer.singleShot(120, self._verify_foreground_grab)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22757  [QTimer.singleShot]  in None._continue_superlookup  :: QTimer.singleShot(150, widget.search_btn.click)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22763  [QTimer.singleShot]  in None.open_workbench_to_superlookup  :: QTimer.singleShot(0, _continue_superlookup)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22918  [modal-dialog(QMessageBox.information)]  in None._save_debug_settings_from_ui  :: QMessageBox.information(self, "Settings Saved", "Debug settings have been saved successful
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22939  [modal-dialog(QMessageBox.information)]  in None.export_debug_log_now  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22947  [modal-dialog(QMessageBox.warning)]  in None.export_debug_log_now  :: QMessageBox.warning(self, "Export Failed", f"Failed to export debug log:\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:22954  [modal-dialog(QMessageBox.information)]  in None.clear_debug_log_buffer  :: QMessageBox.information(self, "Buffer Cleared", f"Debug log buffer cleared.\n{buffer_size}
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:23036  [modal-dialog(QMessageBox.information)]  in None._save_llm_settings_from_ui  :: QMessageBox.information(self, "Settings Saved", "LLM settings have been saved successfully
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:23095  [modal-dialog(QMessageBox.warning)]  in None._save_ai_settings_from_ui  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:23202  [modal-dialog(QMessageBox.information)]  in None._save_ai_settings_from_ui  :: QMessageBox.information(self, "Settings Saved", "AI settings have been saved successfully.
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:23413  [modal-dialog(QMessageBox.information)]  in None._save_general_settings_from_ui  :: QMessageBox.information(self, "Settings Saved", "General settings have been saved successf
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:24838  [QTimer.singleShot]  in None._on_right_tab_changed  :: QTimer.singleShot(0, self._refresh_preview_on_show)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:25012  [QTimer.singleShot]  in None._start_background_populate  :: QTimer.singleShot(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:25056  [QTimer.singleShot]  in None._background_populate_step  :: QTimer.singleShot(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:25518  [QTimer.singleShot]  in None.add_precision_scroll_buttons  :: QTimer.singleShot(100, self.position_precision_scroll_buttons)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:25922  [modal-dialog(QFileDialog.getOpenFileName)]  in None.browse_file  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:25935  [modal-dialog(QMessageBox.warning)]  in None.browse_file  :: QMessageBox.warning(dialog, "Error", f"Could not load file:\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:26009  [modal-dialog(QMessageBox.warning)]  in None.new_project  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:26056  [modal-dialog(QMessageBox.warning)]  in None.new_project  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:26083  [modal-dialog(QMessageBox.question)]  in None.new_project  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:26889  [modal-dialog(QMessageBox.critical)]  in None.load_project  :: QMessageBox.critical(self, "Encoding Error", error_msg)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:26896  [modal-dialog(QMessageBox.critical)]  in None.load_project  :: QMessageBox.critical(self, "Error",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28462  [modal-dialog(QMessageBox.critical)]  in None.save_project_to_file  :: QMessageBox.critical(self, "Error", f"Failed to save project:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28588  [modal-dialog(QMessageBox.information)]  in None.close_project  :: QMessageBox.information(self, "No Project", "No project is currently open")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28593  [modal-dialog(QMessageBox.question)]  in None.close_project  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28685  [QTimer.singleShot]  in None._load_recent_project_with_resize  :: QTimer.singleShot(100, self.auto_resize_rows)  # Slight delay to ensure grid is fully load
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28817  [modal-dialog(QMessageBox.question)]  in None.clear_recent_projects  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28875  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_document  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28990  [modal-dialog(QMessageBox.warning)]  in None.export_okapi_merge  :: QMessageBox.warning(self, "Nothing to Export", "Open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:28993  [modal-dialog(QMessageBox.warning)]  in None.export_okapi_merge  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29006  [modal-dialog(QMessageBox.warning)]  in None.export_okapi_merge  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29021  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_okapi_merge  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29051  [modal-dialog(QMessageBox.critical)]  in None._ensure_okapi_sidecar  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29108  [modal-dialog(QMessageBox.critical)]  in None._ensure_okapi_sidecar  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29159  [modal-dialog(QMessageBox.critical)]  in None._ensure_okapi_sidecar  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29182  [modal-dialog(QMessageBox.question)]  in None._ensure_okapi_sidecar  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29237  [modal-dialog(QMessageBox.critical)]  in None._ensure_okapi_sidecar  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29254  [modal-dialog(QMessageBox.critical)]  in None._ensure_okapi_sidecar  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29444  [modal-dialog(QMessageBox.critical)]  in None.import_docx_from_path  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29668  [modal-dialog(QMessageBox.information)]  in None.import_docx_from_path  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29681  [modal-dialog(QMessageBox.critical)]  in None.import_docx_from_path  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29701  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_simple_txt  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29890  [modal-dialog(QMessageBox.warning)]  in None.import_simple_txt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:29967  [modal-dialog(QMessageBox.information)]  in None.import_simple_txt  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30029  [modal-dialog(QMessageBox.information)]  in None.import_simple_txt  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30040  [modal-dialog(QMessageBox.critical)]  in None.import_simple_txt  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30050  [modal-dialog(QMessageBox.critical)]  in None.import_simple_txt  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30065  [modal-dialog(QMessageBox.warning)]  in None.export_simple_txt  :: QMessageBox.warning(self, "No Project", "Please open a project with segments first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30075  [modal-dialog(QMessageBox.warning)]  in None.export_simple_txt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30176  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_simple_txt  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30217  [modal-dialog(QMessageBox.information)]  in None.export_simple_txt  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30226  [modal-dialog(QMessageBox.critical)]  in None.export_simple_txt  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30249  [modal-dialog(QMessageBox.warning)]  in None.export_for_ai  :: QMessageBox.warning(self, "No Project", "Please open a project with segments first")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30449  [modal-dialog(QMessageBox.warning)]  in None.export_for_ai  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30460  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_for_ai  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30498  [modal-dialog(QMessageBox.information)]  in None.export_for_ai  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30507  [modal-dialog(QMessageBox.critical)]  in None.export_for_ai  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30532  [modal-dialog(QFileDialog.getExistingDirectory)]  in None.import_folder_multifile  :: folder_path = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30558  [modal-dialog(QMessageBox.warning)]  in None.import_folder_multifile  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30726  [modal-dialog(QMessageBox.warning)]  in None.import_folder_multifile  :: QMessageBox.warning(self, "No Files Selected", "Please select at least one file to import.
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30958  [modal-dialog(QMessageBox.warning)]  in None._import_multifile_project  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:30968  [modal-dialog(QMessageBox.warning)]  in None._import_multifile_project  :: QMessageBox.warning(self, "No Segments", "No segments were imported from the selected file
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31037  [modal-dialog(QMessageBox.information)]  in None._import_multifile_project  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31056  [modal-dialog(QMessageBox.warning)]  in None.relocate_source_folder  :: QMessageBox.warning(self, "No Project", "Please open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31064  [modal-dialog(QMessageBox.information)]  in None.relocate_source_folder  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31096  [modal-dialog(QMessageBox.question)]  in None.relocate_source_folder  :: result = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31107  [modal-dialog(QFileDialog.getExistingDirectory)]  in None.relocate_source_folder  :: new_folder = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31159  [modal-dialog(QMessageBox.warning)]  in None.relocate_source_folder  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31168  [modal-dialog(QMessageBox.information)]  in None.relocate_source_folder  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31189  [modal-dialog(QMessageBox.warning)]  in None.export_folder_multifile  :: QMessageBox.warning(self, "No Project", "Please open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31197  [modal-dialog(QMessageBox.information)]  in None.export_folder_multifile  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31352  [modal-dialog(QFileDialog.getExistingDirectory)]  in None.export_folder_multifile  :: output_folder = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31485  [modal-dialog(QMessageBox.information)]  in None._export_multifile_to_folder  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31826  [modal-dialog(QMessageBox.warning)]  in None.import_review_table  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31833  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_review_table  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31850  [modal-dialog(QMessageBox.warning)]  in None.import_review_table  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31862  [modal-dialog(QMessageBox.warning)]  in None.import_review_table  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31874  [modal-dialog(QMessageBox.warning)]  in None.import_review_table  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31919  [modal-dialog(QMessageBox.warning)]  in None.import_review_table  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:31983  [modal-dialog(QMessageBox.information)]  in None.import_review_table  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32034  [modal-dialog(QMessageBox.question)]  in None.import_review_table  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32118  [modal-dialog(QMessageBox.information)]  in None.import_review_table  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32128  [modal-dialog(QMessageBox.critical)]  in None.import_review_table  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32134  [modal-dialog(QMessageBox.critical)]  in None.import_review_table  :: QMessageBox.critical(self, "Import Error", f"Failed to import bilingual table:\n\n{str(e)}
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32156  [modal-dialog(QMessageBox.warning)]  in None.export_bilingual_markdown  :: QMessageBox.warning(self, "No Project",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32253  [modal-dialog(QMessageBox.warning)]  in None.export_bilingual_markdown  :: QMessageBox.warning(self, "No Segments",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32259  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_bilingual_markdown  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32312  [modal-dialog(QMessageBox.information)]  in None.export_bilingual_markdown  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32321  [modal-dialog(QMessageBox.critical)]  in None.export_bilingual_markdown  :: QMessageBox.critical(self, "Export Error",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32333  [modal-dialog(QMessageBox.warning)]  in None.import_bilingual_markdown  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32347  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_bilingual_markdown  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32357  [modal-dialog(QMessageBox.warning)]  in None.import_bilingual_markdown  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32366  [modal-dialog(QMessageBox.warning)]  in None.import_bilingual_markdown  :: QMessageBox.warning(self, "No Segments",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32372  [modal-dialog(QMessageBox.question)]  in None.import_bilingual_markdown  :: resp = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32520  [modal-dialog(QMessageBox.information)]  in None.import_bilingual_markdown  :: QMessageBox.information(self, "Nothing to apply",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32547  [modal-dialog(QMessageBox.information)]  in None.import_bilingual_markdown  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32554  [modal-dialog(QMessageBox.critical)]  in None.import_bilingual_markdown  :: QMessageBox.critical(self, "Import Error",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:32973  [QTimer.singleShot]  in None.on_target_text_changed  :: QTimerLocal.singleShot(0, lambda sid=segment_id: self._refresh_segment_status_by_id(sid))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33211  [QTimer.singleShot]  in None.load_segments_to_grid  :: QTimer.singleShot(0, self._resize_visible_rows)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33692  [modal-dialog(QMessageBox.warning)]  in None._match_panel_edit_tm_entry  :: QMessageBox.warning(self, "Cannot Edit",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33738  [modal-dialog(QMessageBox.critical)]  in None._match_panel_edit_tm_entry  :: QMessageBox.critical(self, "Error", f"Failed to update TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33753  [modal-dialog(QMessageBox.warning)]  in None._match_panel_edit_tm_entry  :: QMessageBox.warning(self, "Not Found",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33768  [modal-dialog(QMessageBox.warning)]  in None._match_panel_delete_tm_entry  :: QMessageBox.warning(self, "Cannot Delete",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33772  [modal-dialog(QMessageBox.question)]  in None._match_panel_delete_tm_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33791  [modal-dialog(QMessageBox.critical)]  in None._match_panel_delete_tm_entry  :: QMessageBox.critical(self, "Error",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:33795  [modal-dialog(QMessageBox.critical)]  in None._match_panel_delete_tm_entry  :: QMessageBox.critical(self, "Error", f"Failed to delete TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:35039  [QTimer.singleShot]  in None._render_preview  :: QTimer.singleShot(0, lambda pt=preview_text: self._center_cursor_in_preview(pt))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:36689  [modal-dialog(QMessageBox.information)]  in None._save_language_settings_from_ui  :: QMessageBox.information(self, "Settings Saved",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:37131  [QTimer.singleShot]  in None._fire_click_center  :: QTimer.singleShot(0, lambda r=row: self._apply_click_center(r))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:37995  [modal-dialog(QMessageBox.warning)]  in None._preview_combined_prompt_from_grid  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38004  [modal-dialog(QMessageBox.warning)]  in None._preview_combined_prompt_from_grid  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38034  [modal-dialog(QMessageBox.information)]  in None._preview_combined_prompt_from_grid  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38041  [modal-dialog(QMessageBox.warning)]  in None._preview_combined_prompt_from_grid  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38402  [modal-dialog(QMessageBox.information)]  in None.clear_selected_translations_from_menu  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38407  [modal-dialog(QMessageBox.information)]  in None.copy_source_to_target_bulk  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38417  [modal-dialog(QMessageBox.question)]  in None.copy_source_to_target_bulk  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38466  [modal-dialog(QMessageBox.information)]  in None.copy_source_to_target_bulk  :: QMessageBox.information(self, "Copy Complete", f"Copied source to target for {copied_count
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38509  [modal-dialog(QMessageBox.information)]  in None.copy_source_to_target_non_translatable_bulk  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38526  [modal-dialog(QMessageBox.information)]  in None.copy_source_to_target_non_translatable_bulk  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38535  [modal-dialog(QMessageBox.question)]  in None.copy_source_to_target_non_translatable_bulk  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38595  [modal-dialog(QMessageBox.information)]  in None.copy_source_to_target_non_translatable_bulk  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38607  [modal-dialog(QMessageBox.information)]  in None.pseudo_translate_bulk  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38663  [modal-dialog(QMessageBox.warning)]  in None.show_clean_tags_dialog  :: QMessageBox.warning(self, "No Project", "Please load a project with segments first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38670  [modal-dialog(QMessageBox.warning)]  in None.show_clean_tags_dialog  :: QMessageBox.warning(self, "Module Error", "Could not load tag cleaner dialog.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38691  [modal-dialog(QMessageBox.information)]  in None.clean_project_tags  :: QMessageBox.information(self, "No Tags Selected", "Please select at least one tag type to 
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38759  [modal-dialog(QMessageBox.information)]  in None.clean_project_tags  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38775  [modal-dialog(QMessageBox.information)]  in None.show_proofread_dialog  :: QMessageBox.information(self, "No Project", "Please open or create a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38946  [modal-dialog(QMessageBox.information)]  in None.show_proofread_dialog  :: QMessageBox.information(self, "No Segments", "No segments match the selected criteria.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:38959  [modal-dialog(QMessageBox.warning)]  in None._run_proofreading  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39110  [modal-dialog(QMessageBox.information)]  in None.show_proofreading_results_dialog  :: QMessageBox.information(self, "No Project", "Please open or create a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39120  [modal-dialog(QMessageBox.information)]  in None.show_proofreading_results_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39210  [modal-dialog(QMessageBox.warning)]  in None.send_segments_to_tm_dialog  :: QMessageBox.warning(self, "No Project", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39214  [modal-dialog(QMessageBox.warning)]  in None.send_segments_to_tm_dialog  :: QMessageBox.warning(self, "No TM Manager", "Translation Memory system is not initialized."
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39220  [modal-dialog(QMessageBox.warning)]  in None.send_segments_to_tm_dialog  :: QMessageBox.warning(self, "No TMs",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39227  [modal-dialog(QMessageBox.warning)]  in None.send_segments_to_tm_dialog  :: QMessageBox.warning(self, "No Writable TMs",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39421  [modal-dialog(QMessageBox.information)]  in None.send_segments_to_tm_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:39556  [modal-dialog(QMessageBox.information)]  in None.send_segments_to_tm_dialog  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41129  [modal-dialog(QMessageBox.information)]  in None.show_find_replace_dialog  :: QMessageBox.information(self, "No Project", "Please open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41518  [modal-dialog(QMessageBox.information)]  in None._fr_add_to_set  :: QMessageBox.information(self.find_replace_dialog, "Add to Set", "Please enter a Find term 
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41571  [modal-dialog(QMessageBox.warning)]  in None._fr_compile_regex  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41605  [modal-dialog(QMessageBox.information)]  in None._fr_run_set_batch  :: QMessageBox.information(self.find_replace_dialog, "Run All", "No enabled operations with f
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41624  [modal-dialog(QMessageBox.question)]  in None._fr_run_set_batch  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41672  [modal-dialog(QMessageBox.information)]  in None._fr_run_set_batch  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41817  [modal-dialog(QMessageBox.information)]  in None.find_next_match  :: QMessageBox.information(self.find_replace_dialog, "Find", "No matches found.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:41885  [modal-dialog(QMessageBox.information)]  in None.find_all_matches  :: QMessageBox.information(self.find_replace_dialog, "Find", "No matches found.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42039  [modal-dialog(QMessageBox.information)]  in None.replace_current_match  :: QMessageBox.information(self.find_replace_dialog, "Replace", "No match selected. Use 'Find
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42048  [modal-dialog(QMessageBox.warning)]  in None.replace_current_match  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42075  [modal-dialog(QMessageBox.warning)]  in None.replace_current_match  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42128  [modal-dialog(QMessageBox.warning)]  in None.replace_all_matches  :: reply = QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42156  [modal-dialog(QMessageBox.warning)]  in None.replace_all_matches  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42163  [modal-dialog(QMessageBox.information)]  in None.replace_all_matches  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42176  [modal-dialog(QMessageBox.information)]  in None.replace_all_matches  :: QMessageBox.information(self.find_replace_dialog, "Replace All", "No matches found in Targ
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42208  [modal-dialog(QMessageBox.question)]  in None.replace_all_matches  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42230  [modal-dialog(QMessageBox.warning)]  in None.replace_all_matches  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42318  [modal-dialog(QMessageBox.information)]  in None.replace_all_matches  :: QMessageBox.information(self.find_replace_dialog, "Replace All", summary)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42375  [modal-dialog(QMessageBox.information)]  in None.highlight_all_matches  :: QMessageBox.information(self.find_replace_dialog, "Highlight All", "No matches found.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42680  [modal-dialog(QMessageBox.information)]  in None.show_goto_dialog  :: QMessageBox.information(self, "No Project", "Please open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:42769  [modal-dialog(QMessageBox.information)]  in None.show_project_info_dialog  :: QMessageBox.information(self, "No Project", "Please open or create a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43138  [modal-dialog(QMessageBox.question)]  in None.on_file_double_click  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43177  [modal-dialog(QMessageBox.information)]  in None.show_search_dialog  :: QMessageBox.information(self, "No Project", "Please open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43371  [modal-dialog(QMessageBox.information)]  in None.show_manage_views_dialog  :: QMessageBox.information(self, "Not Available",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43439  [modal-dialog(QMessageBox.question)]  in None.delete_selected_view  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43496  [modal-dialog(QMessageBox.warning)]  in None.create_view  :: QMessageBox.warning(dialog, "Name Required", "Please enter a name for the view.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43502  [modal-dialog(QMessageBox.warning)]  in None.create_view  :: QMessageBox.warning(dialog, "No Files Selected",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43680  [modal-dialog(QMessageBox.warning)]  in None._toggle_spellcheck  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:43728  [modal-dialog(QMessageBox.warning)]  in None._toggle_spellcheck_from_button  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:44806  [QTimer.singleShot]  in None._sync_segment_comments_to_active  :: QTimer.singleShot(0, _reveal)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:45071  [QTimer.singleShot]  in None._open_comment_in_panel  :: QTimer.singleShot(0, _reveal_and_flash)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:45088  [QTimer.singleShot]  in None._flash_comment_header  :: QTimer.singleShot(1400, _restore)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:45364  [QTimer.singleShot]  in None._sync_proofreading_comments_to_active  :: QTimer.singleShot(0, _reveal)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:46440  [QTimer.singleShot]  in None.confirm_and_next_unconfirmed  :: QTimer.singleShot(50, lambda r=row, s=seg: self._check_auto_confirm_100_percent(r, s))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:46817  [modal-dialog(QMessageBox.information)]  in None.confirm_selected_segments_from_menu  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:46821  [modal-dialog(QMessageBox.information)]  in None.confirm_selected_segments_from_menu  :: QMessageBox.information(self, "Not Available", "Grid view is not available.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:46837  [modal-dialog(QMessageBox.information)]  in None.change_status_selected  :: QMessageBox.information(self, "Not Available", "Please load a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:46844  [modal-dialog(QMessageBox.information)]  in None.change_status_selected  :: QMessageBox.information(self, "Not Available", "Grid view is not available.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47061  [modal-dialog(QMessageBox.question)]  in None._on_termlens_delete_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47435  [QTimer.singleShot]  in None._go_to_settings_tab  :: QTimer.singleShot(100, lambda: self.ai_settings_scroll.verticalScrollBar().setValue(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47814  [modal-dialog(QMessageBox.warning)]  in None._open_url  :: QMessageBox.warning(self, "Error", f"Could not open URL: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47822  [modal-dialog(QMessageBox.information)]  in None._open_superdocs_tab  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47836  [modal-dialog(QMessageBox.warning)]  in None.check_for_updates  :: QMessageBox.warning(self, "Check for Updates", f"Could not open releases page: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47840  [modal-dialog(QMessageBox.information)]  in None.check_for_updates  :: QMessageBox.information(self, "Check for Updates", "An update check is already in progress
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:47977  [modal-dialog(QMessageBox.warning)]  in None.finish  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48027  [modal-dialog(QMessageBox.question)]  in None.show_offline_error  :: choice = QMessageBox.question(
+  W  E:\Dev\SupervertalerPortable\Supervertaler.py:48090  [QTimer.singleShot]  in None.worker  :: QTimer.singleShot(0, on_ok)
+  W  E:\Dev\SupervertalerPortable\Supervertaler.py:48103  [QTimer.singleShot]  in None.worker  :: QTimer.singleShot(0, on_err)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48180  [modal-dialog(QMessageBox.information)]  in None.handle_latest  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48197  [modal-dialog(QMessageBox.question)]  in None.handle_latest  :: choice = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48207  [modal-dialog(QMessageBox.information)]  in None.handle_latest  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48213  [modal-dialog(QMessageBox.information)]  in None.handle_latest  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48426  [modal-dialog(QMessageBox.information)]  in None.copy_version_info_to_clipboard  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48433  [modal-dialog(QMessageBox.warning)]  in None.copy_version_info_to_clipboard  :: QMessageBox.warning(self, "Copy Failed", f"Could not copy version info: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48459  [modal-dialog(QMessageBox.warning)]  in None.open_diagnostic_log  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48465  [modal-dialog(QMessageBox.information)]  in None.open_diagnostic_log  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48479  [modal-dialog(QMessageBox.warning)]  in None.open_diagnostic_log_folder  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48559  [modal-dialog(QMessageBox.question)]  in None.closeEvent  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48603  [QTimer.singleShot]  in None._init_okapi_sidecar_deferred  :: QTimer.singleShot(1500, self._start_okapi_sidecar)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48744  [modal-dialog(QMessageBox.warning)]  in None.translate_current_segment  :: QMessageBox.warning(self, "No Selection", "Please select a segment to translate.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48750  [modal-dialog(QMessageBox.warning)]  in None.translate_current_segment  :: QMessageBox.warning(self, "Empty Source", "Cannot translate empty source text.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:48769  [modal-dialog(QMessageBox.warning)]  in None.translate_current_segment  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49028  [modal-dialog(QMessageBox.warning)]  in None.translate_current_segment  :: QMessageBox.warning(self, "Translation Failed", "No translation received from LLM.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49037  [modal-dialog(QMessageBox.critical)]  in None.translate_current_segment  :: QMessageBox.critical(self, "Translation Error", f"Failed to translate segment:\n\n{str(e)}
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49053  [modal-dialog(QMessageBox.warning)]  in None.fuzzy_fix_current_segment  :: QMessageBox.warning(self, "No Project", "Open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49058  [modal-dialog(QMessageBox.information)]  in None.fuzzy_fix_current_segment  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49088  [modal-dialog(QMessageBox.information)]  in None.fuzzy_fix_current_segment  :: QMessageBox.information(self, "FuzzyFixer",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49095  [modal-dialog(QMessageBox.information)]  in None.fuzzy_fix_current_segment  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49101  [modal-dialog(QMessageBox.information)]  in None.fuzzy_fix_current_segment  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49163  [modal-dialog(QMessageBox.warning)]  in None.autotag_current_segment  :: QMessageBox.warning(self, "No Selection", "Please select a segment first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49168  [modal-dialog(QMessageBox.information)]  in None.autotag_current_segment  :: QMessageBox.information(self, "AutoTagger",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49172  [modal-dialog(QMessageBox.information)]  in None.autotag_current_segment  :: QMessageBox.information(self, "AutoTagger",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49183  [modal-dialog(QMessageBox.warning)]  in None.autotag_current_segment  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49192  [modal-dialog(QMessageBox.critical)]  in None.autotag_current_segment  :: QMessageBox.critical(self, "AutoTagger", f"Could not initialise the AI client:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49204  [modal-dialog(QMessageBox.critical)]  in None.autotag_current_segment  :: QMessageBox.critical(self, "AutoTagger", f"AutoTagger failed:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49210  [modal-dialog(QMessageBox.warning)]  in None.autotag_current_segment  :: QMessageBox.warning(self, "AutoTagger",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49458  [modal-dialog(QMessageBox.information)]  in None.run_grid_quicklauncher_prompt  :: QMessageBox.information(self, "QuickLauncher", "Please select some text first (or click in
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49488  [modal-dialog(QMessageBox.critical)]  in None.run_grid_quicklauncher_prompt  :: QMessageBox.critical(self, "QuickLauncher", f"Could not build prompt:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49506  [modal-dialog(QMessageBox.warning)]  in None.run_grid_quicklauncher_prompt  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49541  [modal-dialog(QMessageBox.warning)]  in None.run_grid_quicklauncher_prompt  :: QMessageBox.warning(self, "QuickLauncher", "No response received from the LLM.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49545  [modal-dialog(QMessageBox.critical)]  in None.run_grid_quicklauncher_prompt  :: QMessageBox.critical(self, "QuickLauncher", f"QuickLauncher failed:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49598  [modal-dialog(QMessageBox.warning)]  in None.translate_multiple_segments  :: QMessageBox.warning(self, "No Project", "Please load or create a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49607  [modal-dialog(QMessageBox.information)]  in None.translate_multiple_segments  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49616  [modal-dialog(QMessageBox.information)]  in None.translate_multiple_segments  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49666  [modal-dialog(QMessageBox.information)]  in None.translate_multiple_segments  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49677  [modal-dialog(QMessageBox.information)]  in None.translate_multiple_segments  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49731  [modal-dialog(QMessageBox.warning)]  in None.autotag_segments_bulk  :: QMessageBox.warning(self, "No Project", "Open a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49743  [modal-dialog(QMessageBox.information)]  in None.autotag_segments_bulk  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49749  [modal-dialog(QMessageBox.question)]  in None.autotag_segments_bulk  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49764  [modal-dialog(QMessageBox.warning)]  in None.autotag_segments_bulk  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49837  [modal-dialog(QMessageBox.warning)]  in None.translate_batch  :: QMessageBox.warning(self, "No Project", "Please load or create a project first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49857  [modal-dialog(QMessageBox.information)]  in None.translate_batch  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:49898  [modal-dialog(QMessageBox.warning)]  in None.translate_batch  :: reply = QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50156  [modal-dialog(QMessageBox.critical)]  in None.translate_batch  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50171  [modal-dialog(QMessageBox.critical)]  in None.translate_batch  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50234  [modal-dialog(QMessageBox.warning)]  in None.translate_batch  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50428  [modal-dialog(QMessageBox.information)]  in None.translate_batch  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50512  [modal-dialog(QMessageBox.question)]  in None.translate_batch  :: _reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50764  [QTimer.singleShot]  in None._fetch_llm_translation_async  :: QTimer.singleShot(100, fetch_and_update)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50828  [QTimer.singleShot]  in None._fetch_mt_translation_async  :: QTimer.singleShot(150, fetch_and_update)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:50884  [modal-dialog(QMessageBox.warning)]  in None.show_scratchpad  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:52210  [modal-dialog(QMessageBox.critical)]  in None.__init__  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:52272  [QTimer.singleShot]  in None.showEvent  :: QTimer.singleShot(100, self._delayed_language_population)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:53658  [QTimer.singleShot]  in None.set_filter_and_select  :: QTimer.singleShot(300, lambda: self._select_first_term_in_table(main))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:53659  [QTimer.singleShot]  in None._navigate_to_termbase_entry  :: QTimer.singleShot(200, set_filter_and_select)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54110  [modal-dialog(QMessageBox.warning)]  in None.add_to_termbase  :: QMessageBox.warning(self, "No Source Text", "Please enter or capture source text first.")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54123  [modal-dialog(QMessageBox.warning)]  in None.add_to_termbase  :: QMessageBox.warning(self, "Database Not Available", "Termbase database is not initialized.
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54161  [modal-dialog(QMessageBox.warning)]  in None.show_add_term_dialog  :: QMessageBox.warning(self, "No Writable Termbases",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54168  [modal-dialog(QMessageBox.warning)]  in None.show_add_term_dialog  :: QMessageBox.warning(self, "Error", f"Could not load termbases: {e}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54195  [modal-dialog(QMessageBox.warning)]  in None.show_add_term_dialog  :: QMessageBox.warning(self, "Missing Information", "Both source and target terms are require
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54221  [modal-dialog(QMessageBox.warning)]  in None.show_add_term_dialog  :: QMessageBox.warning(self, "Duplicate Term",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54240  [modal-dialog(QMessageBox.information)]  in None.show_add_term_dialog  :: QMessageBox.information(self, "Term Added",
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54256  [modal-dialog(QMessageBox.critical)]  in None.show_add_term_dialog  :: QMessageBox.critical(self, "Error", f"Failed to add term:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54382  [invokeMethod]  in None._on_pynput_quicktrans  :: QMetaObject.invokeMethod(
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54421  [QTimer.singleShot]  in None._handle_quicktrans_hotkey  :: QTimer.singleShot(250, self._read_clipboard_for_quicktrans)
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54446  [QTimer.singleShot]  in None.on_ahk_mt_lookup_capture  :: QTimer.singleShot(100, lambda: self.show_mt_quick_lookup_from_ahk(text))
+  .  E:\Dev\SupervertalerPortable\Supervertaler.py:54585  [QTimer.singleShot]  in None._paste_translation_to_external_app  :: QTimer.singleShot(500, _do_paste)
+  .  E:\Dev\SupervertalerPortable\modules\ai_file_viewer_dialog.py:142  [modal-dialog(QMessageBox.information)]  in None.copy_to_clipboard  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\ai_file_viewer_dialog.py:149  [modal-dialog(QMessageBox.warning)]  in None.copy_to_clipboard  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\chat_view_widget.py:468  [modal-dialog(QFileDialog.getOpenFileName)]  in None._attach_file  :: path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\chat_view_widget.py:643  [modal-dialog(QMessageBox.question)]  in None._clear_chat  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:141  [modal-dialog(QColorDialog.getColor)]  in None.pick_color  :: color = QColorDialog.getColor(current_color, self, f"Pick {attr}")
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:164  [modal-dialog(QMessageBox.information)]  in None.apply_theme  :: QMessageBox.information(self, "Theme Applied",
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:171  [modal-dialog(QInputDialog.getText)]  in None.save_custom_theme  :: name, ok = QInputDialog.getText(self, "Save Theme", "Enter theme name:")
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:199  [modal-dialog(QMessageBox.information)]  in None.save_custom_theme  :: QMessageBox.information(self, "Theme Saved",
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:209  [modal-dialog(QMessageBox.warning)]  in None.delete_custom_theme  :: QMessageBox.warning(self, "Cannot Delete",
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:213  [modal-dialog(QMessageBox.question)]  in None.delete_custom_theme  :: reply = QMessageBox.question(self, "Delete Theme",
+  .  E:\Dev\SupervertalerPortable\modules\dialogs\theme_editor.py:221  [modal-dialog(QMessageBox.information)]  in None.delete_custom_theme  :: QMessageBox.information(self, "Theme Deleted",
+  .  E:\Dev\SupervertalerPortable\modules\file_dialog_helper.py:35  [modal-dialog(QFileDialog.getOpenFileName)]  in None.None  :: file_path, selected_filter = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\file_dialog_helper.py:70  [modal-dialog(QFileDialog.getOpenFileNames)]  in None.None  :: file_paths, selected_filter = QFileDialog.getOpenFileNames(
+  .  E:\Dev\SupervertalerPortable\modules\file_dialog_helper.py:105  [modal-dialog(QFileDialog.getSaveFileName)]  in None.None  :: file_path, selected_filter = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\file_dialog_helper.py:138  [modal-dialog(QFileDialog.getExistingDirectory)]  in None.None  :: directory = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:422  [modal-dialog(QInputDialog.getText)]  in None._create_new_set  :: name, ok = QInputDialog.getText(self, "New F&R Set", "Enter set name:")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:433  [modal-dialog(QFileDialog.getOpenFileName)]  in None._import_set  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:444  [modal-dialog(QMessageBox.information)]  in None._import_set  :: QMessageBox.information(self, "Import", f"Imported '{fr_set.name}' with {len(fr_set.operat
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:446  [modal-dialog(QMessageBox.warning)]  in None._import_set  :: QMessageBox.warning(self, "Import Error", f"Failed to import: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:451  [modal-dialog(QMessageBox.information)]  in None._export_set  :: QMessageBox.information(self, "Export", "Select a set to export first.")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:454  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_set  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:465  [modal-dialog(QMessageBox.information)]  in None._export_set  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:469  [modal-dialog(QMessageBox.warning)]  in None._export_set  :: QMessageBox.warning(self, "Export Error", f"Failed to export: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:475  [modal-dialog(QMessageBox.information)]  in None._delete_selected_set  :: QMessageBox.information(self, "Delete Set", "Select a set to delete first.")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:481  [modal-dialog(QMessageBox.question)]  in None._delete_selected_set  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:506  [modal-dialog(QMessageBox.information)]  in None._delete_selected_operation  :: QMessageBox.information(self, "Delete Operation", "Select a set first.")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:510  [modal-dialog(QMessageBox.information)]  in None._delete_selected_operation  :: QMessageBox.information(self, "Delete Operation", "Select an operation to delete.")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:522  [modal-dialog(QMessageBox.information)]  in None._add_empty_operation  :: QMessageBox.information(self, "No Set", "Please select or create a F&R set first.")
+  .  E:\Dev\SupervertalerPortable\modules\find_replace_qt.py:538  [modal-dialog(QMessageBox.information)]  in None._run_all_operations  :: QMessageBox.information(self, "Run All", "No enabled operations with find text.")
+  .  E:\Dev\SupervertalerPortable\modules\grid\filters.py:916  [modal-dialog(QMessageBox.information)]  in None.None  :: QMessageBox.information(parent, "No Project", "Please open or create a project first.")
+  .  E:\Dev\SupervertalerPortable\modules\grid\helpers.py:203  [QTimer.singleShot]  in None.None  :: QTimer.singleShot(0, table.setFocus)
+  .  E:\Dev\SupervertalerPortable\modules\grid\helpers.py:398  [modal-dialog(QMessageBox.question)]  in None.None  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\grid\helpers.py:408  [modal-dialog(QMessageBox.information)]  in None.None  :: QMessageBox.information(parent_widget, "No Selection",
+  .  E:\Dev\SupervertalerPortable\modules\grid\pagination.py:357  [QTimer.singleShot]  in None.None  :: QTimer.singleShot(50, deferred_resize_callback)
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:201  [modal-dialog(QMessageBox.question)]  in None.accept_shortcut  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:645  [modal-dialog(QMessageBox.information)]  in None.edit_selected_shortcut  :: QMessageBox.information(self, "No Selection", "Please select a shortcut to edit.")
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:658  [modal-dialog(QMessageBox.information)]  in None.edit_selected_shortcut  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:668  [modal-dialog(QMessageBox.information)]  in None.reset_selected  :: QMessageBox.information(self, "No Selection", "Please select a shortcut to reset.")
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:676  [modal-dialog(QMessageBox.information)]  in None.reset_selected  :: QMessageBox.information(self, "Already Default", "This shortcut is already using its defau
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:679  [modal-dialog(QMessageBox.question)]  in None.reset_selected  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:692  [modal-dialog(QMessageBox.information)]  in None.reset_selected  :: QMessageBox.information(self, "Reset Complete", "Shortcut has been reset to default.")
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:696  [modal-dialog(QMessageBox.question)]  in None.reset_all  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:709  [modal-dialog(QMessageBox.information)]  in None.reset_all  :: QMessageBox.information(self, "Reset Complete", "All shortcuts have been reset to defaults
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:713  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_shortcuts  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:723  [modal-dialog(QMessageBox.information)]  in None.export_shortcuts  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:729  [modal-dialog(QMessageBox.critical)]  in None.export_shortcuts  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:737  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_shortcuts  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:745  [modal-dialog(QMessageBox.question)]  in None.import_shortcuts  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:758  [modal-dialog(QMessageBox.information)]  in None.import_shortcuts  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:764  [modal-dialog(QMessageBox.critical)]  in None.import_shortcuts  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:770  [modal-dialog(QMessageBox.critical)]  in None.import_shortcuts  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:778  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_html_cheatsheet  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:789  [modal-dialog(QMessageBox.question)]  in None.export_html_cheatsheet  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\keyboard_shortcuts_widget.py:801  [modal-dialog(QMessageBox.critical)]  in None.export_html_cheatsheet  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:398  [modal-dialog(QFileDialog.getOpenFileName)]  in None._import_from_pdf  :: pdf_file, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:413  [modal-dialog(QMessageBox.warning)]  in None._import_from_pdf  :: QMessageBox.warning(None, "Empty PDF", "The selected PDF has no pages.")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:472  [modal-dialog(QMessageBox.information)]  in None._import_from_pdf  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:481  [modal-dialog(QMessageBox.critical)]  in None._import_from_pdf  :: QMessageBox.critical(None, "PDF Import Error", f"Failed to import PDF:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:487  [modal-dialog(QFileDialog.getOpenFileNames)]  in None._add_files  :: files, _ = QFileDialog.getOpenFileNames(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:503  [modal-dialog(QFileDialog.getExistingDirectory)]  in None._add_folder  :: folder = QFileDialog.getExistingDirectory(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:527  [modal-dialog(QMessageBox.question)]  in None._clear_list  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:636  [modal-dialog(QMessageBox.warning)]  in None._save_session_report  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:645  [modal-dialog(QFileDialog.getSaveFileName)]  in None._save_session_report  :: output_file, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:729  [modal-dialog(QMessageBox.question)]  in None._save_session_report  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:741  [modal-dialog(QMessageBox.critical)]  in None._save_session_report  :: QMessageBox.critical(None, "Error", f"Failed to save report:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:900  [modal-dialog(QMessageBox.warning)]  in None._process_selected  :: QMessageBox.warning(None, "No Selection", "Please select an image to process")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:930  [modal-dialog(QMessageBox.warning)]  in None._process_all  :: QMessageBox.warning(None, "No Files", "Please add images first")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:937  [modal-dialog(QMessageBox.question)]  in None._process_all  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:968  [modal-dialog(QMessageBox.information)]  in None._process_all  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1371  [modal-dialog(QMessageBox.warning)]  in None._export_markdown_and_word  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1380  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_markdown_and_word  :: output_file, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1418  [modal-dialog(QMessageBox.question)]  in None._export_markdown_and_word  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1432  [modal-dialog(QMessageBox.critical)]  in None._export_markdown_and_word  :: QMessageBox.critical(None, "Error", f"Failed to export documents:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1510  [modal-dialog(QMessageBox.warning)]  in None._save_to_docx  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1518  [modal-dialog(QFileDialog.getSaveFileName)]  in None._save_to_docx  :: output_file, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1619  [modal-dialog(QMessageBox.question)]  in None._save_to_docx  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1631  [modal-dialog(QMessageBox.critical)]  in None._save_to_docx  :: QMessageBox.critical(None, "Error", f"Failed to save document:\n\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1636  [modal-dialog(QMessageBox.warning)]  in None._copy_all_text  :: QMessageBox.warning(None, "No Text", "No extracted text to copy")
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1656  [modal-dialog(QMessageBox.information)]  in None._copy_all_text  :: QMessageBox.information(None, "Copied", f"Copied text from {len(self.extracted_texts)} pag
+  .  E:\Dev\SupervertalerPortable\modules\pdf_rescue_Qt.py:1715  [modal-dialog(QMessageBox.critical)]  in StandaloneApp.__init__  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\pseudo_translate_dialog.py:187  [modal-dialog(QMessageBox.information)]  in None.None  :: QMessageBox.information(mw, "Pseudo-translate", "There are no segments to pseudo-translate
+  .  E:\Dev\SupervertalerPortable\modules\pseudo_translate_dialog.py:208  [modal-dialog(QMessageBox.information)]  in None.None  :: QMessageBox.information(mw, "Pseudo-translate", "No segments matched the chosen scope.")
+  .  E:\Dev\SupervertalerPortable\modules\pseudo_translate_dialog.py:220  [modal-dialog(QMessageBox.warning)]  in None.None  :: reply = QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\pseudo_translate_dialog.py:281  [modal-dialog(QMessageBox.information)]  in None.None  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\quicktrans.py:1126  [QTimer.singleShot]  in None._send_to_superlookup  :: QTimer.singleShot(
+  .  E:\Dev\SupervertalerPortable\modules\quicktrans.py:1152  [QTimer.singleShot]  in None._open_settings  :: QTimer.singleShot(
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:239  [modal-dialog(QInputDialog.getText)]  in None._add_delimiter_rule  :: text, ok = QInputDialog.getText(self, "Break after text",
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:269  [modal-dialog(QFileDialog.getOpenFileName)]  in None._import_srx  :: path, _ = QFileDialog.getOpenFileName(self, "Import SRX rules", "",
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:277  [modal-dialog(QMessageBox.warning)]  in None._import_srx  :: QMessageBox.warning(self, "Import SRX", f"Could not read this SRX file:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:281  [modal-dialog(QMessageBox.information)]  in None._import_srx  :: QMessageBox.information(self, "Import SRX", "The file contains no segmentation rules.")
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:320  [modal-dialog(QMessageBox.information)]  in None._import_srx  :: QMessageBox.information(self, "Import SRX", message)
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:326  [modal-dialog(QMessageBox.information)]  in None._export_srx  :: QMessageBox.information(self, "Export SRX", "There are no usable custom rules to export.")
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:328  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export_srx  :: path, _ = QFileDialog.getSaveFileName(self, "Export SRX rules", "segmentation.srx",
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:336  [modal-dialog(QMessageBox.warning)]  in None._export_srx  :: QMessageBox.warning(self, "Export SRX", f"Could not save the file:\n\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\segmentation_rules_widget.py:338  [modal-dialog(QMessageBox.information)]  in None._export_srx  :: QMessageBox.information(self, "Export SRX", f"Exported {len(usable)} rules.")
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:195  [modal-dialog(QMessageBox.information)]  in None._start_analysis  :: QMessageBox.information(self, "Statistics", "The project has no segments to analyse.")
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:206  [modal-dialog(QMessageBox.critical)]  in None._start_analysis  :: QMessageBox.critical(self, "Statistics", "Could not locate the TM database path.")
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:284  [modal-dialog(QMessageBox.critical)]  in None._on_error  :: QMessageBox.critical(self, "Statistics – Error", msg)
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:383  [modal-dialog(QFileDialog.getSaveFileName)]  in None._export  :: path, selected = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:410  [modal-dialog(QMessageBox.information)]  in None._export  :: QMessageBox.information(self, "Export complete", f"Statistics exported to:\n{path}")
+  .  E:\Dev\SupervertalerPortable\modules\statistics_dialog_qt.py:412  [modal-dialog(QMessageBox.warning)]  in None._export  :: QMessageBox.warning(self, "Export", f"Export failed: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:712  [modal-dialog(QMessageBox.warning)]  in None.add_source_synonym  :: QMessageBox.warning(self, "Duplicate", f"Source synonym '{synonym}' already added.")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:717  [modal-dialog(QMessageBox.warning)]  in None.add_source_synonym  :: QMessageBox.warning(self, "Invalid Synonym", "Cannot add the main source term as a synonym
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:884  [modal-dialog(QMessageBox.warning)]  in None.add_target_synonym  :: QMessageBox.warning(self, "Duplicate", f"Synonym '{synonym}' already added.")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:889  [modal-dialog(QMessageBox.warning)]  in None.add_target_synonym  :: QMessageBox.warning(self, "Invalid Synonym", "Cannot add the main target term as a synonym
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1482  [modal-dialog(QMessageBox.warning)]  in None.load_term_data  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1495  [QTimer.singleShot]  in None.load_term_data  :: QTimer.singleShot(0, self.reject)
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1499  [modal-dialog(QMessageBox.critical)]  in None.load_term_data  :: QMessageBox.critical(self, "Error", f"Failed to load term data: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1573  [modal-dialog(QMessageBox.question)]  in None.delete_term  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1602  [modal-dialog(QMessageBox.information)]  in None.delete_term  :: QMessageBox.information(self, "Success", "Termbase entry deleted")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1605  [modal-dialog(QMessageBox.critical)]  in None.delete_term  :: QMessageBox.critical(self, "Error", f"Failed to delete entry: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1614  [modal-dialog(QMessageBox.warning)]  in None.save_term  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1622  [modal-dialog(QMessageBox.critical)]  in None.save_term  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1757  [modal-dialog(QMessageBox.critical)]  in None.save_term  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\termbase_entry_editor.py:1811  [modal-dialog(QMessageBox.warning)]  in None.save_synonyms  :: QMessageBox.warning(self, "Warning", f"Failed to save synonyms: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\termlens_popup.py:295  [QTimer.singleShot]  in None._build_ui  :: QTimer.singleShot(0, self._fit_height_to_content)
+  .  E:\Dev\SupervertalerPortable\modules\termlens_popup.py:296  [QTimer.singleShot]  in None._build_ui  :: QTimer.singleShot(80, self._fit_height_to_content)
+  .  E:\Dev\SupervertalerPortable\modules\termlens_popup.py:605  [QTimer.singleShot]  in None.changeEvent  :: QTimer.singleShot(0, self.close)
+  .  E:\Dev\SupervertalerPortable\modules\termlens_popup.py:638  [QTimer.singleShot]  in None.closeEvent  :: QTimer.singleShot(0, lambda: self.edit_requested.emit(term_id, termbase_id))
+  .  E:\Dev\SupervertalerPortable\modules\termlens_widget.py:1696  [QTimer.singleShot]  in None._on_refresh_clicked  :: QTimer.singleShot(500, _restore)
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:829  [modal-dialog(QMessageBox.warning)]  in None.delete_selected_entry  :: QMessageBox.warning(self, "No Selection", "Please select an entry to delete")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:838  [modal-dialog(QMessageBox.question)]  in None.delete_selected_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:850  [modal-dialog(QMessageBox.information)]  in None.delete_selected_entry  :: QMessageBox.information(self, "Success", "Entry deleted successfully")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:852  [modal-dialog(QMessageBox.critical)]  in None.delete_selected_entry  :: QMessageBox.critical(self, "Error", f"Failed to delete entry: {str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:895  [modal-dialog(QFileDialog.getOpenFileName)]  in None.import_tmx  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:935  [modal-dialog(QMessageBox.information)]  in None.on_import_finished  :: QMessageBox.information(self, "Import Complete", f"{message}\n\nTotal entries: {count}")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:939  [modal-dialog(QMessageBox.critical)]  in None.on_import_finished  :: QMessageBox.critical(self, "Import Failed", message)
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:943  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export_tmx  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:963  [modal-dialog(QMessageBox.warning)]  in None.export_tmx  :: QMessageBox.warning(self, "No Entries", "No translation units to export")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:1002  [modal-dialog(QMessageBox.information)]  in None.export_tmx  :: QMessageBox.information(self, "Export Complete",
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:1008  [modal-dialog(QMessageBox.critical)]  in None.export_tmx  :: QMessageBox.critical(self, "Export Failed", f"Failed to export TMX:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:1149  [modal-dialog(QMessageBox.question)]  in None.clean_identical_source_target  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:1173  [modal-dialog(QMessageBox.question)]  in None.clean_duplicate_sources  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tm_manager_qt.py:1237  [modal-dialog(QMessageBox.critical)]  in None.on_finished  :: QMessageBox.critical(self, "Cleaning Error", error_msg)
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:393  [modal-dialog(QMessageBox.information)]  in None.preview_cleaning  :: QMessageBox.information(self, "Preview", "No tag patterns selected.")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:405  [modal-dialog(QMessageBox.information)]  in None.preview_cleaning  :: QMessageBox.information(self, "Preview", preview_text)
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:929  [modal-dialog(QMessageBox.question)]  in None.new_tmx  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:975  [modal-dialog(QMessageBox.warning)]  in None.new_tmx  :: QMessageBox.warning(self, "Error", "Please enter both source and target languages")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:999  [modal-dialog(QMessageBox.question)]  in None.open_tmx  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1007  [modal-dialog(QFileDialog.getOpenFileName)]  in None.open_tmx  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1127  [modal-dialog(QMessageBox.critical)]  in None.open_tmx  :: QMessageBox.critical(self, "Error", f"Failed to open TMX file:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1151  [modal-dialog(QMessageBox.warning)]  in None._open_tmx_database  :: QMessageBox.warning(self, "Warning", "Database manager not available. Using RAM mode inste
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1301  [modal-dialog(QMessageBox.warning)]  in None.save_tmx  :: QMessageBox.warning(self, "Warning", "No file to save")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1307  [modal-dialog(QMessageBox.warning)]  in None.save_tmx  :: QMessageBox.warning(self, "Warning", "File information not found")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1322  [modal-dialog(QMessageBox.warning)]  in None.save_tmx  :: QMessageBox.warning(self, "Warning", "No file to save")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1338  [modal-dialog(QMessageBox.critical)]  in None.save_tmx  :: QMessageBox.critical(self, "Error", f"Failed to save TMX file:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1344  [modal-dialog(QMessageBox.question)]  in None.close_tmx  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1395  [modal-dialog(QFileDialog.getSaveFileName)]  in None.save_tmx_as  :: file_path, _ = QFileDialog.getSaveFileName(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1409  [modal-dialog(QMessageBox.warning)]  in None.save_tmx_as  :: QMessageBox.warning(self, "Warning", "No file to save")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1421  [modal-dialog(QMessageBox.critical)]  in None.save_tmx_as  :: QMessageBox.critical(self, "Error", f"Failed to save TMX file:\n{str(e)}")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1520  [modal-dialog(QMessageBox.warning)]  in None.add_translation_unit  :: QMessageBox.warning(self, "Warning", "Please select source and target languages")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1525  [modal-dialog(QMessageBox.warning)]  in None.add_translation_unit  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1566  [modal-dialog(QMessageBox.warning)]  in None.add_translation_unit  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1584  [modal-dialog(QMessageBox.information)]  in None.delete_selected_tu  :: QMessageBox.information(self, "Info", "Please select a translation unit to delete")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1592  [modal-dialog(QMessageBox.question)]  in None.delete_selected_tu  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1654  [modal-dialog(QMessageBox.information)]  in None.show_all_languages  :: QMessageBox.information(self, "Info", "No languages found")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1685  [modal-dialog(QMessageBox.warning)]  in None.edit_header  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1692  [modal-dialog(QMessageBox.warning)]  in None.edit_header  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1785  [modal-dialog(QMessageBox.warning)]  in None.show_statistics  :: QMessageBox.warning(self, "Warning", "No file open")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1790  [modal-dialog(QMessageBox.warning)]  in None.show_statistics  :: QMessageBox.warning(self, "Warning", "File information not found")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1807  [modal-dialog(QMessageBox.information)]  in None.show_statistics  :: QMessageBox.information(self, "Statistics", stats)
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:1837  [modal-dialog(QMessageBox.information)]  in None.show_statistics  :: QMessageBox.information(self, "Statistics", stats)
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2255  [modal-dialog(QMessageBox.information)]  in None.validate_tmx  :: QMessageBox.information(self, "Validation",
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2262  [modal-dialog(QMessageBox.warning)]  in None.validate_tmx  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2287  [modal-dialog(QMessageBox.warning)]  in None.validate_tmx  :: QMessageBox.warning(self, "Validation Issues",
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2290  [modal-dialog(QMessageBox.information)]  in None.validate_tmx  :: QMessageBox.information(self, "Validation", "✓ No issues found. TMX file is valid!")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2304  [modal-dialog(QMessageBox.warning)]  in None.show_clean_tags_dialog  :: QMessageBox.warning(self, "Warning", "Please create or open a TMX file first")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2309  [modal-dialog(QMessageBox.warning)]  in None.show_clean_tags_dialog  :: QMessageBox.warning(self, "Warning", "No translation units to clean")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2317  [modal-dialog(QMessageBox.information)]  in None.show_clean_tags_dialog  :: QMessageBox.information(self, "Clean Tags", "No tag patterns selected.")
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2324  [modal-dialog(QMessageBox.question)]  in None.show_clean_tags_dialog  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2491  [modal-dialog(QMessageBox.information)]  in None.clean_tags  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\tmx_editor_qt.py:2680  [modal-dialog(QMessageBox.question)]  in StandaloneWindow.closeEvent  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:308  [modal-dialog(QMessageBox.question)]  in None._delete_termbase_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:382  [modal-dialog(QMessageBox.information)]  in None._delete_termbase_entry  :: QMessageBox.information(parent_window, "Success", "Termbase entry deleted")
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:386  [modal-dialog(QMessageBox.critical)]  in None._delete_termbase_entry  :: QMessageBox.critical(parent_window, "Error", f"Failed to delete entry: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:407  [modal-dialog(QMessageBox.warning)]  in None._edit_tm_entry  :: QMessageBox.warning(self.window(), "Cannot Edit",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:462  [modal-dialog(QMessageBox.critical)]  in None._edit_tm_entry  :: QMessageBox.critical(parent_window, "Error", f"Failed to update TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:476  [modal-dialog(QMessageBox.warning)]  in None._edit_tm_entry  :: QMessageBox.warning(parent_window, "Not Found",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:493  [modal-dialog(QMessageBox.warning)]  in None._delete_tm_entry  :: QMessageBox.warning(self.window(), "Cannot Delete",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:499  [modal-dialog(QMessageBox.question)]  in None._delete_tm_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:522  [modal-dialog(QMessageBox.critical)]  in None._delete_tm_entry  :: QMessageBox.critical(parent_window, "Error",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:526  [modal-dialog(QMessageBox.critical)]  in None._delete_tm_entry  :: QMessageBox.critical(parent_window, "Error", f"Failed to delete TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2012  [modal-dialog(QMessageBox.warning)]  in None._edit_current_tm_entry  :: QMessageBox.warning(self.window(), "Cannot Edit",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2063  [modal-dialog(QMessageBox.critical)]  in None._edit_current_tm_entry  :: QMessageBox.critical(parent_window, "Error", f"Failed to update TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2075  [modal-dialog(QMessageBox.warning)]  in None._edit_current_tm_entry  :: QMessageBox.warning(parent_window, "Not Found",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2093  [modal-dialog(QMessageBox.warning)]  in None._delete_current_tm_entry  :: QMessageBox.warning(self.window(), "Cannot Delete",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2099  [modal-dialog(QMessageBox.question)]  in None._delete_current_tm_entry  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2121  [modal-dialog(QMessageBox.critical)]  in None._delete_current_tm_entry  :: QMessageBox.critical(parent_window, "Error",
+  .  E:\Dev\SupervertalerPortable\modules\translation_results_panel.py:2125  [modal-dialog(QMessageBox.critical)]  in None._delete_current_tm_entry  :: QMessageBox.critical(parent_window, "Error", f"Failed to delete TM entry:\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2101  [modal-dialog(QMessageBox.warning)]  in None._view_file  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2111  [modal-dialog(QMessageBox.warning)]  in None._view_file  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2148  [modal-dialog(QMessageBox.warning)]  in None._remove_file  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2874  [modal-dialog(QMessageBox.warning)]  in None._move_folder_to_folder  :: QMessageBox.warning(self.main_widget, "Move not allowed", "You can't move a folder into it
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2885  [modal-dialog(QMessageBox.warning)]  in None._move_folder_to_folder  :: QMessageBox.warning(self.main_widget, "Move failed", "Could not move the folder.")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:2918  [modal-dialog(QMessageBox.warning)]  in None._move_prompt_to_folder  :: QMessageBox.warning(self.main_widget, "Move failed", "Could not move the prompt.")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3208  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Name and content are required")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3213  [modal-dialog(QMessageBox.information)]  in None._save_current_prompt  :: QMessageBox.information(self.main_widget, "Read-Only", "This prompt is read-only. Uncheck 
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3228  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Prompt no longer exists")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3260  [modal-dialog(QMessageBox.information)]  in None._save_current_prompt  :: QMessageBox.information(self.main_widget, "Saved", f"Prompt renamed to '{name}' successful
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3263  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Failed to rename prompt")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3265  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Failed to delete old prompt file")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3280  [modal-dialog(QMessageBox.information)]  in None._save_current_prompt  :: QMessageBox.information(self.main_widget, "Saved", "Prompt updated successfully!")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3284  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Failed to save prompt")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3309  [modal-dialog(QMessageBox.information)]  in None._save_current_prompt  :: QMessageBox.information(self.main_widget, "Created", f"Prompt '{name}' created successfull
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3314  [modal-dialog(QMessageBox.warning)]  in None._save_current_prompt  :: QMessageBox.warning(self.main_widget, "Error", "Failed to create prompt")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3321  [modal-dialog(QMessageBox.critical)]  in None._save_current_prompt  :: QMessageBox.critical(self.main_widget, "Save Error", f"Failed to save prompt:\n\n{str(e)}"
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3348  [modal-dialog(QMessageBox.information)]  in None._save_external_prompt  :: QMessageBox.information(self.main_widget, "Saved", f"External prompt '{name}' saved succes
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3352  [modal-dialog(QMessageBox.warning)]  in None._save_external_prompt  :: QMessageBox.warning(self.main_widget, "Error", f"Failed to save external prompt: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3401  [modal-dialog(QFileDialog.getOpenFileName)]  in None._load_external_primary_prompt  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3424  [modal-dialog(QMessageBox.warning)]  in None._load_external_primary_prompt  :: QMessageBox.warning(self.main_widget, "Error", f"Could not load file: {result}")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3485  [modal-dialog(QMessageBox.warning)]  in None._open_external_prompt_folder  :: QMessageBox.warning(self.main_widget, "Folder Not Found", f"The folder no longer exists:\n
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3497  [modal-dialog(QMessageBox.warning)]  in None._open_external_prompt_folder  :: QMessageBox.warning(self.main_widget, "Error", f"Could not open folder: {e}")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3551  [modal-dialog(QInputDialog.getText)]  in None._new_folder  :: name, ok = QInputDialog.getText(self.main_widget, "New Folder", "Enter folder name:")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3558  [modal-dialog(QInputDialog.getText)]  in None._new_prompt_in_folder  :: name, ok = QInputDialog.getText(self.main_widget, "New Prompt", "Enter prompt filename wit
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3595  [modal-dialog(QMessageBox.warning)]  in None._new_prompt_in_folder  :: QMessageBox.warning(self.main_widget, "Error", "Failed to create prompt")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3599  [modal-dialog(QInputDialog.getText)]  in None._new_subfolder  :: name, ok = QInputDialog.getText(self.main_widget, "New Subfolder", "Enter folder name:")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3636  [modal-dialog(QMessageBox.warning)]  in None._duplicate_prompt  :: QMessageBox.warning(self.main_widget, "Duplicate failed", "Failed to duplicate the prompt.
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3640  [modal-dialog(QMessageBox.question)]  in None._delete_prompt  :: reply = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3655  [modal-dialog(QMessageBox.warning)]  in None._delete_folder  :: reply = QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3717  [modal-dialog(QMessageBox.information)]  in None._preview_combined_prompt  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3846  [modal-dialog(QMessageBox.warning)]  in None._open_system_prompts_settings  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3866  [modal-dialog(QMessageBox.warning)]  in None._open_system_prompts_settings  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3874  [modal-dialog(QMessageBox.information)]  in None._open_system_prompts_settings  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:3885  [modal-dialog(QMessageBox.critical)]  in None._open_system_prompts_settings  :: QMessageBox.critical(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:4441  [modal-dialog(QMessageBox.information)]  in None._collect_autoprompt_images  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:4459  [modal-dialog(QMessageBox.warning)]  in None._collect_autoprompt_images  :: resp = QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:4520  [modal-dialog(QMessageBox.question)]  in None._collect_autoprompt_images  :: confirm = QMessageBox.question(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:5891  [modal-dialog(QFileDialog.getOpenFileName)]  in None._attach_file  :: file_path, _ = QFileDialog.getOpenFileName(
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:5966  [modal-dialog(QMessageBox.warning)]  in None._attach_file  :: QMessageBox.warning(None, "Attachment Error", "Failed to save attachment to disk.")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:5969  [modal-dialog(QMessageBox.warning)]  in None._attach_file  :: QMessageBox.warning(None, "Attachment Error", f"Failed to attach file:\n{e}")
+  .  E:\Dev\SupervertalerPortable\modules\unified_prompt_manager_qt.py:6700  [modal-dialog(QMessageBox.warning)]  in None._create_prompt_from_content  :: QMessageBox.warning(
+  .  E:\Dev\SupervertalerPortable\modules\usage_report_dialog.py:137  [modal-dialog(QFileDialog.getSaveFileName)]  in None.export  :: path, _ = QFileDialog.getSaveFileName(self, "Export usage ledger", default, flt)
+  .  E:\Dev\SupervertalerPortable\modules\usage_report_dialog.py:144  [modal-dialog(QMessageBox.information)]  in None.export  :: QMessageBox.information(
+  .  E:\Dev\SupervertalerPortable\modules\usage_report_dialog.py:148  [modal-dialog(QMessageBox.warning)]  in None.export  :: QMessageBox.warning(self, "Export", f"Export failed: {e}")

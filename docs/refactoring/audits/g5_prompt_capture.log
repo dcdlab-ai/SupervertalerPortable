@@ -1,0 +1,226 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\g5\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/model-x
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\g5\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[LOG] ⚠ Global hotkeys NOT registered – check console for errors
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+WINDOW OK
+[LOG] 📄 Importing simple text file: fig.txt
+[LOG] ✓ Alternating row colors applied
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2453621180464): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 2453620701968): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 2 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 1085761954)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 2 segments from 2 lines (text file)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 2 segments...
+[LOG] ✅ Termbase batch worker complete: 2 segments in 0.00s (220753 seg/sec, 0 with matches)
+segs= 2
+fixture loaded: Figure 1A.png (560, 196)
+[LOG]   Including 2 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ✅ Including 1 figure images: 1a
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-x
+G1 requests: 1 image_parts: 1
+PASS G1 vision=True -> 1 request with image_url reqs=1 img=1
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[LOG]   Including 2 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ⚠️ Figures detected (1a) but model 'model-b' doesn't support vision — tick 'Model supports vision (image input)' for this profile in Settings → AI Settings to send images
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-b
+G2 requests: 1 image_parts: 0
+PASS G2 vision=False -> 1 request, 0 image parts reqs=1 img=0
+PASS G3 text part identical with/without image (figure role NOT in text) len_with=3228 len_without=3228
+=== G4 raw-bytes UTF-8 check (with-image request) ===
+raw bytes len: 15265
+  OK  café (é U+00E9): c3a9 in raw = True
+  OK  ☕ U+2615: e29895 in raw = True
+  OK  « U+00AB: c2ab in raw = True
+  OK  » U+00BB: c2bb in raw = True
+  OK  привет (U+043F): d0bf in raw = True
+  OK  🖼 U+1F5BC: f09f96bc in raw = True
+  '?' count in text part: 0 (0 = no loss)
+PASS G4 all emoji/non-ASCII present as UTF-8 bytes see per-seq lines
+PASS G4 no '?' substitution in text part q=0
+PASS G5 network trap silent []
+=== G1 body (with image, base64 truncated) ===
+{
+  "model": "model-x",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "# SYSTEM PROMPT\n\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\nYou are performing professional translation work. The source text may contain specialized terminology from any domain (medical, legal, technical, financial, etc.). Translate all content faithfully and accurately regardless of subject matter.\n\nYou are an expert en to nl translator with deep understanding of context and nuance.\n\n**YOUR TASK**: Translate the text below.\n\n**IMPORTANT INSTRUCTIONS**:\n- Provide ONLY the translated text\n- Do NOT include numbering, labels, or commentary\n- Do NOT repeat the source text\n- Maintain accuracy and natural fluency\n\n**CRITICAL: INLINE FORMATTING TAG PRESERVATION**:\n- Source text may contain simple HTML-style formatting tags: <b>bold</b>, <i>italic</i>, <u>underline</u>\n- These tags represent text formatting that MUST be preserved in the translation\n- Place the tags around the CORRESPONDING translated words, not necessarily in the same position\n- Example: \"Click the <b>Save</b> button\" → \"Klik op de knop <b>Opslaan</b>\"\n- Ensure every opening tag has a matching closing tag\n- Never omit, add, or modify tags - preserve the exact same tags from source\n\n**CRITICAL: CAT TOOL TAG PRESERVATION**:\n- Source may contain CAT tool formatting tags in various formats:\n  • memoQ: [1}, {2], [3}, {4] (asymmetric bracket-brace pairs)\n  • Trados Studio: <410>text</410>, <434>text</434> (XML-style opening/closing tags)\n  • CafeTran: |formatted text| (pipe symbols mark formatted text - bold, italic, underline, etc.)\n  • Other CAT tools: various bracketed or special character sequences\n- These are placeholder tags representing formatting (bold, italic, links, etc.)\n- PRESERVE ALL tags - if source has N tags, target must have exactly N tags\n- Keep tags with their content and adjust position for natural target language word order\n- Never translate, omit, or modify the tags themselves - only reposition them\n- Examples:\n  • memoQ: '[1}De uitvoer{2]' → '[1}The exports{2]'\n  • Trados: '<410>De uitvoer van machines</410>' → '<410>Exports of machinery</410>'\n  • CafeTran: 'He debuted against |Juventus FC| in 2001' → 'Hij debuteerde tegen |Juventus FC| in 2001'\n  • Multiple: '[1}De uitvoer{2] [3}stelt niets voor{4]' → '[1}Exports{2] [3}mean nothing{4]'\n\n**LANGUAGE-SPECIFIC NUMBER FORMATTING**:\n- If the target language is **Dutch**, **French**, **German**, **Italian**, **Spanish**, or another **continental European language**, use a **comma** as the decimal separator and a **space or non-breaking space** between the number and unit (e.g., 17,1 cm).\n- If the target language is **English** or **Irish**, use a **full stop (period)** as the decimal separator and **no space** before the unit (e.g., 17.1 cm).\n- Always follow the **number formatting conventions** of the target language.\n\nIf the text refers to figures (e.g., 'Figure 1A'), relevant images may be provided for visual context.\n\nen text:\nSee Figure 1A — café ☕ «привет» 🖼️ gear engages\n\n\n\n**SURROUNDING SEGMENTS FOR CONTEXT:**\n(The segment marked with >>> <<< is the one to translate)\n\n>>> 1. See Figure 1A — café ☕ «привет» 🖼️ gear engages <<<  [TRANSLATE THIS]\n2. Plain segment.\n\n**YOUR TRANSLATION (provide ONLY the translated text, no numbering or labels):**\n"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAjAAAADECAIAAA...<+11682 chars>"
+          }
+        }
+      ]
+    }
+  ],
+  "max_tokens": 16384,
+  "temperature": 0.3
+}
+=== G2 body (without image) ===
+{
+  "model": "model-b",
+  "messages": [
+    {
+      "role": "user",
+      "content": "# SYSTEM PROMPT\n\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\nYou are performing professional translation work. The source text may contain specialized terminology from any domain (medical, legal, technical, financial, etc.). Translate all content faithfully and accurately regardless of subject matter.\n\nYou are an expert en to nl translator with deep understanding of context and nuance.\n\n**YOUR TASK**: Translate the text below.\n\n**IMPORTANT INSTRUCTIONS**:\n- Provide ONLY the translated text\n- Do NOT include numbering, labels, or commentary\n- Do NOT repeat the source text\n- Maintain accuracy and natural fluency\n\n**CRITICAL: INLINE FORMATTING TAG PRESERVATION**:\n- Source text may contain simple HTML-style formatting tags: <b>bold</b>, <i>italic</i>, <u>underline</u>\n- These tags represent text formatting that MUST be preserved in the translation\n- Place the tags around the CORRESPONDING translated words, not necessarily in the same position\n- Example: \"Click the <b>Save</b> button\" → \"Klik op de knop <b>Opslaan</b>\"\n- Ensure every opening tag has a matching closing tag\n- Never omit, add, or modify tags - preserve the exact same tags from source\n\n**CRITICAL: CAT TOOL TAG PRESERVATION**:\n- Source may contain CAT tool formatting tags in various formats:\n  • memoQ: [1}, {2], [3}, {4] (asymmetric bracket-brace pairs)\n  • Trados Studio: <410>text</410>, <434>text</434> (XML-style opening/closing tags)\n  • CafeTran: |formatted text| (pipe symbols mark formatted text - bold, italic, underline, etc.)\n  • Other CAT tools: various bracketed or special character sequences\n- These are placeholder tags representing formatting (bold, italic, links, etc.)\n- PRESERVE ALL tags - if source has N tags, target must have exactly N tags\n- Keep tags with their content and adjust position for natural target language word order\n- Never translate, omit, or modify the tags themselves - only reposition them\n- Examples:\n  • memoQ: '[1}De uitvoer{2]' → '[1}The exports{2]'\n  • Trados: '<410>De uitvoer van machines</410>' → '<410>Exports of machinery</410>'\n  • CafeTran: 'He debuted against |Juventus FC| in 2001' → 'Hij debuteerde tegen |Juventus FC| in 2001'\n  • Multiple: '[1}De uitvoer{2] [3}stelt niets voor{4]' → '[1}Exports{2] [3}mean nothing{4]'\n\n**LANGUAGE-SPECIFIC NUMBER FORMATTING**:\n- If the target language is **Dutch**, **French**, **German**, **Italian**, **Spanish**, or another **continental European language**, use a **comma** as the decimal separator and a **space or non-breaking space** between the number and unit (e.g., 17,1 cm).\n- If the target language is **English** or **Irish**, use a **full stop (period)** as the decimal separator and **no space** before the unit (e.g., 17.1 cm).\n- Always follow the **number formatting conventions** of the target language.\n\nIf the text refers to figures (e.g., 'Figure 1A'), relevant images may be provided for visual context.\n\nen text:\nSee Figure 1A — café ☕ «привет» 🖼️ gear engages\n\n\n\n**SURROUNDING SEGMENTS FOR CONTEXT:**\n(The segment marked with >>> <<< is the one to translate)\n\n>>> 1. See Figure 1A — café ☕ «привет» 🖼️ gear engages <<<  [TRANSLATE THIS]\n2. Plain segment.\n\n**YOUR TRANSLATION (provide ONLY the translated text, no numbering or labels):**\n"
+    }
+  ],
+  "max_tokens": 16384,
+  "temperature": 0.3
+}
+=== G1 text part (verbatim) ===
+# SYSTEM PROMPT
+
+⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**
+You are performing professional translation work. The source text may contain specialized terminology from any domain (medical, legal, technical, financial, etc.). Translate all content faithfully and accurately regardless of subject matter.
+
+You are an expert en to nl translator with deep understanding of context and nuance.
+
+**YOUR TASK**: Translate the text below.
+
+**IMPORTANT INSTRUCTIONS**:
+- Provide ONLY the translated text
+- Do NOT include numbering, labels, or commentary
+- Do NOT repeat the source text
+- Maintain accuracy and natural fluency
+
+**CRITICAL: INLINE FORMATTING TAG PRESERVATION**:
+- Source text may contain simple HTML-style formatting tags: <b>bold</b>, <i>italic</i>, <u>underline</u>
+- These tags represent text formatting that MUST be preserved in the translation
+- Place the tags around the CORRESPONDING translated words, not necessarily in the same position
+- Example: "Click the <b>Save</b> button" → "Klik op de knop <b>Opslaan</b>"
+- Ensure every opening tag has a matching closing tag
+- Never omit, add, or modify tags - preserve the exact same tags from source
+
+**CRITICAL: CAT TOOL TAG PRESERVATION**:
+- Source may contain CAT tool formatting tags in various formats:
+  • memoQ: [1}, {2], [3}, {4] (asymmetric bracket-brace pairs)
+  • Trados Studio: <410>text</410>, <434>text</434> (XML-style opening/closing tags)
+  • CafeTran: |formatted text| (pipe symbols mark formatted text - bold, italic, underline, etc.)
+  • Other CAT tools: various bracketed or special character sequences
+- These are placeholder tags representing formatting (bold, italic, links, etc.)
+- PRESERVE ALL tags - if source has N tags, target must have exactly N tags
+- Keep tags with their content and adjust position for natural target language word order
+- Never translate, omit, or modify the tags themselves - only reposition them
+- Examples:
+  • memoQ: '[1}De uitvoer{2]' → '[1}The exports{2]'
+  • Trados: '<410>De uitvoer van machines</410>' → '<410>Exports of machinery</410>'
+  • CafeTran: 'He debuted against |Juventus FC| in 2001' → 'Hij debuteerde tegen |Juventus FC| in 2001'
+  • Multiple: '[1}De uitvoer{2] [3}stelt niets voor{4]' → '[1}Exports{2] [3}mean nothing{4]'
+
+**LANGUAGE-SPECIFIC NUMBER FORMATTING**:
+- If the target language is **Dutch**, **French**, **German**, **Italian**, **Spanish**, or another **continental European language**, use a **comma** as the decimal separator and a **space or non-breaking space** between the number and unit (e.g., 17,1 cm).
+- If the target language is **English** or **Irish**, use a **full stop (period)** as the decimal separator and **no space** before the unit (e.g., 17.1 cm).
+- Always follow the **number formatting conventions** of the target language.
+
+If the text refers to figures (e.g., 'Figure 1A'), relevant images may be provided for visual context.
+
+en text:
+See Figure 1A — café ☕ «привет» 🖼️ gear engages
+
+
+
+**SURROUNDING SEGMENTS FOR CONTEXT:**
+(The segment marked with >>> <<< is the one to translate)
+
+>>> 1. See Figure 1A — café ☕ «привет» 🖼️ gear engages <<<  [TRANSLATE THIS]
+2. Plain segment.
+
+**YOUR TRANSLATION (provide ONLY the translated text, no numbering or labels):**
+
+=== figure-context keywords in text part ===
+  'figure' in text part: True
+  'Figure' in text part: True
+  'image' in text part: True
+  'context' in text part: True
+  'изображ' in text part: False
+  'картин' in text part: False
+DONE
+QThreadStorage: entry 1 destroyed before end of thread 0x23b452aa4d0
