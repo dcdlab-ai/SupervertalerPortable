@@ -1,0 +1,175 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: D:\Temp\SupervertalerPortable\refactoring\batch-g5-12\iso-probe\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/model-x
+[LOG] ✓ Attachment directories initialized: D:\Temp\SupervertalerPortable\refactoring\batch-g5-12\iso-probe\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[LOG] ⚠ Global hotkeys NOT registered – check console for errors
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+WINDOW OK
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] 📄 Importing simple text file: fig.txt
+[LOG] ✓ Alternating row colors applied
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 1977255037648): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 1977254607632): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 3 (obj 1977254607952): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 4 (obj 1977272418704): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 5 (obj 1977272419024): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 5 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 3740229723)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 5 segments from 5 lines (text file)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 5 segments...
+[LOG] ✅ Termbase batch worker complete: 5 segments in 0.00s (322639 seg/sec, 0 with matches)
+segs= 5
+fixtures loaded: ['1a', '3', '4', '5', '2']
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ✅ Including 1 figure images: 1a
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-x
+PASS P1 vision=True -> 1 image part img=1
+PASS P1 block present with label 'Image 1 = Figure 1A' 
+PASS P1 final delimiter is last line '**YOUR TRANSLATION (provide ONLY the tra'
+PASS P1 block placed before delimiter 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ⚠️ Figures detected (1a) but model 'model-b' doesn't support vision — tick 'Model supports vision (image input)' for this profile in Settings → AI Settings to send images
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-b
+PASS P2 vision=False -> 0 image parts img=0
+PASS P2 no block in text 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: Plain segment without referenc... → Vertaling...
+[LOG] ✓ Segment #2 translated with custom_openai/model-x
+PASS P3 no-ref segment -> 0 image parts img=0
+PASS P3 no block in text 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #3: 1a, 2
+[LOG]   ✅ Including 2 figure images: 1a, 2
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A and Figure 2 for... → Vertaling...
+[LOG] ✓ Segment #3 translated with custom_openai/model-x
+PASS P4 two refs -> 2 image parts img=2
+PASS P4 labels in sent order ['FIGURE CONTEXT: The following image(s) are attached to this request as visual context for the figure reference(s) in the source segment: Image 1 = Figure 1A; Image 2 = Figure 2. Use them only to resolve ambiguity and choose terminology. Do NOT translate, transcribe, describe or comment on any text shown in the images. Return only the translation of the source segment, with no numbering or labels.']
+[LOG] ℹ️ No TM is switched on for this project, so no TM matches can be shown. Tick 'Read' for the TM you want in Resources → TM. (A new project starts with every TM off.)
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ✅ Including 1 figure images: 1a
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-x
+PASS P5 saved copy keeps OLD static line (kept verbatim) 
+PASS P5 block inserted exactly once count=1
+PASS P5 delimiter last line 
+PASS P5 layer1.json untouched by translation 
+[LOG] [Image Extractor] AI label fallback: will call custom_openai/model-x for 1 image(s) (est. extra ~$0.01–$0.00)
+PASS P6 extractor callback invoked with 1 image 1
+PASS P6 extractor prompt has NO figure-context block 
+PASS P7 preview mentions image(s) will be sent 
+PASS P7 preview has NO code-inserted block (expected divergence) 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #4: 1a, 2, 3, 4, 5
+[LOG]   Figure context: 5 images found, only first 4 sent
+[LOG]   ✅ Including 4 figure images: 1a, 2, 3, 4, 5
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figures 1A, 2, 3, 4 and 5... → Vertaling...
+[LOG] ✓ Segment #4 translated with custom_openai/model-x
+PASS P8 5 refs -> only 4 image parts img=4
+PASS P8 overflow logged ['  Figure context: 5 images found, only first 4 sent']
+PASS P8 labels Image 1..4 in appearance order 
+PASS P9 batch worker -> 1 request, 0 image parts reqs=1 img=0
+PASS P9 batch worker text has NO block 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #5: 2
+[LOG]   ✅ Including 1 figure images: 2
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: ![Image](..\Figure 2.jpg)... → Vertaling...
+[LOG] ✓ Segment #5 translated with custom_openai/model-x
+PASS P10 md-insertion ref '2' -> 1 image part img=1
+PASS P10 block labels Figure 2 
+[LOG]   Including 5 surrounding segments (5 before/after)
+[LOG]   🖼️ Detected figure references in segment #1: 1a
+[LOG]   ✅ Including 1 figure images: 1a
+[LOG] ⚠️ Refusing to add TU: tm_id 'project' has no row in translation_memories (orphan write blocked)
+[LOG] ✓ Added to TM: See Figure 1A — café ☕ «привет... → Vertaling...
+[LOG] ✓ Segment #1 translated with custom_openai/model-x
+PASS P11 emoji/non-ASCII arrive as UTF-8 bytes {'café é': True, '☕': True, '«': True, '»': True, 'привет п': True, '🖼': True}
+PASS P11 no '?' substitution in text part q=0
+PASS P11 network trap silent []
+PASS static: no block text in prompt manager / figure module 
+DONE
