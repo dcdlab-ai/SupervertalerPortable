@@ -48936,6 +48936,15 @@ class SupervertalerQt(QMainWindow):
                         # Get images for detected figures
                         images_for_text = self.figure_context.get_images_for_text(segment.source)
                         if images_for_text:
+                            # Batch G5.2 (verdict Q2): cap the number of images
+                            # attached to one request. On overflow keep the
+                            # first N in order of appearance and say so in the
+                            # log — never silent truncation.
+                            from modules.figure_context_manager import MAX_FIGURE_IMAGES_PER_REQUEST
+                            if len(images_for_text) > MAX_FIGURE_IMAGES_PER_REQUEST:
+                                _fig_found = len(images_for_text)
+                                images_for_text = images_for_text[:MAX_FIGURE_IMAGES_PER_REQUEST]
+                                self.log(f"  Figure context: {_fig_found} images found, only first {MAX_FIGURE_IMAGES_PER_REQUEST} sent")
                             # Batch #9.5: vision — галка профиля («Model supports
                             # vision») у клиента, реально используемого для запроса
                             if getattr(client, 'supports_vision', False):

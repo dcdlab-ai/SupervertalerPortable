@@ -30,6 +30,32 @@ try:
 except ImportError:
     ImageTk = None
 
+# Batch G5.2 (verdict Q2): maximum number of figure images attached to a
+# single translation request. On overflow the caller keeps the first N in
+# order of appearance and logs the truncation (never silent).
+MAX_FIGURE_IMAGES_PER_REQUEST = 4
+
+# Batch G5.2 (verdict Q1): figure-reference detection.
+# - Keywords Figure/Figures/Fig/Figs/figuur + Cyrillic Рисунок/Рис. (lowest
+#   priority), case-insensitive, with a word-boundary lookbehind so
+#   "configuration", "prefigure 2", "Config. 3", "нарисуй 2" never fire.
+# - A digit is required: bare "Figure"/"Fig" never fires.
+# - Optional period/space: "Fig.1A", "Figure1", "Figures 1" all fire.
+# - Multi-reference chains after the first token via comma / "and" / "&" /
+#   "or" only: "Figures 1, 2 and 3" -> 1,2,3; "Figure 1A and 1B" -> 1a,1b.
+#   Hyphen/en-dash and "/" are NOT separators and ranges are NOT expanded:
+#   "Fig.1-3" -> ['1'], "Fig. 1A-B" -> ['1a'], "Figure 1A/B" -> ['1a'].
+#   Chain tokens are 1-3 digits with a digit-boundary lookahead so years
+#   do not become references: "Figure 1 and 2018" -> ['1'].
+# - Order of first appearance, duplicates removed.
+_FIGURE_KEYWORD = r"(?:figures|figure|figuur|figs|fig|рисунки|рисунков|рисунка|рисунок|рис)"
+_FIGURE_TOKEN = r"(\d{1,3}[a-zA-Z]?)(?!\d)"
+_FIGURE_SEP = r"(?:,|&|\band\b|\bor\b)"
+_FIGURE_CHAIN = rf"((?:\s*{_FIGURE_SEP}\s*(?:{_FIGURE_SEP}\s*)?\d{{1,3}}[a-zA-Z]?(?!\d))*)"
+_FIGURE_PATTERN = re.compile(
+    r"(?<!\w)" + _FIGURE_KEYWORD + r"\.?\s*" + _FIGURE_TOKEN + _FIGURE_CHAIN,
+    re.IGNORECASE)
+
 
 class FigureContextManager:
     """Manages figure context images for multimodal AI translation."""
@@ -64,16 +90,16 @@ class FigureContextManager:
         if not text:
             return []
         
-        # Pattern matches: figure/figuur/fig + optional period + space + identifier
-        # Match: digit(s) optionally followed by letter(s) (e.g., 1, 2A, 3b, 10C)
-        pattern = r"(?:figure|figuur|fig\.?)\s+(\d+[a-zA-Z]?)"
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        
+        # Batch G5.2: see _FIGURE_PATTERN above for the detection rules
+        # (word boundaries, required digit, comma/and/&/or chains, hyphen and
+        # slash NOT separators, ranges NOT expanded, first-appearance order).
         normalized_refs = []
-        for match in matches:
-            normalized = normalize_figure_ref(f"fig {match}")
-            if normalized and normalized not in normalized_refs:
-                normalized_refs.append(normalized)
+        for m in _FIGURE_PATTERN.finditer(text):
+            tokens = [m.group(1)] + re.findall(r"\d{1,3}[a-zA-Z]?(?!\d)", m.group(2))
+            for token in tokens:
+                ref = token.lower()
+                if ref not in normalized_refs:
+                    normalized_refs.append(ref)
         
         return normalized_refs
     
@@ -306,6 +332,8 @@ def normalize_figure_ref(text: str) -> Optional[str]:
         "Figure 1" -> "1"
         "fig. 2A" -> "2a"
         "Figure3-B.png" -> "3b"
+        "figure_1a.png" -> "1a"
+        "Figure 1A and 1B.png" -> "1a"  (only the first number token)
     
     Args:
         text: Text containing figure reference or filename
@@ -320,8 +348,14 @@ def normalize_figure_ref(text: str) -> Optional[str]:
     text = text.lower()
     text = re.sub(r'\.(png|jpg|jpeg|gif|bmp|tiff)$', '', text)
     
-    # Extract figure reference (letters and numbers)
-    match = re.search(r'(?:figure|figuur|fig\.?)\s*([\w\d]+(?:[\s\.\-]*[\w\d]+)?)', text, re.IGNORECASE)
+    # Batch G5.2 filename normalization: keyword, then separators
+    # (underscores included), then ONLY the first number token — a digit
+    # run with an optional glued letter or "-letter" tail. Multi-number
+    # filenames beyond the first token are a known limitation. A filename
+    # without the keyword ("1A.png") stays unmapped (None).
+    match = re.search(
+        r"(?<!\w)" + _FIGURE_KEYWORD + r"[_\s.\-]*(\d{1,3}(?:[a-zA-Z]|-[a-zA-Z])?)",
+        text, re.IGNORECASE)
     if match:
         ref = match.group(1)
         # Remove spaces, dots, dashes
