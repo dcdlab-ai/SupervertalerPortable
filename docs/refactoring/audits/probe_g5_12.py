@@ -121,7 +121,8 @@ import modules.usage_statistics as _us  # noqa: E402
 _us.show_opt_in_dialog = lambda parent=None: False
 
 from PyQt6.QtWidgets import (  # noqa: E402
-    QApplication, QDialog, QMessageBox, QFileDialog, QCheckBox, QLabel, QPlainTextEdit)
+    QApplication, QDialog, QMessageBox, QFileDialog, QCheckBox, QLabel,
+    QPlainTextEdit, QTextEdit)
 
 app = QApplication(sys.argv)
 QDialog.exec = lambda self, *a, **k: QDialog.DialogCode.Accepted
@@ -353,7 +354,8 @@ else:
     check("P6 extractor callback invoked with 1 image", False, f"fn={fn!r}")
 win.prompt_manager_qt.chat_backend = cb
 
-# ---- P7: preview shows figure info, no block (expected divergence) ----
+# ---- P7: preview shows figure info AND the block, byte-identical to
+# the request block (verdict answer 1, G5.1d: shared builder function) ----
 preview_texts = []
 _orig_exec = QDialog.exec
 
@@ -362,6 +364,8 @@ def cap_exec(self, *a, **k):
     for lbl in self.findChildren(QLabel):
         preview_texts.append(lbl.text())
     for ed in self.findChildren(QPlainTextEdit):
+        preview_texts.append(ed.toPlainText())
+    for ed in self.findChildren(QTextEdit):
         preview_texts.append(ed.toPlainText())
     return QDialog.DialogCode.Accepted
 
@@ -376,7 +380,16 @@ except Exception as e:
 QDialog.exec = _orig_exec
 pv = "\n".join(preview_texts)
 check("P7 preview mentions image(s) will be sent", "image(s) will be sent" in pv)
-check("P7 preview has NO code-inserted block (expected divergence)", BLOCK not in pv)
+check("P7 preview HAS the figure-context block", BLOCK in pv)
+# Byte-identity: extract the block line from the request (P1 text) and
+# from the preview and compare exactly.
+_req_block = next((ln for ln in text.splitlines() if ln.startswith(BLOCK)), "")
+_pv_block = next((ln for ln in pv.splitlines() if ln.startswith(BLOCK)), "")
+check("P7 preview block byte-identical to request block",
+      _req_block == _pv_block and bool(_req_block),
+      f"req={len(_req_block)}B pv={len(_pv_block)}B")
+check("P7 preview delimiter stays last line", last_line(pv).startswith("**YOUR TRANSLATION"),
+      repr(last_line(pv)[:40]))
 
 # ---- P8: 5 refs, 5 images -> first 4 sent + log ----
 LOGS.clear()
@@ -419,11 +432,14 @@ check("P11 emoji/non-ASCII arrive as UTF-8 bytes",
 check("P11 no '?' substitution in text part", text.count("?") == 0, f"q={text.count('?')}")
 check("P11 network trap silent", not TRAP_HITS, str(TRAP_HITS))
 
-# ---- static: block exists only in monolith gate ----
+# ---- static: block text lives ONLY in the shared builder (G5.1d) ----
 mp = (tree / "modules" / "unified_prompt_manager_qt.py").read_text(encoding="utf-8")
 fp = (tree / "modules" / "figure_context_manager.py").read_text(encoding="utf-8")
-check("static: no block text in prompt manager / figure module",
-      BLOCK not in mp and BLOCK not in fp)
+mono = (tree / "Supervertaler.py").read_text(encoding="utf-8")
+check("static: block text in figure module (shared builder)", BLOCK in fp)
+check("static: no block text in prompt manager", BLOCK not in mp)
+check("static: no block text copy in monolith (calls builder only)",
+      BLOCK not in mono and "build_figure_context_block" in mono)
 
 say("DONE")
 os._exit(0)

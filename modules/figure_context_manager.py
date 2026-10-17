@@ -41,19 +41,35 @@ MAX_FIGURE_IMAGES_PER_REQUEST = 4
 #   "configuration", "prefigure 2", "Config. 3", "нарисуй 2" never fire.
 # - A digit is required: bare "Figure"/"Fig" never fires.
 # - Optional period/space: "Fig.1A", "Figure1", "Figures 1" all fire.
-# - Multi-reference chains after the first token via comma / "and" / "&" /
-#   "or" only: "Figures 1, 2 and 3" -> 1,2,3; "Figure 1A and 1B" -> 1a,1b.
-#   Hyphen/en-dash and "/" are NOT separators and ranges are NOT expanded:
-#   "Fig.1-3" -> ['1'], "Fig. 1A-B" -> ['1a'], "Figure 1A/B" -> ['1a'].
-#   Chain tokens are 1-3 digits with a digit-boundary lookahead so years
-#   do not become references: "Figure 1 and 2018" -> ['1'].
+# - Multi-reference chains after the first token (coordinator's rule,
+#   2026-10-17): after "and"/"&"/"or" any 1-3-digit token is accepted;
+#   after a comma a token is accepted only with a letter suffix
+#   ("Figure 1A, 1B") — unless the keyword is plural ("Figures 1, 2 and 3").
+#   So "Figure 3, 12 soldiers" -> ['3'] (no stray "12"), "Figure 1, 201"
+#   -> ['1']. Hyphen/en-dash and "/" are NOT separators and ranges are NOT
+#   expanded: "Fig.1-3" -> ['1'], "Fig. 1A-B" -> ['1a'], "Figure 1A/B" ->
+#   ['1a']. Tokens are 1-3 digits with a digit-boundary lookahead so years
+#   never match, fully or partially: "Figure 1 and 2018" -> ['1'].
 # - Order of first appearance, duplicates removed.
-_FIGURE_KEYWORD = r"(?:figures|figure|figuur|figs|fig|рисунки|рисунков|рисунка|рисунок|рис)"
-_FIGURE_TOKEN = r"(\d{1,3}[a-zA-Z]?)(?!\d)"
-_FIGURE_SEP = r"(?:,|&|\band\b|\bor\b)"
-_FIGURE_CHAIN = rf"((?:\s*{_FIGURE_SEP}\s*(?:{_FIGURE_SEP}\s*)?\d{{1,3}}[a-zA-Z]?(?!\d))*)"
-_FIGURE_PATTERN = re.compile(
-    r"(?<!\w)" + _FIGURE_KEYWORD + r"\.?\s*" + _FIGURE_TOKEN + _FIGURE_CHAIN,
+_FIGURE_KEYWORD_PLURAL = r"(?:figures|figs|рисунки)"
+_FIGURE_KEYWORD_SINGULAR = r"(?:figure|figuur|fig|рисунков|рисунка|рисунок|рис)"
+# Combined keyword for filename normalization (plural first so "figures"
+# matches whole, not as "figure" + residue). Wrapped in a non-capturing
+# group: the alternation must not swallow the suffix that follows it.
+_FIGURE_KEYWORD = r"(?:" + _FIGURE_KEYWORD_PLURAL + "|" + _FIGURE_KEYWORD_SINGULAR + ")"
+_FIGURE_SEP_ANY = r"(?:&|\band\b|\bor\b)"
+_FIGURE_TOKEN_ANY = r"\d{1,3}[a-zA-Z]?(?!\d)"
+_FIGURE_TOKEN_SUFF = r"\d{1,3}[a-zA-Z](?!\d)"
+_FIGURE_CHAIN_PLURAL = rf"((?:\s*(?:,|{_FIGURE_SEP_ANY})\s*(?:(?:,|{_FIGURE_SEP_ANY})\s*)?{_FIGURE_TOKEN_ANY})*)"
+_FIGURE_CHAIN_SINGULAR = (
+    rf"((?:(?:\s*,\s*)?(?:\s*{_FIGURE_SEP_ANY}\s*(?:{_FIGURE_SEP_ANY}\s*)?{_FIGURE_TOKEN_ANY})"
+    rf"|\s*,\s*(?:{_FIGURE_SEP_ANY}\s*)?{_FIGURE_TOKEN_SUFF})*)"
+)
+_FIGURE_PATTERN_PLURAL = re.compile(
+    r"(?<!\w)" + _FIGURE_KEYWORD_PLURAL + r"\.?\s*(\d{1,3}[a-zA-Z]?)(?!\d)" + _FIGURE_CHAIN_PLURAL,
+    re.IGNORECASE)
+_FIGURE_PATTERN_SINGULAR = re.compile(
+    r"(?<!\w)" + _FIGURE_KEYWORD_SINGULAR + r"\.?\s*(\d{1,3}[a-zA-Z]?)(?!\d)" + _FIGURE_CHAIN_SINGULAR,
     re.IGNORECASE)
 
 
@@ -90,12 +106,22 @@ class FigureContextManager:
         if not text:
             return []
         
-        # Batch G5.2: see _FIGURE_PATTERN above for the detection rules
-        # (word boundaries, required digit, comma/and/&/or chains, hyphen and
-        # slash NOT separators, ranges NOT expanded, first-appearance order).
+        # Batch G5.2: see _FIGURE_PATTERN_PLURAL/_FIGURE_PATTERN_SINGULAR
+        # above for the detection rules (word boundaries, required digit,
+        # comma/and/&/or chains with the plural/singular comma rule, hyphen
+        # and slash NOT separators, ranges NOT expanded, first-appearance
+        # order). Plural and singular keywords use separate patterns; hits
+        # are merged by match position so order of first appearance holds
+        # across both kinds.
+        hits = []
+        for pattern in (_FIGURE_PATTERN_PLURAL, _FIGURE_PATTERN_SINGULAR):
+            for m in pattern.finditer(text):
+                tokens = [m.group(1)] + re.findall(r"\d{1,3}[a-zA-Z]?(?!\d)", m.group(2))
+                hits.append((m.start(), tokens))
+        hits.sort(key=lambda item: item[0])
+
         normalized_refs = []
-        for m in _FIGURE_PATTERN.finditer(text):
-            tokens = [m.group(1)] + re.findall(r"\d{1,3}[a-zA-Z]?(?!\d)", m.group(2))
+        for _pos, tokens in hits:
             for token in tokens:
                 ref = token.lower()
                 if ref not in normalized_refs:
@@ -363,6 +389,39 @@ def normalize_figure_ref(text: str) -> Optional[str]:
         return ref.lower()
     
     return None
+
+
+def build_figure_context_block(images: List[Tuple[str, Any]]) -> str:
+    """
+    Build the FIGURE CONTEXT instruction block for prompts that attach
+    figure images (Batch G5.1a, single-source per coordinator verdict
+    2026-10-17 answer 1).
+
+    The request path (translate_current_segment) and the Combined Prompt
+    Preview must show byte-identical text, so the block is built ONLY
+    here — callers must not keep a copy of the wording.
+
+    Args:
+        images: list of (ref, payload) tuples in the order the images are
+            actually sent (labels are numbered by this order).
+
+    Returns:
+        The block text (no surrounding newlines).
+    """
+    labels = "; ".join(
+        f"Image {i} = Figure {ref.upper()}"
+        for i, (ref, _payload) in enumerate(images, 1)
+    )
+    return (
+        "FIGURE CONTEXT: The following image(s) are attached "
+        "to this request as visual context for the figure "
+        f"reference(s) in the source segment: {labels}. "
+        "Use them only to resolve ambiguity and choose "
+        "terminology. Do NOT translate, transcribe, describe "
+        "or comment on any text shown in the images. Return "
+        "only the translation of the source segment, with no "
+        "numbering or labels."
+    )
 
 
 def pil_image_to_base64_png(img: Any) -> str:

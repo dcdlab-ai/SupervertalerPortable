@@ -38081,6 +38081,32 @@ class SupervertalerQt(QMainWindow):
                 else:
                     total_images = len(self.figure_context.figure_context_map)
                     figure_info = f"ℹ️ {total_images} image(s) loaded but no figure references detected in this segment"
+
+        # Batch G5.1d (verdict answer 1): the preview must show the same
+        # FIGURE CONTEXT block the request will carry — built by the same
+        # module function, inserted the same way (same delimiter, same
+        # fallback), only when an image will really be sent: the vision
+        # gate and the per-request cap are mirrored from the request path.
+        if figure_images:
+            try:
+                from modules.figure_context_manager import (
+                    MAX_FIGURE_IMAGES_PER_REQUEST, build_figure_context_block)
+                _pv_settings = self.load_llm_settings()
+                _pv_provider = _pv_settings.get('provider', 'openai')
+                _pv_client = self.create_llm_client(
+                    _pv_provider,
+                    self._resolve_provider_model(_pv_settings, _pv_provider, 'gpt-5.5'),
+                    self.load_api_keys(), settings=_pv_settings)
+                if getattr(_pv_client, 'supports_vision', False):
+                    _pv_block = build_figure_context_block(
+                        figure_images[:MAX_FIGURE_IMAGES_PER_REQUEST])
+                    if "**YOUR TRANSLATION" in combined:
+                        combined = combined.replace(
+                            "**YOUR TRANSLATION", _pv_block + "\n\n**YOUR TRANSLATION", 1)
+                    else:
+                        combined += "\n\n" + _pv_block
+            except Exception as e:
+                self.log(f"⚠ Preview figure block skipped: {e}")
         
         # Build composition info
         composition_parts = []
@@ -48927,7 +48953,7 @@ class SupervertalerQt(QMainWindow):
             images = None
             if self.figure_context and self.figure_context.has_images():
                 try:
-                    from modules.figure_context_manager import pil_image_to_base64_png
+                    from modules.figure_context_manager import pil_image_to_base64_png, build_figure_context_block
 
                     # Detect figure references in source text
                     figure_refs = self.figure_context.detect_figure_references(segment.source)
@@ -48966,20 +48992,10 @@ class SupervertalerQt(QMainWindow):
                                 # the final translation delimiter so that the final
                                 # instruction stays the last line of the prompt.
                                 if images and custom_prompt:
-                                    _fig_labels = "; ".join(
-                                        f"Image {i} = Figure {ref.upper()}"
-                                        for i, (ref, _img) in enumerate(images, 1)
-                                    )
-                                    _fig_block = (
-                                        "FIGURE CONTEXT: The following image(s) are attached "
-                                        "to this request as visual context for the figure "
-                                        f"reference(s) in the source segment: {_fig_labels}. "
-                                        "Use them only to resolve ambiguity and choose "
-                                        "terminology. Do NOT translate, transcribe, describe "
-                                        "or comment on any text shown in the images. Return "
-                                        "only the translation of the source segment, with no "
-                                        "numbering or labels."
-                                    )
+                                    # Batch G5.1d (verdict answer 1): the block text
+                                    # is built by the shared module function so the
+                                    # request and the preview can never diverge.
+                                    _fig_block = build_figure_context_block(images)
                                     if "**YOUR TRANSLATION" in custom_prompt:
                                         custom_prompt = custom_prompt.replace(
                                             "**YOUR TRANSLATION",
