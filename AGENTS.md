@@ -168,9 +168,19 @@ Run GUI checks offscreen and non-interactively:
   faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
   ```
   The repeated thread-stack dump names the exact blocking call.
-* After each GUI test process, kill leftover `python.exe`/`java.exe` before the
-  next run: the app spawns an Okapi sidecar subprocess, and test scripts that
-  exit via `os._exit()` leave it orphaned.
+* After each GUI test process, clean up leftover `python.exe`/`java.exe` from
+  that specific run before the next run: the app spawns an Okapi sidecar
+  subprocess, and test scripts that exit via `os._exit()` leave it orphaned.
+  **Never kill by image name.** `taskkill /F /IM python.exe` (and the `java.exe`
+  equivalent) also kills the user's unrelated interpreters, IDE servers and
+  language daemons. Enumerate candidates with their full command lines first
+  (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='python.exe' or
+  Name='java.exe'" | Select-Object ProcessId, CommandLine`), keep only PIDs
+  whose command line belongs to this session's run (the probe script path, the
+  stage directory under `D:\Temp\SupervertalerPortable\`, the `python-embed`
+  interpreter, the sidecar jar), kill exactly those PIDs with
+  `taskkill /F /PID <pid>`, and leave every unmatched process running.
+  Report the survivor list in the batch log.
 
 ### Git line-ending artifacts
 Comparing `git show HEAD:<file>` bytes against the working copy can produce
