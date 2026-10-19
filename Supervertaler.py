@@ -5334,6 +5334,7 @@ class PreTranslationWorker(QThread):
         не трогают виджеты Qt — только сигналы."""
         import time
         import re
+        from modules.bilingual_markdown_handler import is_image_links_only
 
         # Относим AI-вызовы этого воркера в постоянный журнал использования
         # (поток-локально; поток воркера короткоживущий). Логируются только вызовы LLM.
@@ -5456,7 +5457,9 @@ class PreTranslationWorker(QThread):
                                     self.undo_entries.append((segment.id, old_target, translation, old_status, "draft"))
 
                                 preview = segment.source[:50] + ("..." if len(segment.source) > 50 else "")
-                                message = f"[{absolute_idx+1}/{len(self.segments)}] ✓ {preview}"
+                                # M1: mark copied link-only segments distinctly
+                                _tag = "⤳ link-only (LLM skipped)" if is_image_links_only(segment.source) else "✓"
+                                message = f"[{absolute_idx+1}/{len(self.segments)}] {_tag} {preview}"
                                 self.progress_update.emit(absolute_idx + 1, len(self.segments), message, True, elapsed / len(batch_segments))
                                 self.success_count += 1
                             else:
@@ -5651,10 +5654,27 @@ class PreTranslationWorker(QThread):
         """Переводит несколько сегментов одним вызовом LLM (пакетный режим)."""
         try:
             from modules.llm_clients import LLMClient
+            from modules.bilingual_markdown_handler import is_image_links_only
             import re
             import traceback
             
             print(f"🚀 _translate_batch_with_llm: Starting batch of {len(batch_segments)} segments")
+
+            # M1: segments whose entire text is Markdown image links carry no
+            # translatable content — they are NOT sent to the LLM (the model
+            # rewrites/mangles the link path). Their slot in the returned list
+            # is filled with the source verbatim (target = source); run() writes
+            # it with status "draft" — the same precedent as
+            # copy_source_to_target_non_translatable_bulk ("non-translatable"
+            # segment copied source→target, status draft).
+            link_only_ids = {seg.id for _, seg in batch_segments if is_image_links_only(seg.source)}
+            send_segments = [pair for pair in batch_segments if pair[1].id not in link_only_ids]
+            n_link_only = len(batch_segments) - len(send_segments)
+            if n_link_only:
+                print(f"⤳ {n_link_only} link-only segments skipped in this batch (not sent to LLM)")
+            if not send_segments:
+                # Whole batch is link-only: no LLM call at all.
+                return [seg.source for _, seg in batch_segments]
 
             # Получаем языки источника/перевода
             source_lang = getattr(self.parent_app.current_project, 'source_lang', 'en')
@@ -5678,9 +5698,9 @@ class PreTranslationWorker(QThread):
             # Get base prompt from prompt library – becomes the system prompt
             # so that it's byte-stable across batches in this run and cacheable.
             base_prompt = None
-            if self.prompt_manager and batch_segments:
+            if self.prompt_manager and send_segments:
                 try:
-                    first_segment = batch_segments[0][1]
+                    first_segment = send_segments[0][1]
                     # Use pre-fetched glossary terms (SQLite is not thread-safe)
                     full_prompt = self.prompt_manager.build_final_prompt(
                         source_text=first_segment.source,
@@ -5708,10 +5728,10 @@ class PreTranslationWorker(QThread):
                 # minimal language pair instruction in the user prompt itself.
                 batch_prompt_parts.append(f"Translate the following text segments from {source_lang} to {target_lang}.")
 
-            batch_prompt_parts.append(f"**SEGMENTS TO TRANSLATE ({len(batch_segments)} segments):**")
+            batch_prompt_parts.append(f"**SEGMENTS TO TRANSLATE ({len(send_segments)} segments):**")
             batch_prompt_parts.append("\n⚠️ CRITICAL INSTRUCTIONS:")
             batch_prompt_parts.append(f"1. You must provide EXACTLY one translation per segment")
-            batch_prompt_parts.append(f"2. You MUST translate ALL {len(batch_segments)} segments")
+            batch_prompt_parts.append(f"2. You MUST translate ALL {len(send_segments)} segments")
             batch_prompt_parts.append("3. Format: Each translation MUST start with its segment number, a period, then the translation")
             batch_prompt_parts.append("4. Line breaks: If the source segment contains line breaks, preserve them in your translation.")
             batch_prompt_parts.append("   The number label (e.g. '40.') appears only ONCE at the start; continuation lines have no number.")
@@ -5722,7 +5742,7 @@ class PreTranslationWorker(QThread):
             # empty pairs (<1></1>) or otherwise mangling the markers.
             _next_rule = 5
             _has_inline_tags = any(
-                re.search(r'</?\d+/?>', seg.source or '') for _, seg in batch_segments
+                re.search(r'</?\d+/?>', seg.source or '') for _, seg in send_segments
             )
             if _has_inline_tags:
                 batch_prompt_parts.append(
@@ -5737,8 +5757,9 @@ class PreTranslationWorker(QThread):
 
             batch_prompt_parts.append("**SEGMENTS TO TRANSLATE:**\n")
 
-            # Add all segments
-            for row_index, seg in batch_segments:
+            # Add all segments (M1: link-only segments are not part of
+            # send_segments, so they never reach the prompt)
+            for row_index, seg in send_segments:
                 batch_prompt_parts.append(f"{seg.id}. {seg.source}")
 
             batch_prompt_parts.append("\n**YOUR TRANSLATIONS (numbered list):**")
@@ -5799,13 +5820,17 @@ class PreTranslationWorker(QThread):
                 for _sid in translation_map:
                     translation_map[_sid] = re.sub(r'\n\s*$', '', translation_map[_sid])
 
-                # Extract translations in order
+                # Extract translations in order; link-only slots keep the
+                # source verbatim (target = source, no LLM round-trip)
                 for row_index, seg in batch_segments:
-                    translation = translation_map.get(seg.id, None)
-                    translations.append(translation)
+                    if seg.id in link_only_ids:
+                        translations.append(seg.source)
+                    else:
+                        translations.append(translation_map.get(seg.id, None))
             else:
-                # No result - all segments failed
-                translations = [None] * len(batch_segments)
+                # No result - all sent segments failed (link-only keep the source)
+                translations = [seg.source if seg.id in link_only_ids else None
+                                for _, seg in batch_segments]
             
             return translations
             
