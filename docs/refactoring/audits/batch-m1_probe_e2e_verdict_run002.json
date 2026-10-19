@@ -1,0 +1,195 @@
+{
+ "tag": "m1-e2e",
+ "port": 19314,
+ "requests": [
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 794,
+   "ids_in_prompt": [
+    1,
+    6,
+    7,
+    8,
+    10,
+    11
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (6 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segme"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3602,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 2465,
+   "ids_in_prompt": [
+    1,
+    2
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segme"
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'"
+ ],
+ "s1_segments": [
+  [
+   1,
+   "The quick brown fox jumps over the lazy dog."
+  ],
+  [
+   2,
+   "![Image](/path/file.png)"
+  ],
+  [
+   3,
+   "![Image](a.png) ![Image](b.png)"
+  ],
+  [
+   4,
+   "![Figure 1](x.png)"
+  ],
+  [
+   5,
+   "![Рисунок 1](рисунки/рисунок 1.png)"
+  ],
+  [
+   6,
+   "![Image](x.png) Figure 1 shows"
+  ],
+  [
+   7,
+   "![Image](x.png)."
+  ],
+  [
+   8,
+   "[t](u)"
+  ],
+  [
+   9,
+   "![](x.png)"
+  ],
+  [
+   10,
+   "![Image](x.png) some text after"
+  ],
+  [
+   11,
+   "The troops advanced at dawn."
+  ],
+  [
+   12,
+   ""
+  ]
+ ],
+ "s1": {
+  "n_requests": 1,
+  "ids_in_prompt": [
+   1,
+   6,
+   7,
+   8,
+   10,
+   11
+  ],
+  "targets": [
+   "Translated1",
+   "![Image](/path/file.png)",
+   "![Image](a.png) ![Image](b.png)",
+   "![Figure 1](x.png)",
+   "![Рисунок 1](рисунки/рисунок 1.png)",
+   "Translated6",
+   "Translated7",
+   "Translated8",
+   "![](x.png)",
+   "Translated10",
+   "Translated11"
+  ],
+  "statuses": [
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft"
+  ],
+  "console_link_only_lines": 5,
+  "console_lines_n": 20,
+  "link_only_targets_byte_eq_source": true,
+  "translated_ids_byte_eq_expected": true
+ },
+ "s3": {
+  "row": 1,
+  "n_requests": 0,
+  "target_eq_source": true,
+  "status": "draft",
+  "log_lines": [
+   "⤳ Segment #2: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+  ]
+ },
+ "s4": {
+  "n_requests": 1,
+  "target": "Goedemorgen",
+  "status": "draft",
+  "log_tail": [
+   "  Including 11 surrounding segments (5 before/after)",
+   "✓ Added to TM: ![Image](x.png) Figure 1 shows... → Goedemorgen...",
+   "✓ Segment #6 translated with custom_openai/fake-llm"
+  ]
+ },
+ "s2": {
+  "n_requests": 0,
+  "targets_eq_source": true,
+  "statuses": [
+   "draft",
+   "draft"
+  ],
+  "console_link_only_lines": 2
+ },
+ "s5": {
+  "n_segments": 3,
+  "link_rows": [
+   2
+  ],
+  "link_ids": [
+   3
+  ],
+  "n_requests": 1,
+  "ids_in_prompt": [
+   1,
+   2
+  ],
+  "link_ids_leaked_to_endpoint": [],
+  "link_targets_eq_source": true,
+  "link_statuses": [
+   "draft"
+  ],
+  "console_link_only_lines": 1,
+  "export_link_byte_identity": {
+   "![Image](e:\\Dev\\SupervertalerPortable\\docs\\refactoring\\samples\\Figure 2.jpg)": 2
+  }
+ },
+ "net_traps": [],
+ "verdict": "PASS"
+}
