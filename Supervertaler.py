@@ -48803,6 +48803,38 @@ class SupervertalerQt(QMainWindow):
             QMessageBox.warning(self, "Empty Source", "Cannot translate empty source text.")
             return
         
+        # M1 (2026-10-19): a segment consisting only of Markdown image links
+        # carries no translatable content — no LLM call (the model would
+        # rewrite/mangle the link path). Treated as a non-translatable copy:
+        # target = source verbatim, status "draft" — the same precedent as
+        # copy_source_to_target_non_translatable_bulk (Edit > Bulk Operations).
+        from modules.bilingual_markdown_handler import is_image_links_only
+        if is_image_links_only(segment.source):
+            _undo_old_target = segment.target
+            _undo_old_status = segment.status
+            segment.target = segment.source
+            segment.status = "draft"
+            try:
+                self.record_undo_state(segment.id, _undo_old_target, segment.source, _undo_old_status, "draft")
+            except Exception:
+                pass  # never let undo failure break the actual operation
+            # Update grid - Column 3 is Target (using cell widget), display form
+            target_widget = self.table.cellWidget(current_row, 3)
+            if target_widget and isinstance(target_widget, EditableGridTextEditor):
+                target_display = self.apply_invisible_replacements(segment.source) if hasattr(self, 'apply_invisible_replacements') else segment.source
+                target_widget.blockSignals(True)
+                target_widget.setPlainText(target_display)
+                target_widget.blockSignals(False)
+            else:
+                self.table.setItem(current_row, 3, QTableWidgetItem(segment.source))
+            self.update_status_icon(current_row, "draft")
+            self._auto_resize_single_row(current_row)
+            self.project_modified = True
+            self.update_window_title()
+            self.log(f"⤳ Segment #{segment.id}: link-only segment (image links) skipped — LLM not called, source copied to target (draft)")
+            self.status_bar.showMessage(f"⤳ Segment #{segment.id}: image link copied to target (no LLM call)", 3000)
+            return
+        
         # Load LLM settings first to check provider
         settings = self.load_llm_settings()
         provider = settings.get('provider', 'openai')
