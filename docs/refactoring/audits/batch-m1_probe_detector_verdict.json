@@ -1,0 +1,169 @@
+{
+ "probe": "M1a detector matrix",
+ "n_cases": 23,
+ "n_fail": 0,
+ "verdict": "PASS",
+ "cases": [
+  {
+   "label": "plain text",
+   "text": "The army marched north.",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "link only",
+   "text": "![Image](/path/file.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "link only, windows path",
+   "text": "![Image](D:\\Temp\\x.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "two links in a row",
+   "text": "![Image](a.png) ![Image](b.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "two links separated by line break",
+   "text": "![Image](a.png)\n![Image](b.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "alt keyword",
+   "text": "![Figure 1](x.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "cyrillic alt + cyrillic path with spaces",
+   "text": "![Рисунок 1](D:\\Мои файлы\\рисунок 1.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "empty alt",
+   "text": "![](x.png)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "link + text after",
+   "text": "![Image](x.png) Figure 1 shows",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "link + trailing period",
+   "text": "![Image](x.png).",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "plain md link (no !)",
+   "text": "[t](u)",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "plain md link + text",
+   "text": "see [the chart](u)",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "text before links",
+   "text": "Figure: ![Image](x.png)",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "text after links (newline)",
+   "text": "![Image](x.png)\nSome text",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "link then plain link",
+   "text": "![Image](x.png) [t](u)",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "empty segment",
+   "text": "",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "whitespace only",
+   "text": "   \n\t ",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "link with trailing spaces",
+   "text": "![Image](x.png)   \n",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "link with title in parens",
+   "text": "![Image](x.png \"Fig. 1\")",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "link url with parentheses inside",
+   "text": "![Image](im(1).png)",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "image ext jpg + spaces in url",
+   "text": "![Figure 12A](figures/troops detail 1.jpg)",
+   "expected": true,
+   "got": true,
+   "ok": true
+  },
+  {
+   "label": "html img tag (not md)",
+   "text": "<img src='x.png'>",
+   "expected": false,
+   "got": false,
+   "ok": true
+  },
+  {
+   "label": "bbcode img (not md)",
+   "text": "[img]x.png[/img]",
+   "expected": false,
+   "got": false,
+   "ok": true
+  }
+ ]
+}

@@ -395,6 +395,24 @@ def looks_like_bracketed_markdown(text: str) -> bool:
     return bool(re.search(r"^\[SEGMENT\s+\d+\]\s*$", text, re.MULTILINE))
 
 
+# M1 (2026-10-19): "link-only segment" detector. A segment whose entire text is
+# one or more Markdown image links (whitespace between them allowed, incl. line
+# breaks) and nothing else carries no translatable content: the LLM rewrites or
+# mangles the link path, so the workbench copies source to target verbatim
+# instead of sending it out (see PreTranslationWorker / translate_current_segment).
+# Deliberately strict — it must NOT fire on: a link plus any other text (incl. a
+# trailing period), a plain [text](url) link, an empty segment. Allowed: empty
+# alt text, alt text with words, paths with spaces and non-ASCII characters.
+_MD_IMAGE_LINK_ONLY_RE = re.compile(r"^\s*(?:!\[[^\]]*\]\([^)]*\)\s*)+$")
+
+
+def is_image_links_only(text: str) -> bool:
+    """True if *text* consists only of one or more Markdown image links."""
+    if not text:
+        return False
+    return bool(_MD_IMAGE_LINK_ONLY_RE.match(text))
+
+
 def parse_markdown(md_text: str) -> List[ParsedMdSegment]:
     """Parse a Bracketed Markdown document into segments.
 
