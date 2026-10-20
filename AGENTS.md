@@ -51,6 +51,22 @@ go/no-go verdict, plans the next stages, and writes the per-batch prompts.
 * Decisions recorded in a report (e.g. answers to the report's questions) authorize the
   content of a future batch, not its start.
 
+### Executor turn discipline (no silent stops) — Dmitry's note 2026-10-20
+Observed failure mode: the agent drafted long artifact text in a chat message and ended the
+turn without the file-edit call — a text-only message ends the agent turn, which reads as a
+silent stop and requires a manual "продолжай" to resume. Rules:
+* Long artifact text (report sections, BACKLOG/PROJECT_STATUS blocks, doc paragraphs) is
+  applied with file tools (Edit/Write) in the same turn; a "draft in the message" is NOT
+  delivery. Plan → apply, never plan → stop.
+* A turn that ends with a draft/plan and no tool call is a stall: the agent self-resumes by
+  applying the artifact immediately, without waiting for a user prompt.
+* Long-running probes (background task, GUI suite, worktree runs) are announced in the
+  message before ending the turn: what was started, that the agent awaits its completion
+  notification, expected duration — pauses are labeled, never silent.
+* Commands expected to exceed 120 s (app instantiation 1–2 min, 16-stage offscreen suites)
+  run via `run_in_background` (or with an explicit larger timeout) and are reported as such.
+* After tool-call-only chains, end the turn with a visible status line.
+
 ### Temporary files and test artifacts
 Use the dedicated project temporary workspace:
 `D:\Temp\SupervertalerPortable\`
