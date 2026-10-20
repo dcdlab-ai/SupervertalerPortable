@@ -9,6 +9,11 @@ Scenarios:
                      + plain md link + empty alt); one batch call: the payload
                      must contain ONLY the ids that are not link-only; link-only
                      targets == source byte-wise; statuses draft; counters.
+                     M1e (2026-10-20, broadened criterion): the trailing-period row
+                     "![Image](x.png)." (id 7) is now link-only too -> expected ids
+                     [1, 6, 8, 10, 11] (was [1, 6, 7, 8, 10, 11] under M1), 6 copy
+                     lines (was 5). Expectations updated per coordinator verdict
+                     (M1e Q8); the historical run logs are NOT regenerated.
   S2 all-links     — a batch of ONLY link-only segments: ZERO endpoint requests.
   S3 single-link   — translate_current_segment on a link-only segment: zero new
                      requests, target == source, status draft, log line.
@@ -244,7 +249,8 @@ try:
         "console_link_only_lines": sum(1 for m, _ in CONSOLE if "⤳ link-only (LLM skipped)" in m),
         "console_lines_n": len(CONSOLE),
     }
-    link_idx = {1, 2, 3, 4, 8}  # 0-based rows of link-only segments (ids 2..5, 9)
+    link_idx = {1, 2, 3, 4, 6, 8}  # 0-based link-only rows: ids 2..5, 7 ("![Image](x.png)."
+    # trailing period — link-only since M1e), 9
     link_only_sources = [segs[i].source for i in link_idx]
     result["s1"]["link_only_targets_byte_eq_source"] = all(
         segs[i].target == segs[i].source for i in link_idx)
@@ -355,11 +361,11 @@ try:
     s1 = result["s1"]
     ok = (
         s1["n_requests"] == 1
-        and s1["ids_in_prompt"] == [1, 6, 7, 8, 10, 11]
+        and s1["ids_in_prompt"] == [1, 6, 8, 10, 11]
         and s1["link_only_targets_byte_eq_source"]
         and s1["translated_ids_byte_eq_expected"]
         and all(st == "draft" for st in s1["statuses"])
-        and s1["console_link_only_lines"] == 5
+        and s1["console_link_only_lines"] == 6
         and result["s3"]["n_requests"] == 0
         and result["s3"]["target_eq_source"]
         and result["s3"]["status"] == "draft"

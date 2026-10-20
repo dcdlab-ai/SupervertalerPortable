@@ -298,6 +298,21 @@
   вставленном row / при guard — печатать отказ). Не править без решения
   координатора.
 
+### 9.9 N1 — Qt-нормализация NBSP в пакетном пути (вердикт Дмитрия 2026-10-20, M1e §11.4)
+
+* Пакетный путь: `handle_progress_update` (~:50666) пишет target в ячейку
+  `target_widget.setPlainText(display_text)` **без blockSignals**; отложенное
+  событие textChanged проходит через `on_target_text_changed` (:32861) и
+  присваивает `segment.target` из `toPlainText()`, а `QTextDocument` конвертирует
+  U+00A0 → U+0020 при plain-text round-trip → NBSP в цели теряется.
+  Pre-existing (доказано на worktree HEAD 2264e2a6, аудит
+  `batch-m1e_probe_head_verdict_run004.json`); касается всех целей с NBSP в
+  пачках (не только link-only-копий M1). В одиночном Ctrl+T NBSP сохранён
+  (гейт пишет raw + blockSignals).
+* **Решение координатора (Q7):** правка — **блокировка сигналов в прогресс-хендлере**,
+  с регрессом **по всем пачкам**; пункт **N1**, запланировать **после G3.2 вместе с M2**.
+  Сейчас код не менять.
+
 ## 10. Документы (конец Batch #8)
 
 * Источники: AGENTS.md (правило батчей), BATCH8_3 §8 п.2 (решение), BATCH8_4 §8
@@ -307,6 +322,9 @@
   Stage 1.
 * Чистка док-остатков по группе 7 (HelpTopics, platform_helpers,
   styled_widgets/termbase_manager).
+* **Tooltip :8150 «mark as Translated» (BATCH M1 §9 Q5, вердикт Дмитрия 2026-10-20):**
+  устаревший текст vs код `'draft'` в `copy_source_to_target_non_translatable_bulk`
+  (прецедент статуса M1-копий) — править в **docs-проходе 8.16**, код сейчас не менять.
 * **Находка G5.1+G5.2 (2026-10-15, отчёт G5_1_2 §9):** CRLF/LF-гигиена —
   `modules/settings_service.py` стабильно помечен «M» в `git status` при пустом
   content-диффе (CRLF/LF-артефакт, content-hash 08a0d943 = HEAD);
