@@ -395,22 +395,29 @@ def looks_like_bracketed_markdown(text: str) -> bool:
     return bool(re.search(r"^\[SEGMENT\s+\d+\]\s*$", text, re.MULTILINE))
 
 
-# M1 (2026-10-19): "link-only segment" detector. A segment whose entire text is
-# one or more Markdown image links (whitespace between them allowed, incl. line
-# breaks) and nothing else carries no translatable content: the LLM rewrites or
-# mangles the link path, so the workbench copies source to target verbatim
-# instead of sending it out (see PreTranslationWorker / translate_current_segment).
-# Deliberately strict — it must NOT fire on: a link plus any other text (incl. a
-# trailing period), a plain [text](url) link, an empty segment. Allowed: empty
-# alt text, alt text with words, paths with spaces and non-ASCII characters.
-_MD_IMAGE_LINK_ONLY_RE = re.compile(r"^\s*(?:!\[[^\]]*\]\([^)]*\)\s*)+$")
+# M1e (2026-10-20): "link-only segment" detector, broadened from M1's strict
+# "links only" rule after the coordinator's manual test (a trailing period after
+# a link must NOT send the segment to the LLM). A segment is link-only when it
+# contains one or more Markdown image links and the text left after removing all
+# of them has no letters or digits (Unicode word characters; underscore does not
+# count as content). Leftover of whitespace, NBSP, ZWSP, periods, "!", dashes,
+# any punctuation — link-only. A segment with no image links (incl. an empty
+# segment) never qualifies. A plain [text](url) link, a link plus words
+# ("Figure 2 shows") or a digit goes to the LLM. Paths with spaces and non-ASCII
+# characters, empty alt text, alt text with words — all allowed.
+_MD_IMAGE_LINK_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
+_MD_LEFTOVER_CONTENT_RE = re.compile(r"[^\W_]")
 
 
 def is_image_links_only(text: str) -> bool:
-    """True if *text* consists only of one or more Markdown image links."""
+    """True if *text* holds one or more Markdown image links and the leftover
+    after stripping them contains no letters/digits (M1e criterion)."""
     if not text:
         return False
-    return bool(_MD_IMAGE_LINK_ONLY_RE.match(text))
+    rest, n_links = _MD_IMAGE_LINK_RE.subn("", text)
+    if n_links == 0:
+        return False
+    return not _MD_LEFTOVER_CONTENT_RE.search(rest)
 
 
 def parse_markdown(md_text: str) -> List[ParsedMdSegment]:
