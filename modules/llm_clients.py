@@ -142,6 +142,10 @@ _REASONING_BLOCK_RE = re.compile(
     r'<(think|thinking)\b[^>]*>.*?</\1\s*>', re.IGNORECASE | re.DOTALL)
 # An unclosed reasoning opening tag, e.g. a response cut off mid-reasoning.
 _OPEN_REASONING_RE = re.compile(r'<(think|thinking)\b[^>]*/?>', re.IGNORECASE)
+# G3.2d: a dangling closing tag whose opening tag is not in the response —
+# chat templates that inject <think> into the prompt leave the reasoning
+# header outside the returned content, so the answer follows the last </think>.
+_CLOSE_REASONING_RE = re.compile(r'</(?:think|thinking)\s*>', re.IGNORECASE)
 
 # Module-level log hook: the main app wires its own log callback at startup
 # (set_llm_log_callback) so core-level warnings reach the app log panel
@@ -169,15 +173,18 @@ class LLMResponseError(ValueError):
 
     Subclasses ValueError so every existing `except ValueError` caller
     (segment, batch, QuickTrans, chat, proofread, …) keeps handling them.
-    Attributes: finish_reason, has_reasoning, reasoning_tokens.
+    Attributes: finish_reason, has_reasoning, reasoning_tokens, partial_text
+    (G3.2d: text recovered before a mid-answer truncation, None otherwise).
     """
 
     def __init__(self, message: str, finish_reason: Optional[str] = None,
-                 has_reasoning: bool = False, reasoning_tokens: int = 0):
+                 has_reasoning: bool = False, reasoning_tokens: int = 0,
+                 partial_text: Optional[str] = None):
         super().__init__(message)
         self.finish_reason = finish_reason
         self.has_reasoning = bool(has_reasoning)
         self.reasoning_tokens = int(reasoning_tokens or 0)
+        self.partial_text = partial_text
 
 
 class LLMTruncatedError(LLMResponseError):
@@ -266,12 +273,21 @@ def _extract_reasoning_tokens(response) -> int:
     return int(getattr(details, 'reasoning_tokens', 0) or 0) if details else 0
 
 
-def _parse_completion_response(response, model: str) -> str:
+def _parse_completion_response(response, model: str, lenient: bool = False) -> str:
     """G3.2: parse a chat-completion response into translation text.
 
     finish_reason is read; reasoning_content is detected but NEVER used as
     translation; inline <think>/<thinking> blocks are stripped from content.
     Raises typed LLMResponseError subclasses for truncated/empty responses.
+
+    G3.2d (coordinator verdict 2026-10-20, answers 1 & 5):
+    - strict (translation paths): a non-empty response cut off at max_tokens
+      raises LLMTruncatedError carrying `partial_text`;
+    - lenient (skip_cleaning=True callers: chat analysis, AutoPrompt, JSON
+      extractors): return the partial text with a warning log, as before;
+    - a dangling closing tag (template with <think> injected into the prompt)
+      resolves to the text after the last closing tag;
+    - an unclosed opening tag raises in every path (nothing is returned).
     """
     choices = getattr(response, 'choices', None)
     if not choices:
@@ -286,7 +302,15 @@ def _parse_completion_response(response, model: str) -> str:
     has_reasoning = bool(reasoning)
     reasoning_tokens = _extract_reasoning_tokens(response)
 
-    stripped = _REASONING_BLOCK_RE.sub('', content or '').strip()
+    stripped = _REASONING_BLOCK_RE.sub('', content or '')
+    last_close = None
+    for m in _CLOSE_REASONING_RE.finditer(stripped):
+        last_close = m
+    if last_close is not None:
+        # Dangling closing tag: the opening tag is not in this response
+        # (template puts it in the prompt) — the answer is what follows it.
+        stripped = stripped[last_close.end():]
+    stripped = stripped.strip()
 
     if _OPEN_REASONING_RE.search(stripped):
         # Reasoning block cut off mid-stream: the budget ran out while
@@ -315,9 +339,21 @@ def _parse_completion_response(response, model: str) -> str:
             finish_reason=finish, has_reasoning=has_reasoning,
             reasoning_tokens=reasoning_tokens)
     if finish == 'length':
-        # Content is present but hit the token limit: return it, warn loudly.
-        _llm_log(f"⚠ LLM response for {model} truncated at max_tokens "
-                 f"(finish_reason='length'); translation may be incomplete")
+        if lenient:
+            # Analysis/prompt-generation callers (skip_cleaning=True) keep the
+            # pre-G3.2d behaviour: return the partial text, warn in the log.
+            _llm_log(f"⚠ LLM response for {model} truncated at max_tokens "
+                     f"(finish_reason='length'); translation may be incomplete")
+        else:
+            # Translation paths raise; the text recovered before the cut is
+            # preserved on the exception (coordinator answer 1).
+            preview = stripped if len(stripped) <= 200 else stripped[:200] + '…'
+            raise LLMTruncatedError(
+                f"Model {model} was cut off at max_tokens mid-answer "
+                f"(finish_reason='length'); the translation is incomplete. "
+                f"Increase 'Max tokens' in the profile. Partial text: {preview!r}",
+                finish_reason=finish, has_reasoning=has_reasoning,
+                reasoning_tokens=reasoning_tokens, partial_text=stripped)
     return stripped
 
 
@@ -675,7 +711,8 @@ class LLMClient:
                 f"(OpenAI-compatible) profile in Settings → AI Settings")
         result, usage = self._call_openai_with_usage(
             prompt, max_tokens=max_tokens, images=images,
-            system_prompt=system_prompt, enable_prompt_caching=enable_prompt_caching)
+            system_prompt=system_prompt, enable_prompt_caching=enable_prompt_caching,
+            lenient_on_truncation=skip_cleaning)
 
         if not skip_cleaning:
             result = self._clean_translation_response(result, prompt)
@@ -696,8 +733,13 @@ class LLMClient:
 
         return result, usage
 
-    def _call_openai_with_usage(self, prompt: str, max_tokens: Optional[int] = None, images: Optional[List] = None, system_prompt: Optional[str] = None, enable_prompt_caching: bool = False) -> Tuple[str, Dict]:
+    def _call_openai_with_usage(self, prompt: str, max_tokens: Optional[int] = None, images: Optional[List] = None, system_prompt: Optional[str] = None, enable_prompt_caching: bool = False, lenient_on_truncation: bool = False) -> Tuple[str, Dict]:
         """Call an OpenAI-compatible API and return (text, usage_dict).
+
+        G3.2d: `lenient_on_truncation` is the existing `skip_cleaning` flag
+        threaded down from translate_with_usage — its callers (chat analysis,
+        AutoPrompt, JSON extractors) keep the return+warning behaviour for
+        responses cut off at max_tokens; translation paths raise.
 
         Единственное ядро исполнения после Batch #9.3 (custom_openai).
         enable_prompt_caching сохранён в сигнатуре для совместимости
@@ -772,7 +814,7 @@ class LLMClient:
                 finish_reason=None, has_reasoning=False,
                 reasoning_tokens=0) from exc
 
-        text = _parse_completion_response(response, self.model)
+        text = _parse_completion_response(response, self.model, lenient=lenient_on_truncation)
 
         usage = {}
         if hasattr(response, 'usage') and response.usage:
