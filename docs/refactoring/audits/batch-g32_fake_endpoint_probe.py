@@ -7,8 +7,9 @@ Modes:
                         the new fields produces (plain + vision calls). These
                         files are the regression reference for matrix item 7.
   verify  <stage_dir>   Run against the POST-EDIT code. Executes probe matrix
-                        items 1-11 + G3.2d items (2b/3b/6-strict/6b) = 15,
-                        against the same fake endpoint.
+                        items 1-11 + G3.2d items (2b/3b/6-strict/6b) + G3.2e
+                        item 12 (chat truncation display) = 16, against the
+                        same fake endpoint.
 
 Nothing outside 127.0.0.1 is contacted: every request is served by the local
 ThreadingHTTPServer; the trap assertion checks the Host header of every
@@ -25,6 +26,7 @@ import os
 import sys
 import threading
 import time
+from pathlib import Path
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -177,7 +179,7 @@ def capture(stage):
 
 
 # ---------------------------------------------------------------------------
-# verify (post-edit) — matrix 1..11 + G3.2d items 2b/3b/6/6b = 15 + net-traps
+# verify (post-edit) — matrix 1..11 + G3.2d items 2b/3b/6/6b + G3.2e item 12 = 16 + net-traps
 # ---------------------------------------------------------------------------
 
 def verify(stage):
@@ -433,6 +435,51 @@ def verify(stage):
            and body11.get("chat_template_kwargs") == {"enable_thinking": False},
            f"image_parts={has_image} max_tokens={body11.get('max_tokens')} "
            f"chat_template_kwargs={body11.get('chat_template_kwargs')}")
+
+    # 12 (G3.2e, verdict Q8) — chat: finish_reason=length is NOT an error
+    # bubble. The default sender must show partial_text as a normal assistant
+    # reply with a truncation note, plus a warning in the backend log.
+    # Runs the real ChatViewWidget + ChatBackend offscreen against the fake
+    # endpoint (stub parent app supplies only the factory surface ChatBackend
+    # probes). The context-aware sender installed by UnifiedPromptManagerQt
+    # follows the same pattern; it is covered by manual test T-G3.2.7.
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+    from modules.chat_backend import ChatBackend
+    from modules.chat_view_widget import ChatViewWidget
+
+    class StubApp:
+        """Minimal app surface ChatBackend.init_llm_client probes."""
+        current_provider = "custom_openai"
+        current_model = "probe-model"
+
+        def load_api_keys(self):
+            return {}
+
+        def load_llm_settings(self):
+            return None
+
+        def _custom_llm_ready(self, settings):
+            return True
+
+        def create_llm_client(self, provider, model, api_keys, settings=None):
+            return make_client(port)
+
+    qt_app = QApplication.instance() or QApplication(sys.argv[:1])
+    chat_logs = []
+    chat_backend = ChatBackend(StubApp(), Path(out) / "chat_conversation.json",
+                               log_callback=chat_logs.append)
+    chat_widget = ChatViewWidget(chat_backend)
+    srv.responses.clear()
+    srv.responses.append({"json": make_completion("Chat partial", finish="length")})
+    chat_widget._do_send("Hello chat")
+    last_msg = chat_backend.chat_history[-1] if chat_backend.chat_history else {}
+    ok12 = (last_msg.get("role") == "assistant"
+            and last_msg.get("content", "").startswith("Chat partial")
+            and "truncated by Max tokens" in last_msg.get("content", ""))
+    warned12 = any("truncated by Max tokens" in ln for ln in chat_logs)
+    record("12-chat-length-partial-shown", ok12 and warned12,
+           f"msg={last_msg!r} chat_log={chat_logs}")
 
     # network trap assertion: every recorded request went to the loopback endpoint
     bad_hosts = sorted({h for h in srv.hosts if h != f"127.0.0.1:{port}"})

@@ -1,0 +1,82 @@
+[
+  {
+    "item": "1-normal-stop",
+    "ok": true,
+    "detail": "text='Привет мир' usage={'input_tokens': 11, 'output_tokens': 23, 'cache_read_input_tokens': 0, 'cache_creation_input_tokens': 0} host=127.0.0.1:11971"
+  },
+  {
+    "item": "2-think-stripping",
+    "ok": true,
+    "detail": "case1: got 'Привет' want 'Привет' | case2: got 'midПривет' want 'midПривет' | case3: got 'Привет' want 'Привет' | case4: got 'Привет' want 'Привет' | case5: got 'Привет' want 'Привет' | case6: LLMEmptyResponseError: Model probe-model returned an empty response (finish_reason='stop', reasoning_content absent)"
+  },
+  {
+    "item": "2b-dangling-close",
+    "ok": true,
+    "detail": "case1: got 'Привет' want 'Привет' | case2: got 'mid Привет' want 'mid Привет' | case3: got 'Answer' want 'Answer'"
+  },
+  {
+    "item": "3-unclosed-think-length",
+    "ok": true,
+    "detail": "LLMTruncatedError: 'Model probe-model produced an unclosed reasoning block — the reasoning process exhausted the max_tokens budget (finish_reason=\\'length\\'). Increase \\'Max tokens\\' in the profile or disable thinking via the \\'Extra request body\\' field (e.g. {\"chat_template_kwargs\": {\"enable_thinking\": false}}).'"
+  },
+  {
+    "item": "3b-unclosed-nonempty",
+    "ok": true,
+    "detail": "partial_text=None msg='Model probe-model produced an unclosed reasoning block — the reasoning process exhausted the max_tokens budget (finish_reason=\\'stop\\'). Increase \\'Max tokens\\' in the profile or disable thinking via the \\'Extra request body\\' field (e.g. {\"chat_template_kwargs\": {\"enable_thinking\": false}}).'"
+  },
+  {
+    "item": "4-reasoning-exhausted-length",
+    "ok": true,
+    "detail": "finish=length has_reasoning=True reasoning_tokens=12345 msg='Model probe-model exhausted the max_tokens budget on reasoning (finish_reason=\\'length\\'; reasoning only, no translation content, reasoning_tokens=12345). Increase \\'Max tokens\\' in the profile or disable thinking via the \\'Extra request body\\' field (e.g. {\"chat_template_kwargs\": {\"enable_thinking\": false}}).'"
+  },
+  {
+    "item": "5-reasoning-only-stop",
+    "ok": true,
+    "detail": "LLMEmptyResponseError: \"Model probe-model returned an empty response (finish_reason='stop', reasoning_content present)\""
+  },
+  {
+    "item": "6-strict-length-raise-partial",
+    "ok": true,
+    "detail": "partial_text='Partial answer' msg=\"Model probe-model was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Partial answer'\""
+  },
+  {
+    "item": "6b-lenient-length-warning",
+    "ok": true,
+    "detail": "text='Partial answer' log=[\"⚠ LLM response for probe-model truncated at max_tokens (finish_reason='length'); translation may be incomplete\"]"
+  },
+  {
+    "item": "7-body-regression",
+    "ok": true,
+    "detail": "plain: byte-equal | vision: byte-equal"
+  },
+  {
+    "item": "8-extra-body-forwarded",
+    "ok": true,
+    "detail": "body keys=['chat_template_kwargs', 'max_tokens', 'messages', 'model', 'temperature'] chat_template_kwargs={'enable_thinking': False}"
+  },
+  {
+    "item": "9-profile-timeout",
+    "ok": true,
+    "detail": "LLMTimeoutError: \"Request to model probe-model timed out after 0.00833333 minutes (0.5 s) — profile 'ProbeProfile'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.\""
+  },
+  {
+    "item": "10-save-validation",
+    "ok": true,
+    "detail": "extra_body invalid json: blocked (['\\'Extra request body\\' must be a JSON object (e.g. {\"chat_template_kwargs\": {\"enable_thinking\": false}}); leave empty for nothing.']) | extra_body not an object: blocked (['\\'Extra request body\\' must be a JSON object (e.g. {\"chat_template_kwargs\": {\"enable_thinking\": false}}); leave empty for nothing.']) | forbidden key model: blocked ([\"'Extra request body' must not contain the key(s): model — these are managed by the request builder.\"]) | forbidden key messages: blocked ([\"'Extra request body' must not contain the key(s): messages — these are managed by the request builder.\"]) | forbidden key max_tokens: blocked ([\"'Extra request body' must not contain the key(s): max_tokens — these are managed by the request builder.\"]) | forbidden key stream: blocked ([\"'Extra request body' must not contain the key(s): stream — these are managed by the request builder.\"]) | forbidden key tools: blocked ([\"'Extra request body' must not contain the key(s): tools — these are managed by the request builder.\"]) | max_tokens non-number 'abc': blocked ([\"'Max tokens' must be a positive whole number (e.g. 20000); leave empty for the default (16384).\"]) | timeout_min non-positive '-3': blocked ([\"'Request timeout' must be a positive number of minutes (e.g. 10); leave empty for the default (10 minutes).\"]) | valid: mt=5000 to=300.0 eb={'chat_template_kwargs': {'enable_thinking': False}} errors=[]"
+  },
+  {
+    "item": "11-vision-profile-params",
+    "ok": true,
+    "detail": "image_parts=True max_tokens=1234 chat_template_kwargs={'enable_thinking': False}"
+  },
+  {
+    "item": "12-chat-length-partial-shown",
+    "ok": true,
+    "detail": "msg={'role': 'assistant', 'content': 'Chat partial\\n\\n⚠ Answer truncated by Max tokens', 'timestamp': '2026-10-20T18:14:15.216684'} chat_log=['[ChatBackend] LLM client: custom_openai/probe-model', '[ChatBackend] LLM client: custom_openai/probe-model', '[ChatBackend] Sending to custom_openai/probe-model', \"[ChatBackend] Error: Model probe-model was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Chat partial'\", '[Chat] ⚠ answer truncated by Max tokens (12 chars recovered)']"
+  },
+  {
+    "item": "net-traps",
+    "ok": true,
+    "detail": "requests=24 foreign_hosts=[]"
+  }
+]

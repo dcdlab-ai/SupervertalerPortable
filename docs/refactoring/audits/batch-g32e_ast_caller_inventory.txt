@@ -1,0 +1,31 @@
+Supervertaler.py:5645 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'custom_prompt'}
+Supervertaler.py:5790 translate recv=client.translate kwargs={'text': 'batch_prompt', 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'batch_prompt', 'system_prompt': 'base_prompt', 'enable_prompt_caching': 'True'}
+Supervertaler.py:5927 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'custom_prompt'}
+Supervertaler.py:47898 translate recv=client.translate kwargs={'text': "''", 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'prompt', 'system_prompt': 'system_prompt'}
+Supervertaler.py:49823 translate recv=client.translate kwargs={'text': "''", 'source_lang': "'en'", 'target_lang': "'en'", 'custom_prompt': 'custom_prompt'}
+Supervertaler.py:5145 translate recv=painter.translate kwargs={}
+Supervertaler.py:10076 send_ai_request recv=chat_backend.send_ai_request kwargs={'is_analysis': 'False', 'images': 'images_payload'}
+Supervertaler.py:49250 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': "Attribute(value=Attribute(value=Name(id='self', ctx=Load()),", 'target_lang': "Attribute(value=Attribute(value=Name(id='self', ctx=Load()),", 'custom_prompt': 'custom_prompt', 'images': 'images'}
+Supervertaler.py:51012 translate recv=client.translate kwargs={'text': 'source_text', 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'custom_prompt'}
+Supervertaler.py:52224 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': "BoolOp(op=Or(), values=[Name(id='source_lang_code', ctx=Load", 'target_lang': "BoolOp(op=Or(), values=[Name(id='target_lang_code', ctx=Load"}
+Supervertaler.py:52085 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': "BoolOp(op=Or(), values=[Name(id='source_lang_code', ctx=Load", 'target_lang': "BoolOp(op=Or(), values=[Name(id='target_lang_code', ctx=Load"}
+Supervertaler.py:52127 translate recv=client.translate kwargs={'text': "Attribute(value=Name(id='segment', ctx=Load()), attr='source", 'source_lang': "BoolOp(op=Or(), values=[Name(id='source_lang_code', ctx=Load", 'target_lang': "BoolOp(op=Or(), values=[Name(id='target_lang_code', ctx=Load"}
+modules\chat_backend.py:210 translate_with_usage recv=self.llm_client.translate_with_usage kwargs={'text': "''", 'source_lang': "'en'", 'target_lang': "'en'", 'custom_prompt': 'prompt', 'system_prompt': 'system_prompt', 'skip_cleaning': 'is_analysis', 'images': 'images'}
+modules\chat_message_delegate.py:263 translate recv=painter.translate kwargs={}
+modules\chat_message_delegate.py:345 translate recv=painter.translate kwargs={}
+modules\chat_message_delegate.py:401 translate recv=painter.translate kwargs={}
+modules\chat_view_widget.py:626 send_ai_request recv=self._backend.send_ai_request kwargs={'images': "BoolOp(op=Or(), values=[Name(id='images', ctx=Load()), Const"}
+modules\llm_clients.py:656 translate_with_usage recv=self.translate_with_usage kwargs={'text': 'text', 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'context': 'context', 'custom_prompt': 'custom_prompt', 'max_tokens': 'max_tokens', 'images': 'images', 'system_prompt': 'system_prompt', 'skip_cleaning': 'skip_cleaning', 'enable_prompt_caching': 'enable_prompt_caching'}
+modules\pseudo_translate.py:102 translate recv=core.translate kwargs={}
+modules\quicktrans.py:456 translate recv=client.translate kwargs={'text': "''", 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'prompt', 'system_prompt': 'system_prompt'}
+modules\tag_manager.py:1439 translate recv=client.translate kwargs={'text': 'clean_target', 'source_lang': 'source_lang', 'target_lang': 'target_lang', 'custom_prompt': 'prompt'}
+modules\tm_manager_qt.py:271 translate recv=painter.translate kwargs={}
+modules\unified_prompt_manager_qt.py:594 translate recv=painter.translate kwargs={}
+modules\unified_prompt_manager_qt.py:670 translate recv=painter.translate kwargs={}
+modules\unified_prompt_manager_qt.py:736 translate recv=painter.translate kwargs={}
+modules\unified_prompt_manager_qt.py:136 send_ai_request recv=self._chat_backend.send_ai_request kwargs={'is_analysis': 'True', 'images': "Attribute(value=Name(id='self', ctx=Load()), attr='_images',"}
+modules\unified_prompt_manager_qt.py:6354 send_ai_request recv=self.chat_backend.send_ai_request kwargs={'images': 'images'}
+modules\unified_prompt_manager_qt.py:6453 send_ai_request recv=self.chat_backend.send_ai_request kwargs={'is_analysis': 'False'}
+modules\workers\glossary.py:28 translate recv=self.client.translate kwargs={'text': "''", 'custom_prompt': "Attribute(value=Name(id='self', ctx=Load()), attr='prompt', ", 'skip_cleaning': 'True'}
+modules\workers\proofread.py:117 translate recv=llm_client.translate kwargs={'text': "''", 'source_lang': "Attribute(value=Name(id='self', ctx=Load()), attr='source_la", 'target_lang': "Attribute(value=Name(id='self', ctx=Load()), attr='target_la", 'custom_prompt': 'full_prompt'}
+TOTAL 30 call sites

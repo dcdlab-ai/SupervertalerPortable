@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 
 from modules.chat_backend import ChatBackend
 from modules.chat_message_delegate import ChatMessageDelegate
+from modules.llm_clients import LLMTruncatedError
 
 
 class ChatViewWidget(QWidget):
@@ -630,6 +631,24 @@ class ChatViewWidget(QWidget):
             else:
                 self._backend.add_message(
                     "system", "\u26A0 Received empty response from AI."
+                )
+        except LLMTruncatedError as e:
+            # Coordinator verdict Q8 (G3.2e): a truncated chat answer stays
+            # useful — the recovered text is shown as a normal assistant
+            # reply with a short note, not as the error bubble.
+            partial = getattr(e, 'partial_text', '') or ''
+            self._backend._log(
+                f"[Chat] \u26A0 answer truncated by Max tokens "
+                f"({len(partial)} chars recovered)")
+            if partial.strip():
+                self._backend.add_message(
+                    "assistant",
+                    partial + "\n\n\u26A0 Answer truncated by Max tokens",
+                )
+            else:
+                self._backend.add_message(
+                    "assistant",
+                    "\u26A0 Answer truncated by Max tokens (no recovered text).",
                 )
         except Exception as e:
             self._backend.add_message(

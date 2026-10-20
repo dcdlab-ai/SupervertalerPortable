@@ -225,6 +225,18 @@ CRLF=809, bare-LF=0; `proofread.py` LF (как базово).
   обычные, таймаут 10 мин; тела запросов совпадают со старыми (probe-матрица 7).
 - **T-G3.2.6 (валидация)**: Extra request body = `[1,2]` / `{"model":"x"}` /
   Max tokens = `abc` → сохранение блокируется QMessageBox с именем профиля.
+- **T-G3.2.7 (lenient-пути + чат, G3.2e)**: чат-анализ / AutoPrompt / glossary-экстрактор
+  при усечении → текст **возвращается**, в логе `⚠ … truncated at max_tokens`; перевод
+  не прерывается. **Явный пункт про чат (вердикт Q8, G3.2e):** маленький Max tokens +
+  обычный вопрос в чате → **обычный пузырь ассистента** с восстановленным текстом и
+  пометкой «⚠ Answer truncated by Max tokens» в конце + warning в лог
+  («[Chat] ⚠ answer truncated by Max tokens (N chars recovered)») — НЕ пузырь ошибки;
+  при отсутствии восстановленного текста — пузырь ассистента «⚠ Answer truncated by
+  Max tokens (no recovered text)»; прочие ошибки чата (Timeout, Empty) — как раньше
+  (пузырь «⚠ Error communicating with AI: …»).
+- **T-G3.2.8 (висячий `</think>`)**: ответ с инжектированным opener → в перевод идёт
+  текст **после последнего** `</think>`; незакрытый opener в content → raise
+  «unclosed reasoning block» во всех путях (ничего не подставляется).
 
 ## §10. Артефакты в репозитории (`docs/refactoring/audits/`)
 
@@ -303,12 +315,132 @@ Worktree `340ad21a` (без правок G3.2), изолированный пр�
 ### 12.8 Ручные тесты — ИЗМЕНЕНЫ (предупреждение координатору)
 
 - **T-G3.2.2 — переписан:** маленький Max tokens на переводческом пути → диалог `LLMTruncatedError` «cut off at max_tokens mid-answer … Partial text: '…» (было: усечённый ответ подставляется + warning в лог); пакет → `✗ BATCH ERROR` / `❌ Batch translation failed`.
-- **T-G3.2.7 (новый) — lenient:** чат-анализ / AutoPrompt / glossary-экстрактор при усечении → текст **возвращается**, в логе `⚠ … truncated at max_tokens`; перевод не прерывается.
+- **T-G3.2.7 (новый) — lenient:** чат-анализ / AutoPrompt / glossary-экстрактор при усечении → текст **возвращается**, в логе `⚠ … truncated at max_tokens`; перевод не прерывается. **Дополнен явным пунктом про чат (вердикт Q8, G3.2e, §13.7):** обычный чат при усечении — обычный ответ ассистента с пометкой + warning (не пузырь ошибки).
 - **T-G3.2.8 (новый) — висячий `</think>`:** ответ шаблона с инжектированным opener → в перевод идёт текст **после последнего** `</think>`; незакрытый opener в content → raise «unclosed reasoning block» во всех путях (ничего не подставляется).
 
 ### 12.9 Вопросы координатору
 
 - **Q8:** обычный чат (flag False) стал строгим — по инструкции «использовать существующий флаг». Подтвердить строгость чата или сделать lenient (явная передача флага для обычного чата)?
 - **Q9:** glossary Image Extractor (flag True) остался lenient — подтвердить lenient для экстрактора (vision внутри сегмента перевода — строгий)?
+
+## §13. Дополнение — вердикт координатора (ответы Q8/Q9, 2026-10-20) и sub-batch G3.2e
+
+### 13.1 Ответы вердикта → исполнение
+
+| № | Ответ координатора | Исполнение |
+|---|---|---|
+| Q8 | Чат строгим не должен быть: в вызывающем коде чата ловить `LLMTruncatedError`, показывать `e.partial_text` как обычный ответ ассистента с короткой пометкой в конце («⚠ ответ обрезан по Max tokens») + warning в лог; новый параметр в публичный API не вводить; Timeout/Empty в чате остаются как есть (пузырь с ошибкой); перечислить в отчёте всех вызывающих со `skip_cleaning=False`, не являющихся переводом (строго/мягко); новый не-переводческий вызывающий — вынести вопросом | **G3.2e**: 3 чат-хендлера (§13.2), карта вызывающих §13.3; найден новый не-переводческий вызывающий → **вопрос Q10** (§13.9) |
+| Q9 | Glossary Image Extractor остаётся lenient — подтверждено; записать в отчёт требование «OCR-воркер (O.2) должен вызывать клиент в строгом режиме» (на будущее, код не трогать) | Записано дословно в §13.6; код не тронут |
+
+### 13.2 Код G3.2e — два модуля, ни одной строки в монолите
+
+- `modules/chat_view_widget.py` 934 → **953** (sha `38148b43086396f8…`, LF чистый):
+  импорт `LLMTruncatedError` (:23); в `_do_send` хендлер `except LLMTruncatedError`
+  (:635, перед общим `except Exception`; вызов бэкенда :626): warning в лог
+  «[Chat] ⚠ answer truncated by Max tokens (N chars recovered)»; восстановленный текст
+  добавляется как **assistant**-сообщение с пометкой «⚠ Answer truncated by Max tokens»
+  в конце; пустой partial → пузырь ассистента «⚠ Answer truncated by Max tokens
+  (no recovered text)».
+- `modules/unified_prompt_manager_qt.py` 6831 → **6879** (sha `6bd7beab2eaf4387…`,
+  CRLF сохранён, lone-LF 0): импорт расширен (:30); те же хендлеры в
+  `_context_aware_send` (:6384, перед общим `except` :6409) и `_send_ai_request`
+  (:6475): warning через `log_message`; partial прогоняется через `parse_and_execute`
+  (AI-действия исполняются, как при обычном ответе), assistant-сообщение + пометка,
+  результаты действий — system-сообщением; ничего не восстановлено → пузырь с пометкой.
+- `modules/chat_backend.py` (диспетчер `skip_cleaning=is_analysis` :210/:216) и
+  `modules/llm_clients.py` — **не тронуты**; новый параметр в публичный API не вводился.
+  Прочие типизированные ошибки чата (Timeout, Empty, общее `Exception`) — прежние
+  ветки (пузырь «⚠ Error communicating with AI: …»).
+- **Монолит не изменён** (перепроверено): `Supervertaler.py` **55 338**, sha
+  `7c499f03…`, CRLF, bare-LF 0 — предпосылка вердикта «монолит снова затронут (код
+  чата)» измерением не подтвердилась: весь чат-дисплей живёт в modules-файлах.
+  Полный оффскрин-набор прогнан по требованию вердикта, независимо от этого.
+- py_compile после каждой замены: 0 ошибок (канон, см. §13.5).
+
+### 13.3 Карта вызывающих (AST-инвентарь 30 колл-сайтов `translate*` / `send_ai_request`, из них 23 LLM-существенных; артефакт `batch-g32e_ast_caller_inventory.txt`)
+
+**Переводческие — строго (raise), без изменений:** `Supervertaler.py` :5645/:5790/:5927
+(одиночный/пакет/FuzzyFixer в воркере), :49250 (`translate_current_segment`, в т.ч.
+vision-сегмент), :47898 (`_fetch_llm_translation_async`), :49823 (QuickLauncher),
+:51012/:52085/:52127/:52224 (Match Panel + progressive), `quicktrans.py:456`,
+`tag_manager.py:1439` (AutoTagger bulk), `workers/proofread.py:117`, обёртка
+`llm_clients.py:656` (`translate → translate_with_usage`).
+
+**Не-переводческие со `skip_cleaning=False` (пункт вердикта Q8):**
+
+| Колл-сайт | Что делает | Было (G3.2d) | Стало (G3.2e) |
+|---|---|---|---|
+| `chat_view_widget.py:626` (`_do_send`) | обычный чат (попап/виджет) | strict raise → пузырь ошибки | **мягко**: partial как ответ ассистента + пометка + warning |
+| `unified_prompt_manager_qt.py:6354` (`_context_aware_send`) | чат AI-ассистента (context-aware, monkey-patch `_do_send`) | strict raise → пузырь ошибки | **мягко** (то же + AI-действия из partial) |
+| `unified_prompt_manager_qt.py:6453` (`_send_ai_request`, non-analysis) | чат легаси-путь | strict raise → пузырь ошибки | **мягко** (то же) |
+
+**Lenient-флаг (подтверждён Q9, без изменений):** `unified_prompt_manager_qt.py:136`
+(AutoPrompt-воркер, `is_analysis=True`), `workers/glossary.py:28` (Image Extractor,
+`skip_cleaning=True`). Диспетчер `chat_backend.py:210` (`skip_cleaning=is_analysis`)
+— не тронут. `chat_message_delegate/tm_manager_qt/pseudo_translate/unified:594/670/736/Supervertaler:5145`
+— `painter.translate` (QPainter), к LLM отношения не имеют.
+
+### 13.4 Матрица проб — **16/16 PASS** (item 12 добавлен по вердикту)
+
+Новый **12-chat-length-partial-shown**: offscreen-Qt, реальный `ChatViewWidget` +
+`ChatBackend` против fake loopback endpoint с canned `finish_reason='length'`
+(«Chat partial»): `chat_widget._do_send("Hello chat")` → assistant-сообщение
+начинается с «Chat partial» и содержит «truncated by Max tokens»; в логе бэкенда
+warning «⚠ answer truncated by Max tokens». Проба 6 (translation strict-raise)
+осталась зелёной. Регресс 7 byte-identical с capture; net-traps: `requests=24`,
+`foreign_hosts=[]`. Артефакты: `batch-g32e_verify_matrix.json`, `batch-g32e_verify_run.log`,
+снимок чата `batch-g32e_chat_conversation_sample.json`.
+
+### 13.5 Защиты — идентичны базлайну
+
+- Статика (тег g32e, `batch-g32e_static.log`): chain **883/0** unresolved; pyflakes
+  **548** (undefined-name строк 126, уникальных имён 4 — тот же набор); канон
+  py_compile **109/0**; справочный **206/0**; headless **90/2** (setuptools, fitz —
+  известные); grep-гейт CLEAN (8/8 файлов).
+- Полный 16-этапный оффскрин-набор (`batch-g32e_run_full.sh`, лог
+  `batch-g32e_run_full_main.log`): **0 FAIL** — fallback/profiles/qtchat/statusbar/
+  e2e/S-clean/S-upgrade/regress/smoke 42/TB/About/save modern+legacy/r9 a+ctrl+rm
+  зелёные; **regress-хешы `5a12501f`/`44828d90`/`c413d563` байт-идентичны базлайну**;
+  diffs против базлайна G3.2 — известные: QMenu `new-widgets` jitter (BACKLOG §9.11),
+  fresh-stage first-run noise (новая БД), tb — clean/dirty состояние stage, e2e —
+  порт/тег.
+- Заметка методологии (для будущих прогонов): `kill_leftovers` набора фильтрует процессы
+  по `ExecutablePath = E:\Dev\python-embed\*` и убивает **все** процессы bundled-рантайма,
+  включая параллельно запущенные фоновые пробы исполнителя (наблюдены молчаливые выходы
+  с кодом 127) → статику/инвентарь гонять после завершения набора; перезагон standalone —
+  зелёный. Регресс-харнесс на свежем stage требует предсозданных `iso/`+`inputs/`
+  (зафиксировано в M1d).
+
+### 13.6 Требование на будущее (подтверждение Q9, записано дословно; код не тронут)
+
+**«OCR-воркер (O.2) должен вызывать клиент в строгом режиме».** O.2 — vision-OCR вызов
+(crop/трансформы → base64 → llm) из плана рекона `RECON_O0_OCR_TOOL_REPORT.md`; OCR-батчи
+не начинались; требование фиксируется на старт O.2.
+
+### 13.7 Ручные тесты — ИЗМЕНЕНЫ (предупреждение координатору)
+
+**T-G3.2.7 дополнен явным пунктом про чат** (§9): усечение в обычном чате — обычный
+пузырь ассистента с восстановленным текстом + «⚠ Answer truncated by Max tokens» +
+warning в лог (НЕ пузырь ошибки); пустой partial — пузырь с пометкой «(no recovered
+text)»; Timeout/Empty в чате — без изменений. Остальные T-G3.2.x — как §12.8.
+
+### 13.8 Артефакты
+
+`docs/refactoring/audits/batch-g32e_*` (30): verify-matrix/verify-run/chat-образец,
+`batch-g32e_static.log`, `batch-g32e_run_full_main.log`, 16 логов этапов + 5 seed-логов,
+`batch-g32e_ast_caller_inventory.txt`/`.py`, `batch-g32e_pyflakes_trace.log`. Расширены
+`batch-g32_fake_endpoint_probe.py` (items 1–11 + G3.2d + item 12 = 16) и раннер
+`batch-g32e_run_full.sh`.
+
+### 13.9 Вопрос координатору
+
+- **Q10:** найден новый не-переводческий вызывающий со `skip_cleaning=False` —
+  `Supervertaler.py:10076`: AI-подпись для Image Extractor
+  (`_build_image_extract_ai_callback`, `send_ai_request(..., is_analysis=False,
+  images=images_payload)`). Сейчас усечение → strict raise → `except Exception`
+  коллера → label=None (подпись к извлечённому термину отсутствует, извлечение
+  продолжается). Варианты: **(а)** оставить как есть; **(б)** по-чатски мягко —
+  partial+пометка в подпись; **(в)** lenient-режим для этого вызова. Решение за
+  координатором, в G3.2e не исполнено.
 
 **Стоп. Дальнейшие шаги — по вердикту координатора. Пуш не выполнялся.**

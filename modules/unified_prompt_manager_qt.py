@@ -27,7 +27,7 @@ from PyQt6.QtCore import Qt, QSettings, pyqtSignal, QThread, QSize, QRect, QRect
 from PyQt6.QtGui import QFont, QColor, QAction, QIcon, QPainter, QPen, QBrush, QPainterPath, QLinearGradient
 
 from modules.unified_prompt_library import UnifiedPromptLibrary
-from modules.llm_clients import LLMClient, load_api_keys
+from modules.llm_clients import LLMClient, LLMTruncatedError, load_api_keys
 from modules.prompt_library_migration import migrate_prompt_library
 from modules.ai_attachment_manager import AttachmentManager
 from modules.ai_file_viewer_dialog import FileViewerDialog, FileRemoveConfirmDialog
@@ -6381,6 +6381,30 @@ IMPORTANT:
             else:
                 self.chat_backend.add_message("system", "\u26A0 Received empty response from AI.")
 
+        except LLMTruncatedError as e:
+            # Coordinator verdict Q8 (G3.2e): a truncated chat answer stays
+            # useful — the recovered text is shown as a normal assistant
+            # reply with a short note, not as the error bubble.
+            partial = getattr(e, 'partial_text', '') or ''
+            self.log_message("[AI Assistant] \u26A0 answer truncated by Max tokens "
+                             f"({len(partial)} chars recovered)")
+            if partial.strip():
+                cleaned_response, action_results = self.ai_action_system.parse_and_execute(partial)
+                if cleaned_response and cleaned_response.strip():
+                    self.chat_backend.add_message(
+                        "assistant",
+                        cleaned_response + "\n\n\u26A0 Answer truncated by Max tokens")
+                if action_results:
+                    formatted_results = self.ai_action_system.format_action_results(action_results)
+                    self.chat_backend.add_message("system", formatted_results)
+                if not (cleaned_response and cleaned_response.strip()) and not action_results:
+                    self.chat_backend.add_message(
+                        "assistant",
+                        "\u26A0 Answer truncated by Max tokens (no recovered text).")
+            else:
+                self.chat_backend.add_message(
+                    "assistant",
+                    "\u26A0 Answer truncated by Max tokens (no recovered text).")
         except Exception as e:
             import traceback
             self.log_message(f"[AI Assistant] \u274C ERROR: {traceback.format_exc()}")
@@ -6448,6 +6472,30 @@ IMPORTANT:
             else:
                 self._add_chat_message("system", "\u26A0 Received empty response from AI.")
 
+        except LLMTruncatedError as e:
+            # Coordinator verdict Q8 (G3.2e): a truncated chat answer stays
+            # useful — the recovered text is shown as a normal assistant
+            # reply with a short note, not as the error bubble.
+            partial = getattr(e, 'partial_text', '') or ''
+            self.log_message("[AI Assistant] \u26A0 answer truncated by Max tokens "
+                             f"({len(partial)} chars recovered)")
+            if partial.strip():
+                cleaned_response, action_results = self.ai_action_system.parse_and_execute(partial)
+                if cleaned_response and cleaned_response.strip():
+                    self._add_chat_message(
+                        "assistant",
+                        cleaned_response + "\n\n\u26A0 Answer truncated by Max tokens")
+                if action_results:
+                    formatted_results = self.ai_action_system.format_action_results(action_results)
+                    self._add_chat_message("system", formatted_results)
+                if not (cleaned_response and cleaned_response.strip()) and not action_results:
+                    self._add_chat_message(
+                        "assistant",
+                        "\u26A0 Answer truncated by Max tokens (no recovered text).")
+            else:
+                self._add_chat_message(
+                    "assistant",
+                    "\u26A0 Answer truncated by Max tokens (no recovered text).")
         except Exception as e:
             import traceback
             self.log_message(f"[AI Assistant] \u274C ERROR: {traceback.format_exc()}")
