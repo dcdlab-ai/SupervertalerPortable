@@ -7,7 +7,8 @@ Modes:
                         the new fields produces (plain + vision calls). These
                         files are the regression reference for matrix item 7.
   verify  <stage_dir>   Run against the POST-EDIT code. Executes probe matrix
-                        items 1-11 against the same fake endpoint.
+                        items 1-11 + G3.2d items (2b/3b/6-strict/6b) = 15,
+                        against the same fake endpoint.
 
 Nothing outside 127.0.0.1 is contacted: every request is served by the local
 ThreadingHTTPServer; the trap assertion checks the Host header of every
@@ -122,6 +123,15 @@ def call_vision(client, srv, spec):
     return text, usage
 
 
+def call_lenient(client, srv, spec):
+    """skip_cleaning=True — the lenient group (chat analysis / AutoPrompt / JSON)."""
+    srv.responses.clear()
+    srv.responses.append(spec)
+    text, usage = client.translate_with_usage(
+        "Hello world", source_lang="en", target_lang="nl", skip_cleaning=True)
+    return text, usage
+
+
 # ---------------------------------------------------------------------------
 # capture (pre-edit)
 # ---------------------------------------------------------------------------
@@ -167,7 +177,7 @@ def capture(stage):
 
 
 # ---------------------------------------------------------------------------
-# verify (post-edit) — matrix 1..11
+# verify (post-edit) — matrix 1..11 + G3.2d items 2b/3b/6/6b = 15 + net-traps
 # ---------------------------------------------------------------------------
 
 def verify(stage):
@@ -243,12 +253,43 @@ def verify(stage):
         strip_detail.append(f"case6: expected LLMEmptyResponseError, got {type(exc).__name__}: {exc}")
     record("2-think-stripping", strip_ok, " | ".join(strip_detail))
 
+    # 2b (G3.2d, verdict 5) — dangling closing tag: chat templates inject the
+    # opening <think> into the prompt, so the answer follows the LAST </think>
+    s2b_ok, s2b_detail = True, []
+    for i, (content, expected) in enumerate([
+            ("</think>Привет", "Привет"),
+            ("</THINK> mid Привет ", "mid Привет"),
+            ("<think>x</think>tail</think>Answer", "Answer")]):
+        text, _ = call_plain(make_client(port), srv, {"json": make_completion(content)})
+        s2b_ok = s2b_ok and text == expected
+        s2b_detail.append(f"case{i+1}: got {text!r} want {expected!r}")
+    record("2b-dangling-close", s2b_ok, " | ".join(s2b_detail))
+
     # 3 — unclosed <think> + finish=length -> LLMTruncatedError
     def s3():
         return call_plain(make_client(port), srv,
                           {"json": make_completion("<think>reasoning that never closes", finish="length")})
     expect_exc("3-unclosed-think-length", s3, LLMTruncatedError,
                contains=["length", "Max tokens"])
+
+    # 3b (G3.2d, verdict 5) — unclosed <think> with leading content + finish=stop:
+    # strict in every path, nothing is returned
+    def s3b():
+        return call_plain(make_client(port), srv,
+                          {"json": make_completion("visible prefix <think>reasoning only")})
+    def s3b_run():
+        try:
+            v, _ = s3b()
+            return None
+        except LLMTruncatedError as exc:
+            return exc
+    exc3b = s3b_run()
+    if exc3b is None:
+        record("3b-unclosed-nonempty", False, "no exception raised")
+    else:
+        record("3b-unclosed-nonempty",
+               exc3b.partial_text is None and "unclosed" in str(exc3b).lower(),
+               f"partial_text={exc3b.partial_text!r} msg={str(exc3b)!r}")
 
     # 4 — empty content + reasoning + finish=length -> LLMTruncatedError
     def s4():
@@ -280,15 +321,36 @@ def verify(stage):
     expect_exc("5-reasoning-only-stop", s5, LLMEmptyResponseError,
                contains=["stop", "reasoning"], not_contains=[SECRET_REASONING])
 
-    # 6 — non-empty content + finish=length -> return + log warning
+    # 6 (G3.2d, verdict 1) — translation path: non-empty content + finish=length
+    # -> LLMTruncatedError carrying partial_text
+    def s6():
+        return call_plain(make_client(port), srv,
+                          {"json": make_completion("Partial answer", finish="length")})
+    def s6_run():
+        try:
+            v, _ = s6()
+            return None
+        except LLMTruncatedError as exc:
+            return exc
+    exc6 = s6_run()
+    if exc6 is None:
+        record("6-strict-length-raise-partial", False, "no exception raised")
+    else:
+        record("6-strict-length-raise-partial",
+               exc6.partial_text == "Partial answer"
+               and "max_tokens" in str(exc6) and "Max tokens" in str(exc6),
+               f"partial_text={exc6.partial_text!r} msg={str(exc6)!r}")
+
+    # 6b (G3.2d, verdict 1) — lenient group (skip_cleaning=True): keep
+    # return + log warning
     log_lines = []
     set_llm_log_callback(log_lines.append)
-    text6, usage6 = call_plain(make_client(port), srv,
-                               {"json": make_completion("Partial answer", finish="length")})
+    text6b, usage6b = call_lenient(make_client(port), srv,
+                                   {"json": make_completion("Partial answer", finish="length")})
     set_llm_log_callback(None)
     warned = any("truncat" in ln.lower() for ln in log_lines)
-    record("6-nonempty-length-warning", text6 == "Partial answer" and warned,
-           f"text={text6!r} log={log_lines}")
+    record("6b-lenient-length-warning", text6b == "Partial answer" and warned,
+           f"text={text6b!r} log={log_lines}")
 
     # 7 — regression: request body without new fields byte-equal to pre-edit capture
     cap_dir = os.path.join(stage, "capture")

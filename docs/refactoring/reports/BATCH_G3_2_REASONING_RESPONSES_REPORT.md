@@ -253,4 +253,62 @@ CRLF=809, bare-LF=0; `proofread.py` LF (как базово).
 7. **Валидация extra_body** срабатывает только при Сохранении. Нужен ли live-подсказка
    на editingFinished?
 
+## §12. Дополнение — вердикт координатора (ответы 1–7, 2026-10-20) и sub-batch G3.2d
+
+### 12.1 Ответы вердикта → исполнение
+
+| № | Ответ координатора | Исполнение |
+|---|---|---|
+| 1 | Непустой content + finish='length': raise в переводческих путях; чат/аналитика (`skip_cleaning=True`) — ответ+warning; атрибут `partial_text`; существующий флаг, без новых параметров; перечислить вызывающих | **G3.2d** (код `10f621fd`), §12.2–12.3; матрица 6 (strict) / 6b (lenient) |
+| 2 | Дефолт 600 с подтверждён, `timeout_min` остаётся | Без правок (поведение G3.2b) |
+| 3 | Silent-места: в M2 только `_fetch_llm_translation_async` (текст в чипе, без модалки); остальные — BACKLOG | BACKLOG §9.10 (код не тронут) |
+| 4 | Autotag-bulk: да, в M2 — подписать `translation_error`, поднимать в консоль прогресса | BACKLOG §9.10 (запись в план M2, код не тронут) |
+| 5 | Строго: незакрытый открывающий think-тег → raise (ничего не возвращать); «висячий» закрывающий `</think>` → текст после **последнего** `</think>`; добавить в матрицу | **G3.2d**: `_CLOSE_REASONING_RE`, unclosed-raise во всех путях; матрица 2b / 3b |
+| 6 | QMenu: зафиксировать как нестабильность, сначала smoke на базе `340ad21a` | Smoke ×2 на базе (worktree, изолированный профиль): run1 `['QFrame']`, run2 `['QFrame','QMenu']` → **поле нестабильно и на базе** → известная нестабильность, BACKLOG §9.11; разбирательство не требуется (условие «стабильно на базе» не выполнено). Логи `batch-g32_base_smoke1_340ad21a.log`, `batch-g32_base_smoke2_340ad21a.log` |
+| 7 | Live-подсказка не нужна, валидации при сохранении достаточно | Без правок (валидация Save действует, G3.2b) |
+
+### 12.2 G3.2d — код (1 коммит `10f621fd`, только `modules/llm_clients.py`: 809 → **851**, sha `e8d5c0bb…`, CRLF сохранён, bare-LF 0)
+
+- `_CLOSE_REASONING_RE` (:148) — закрывающий `</think>`/`</thinking>` без открывающего (шаблоны вставляют opener в промпт, в ответе остаётся только closer).
+- Базовый `LLMResponseError.__init__` получил атрибут **`partial_text`** (:176–187).
+- `_parse_completion_response(response, model, lenient=False)` (:276): после среза закрытых блоков берётся текст **после последнего** закрывающего тега; **незакрытый** открывающий тег → `LLMTruncatedError` во **всех** путях (ничего не возвращается, `partial_text=None`); пустые случаи без изменений; непустой content + `finish='length'`: lenient → возврат + `⚠ … truncated at max_tokens` (как было), strict → `LLMTruncatedError` «cut off at max_tokens mid-answer» с **`partial_text`** = восстановленный текст (превью ≤200 симв. в сообщении) + подсказка «Increase 'Max tokens'».
+- Строгость — **существующим флагом**: `skip_cleaning` прокидывается на :715 (`lenient_on_truncation=skip_cleaning`) → `_call_openai_with_usage` (:736, default False) → :817. Публичный API и монолит не тронуты (монолит **55 338**, `7c499f03…`).
+
+### 12.3 Вызывающие — strict/lenient (ответ 1, существующий флаг)
+
+**Strict (`skip_cleaning=False` → raise):** одиночный сегмент `translate_current_segment` :49250 (в т.ч. vision-сегмент — тот же вызов с images); `PreTranslationWorker` :5645/:5790/:5927 (одиночные, пакет, FuzzyFixer, одиночные внутри воркера); QuickTrans `quicktrans.py:464`; AutoTagger `autotag_current_segment` :49481; `_fetch_llm_translation_async` :51012; `_add_mt_and_llm_matches` :52224 (+progressive-близнец :51875); Proofread `workers/proofread.py` :117/:151; **обычный чат** — `chat_backend.send_ai_request` :216 с `skip_cleaning=is_analysis` (для чата False).
+
+**Lenient (`skip_cleaning=True` → возврат+warning):** чат-анализ (`is_analysis=True`), AutoPrompt-воркер (`is_analysis=True`), JSON-экстрактор глоссария `workers/glossary.py:31`.
+
+Факты гейта флага (расходятся с формулировками вердикта — зафиксировано как есть, вопросы Q8/Q9 в §12.9):
+- Обычный чат — flag False → **strict** (вердикт приравнял чат к `skip_cleaning=True`). Усечённый обычный чат поднимает исключение → пузырь «⚠ Error communicating with AI: …» (обёртка перехватывает, не падает).
+- Image Extractor (glossary-воркер) — flag True → **lenient** (вердикт отнёс «vision/Image Extractor» к переводческим путям). Vision **внутри сегмента перевода** (:49250) — строгий; выкачивание терминов из картинки — снисходительное.
+
+### 12.4 Матрица проб — **15/15 PASS** (перепрогон по ответам 1 и 5)
+
+Новые кейсы: **2b-dangling-close** (3 кейса: `</think>Привет`→`Привет`; `</THINK> mid Привет `→`mid Привет`; `<think>x</think>tail</think>Answer`→`Answer`); **3b-unclosed-nonempty** (видимый текст + незакрытый opener, finish=stop → raise, `partial_text=None`); **6-strict-length-raise-partial** (`partial_text='Partial answer'`, в тексте 'Max tokens'); **6b-lenient-length-warning** (lenient → текст возвращён + `truncat` в логе). Прежние 1–11 зелёные, регресс 7 — byte-equal с capture. net-traps: `requests=23 foreign_hosts=[]`. Артефакты: `batch-g32d_verify_matrix.json`, `batch-g32d_verify_run.log`.
+
+### 12.5 Unit на `_parse_completion_response` — **11/11 PASS**
+
+strict-raise / lenient-return / dangling (3, в т.ч. верхний регистр) / unclosed-nonempty / unclosed-в-lenient-тоже-raise / empty+length / empty+stop / normal / partial-500. Артефакт `batch-g32d_unit_checks.log`.
+
+### 12.6 Статика (тег g32d) — идентична базлайну
+
+chain 883/0-unresolved; pyflakes 548 (undefined 126/4 — тот же set); канон py_compile **109/0**; справочный **206/0** (+1 — unit-скрипт учтён в списке аудитов); headless 90/2 (setuptools, fitz — известные); grep-гейт CLEAN. Артефакт `batch-g32d_static.log`. Полный 16-этапный оффскрин-набор **не перепрогонялся**: G3.2d трогает только парсер ответа в `llm_clients.py` (монолит/воркеры/UI не затронуты; покрыто пробой+юнитом), набор a17fcb63 для пакета из тех же файлов действителен.
+
+### 12.7 QMenu (ответ 6)
+
+Worktree `340ad21a` (без правок G3.2), изолированный профиль, smoke ×2: run1 `new-widgets=['QFrame']`, run2 `['QFrame','QMenu']` → поле `new-widgets` элемента `Tools/Token-Usage-Costs` плавает **уже на базлайне** — известная нестабильность, записана в BACKLOG §9.11; починка не требуется, появление QMenu в наших прогонах регрессией не считать.
+
+### 12.8 Ручные тесты — ИЗМЕНЕНЫ (предупреждение координатору)
+
+- **T-G3.2.2 — переписан:** маленький Max tokens на переводческом пути → диалог `LLMTruncatedError` «cut off at max_tokens mid-answer … Partial text: '…» (было: усечённый ответ подставляется + warning в лог); пакет → `✗ BATCH ERROR` / `❌ Batch translation failed`.
+- **T-G3.2.7 (новый) — lenient:** чат-анализ / AutoPrompt / glossary-экстрактор при усечении → текст **возвращается**, в логе `⚠ … truncated at max_tokens`; перевод не прерывается.
+- **T-G3.2.8 (новый) — висячий `</think>`:** ответ шаблона с инжектированным opener → в перевод идёт текст **после последнего** `</think>`; незакрытый opener в content → raise «unclosed reasoning block» во всех путях (ничего не подставляется).
+
+### 12.9 Вопросы координатору
+
+- **Q8:** обычный чат (flag False) стал строгим — по инструкции «использовать существующий флаг». Подтвердить строгость чата или сделать lenient (явная передача флага для обычного чата)?
+- **Q9:** glossary Image Extractor (flag True) остался lenient — подтвердить lenient для экстрактора (vision внутри сегмента перевода — строгий)?
+
 **Стоп. Дальнейшие шаги — по вердикту координатора. Пуш не выполнялся.**
