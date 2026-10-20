@@ -1,0 +1,142 @@
+{
+ "tag": "m1e-matrix",
+ "port": 16080,
+ "requests": [
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3096,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 625,
+   "ids_in_prompt": [
+    3
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (1 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segme"
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QMessageBox 'Re-import Document'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'"
+ ],
+ "s1_imported": [
+  [
+   1,
+   "'![Image](x)\\xa0'"
+  ],
+  [
+   2,
+   "'![Image](x)'"
+  ],
+  [
+   3,
+   "'Text one'"
+  ]
+ ],
+ "s1": {
+  "link_nbsp_notrail": {
+   "src_repr": "'![Image](x)\\xa0'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x)\\xa0'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #1: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "clean": {
+   "src_repr": "'![Image](x)'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x)'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #2: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "plain_text": {
+   "src_repr": "'Text one'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: Text one... → Goedemorgen..."
+   ],
+   "gate_line": []
+  }
+ },
+ "s2_targets_repr": [
+  [
+   1,
+   "'![Image](x)\\xa0'",
+   "'![Image](x) '"
+  ],
+  [
+   2,
+   "'![Image](x)'",
+   "'![Image](x)'"
+  ],
+  [
+   3,
+   "'Text one'",
+   "'Translated3'"
+  ]
+ ],
+ "s2_app_log": [
+  "📊 Project has 3 segments → Will translate ALL of them",
+  "✓ Auto-resized rows to fit content (compact)",
+  "═══════════════════════════════════════════════════════════",
+  "✓ Batch Translation Complete",
+  "   Translated: 3 | Failed: 0",
+  "═══════════════════════════════════════════════════════════"
+ ],
+ "s2": {
+  "n_requests": 1,
+  "ids_in_prompt": [
+   3
+  ],
+  "expected_sent_ids": [
+   3
+  ],
+  "targets_eq_source": [
+   false,
+   true
+  ],
+  "statuses": [
+   "draft",
+   "draft",
+   "draft"
+  ],
+  "console_link_only_lines": 2,
+  "tu_delta": 0
+ },
+ "net_traps": [],
+ "checks": {
+  "s1_imported_14": false,
+  "s1_link_nbsp_notrail": true,
+  "s1_clean": true,
+  "s1_plain_text": true,
+  "s2_n_requests_1": true,
+  "s2_sent_ids_exact": true,
+  "s2_all_link_targets_eq_source": false,
+  "s2_console_8_copy_lines": false,
+  "s2_no_tu_written": true,
+  "s3_no_net_traps": true
+ },
+ "verdict": "FAIL"
+}

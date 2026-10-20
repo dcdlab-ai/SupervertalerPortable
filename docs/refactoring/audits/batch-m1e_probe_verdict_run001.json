@@ -1,0 +1,436 @@
+{
+ "tag": "m1e-matrix",
+ "port": 16088,
+ "requests": [
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3300,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3289,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3238,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3173,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 3151,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 694,
+   "ids_in_prompt": [
+    8,
+    9,
+    11,
+    13,
+    14
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (5 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segme"
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QMessageBox 'Cannot translate empty source text.'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QMessageBox 'Re-import Document'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'"
+ ],
+ "s1_imported": [
+  [
+   1,
+   "' ![Image](x).'"
+  ],
+  [
+   2,
+   "'![Image](x).'"
+  ],
+  [
+   3,
+   "'![Image](x)'"
+  ],
+  [
+   4,
+   "'![Image](x) .'"
+  ],
+  [
+   5,
+   "'![Image](x)!'"
+  ],
+  [
+   6,
+   "'![Image](x)\\xa0.'"
+  ],
+  [
+   7,
+   "'![A](x)![B](y).'"
+  ],
+  [
+   8,
+   "'![Image](x) Figure 1 shows'"
+  ],
+  [
+   9,
+   "'Text ![Image](x)'"
+  ],
+  [
+   10,
+   "'![](x)'"
+  ],
+  [
+   11,
+   "'[t](u)'"
+  ],
+  [
+   12,
+   "''"
+  ],
+  [
+   13,
+   "'.'"
+  ],
+  [
+   14,
+   "'Figure 2.'"
+  ]
+ ],
+ "s1": {
+  "lead_space_period": {
+   "src_repr": "' ![Image](x).'",
+   "n_requests": 0,
+   "tgt_repr": "' ![Image](x).'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #1: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "clean_period": {
+   "src_repr": "'![Image](x).'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x).'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #2: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "clean": {
+   "src_repr": "'![Image](x)'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x)'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #3: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "link_space_period": {
+   "src_repr": "'![Image](x) .'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x) .'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #4: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "link_bang": {
+   "src_repr": "'![Image](x)!'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x)!'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #5: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "link_nbsp_period": {
+   "src_repr": "'![Image](x)\\xa0.'",
+   "n_requests": 0,
+   "tgt_repr": "'![Image](x)\\xa0.'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #6: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "two_links_period": {
+   "src_repr": "'![A](x)![B](y).'",
+   "n_requests": 0,
+   "tgt_repr": "'![A](x)![B](y).'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #7: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "link_words": {
+   "src_repr": "'![Image](x) Figure 1 shows'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: ![Image](x) Figure 1 shows... → Goedemorgen..."
+   ],
+   "gate_line": []
+  },
+  "words_link": {
+   "src_repr": "'Text ![Image](x)'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: Text ![Image](x)... → Goedemorgen..."
+   ],
+   "gate_line": []
+  },
+  "empty_alt": {
+   "src_repr": "'![](x)'",
+   "n_requests": 0,
+   "tgt_repr": "'![](x)'",
+   "target_eq_source": true,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": [
+    "⤳ Segment #10: link-only segment (image links) skipped — LLM not called, source copied to target (draft)"
+   ]
+  },
+  "plain_md_link": {
+   "src_repr": "'[t](u)'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: [t](u)... → Goedemorgen..."
+   ],
+   "gate_line": []
+  },
+  "empty": {
+   "src_repr": "''",
+   "n_requests": 0,
+   "tgt_repr": "''",
+   "target_eq_source": true,
+   "status": "untranslated",
+   "tu_delta": 0,
+   "tm_log_lines": [],
+   "gate_line": []
+  },
+  "dot_only": {
+   "src_repr": "'.'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: .... → Goedemorgen..."
+   ],
+   "gate_line": []
+  },
+  "words_period": {
+   "src_repr": "'Figure 2.'",
+   "n_requests": 1,
+   "tgt_repr": "'Goedemorgen'",
+   "target_eq_source": false,
+   "status": "draft",
+   "tu_delta": 0,
+   "tm_log_lines": [
+    "✓ Added to TM: Figure 2.... → Goedemorgen..."
+   ],
+   "gate_line": []
+  }
+ },
+ "s2_targets_repr": [
+  [
+   1,
+   "' ![Image](x).'",
+   "' ![Image](x).'"
+  ],
+  [
+   2,
+   "'![Image](x).'",
+   "'![Image](x).'"
+  ],
+  [
+   3,
+   "'![Image](x)'",
+   "'![Image](x)'"
+  ],
+  [
+   4,
+   "'![Image](x) .'",
+   "'![Image](x) .'"
+  ],
+  [
+   5,
+   "'![Image](x)!'",
+   "'![Image](x)!'"
+  ],
+  [
+   6,
+   "'![Image](x)\\xa0.'",
+   "'![Image](x) .'"
+  ],
+  [
+   7,
+   "'![A](x)![B](y).'",
+   "'![A](x)![B](y).'"
+  ],
+  [
+   8,
+   "'![Image](x) Figure 1 shows'",
+   "'Translated8'"
+  ],
+  [
+   9,
+   "'Text ![Image](x)'",
+   "'Translated9'"
+  ],
+  [
+   10,
+   "'![](x)'",
+   "'![](x)'"
+  ],
+  [
+   11,
+   "'[t](u)'",
+   "'Translated11'"
+  ],
+  [
+   12,
+   "''",
+   "''"
+  ],
+  [
+   13,
+   "'.'",
+   "'Translated13'"
+  ],
+  [
+   14,
+   "'Figure 2.'",
+   "'Translated14'"
+  ]
+ ],
+ "s2": {
+  "n_requests": 1,
+  "ids_in_prompt": [
+   8,
+   9,
+   11,
+   13,
+   14
+  ],
+  "expected_sent_ids": [
+   8,
+   9,
+   11,
+   13,
+   14
+  ],
+  "targets_eq_source": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "statuses": [
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "draft",
+   "untranslated",
+   "draft",
+   "draft"
+  ],
+  "console_link_only_lines": 8,
+  "tu_delta": 0
+ },
+ "net_traps": [],
+ "checks": {
+  "s1_imported_14": true,
+  "s1_lead_space_period": true,
+  "s1_clean_period": true,
+  "s1_clean": true,
+  "s1_link_space_period": true,
+  "s1_link_bang": true,
+  "s1_link_nbsp_period": true,
+  "s1_two_links_period": true,
+  "s1_link_words": true,
+  "s1_words_link": true,
+  "s1_empty_alt": true,
+  "s1_plain_md_link": true,
+  "s1_empty": true,
+  "s1_dot_only": true,
+  "s1_words_period": true,
+  "s2_n_requests_1": true,
+  "s2_sent_ids_exact": true,
+  "s2_all_link_targets_eq_source": true,
+  "s2_console_8_copy_lines": true,
+  "s2_no_tu_written": true,
+  "s3_no_net_traps": true
+ },
+ "verdict": "PASS"
+}

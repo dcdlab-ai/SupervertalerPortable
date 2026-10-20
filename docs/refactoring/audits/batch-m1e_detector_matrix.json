@@ -1,0 +1,43 @@
+{
+ "matrix": {
+  "lead_space_period": true,
+  "clean_period": true,
+  "clean": true,
+  "link_space_period": true,
+  "link_bang": true,
+  "link_nbsp_period": true,
+  "two_links_period": true,
+  "link_words": false,
+  "words_link": false,
+  "empty_alt": true,
+  "plain_md_link": false,
+  "empty": false,
+  "dot_only": false,
+  "words_period": false
+ },
+ "expect": {
+  "lead_space_period": true,
+  "clean_period": true,
+  "clean": true,
+  "link_space_period": true,
+  "link_bang": true,
+  "link_nbsp_period": true,
+  "two_links_period": true,
+  "link_words": false,
+  "words_link": false,
+  "empty_alt": true,
+  "plain_md_link": false,
+  "empty": false,
+  "dot_only": false,
+  "words_period": false
+ },
+ "verdict": "PASS",
+ "extra": {
+  "zwsp_link_period": true,
+  "underscore_link": true,
+  "digit_link": false,
+  "cyrillic_link": false,
+  "multiline_links": true,
+  "fullwidth_digit": false
+ }
+}

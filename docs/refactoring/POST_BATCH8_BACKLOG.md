@@ -280,6 +280,24 @@
   в `translate_current_segment` и зеркальная копия в
   `_preview_combined_prompt_from_grid` — синхронно, обе.
 
+### 9.8 «✓ Added to TM» печатается при заблокированной записи TU (мелкий дефект логирования, BATCH M1e, 2026-10-20)
+
+* Одиночный путь Ctrl+T (`translate_current_segment`, ~49107): после
+  `tm_database.add_to_project_tm(source, translation)` безусловно печатается
+  `✓ Added to TM: …`. Если в базе нет строки `tm_id 'project'` в
+  `translation_memories`, phantom-TM guard (`modules/database_manager.py:1033`)
+  печатает `⚠️ Refusing to add TU … (orphan write blocked)` и возвращает `None`
+  без исключения — лог-строка «Added to TM» печатается **поверх** отказа
+  (наблюдено у Дмитрия на тестовой сборке: базы нет, запись заблокирована,
+  строка «Added to TM» видна в консоли).
+* Задача по M1e подтвердила статически: путь «копия source→target для
+  link-only» (одиночный гейт + пакетный M1b) TU в TM **не пишет** — все 9
+  колл-сайтов `save_segment_to_activated_tms` гейтаны статусом `confirmed`,
+  а `add_to_project_tm` в Ctrl+T лежит за return гейта. Правка не требуется.
+* Мелкий дефект: логирование (печатать «Added to TM» только при фактическом
+  вставленном row / при guard — печатать отказ). Не править без решения
+  координатора.
+
 ## 10. Документы (конец Batch #8)
 
 * Источники: AGENTS.md (правило батчей), BATCH8_3 §8 п.2 (решение), BATCH8_4 §8

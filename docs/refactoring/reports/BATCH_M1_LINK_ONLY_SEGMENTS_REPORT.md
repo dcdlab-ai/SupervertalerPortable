@@ -246,3 +246,190 @@ CRLF монолита сохранён (55153 CRLF, bare-LF = 0, провере�
 
 Работа batch M1 завершена (M1a–M1c код + пробит, M1d отчёт), коммиты локальные, пуш не выполнялся.
 Стоп до вердикта координатора.
+
+---
+
+# M1e (2026-10-20) — РАСШИРЕНИЕ КРИТЕРИЯ LINK-ONLY
+
+## 11.0 Премисса (по ручному тесту координатора)
+
+Разбор по repr файла проекта `3.svproj` (сохранён 19:24, состояние со скриншота 19:30):
+пробел в начале сегмента 2 не причина — причина точка после ссылки по спецификации M1
+(«link + trailing period» не был link-only, уходил в LLM). Спецификация M1 признана слишком
+узкой (ошибка координатора). Новый критерий (промпт Дмитрия от 2026-10-20): сегмент
+link-only, если после удаления всех md-ссылок на картинки `![alt](path)` в остатке нет ни
+одной буквы/цифры (`re.search(r'[^\W_]', rest) is None`); остаток из пробелов / NBSP / ZWSP /
+точек / «!» / тире / любой пунктуации — link-only; сегмент без ссылок (в т.ч. пустой) не
+подпадает; буквы/цифры («Figure 2 shows», «1») — в LLM, как раньше.
+
+## 11.1 Задача 1 — детектор (коммит `3fc8b876`)
+
+`modules/bilingual_markdown_handler.py` — только детектор, без «заодно»:
+
+* `_MD_IMAGE_LINK_RE = !\[[^\]]*\]\([^)]*\)` (строка 408), `_MD_LEFTOVER_CONTENT_RE = [^\W_]`
+  (строка 409), `is_image_links_only` — строки 412–420 (AST): `subn` по всем ссылкам,
+  `n_links == 0 → False` (без-ссылочные/пустые вне правила), остаток без букв/цифр → True.
+* Замонтировано по снятому снапшоту блока HEAD (`m1e_detector_block_head.txt`); LF файла
+  сохранён; py_compile 0 ошибок после правки.
+* Файл: 866 → **873 строк**, sha256
+  **`463a523711beb1efa3866475914e9d2d647a6f251b04601cf047cc5ea1bcf8e9`**.
+  `Supervertaler.py` не тронут: **55 153** строки, `10553447…` (гейты M1b/M1c не менялись —
+  весь новый критерий внутри функции детектора).
+* Статик-матрица (`batch-m1e_detector_matrix.py/json`): **14/14 PASS** по матрице промпта
+  (ведущий пробел+точка, чистая точка, «.)», «!» в конце, NBSP+точка, две ссылки+точка,
+  пустой alt → True; link+words, words+link, `[t](u)`, пустой, «.», «Figure 2.» → False)
+  + дополнения: ZWSP+точка True, «_» True, цифра False, кириллица False, полноширинная
+  «１» False, многострочный текст со ссылками True.
+
+## 11.2 Задача 2 — TM: статика (правка НЕ требуется)
+
+Вопрос промпта: пишет ли путь «копия source→target для link-only» TU в TM?
+Статический аудит всех колл-сайтов записи TU в монолите (9 у `save_segment_to_activated_tms`
++ прямые `tm_database.add_to_project_tm`):
+
+| Колл-сайт | Метод | Гейт |
+|---|---|---|
+| :36961 | `_handle_target_text_debounced_by_id` (дебаунс набора в гриде) | только `status == 'confirmed'` |
+| :36993 | `update_status_icon` (её вызывает M1-гейт со статусом draft) | только `status == 'confirmed'` |
+| :44354 | `_save_tab_target_to_tm` (дебаунс вкладки) | только `confirmed` |
+| :44398 | `on_tab_segment_status_change` (смена статуса в комбо) | только `confirmed` |
+| :45508 / :45628 | `save_tab_segment` / `save_grid_segment` (ручной Save) | только `confirmed` |
+| :46604 / :46707 / :46853 | auto-confirm 100 % / `_confirm_current_row_segment` / `confirm_selected_segments` | путь подтверждения |
+| :49107 | `add_to_project_tm` в `translate_current_segment` | лежит ЗА `return` M1-гейта (:48834) — недостижим для link-only |
+
+Вывод: **link-only-копия TU в TM не пишет** (одиночный гейт возвращается до записи;
+пакетный воркер (PreTranslationWorker, 5286–5994) вообще не содержит колл-сайтов записи TU;
+статус копий `draft`, а все сеточные/табовые писатели гейтаны `confirmed`).
+Динамическое подтверждение: TU delta = 0 во всех 14 кейсах пробы + в пакете (§11.3).
+**Правка по ТМ не выполнялась** (промпт: «если не вызывает — ничего не менять»).
+
+Наблюдение Дмитрия («Added to TM» при блокированной записи, базы нет): строка
+«✓ Added to TM: …» (:49109) печатается на пути Ctrl+T **LLM**-перевода безусловно, поверх
+phantom-TM guard'а (`database_manager.py:1033`): при отсутствии строки `tm_id 'project'`
+guard печатает «⚠️ Refusing to add TU … (orphan write blocked)», возвращает `None` без
+исключения → ✓-строка ложная. Как предписано — **не правится**, занесено в
+**BACKLOG §9.8** (`docs/refactoring/POST_BATCH8_BACKLOG.md`).
+
+## 11.3 Задача 3 — матричная проба (fake endpoint + ловушка сети)
+
+`batch-m1e_probe_matrix.py` (полный app, изолированный профиль, offscreen, фейковый loopback
+OpenAI-endpoint, socket-ловушка, 14 кейсов промпта): одиночный Ctrl+T на каждом ряду +
+пакетный прогон на свежем импорте. Первый прогон (run001) — FAIL единственной проверкой
+`s2_all_link_targets_eq_source` (ряд 6, NBSP — см. §11.4); ожидание пробы скорректировано
+(NBSP-нормализация как известное поведение); **прогон run002: PASS 21/21**
+(`batch-m1e_probe_verdict_run002.json`; логи `batch-m1e_probe_run001.log` /
+`batch-m1e_probe_run002.log`; payloads `batch-m1e_payloads_run001/`).
+
+Одиночный путь (Ctrl+T):
+
+| # source (repr) | link-only | запросов | target | статус | TU в TM |
+|---|---|---|---|---|---|
+| 1 `' ![Image](x).'` | да | 0 | == source (байт) | draft | 0, логов TM нет |
+| 2 `'![Image](x).'` | да | 0 | == source | draft | 0 |
+| 3 `'![Image](x)'` | да | 0 | == source | draft | 0 |
+| 4 `'![Image](x) .'` | да | 0 | == source | draft | 0 |
+| 5 `'![Image](x)!'` | да | 0 | == source | draft | 0 |
+| 6 `'![Image](x)\xa0.'` | да | 0 | == source (NBSP сохранён) | draft | 0 |
+| 7 `'![A](x)![B](y).'` | да | 0 | == source | draft | 0 |
+| 8 `'![Image](x) Figure 1 shows'` | нет | 1 | 'Goedemorgen' (модель) | draft | 0† |
+| 9 `'Text ![Image](x)'` | нет | 1 | 'Goedemorgen' | draft | 0† |
+| 10 `'![](x)'` | да | 0 | == source | draft | 0 |
+| 11 `'[t](u)'` | нет | 1 | 'Goedemorgen' | draft | 0† |
+| 12 `''` (пустой) | вне правила | 0 | `''` (QMessageBox «Cannot translate empty source text.») | untranslated | 0 |
+| 13 `'.'` | нет | 1 | 'Goedemorgen' | draft | 0† |
+| 14 `'Figure 2.'` | нет | 1 | 'Goedemorgen' | draft | 0† |
+
+† LLM-путь вызывает `add_to_project_tm('project', …)`; в изолированном профиле строки
+'project' нет → guard блокирует, TU delta = 0; ложная ✓-строка поверх guard'а (BACKLOG §9.8).
+Все 7 copy-кейсов дают строку консоли `⤳ Segment #N: link-only segment (image links) skipped —
+LLM not called, source copied to target (draft)`.
+
+Пакетный прогон (13 непустых рядов одной пачкой): `n_requests=1`,
+`ids_in_prompt=[8,9,11,13,14]` (точно LLM-ряды; все 8 link-only рядов промпта исключены),
+8 строк «⤳ link-only … skipped» в прогресс-консоли, TU delta = 0, цели 7/8 byte-identical
+(ряд 6 — NBSP-нормализация, §11.4), статусы draft, net_traps = 0.
+Мини-проба (`batch-m1e_probe_s2mini.py`, 3 ряда, строгое байтовое сравнение) —
+`batch-m1e_probe_s2mini_verdict_run002.json`: одиночный путь NBSP сохранён, пакетный путь
+`'![Image](x)\xa0.' → '![Image](x) .'` (строго-байтовая проверка mini-пробы ожидаемо даёт
+False на этом ряду — это сама находка, не регрессия).
+
+## 11.4 Находка: Qt-нормализация NBSP в пакетном пути (pre-existing, НЕ править без решения)
+
+Ряд 6 (`'![Image](x)\xa0.'`) в **пакете**: target `'![Image](x) .'` (NBSP → обычный пробел).
+Причина не M1e: `handle_progress_update` (:50666) пишет target в ячейку
+`target_widget.setPlainText(display_text)` **без blockSignals**; отложенное событие
+textChanged (Qt доставляет его после unblock — комментарий :3221) проходит через
+`on_target_text_changed` (:32861) и присваивает `segment.target` из `toPlainText()`,
+а `QTextDocument` конвертирует U+00A0 → U+0020 при plain-text round-trip (минимальная
+проверка на голом `QTextEdit`/`QTextDocument` воспроизводит). В **одиночном** Ctrl+T гейт
+пишет `segment.target` raw (NBSP сохранён, ряд 6 == source байт-в-байт) и обновляет виджет
+с blockSignals. Прединтscируемость доказана на worktree HEAD (`batch-m1e_probe_head_nbsp.py`
+→ `batch-m1e_probe_head_verdict_run004.json`, tree `m1e-run-004/head-wt` @ `2264e2a6`):
+link-only ряд `'![Image](x)\xa0'` в пакете HEAD даёт target `'![Image](x) '` (тот же
+эффект; код прогресс-хендлера в M1 не менялся). Касается **всех** целей с NBSP в пакете
+(не только M1-копий). Правка не выполнена (вне рамок M1e); вопрос Q7 координатору (§11.7).
+
+## 11.5 Задача 4 — обойма (статика + 16 этапов offscreen)
+
+Статика (`g5_12_static.py m1e` → `batch-m1e_static.log`) — идентична базе G5.2b/M1:
+chain 873/0; pyflakes 548; undefined 126/4 (tk 100, messagebox 19, ttk 5, filedialog 2);
+py_compile CANONICAL **109/0**; REFERENCE **201/0** (= 200, +1 — аудит-скрипт M1e, канон
+не вырос, правило «docs/ не считать»); headless 90/2 (setuptools, fitz — известные);
+grep-гейт CLEAN.
+
+Полный прогон (`batch-m1e_run_full.sh` → `batch-m1e_run_full.log`), сравнение логов с
+базалайнами M1 (`*_after_m1.log`) после нормализации тега m1e→m1:
+
+* **regress: хеши байт-идентичны базе** `5a12501f934a589c` / `44828d90090f046d` /
+  `c413d56372e69dd9`; остаточные diff-строки — obj-адреса, project_id, порядок строк
+  стартовых логов (состояние stage-директорий);
+* **smoke: 42 ITEM** (остаточные diff — миграционные строки свежей БД, время);
+  termbase REGRESS-TB OK; about RESULT OK; save modern/legacy — все OK-строки идентичны;
+* e2e (probe M1): verdict **OK**, сверка JSON — отличия только `port`/`tag`;
+* S-clean / S-upgrade: PROBE OK; транзиенты `index.json` + каталог
+  `workbench/ai_assistant/attachments/<дата>` (+1 entry) — известная находка BACKLOG
+  (кандидат §4, attachments/<дата>);
+* r9 a/ctrl/rm: VERDICT зелёные; profiles / qtchat / statusbar / fallback — PROBE DONE
+  (fb residual — порядок строк / QThreadStorage-адрес).
+* Точечный kill не требовался: сирот после прогонов нет; survivor list — PID 18684, 27108
+  (Strata-процессы пользователя, не тронуты; python-embed/java от проб отсутствовали).
+
+## 11.6 Пакет для тестовой сборки
+
+Оба файла — из репо `main` (состояние коммита `3fc8b876`):
+
+* `Supervertaler.py` — **55 153** строки, sha256
+  `10553447d8486abfa24f972d0e2eee145d1226e64c0b5ae880b95c33893ae5b2` — **НЕ ИЗМЕНИЛСЯ**
+  (в тестовой сборке уже лежит этот);
+* `modules/bilingual_markdown_handler.py` — **873** строки, sha256
+  `463a523711beb1efa3866475914e9d2d647a6f251b04601cf047cc5ea1bcf8e9` (LF) —
+  **единственный заменяемый файл пакета**.
+
+## 11.7 Ручные сценарии M1e (ждут теста Дмитрия на `D:\SupervertalerPortable_test\`)
+
+* **T-M1e.1** — Ctrl+T на сегменте `'![Image](…Figure 2.jpg).'` (сегмент с точкой после
+  ссылки): ожидание 0 POST, target == source, Draft, `⤳ Segment #N: link-only …`.
+* **T-M1e.2** — Ctrl+T на `' ![Image](…).'` (ведущий пробел + точка): 0 POST, target == source.
+* **T-M1e.3** — пакет со строками «ссылка+точка»: в консоли `⤳ link-only (LLM skipped)`,
+  target побайтово == source.
+* **T-M1e.4** — `'Figure 2 shows …'` и `'Text ![Image](x)'` — как раньше: 1 POST, перевод модели.
+* **T-M1e.5** — `'[t](u)'` (обычная md-ссылка) — 1 POST (в LLM, не копия).
+* **T-M1e.6** — ряд с NBSP в пакете: target отобразится с обычным пробелом
+  (Qt-нормализация, §11.4) — зафиксировать как известное поведение.
+
+Вопросы координатору по M1e:
+
+7. Qt-нормализация NBSP в пакетном пути (§11.4, pre-existing, касается всех целей с NBSP):
+   оставить как есть / править прогресс-хендлер (blockSignals — затронет все пачки) /
+   BACKLOG-кандидат?
+8. Матричный e2e-пробник M1 (`batch-m1_probe_m1_e2e.py`, закоммичен в M1d) содержит зашитые
+   ожидания M1 для ряда `'![Image](x.png).'` (ряд уходил в payload `[1,6,7,8,10,11]`); по
+   новому критерию этот ряд копируется. Старый лог не тронут; поведение покрыто новой
+   матрицей. Обновить expectations пробы следующим мини-батчем?
+
+## 11.8 Останов M1e
+
+M1e: детектор заменён (коммит `3fc8b876`), TM-статика (правка не требуется, наблюдение —
+BACKLOG §9.8), матричная проба PASS 21/21 (run002), Qt-NBSP находка с доказанной
+прединтscируемостью на HEAD, обойма идентична базе, пакет собран. Пуш не выполнялся.
+**Стоп до вердикта координатора.**
