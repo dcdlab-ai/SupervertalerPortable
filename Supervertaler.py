@@ -9002,6 +9002,12 @@ class SupervertalerQt(QMainWindow):
         self.prompt_manager_qt.create_tab(prompt_widget)
         set_help_topic(prompt_widget, HelpTopics.AI_PROMPT_MANAGER)
 
+        # G3.2: wire the llm_clients module log hook to the app log so
+        # core-level response warnings (e.g. truncation at max_tokens)
+        # reach the log panel.
+        from modules.llm_clients import set_llm_log_callback
+        set_llm_log_callback(self.log)
+
         # v1.10.176: Image Context is no longer a separate AI sub-tab.
         # It's now embedded inside the Prompt Manager tab as page 1 of
         # the right-hand QStackedWidget (page 0 is the Prompt Editor).

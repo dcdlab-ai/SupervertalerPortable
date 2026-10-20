@@ -26,6 +26,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 import time
 from typing import Dict, Optional, Literal, List, Tuple
@@ -128,6 +129,133 @@ class LLMConfig:
     api_key: str
     temperature: Optional[float] = None  # Auto-detected if None
     max_tokens: int = 16384  # Increased from 4096 for batch translation (100 segments needs ~16K tokens)
+
+
+# ---------------------------------------------------------------------------
+# G3.2: reasoning-model response handling (finish_reason, reasoning_content,
+# inline <think>/<thinking> blocks) and typed response errors.
+# ---------------------------------------------------------------------------
+
+# Closed inline reasoning blocks emitted by chat templates
+# (<think>…</think>, <thinking>…</thinking>), case-insensitive, multi-line.
+_REASONING_BLOCK_RE = re.compile(
+    r'<(think|thinking)\b[^>]*>.*?</\1\s*>', re.IGNORECASE | re.DOTALL)
+# An unclosed reasoning opening tag, e.g. a response cut off mid-reasoning.
+_OPEN_REASONING_RE = re.compile(r'<(think|thinking)\b[^>]*/?>', re.IGNORECASE)
+
+# Module-level log hook: the main app wires its own log callback at startup
+# (set_llm_log_callback) so core-level warnings reach the app log panel
+# without importing the app.
+_llm_log_callback = None
+
+
+def set_llm_log_callback(callback) -> None:
+    """Wire (or clear with None) the log callback for module-level messages."""
+    global _llm_log_callback
+    _llm_log_callback = callback
+
+
+def _llm_log(message: str) -> None:
+    cb = _llm_log_callback
+    if cb is not None:
+        try:
+            cb(message)
+        except Exception:
+            pass
+
+
+class LLMResponseError(ValueError):
+    """Base for typed OpenAI-response errors (G3.2).
+
+    Subclasses ValueError so every existing `except ValueError` caller
+    (segment, batch, QuickTrans, chat, proofread, …) keeps handling them.
+    Attributes: finish_reason, has_reasoning, reasoning_tokens.
+    """
+
+    def __init__(self, message: str, finish_reason: Optional[str] = None,
+                 has_reasoning: bool = False, reasoning_tokens: int = 0):
+        super().__init__(message)
+        self.finish_reason = finish_reason
+        self.has_reasoning = bool(has_reasoning)
+        self.reasoning_tokens = int(reasoning_tokens or 0)
+
+
+class LLMTruncatedError(LLMResponseError):
+    """The model exhausted its max_tokens budget on reasoning."""
+
+
+class LLMEmptyResponseError(LLMResponseError):
+    """No content (with reasoning_content present, with, or without)."""
+
+
+class LLMTimeoutError(LLMResponseError):
+    """The request timed out under the profile's timeout value (G3.2b)."""
+
+
+# Copy-pasteable example for the "Extra request body" fix hint: disables
+# thinking in llama.cpp/LM Studio chat templates.
+_DISABLE_THINKING_EXAMPLE = '{"chat_template_kwargs": {"enable_thinking": false}}'
+
+
+def _extract_reasoning_tokens(response) -> int:
+    usage = getattr(response, 'usage', None)
+    details = getattr(usage, 'completion_tokens_details', None) if usage else None
+    return int(getattr(details, 'reasoning_tokens', 0) or 0) if details else 0
+
+
+def _parse_completion_response(response, model: str) -> str:
+    """G3.2: parse a chat-completion response into translation text.
+
+    finish_reason is read; reasoning_content is detected but NEVER used as
+    translation; inline <think>/<thinking> blocks are stripped from content.
+    Raises typed LLMResponseError subclasses for truncated/empty responses.
+    """
+    choices = getattr(response, 'choices', None)
+    if not choices:
+        raise LLMEmptyResponseError(
+            f"OpenAI-compatible endpoint returned no choices for model {model}",
+            finish_reason=None, has_reasoning=False, reasoning_tokens=0)
+    choice = choices[0]
+    finish = getattr(choice, 'finish_reason', None)
+    msg = getattr(choice, 'message', None)
+    content = getattr(msg, 'content', None) if msg is not None else None
+    reasoning = getattr(msg, 'reasoning_content', None) if msg is not None else None
+    has_reasoning = bool(reasoning)
+    reasoning_tokens = _extract_reasoning_tokens(response)
+
+    stripped = _REASONING_BLOCK_RE.sub('', content or '').strip()
+
+    if _OPEN_REASONING_RE.search(stripped):
+        # Reasoning block cut off mid-stream: the budget ran out while
+        # the model was still reasoning.
+        raise LLMTruncatedError(
+            f"Model {model} produced an unclosed reasoning block — the reasoning "
+            f"process exhausted the max_tokens budget (finish_reason={finish!r}). "
+            f"Increase 'Max tokens' in the profile or disable thinking via the "
+            f"'Extra request body' field (e.g. {_DISABLE_THINKING_EXAMPLE}).",
+            finish_reason=finish, has_reasoning=has_reasoning,
+            reasoning_tokens=reasoning_tokens)
+    if not stripped:
+        if finish == 'length':
+            raise LLMTruncatedError(
+                f"Model {model} exhausted the max_tokens budget on reasoning "
+                f"(finish_reason='length'; reasoning only, no translation content"
+                f"{f', reasoning_tokens={reasoning_tokens}' if reasoning_tokens else ''}). "
+                f"Increase 'Max tokens' in the profile or disable thinking via the "
+                f"'Extra request body' field (e.g. {_DISABLE_THINKING_EXAMPLE}).",
+                finish_reason=finish, has_reasoning=has_reasoning,
+                reasoning_tokens=reasoning_tokens)
+        raise LLMEmptyResponseError(
+            f"Model {model} returned an empty response "
+            f"(finish_reason={finish!r}, "
+            f"reasoning_content {'present' if has_reasoning else 'absent'})",
+            finish_reason=finish, has_reasoning=has_reasoning,
+            reasoning_tokens=reasoning_tokens)
+    if finish == 'length':
+        # Content is present but hit the token limit: return it, warn loudly.
+        _llm_log(f"⚠ LLM response for {model} truncated at max_tokens "
+                 f"(finish_reason='length'); translation may be incomplete")
+    return stripped
 
 
 class LLMClient:
@@ -537,12 +665,7 @@ class LLMClient:
 
         response = client.chat.completions.create(**api_params)
 
-        if not response.choices or not response.choices[0].message.content:
-            raise ValueError(f"OpenAI returned empty response for model {self.model}")
-
-        text = response.choices[0].message.content.strip()
-        if not text:
-            raise ValueError(f"OpenAI returned empty translation for model {self.model}")
+        text = _parse_completion_response(response, self.model)
 
         usage = {}
         if hasattr(response, 'usage') and response.usage:
