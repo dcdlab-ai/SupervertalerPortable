@@ -1,0 +1,1 @@
+{"model":"probe-model","messages":[{"role":"user","content":"Translate the following text from en to nl:\n\nHello world"}],"max_tokens":16384,"temperature":0.3}

@@ -1,0 +1,18 @@
+=== fallback probe (9.4h) ===
+=== profiles probe (9.4f) ===
+=== qtchat probe ===
+=== statusbar prof ===
+=== e2e ===
+=== S-clean ===
+=== S-upgrade ===
+=== regress ===
+=== smoke ===
+=== termbase ===
+=== about ===
+=== save probe ===
+=== save probe legacy (pre-9.5 file) ===
+=== r9 a ===
+=== r9 ctrl ===
+=== r9 rm ===
+=== DONE ===
+SUITE_EXIT=0

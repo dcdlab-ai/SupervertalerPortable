@@ -1,0 +1,1 @@
+{"model":"probe-model","messages":[{"role":"user","content":[{"type":"text","text":"Translate the following text from en to nl:\n\nHello vision"},{"type":"image_url","image_url":{"url":"data:image/png;base64,ZmFrZSBpbWFnZSBkYXRhIC0gRzMuMiBwcm9iZSBvbmx5"}}]}],"max_tokens":16384,"temperature":0.3}

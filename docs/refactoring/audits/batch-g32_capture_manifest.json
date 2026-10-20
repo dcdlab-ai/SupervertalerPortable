@@ -1,0 +1,31 @@
+{
+  "mode": "capture",
+  "python": "3.13.15 (tags/v3.13.15:4061bc4, Aug  5 2026, 13:05:39) [MSC v.1944 64 bit (AMD64)]",
+  "port": 38962,
+  "cases": {
+    "plain": {
+      "sha256": "5a528a4963482e8bb2286ca94ac462042bea489c98691db1e5a0d3f594bc5f50",
+      "bytes": 160,
+      "returned_text": "Привет мир",
+      "usage": {
+        "input_tokens": 11,
+        "output_tokens": 23,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0
+      },
+      "host_seen": "127.0.0.1:38962"
+    },
+    "vision": {
+      "sha256": "155cdd87e5b3385f99d000acc0320dcd7a565879672a5dfa5bb0e3e8e1b65bb7",
+      "bytes": 296,
+      "returned_text": "Vision OK",
+      "usage": {
+        "input_tokens": 11,
+        "output_tokens": 23,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0
+      },
+      "host_seen": "127.0.0.1:38962"
+    }
+  }
+}
