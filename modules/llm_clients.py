@@ -196,6 +196,69 @@ class LLMTimeoutError(LLMResponseError):
 # thinking in llama.cpp/LM Studio chat templates.
 _DISABLE_THINKING_EXAMPLE = '{"chat_template_kwargs": {"enable_thinking": false}}'
 
+# Keys the profile 'Extra request body' field must not override — these are
+# owned by the request builder / the profile's own fields (G3.2b).
+_PROFILE_FORBIDDEN_EXTRA_KEYS = {"model", "messages", "max_tokens", "stream", "tools"}
+
+
+def parse_profile_request_fields(profile: dict):
+    """Parse the optional Custom-profile request fields (G3.2b).
+
+    Reads profile['max_tokens'], profile['timeout_min'], profile['extra_body']
+    (strings from the profile dialog; absent/empty mean "use the default").
+    Returns (max_tokens: int|None, timeout_seconds: float|None,
+    extra_body: dict|None, errors: list[str]) — an empty `errors` list means
+    the profile passes save validation.
+    """
+    import json as _json
+    errors = []
+    max_tokens = None
+    timeout_seconds = None
+    extra_body = None
+
+    raw_mt = profile.get('max_tokens')
+    if raw_mt is not None and str(raw_mt).strip():
+        try:
+            mt = int(str(raw_mt).strip())
+            if mt <= 0:
+                raise ValueError
+            max_tokens = mt
+        except (TypeError, ValueError):
+            errors.append("'Max tokens' must be a positive whole number "
+                          "(e.g. 20000); leave empty for the default (16384).")
+
+    raw_to = profile.get('timeout_min')
+    if raw_to is not None and str(raw_to).strip():
+        try:
+            to_min = float(str(raw_to).strip())
+            if to_min <= 0:
+                raise ValueError
+            timeout_seconds = to_min * 60.0
+        except (TypeError, ValueError):
+            errors.append("'Request timeout' must be a positive number of minutes "
+                          "(e.g. 10); leave empty for the default (10 minutes).")
+
+    raw_eb = profile.get('extra_body')
+    if raw_eb is not None and str(raw_eb).strip():
+        try:
+            parsed = _json.loads(str(raw_eb).strip())
+        except Exception:
+            parsed = None
+        if not isinstance(parsed, dict):
+            errors.append("'Extra request body' must be a JSON object "
+                          f"(e.g. {_DISABLE_THINKING_EXAMPLE}); "
+                          "leave empty for nothing.")
+        else:
+            forbidden = sorted(_PROFILE_FORBIDDEN_EXTRA_KEYS & {str(k) for k in parsed})
+            if forbidden:
+                errors.append("'Extra request body' must not contain the key(s): "
+                              + ", ".join(forbidden)
+                              + " — these are managed by the request builder.")
+            else:
+                extra_body = parsed
+
+    return max_tokens, timeout_seconds, extra_body, errors
+
 
 def _extract_reasoning_tokens(response) -> int:
     usage = getattr(response, 'usage', None)
@@ -273,7 +336,7 @@ class LLMClient:
     # Reasoning models that don't support temperature parameter (must be omitted)
     REASONING_MODELS = ["gpt-5", "o1", "o3"]
 
-    def __init__(self, api_key: str = None, provider: str = "openai", model: Optional[str] = None, max_tokens: int = 16384, base_url: Optional[str] = None, http_proxy: Optional[str] = None, supports_vision: bool = False):
+    def __init__(self, api_key: str = None, provider: str = "openai", model: Optional[str] = None, max_tokens: int = 16384, base_url: Optional[str] = None, http_proxy: Optional[str] = None, supports_vision: bool = False, timeout_seconds: Optional[float] = None, extra_body: Optional[dict] = None, profile_name: Optional[str] = None):
         """
         Initialize LLM client
 
@@ -288,6 +351,13 @@ class LLMClient:
             http_proxy: Optional HTTP/HTTPS proxy URL, e.g. "http://user:pass@host:8080"
             supports_vision: Batch #9.5 — «Model supports vision» из профиля Custom
                 (OpenAI-совместимый эндпоинт). Флаг профиля, не whitelist имён моделей.
+            timeout_seconds: G3.2b — «Request timeout» профиля (минуты × 60);
+                None → профиль не задан → default 10 минут (600 s; для
+                gpt-5/o1/o3-by-name исторические 600 s сохранены).
+            extra_body: G3.2b — «Extra request body» профиля (валидированный
+                JSON-объект), мержится в тело каждого create()-запроса.
+            profile_name: G3.2b — имя профиля для понятных сообщений об ошибке
+                таймаута (не участвует в запросе).
         """
         self.provider = provider.lower()
         self.api_key = api_key
@@ -296,6 +366,9 @@ class LLMClient:
         self.base_url = base_url
         self.http_proxy = http_proxy  # e.g. "http://user:pass@127.0.0.1:8080"
         self.supports_vision = bool(supports_vision)
+        self.timeout_seconds = timeout_seconds
+        self.extra_body = extra_body if isinstance(extra_body, dict) else None
+        self.profile_name = profile_name
 
         if not self.model:
             raise ValueError(f"Unknown provider: {provider}")
@@ -307,6 +380,17 @@ class LLMClient:
 
         # Auto-detect temperature based on model
         self.temperature = self._get_temperature()
+
+    def _effective_timeout_seconds(self) -> float:
+        """Request timeout in seconds (G3.2b).
+
+        Profile's «Request timeout» field (timeout_seconds, minutes×60) wins;
+        default is 10 minutes (600.0) — replaces the old hard 120 s. The old
+        name-based 600 s for gpt-5/o1/o3 stays identical (default = 600 s).
+        """
+        if self.timeout_seconds is not None:
+            return float(self.timeout_seconds)
+        return 600.0
     
     def _clean_translation_response(self, translation: str, prompt: str) -> str:
         """
@@ -622,19 +706,26 @@ class LLMClient:
         стабильные префиксы на своей стороне.
         """
         try:
-            from openai import OpenAI
+            from openai import OpenAI, APITimeoutError
         except ImportError:
             raise ImportError("OpenAI library not installed. Install with: pip install openai")
 
         model_lower = self.model.lower()
         is_reasoning_model = any(x in model_lower for x in ["gpt-5", "o1", "o3"])
-        timeout_seconds = 600.0 if is_reasoning_model else 120.0
+        # G3.2b: timeout from the profile ('Request timeout', minutes×60) or the
+        # 10-minute default; the old 120 s is replaced, name-based 600 s kept.
+        timeout_seconds = self._effective_timeout_seconds()
 
         client_kwargs = {"api_key": self.api_key, "timeout": timeout_seconds}
         if self.base_url:
             client_kwargs["base_url"] = self.base_url
         if self.http_proxy:
-            import httpx
+            # The bundled runtime ships httpx2 (openai 3.x's fork) and has no
+            # `httpx` package — fall back to it so a configured proxy works.
+            try:
+                import httpx
+            except ImportError:
+                import httpx2 as httpx
             client_kwargs["http_client"] = httpx.Client(proxy=self.http_proxy, timeout=timeout_seconds)
         client = OpenAI(**client_kwargs)
 
@@ -662,8 +753,24 @@ class LLMClient:
         else:
             api_params["max_tokens"] = tokens_to_use
             api_params["temperature"] = self.temperature
+        # G3.2b: profile 'Extra request body' (validated JSON object) is merged
+        # into the request body by the SDK.
+        if self.extra_body:
+            api_params["extra_body"] = dict(self.extra_body)
 
-        response = client.chat.completions.create(**api_params)
+        try:
+            response = client.chat.completions.create(**api_params)
+        except APITimeoutError as exc:
+            # G3.2b: clear message with profile name + current timeout value,
+            # not a raw SDK traceback.
+            raise LLMTimeoutError(
+                f"Request to model {self.model} timed out after "
+                f"{timeout_seconds / 60.0:g} minutes ({timeout_seconds:g} s) — "
+                f"profile '{self.profile_name or 'Custom LLM'}'. Increase "
+                f"'Request timeout' in Settings → AI Settings (profile fields) "
+                f"and retry.",
+                finish_reason=None, has_reasoning=False,
+                reasoning_tokens=0) from exc
 
         text = _parse_completion_response(response, self.model)
 

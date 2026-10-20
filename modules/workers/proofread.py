@@ -14,7 +14,7 @@ class ProofreadWorker(QThread):
     segment_issue = pyqtSignal(int, str, str)  # row_idx, issue_text, model_name
     finished_proofreading = pyqtSignal(int, int, int)  # checked, issues, ok
 
-    def __init__(self, segments_to_check, provider, model, custom_prompt, api_keys, source_lang, target_lang, base_url=None, custom_api_key=None, http_proxy=None):
+    def __init__(self, segments_to_check, provider, model, custom_prompt, api_keys, source_lang, target_lang, base_url=None, custom_api_key=None, http_proxy=None, profile_kwargs=None):
         super().__init__()
         self.segments_to_check = segments_to_check
         self.provider = provider
@@ -26,6 +26,9 @@ class ProofreadWorker(QThread):
         self.base_url = base_url
         self.custom_api_key = custom_api_key
         self.http_proxy = http_proxy
+        # G3.2b: kwargs из опциональных полей профиля (max_tokens/timeout_seconds/
+        # extra_body/profile_name) — передаются в LLMClient этого воркера.
+        self.profile_kwargs = profile_kwargs if isinstance(profile_kwargs, dict) else {}
         self._cancelled = False
 
     def cancel(self):
@@ -80,7 +83,7 @@ OUTPUT ONLY THE SEGMENT MARKERS. DO NOT ADD EXPLANATIONS BEFORE OR AFTER."""
             # приоритетнее api_keys.txt, последняя ступень — 'not-needed'
             api_key = self.custom_api_key or self.api_keys.get('custom_openai', '') or 'not-needed'
 
-            llm_client = LLMClient(api_key=api_key, provider=self.provider, model=self.model, base_url=self.base_url, http_proxy=self.http_proxy)
+            llm_client = LLMClient(api_key=api_key, provider=self.provider, model=self.model, base_url=self.base_url, http_proxy=self.http_proxy, **(self.profile_kwargs or {}))
         except Exception as e:
             self.batch_error.emit(0, 0, f"Failed to initialize LLM client:\n{str(e)}")
             self.finished_proofreading.emit(0, 0, 0)

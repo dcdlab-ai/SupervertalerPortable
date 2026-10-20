@@ -5292,7 +5292,7 @@ class PreTranslationWorker(QThread):
     translation_error = pyqtSignal(str)  # параметр: error_message
     retry_needed = pyqtSignal(list)  # параметр empty_segments — список (row_index, segment)
     
-    def __init__(self, parent_app, segments, provider_type, provider_name, model, tm_exact_only=False, prompt_manager=None, retry_enabled=False, retry_pass=0, tm_ids=None, glossary_terms=None, base_url=None, custom_api_key=None, http_proxy=None, use_fuzzy_fixer=False, fuzzy_match_map=None, autotag_only=False):
+    def __init__(self, parent_app, segments, provider_type, provider_name, model, tm_exact_only=False, prompt_manager=None, retry_enabled=False, retry_pass=0, tm_ids=None, glossary_terms=None, base_url=None, custom_api_key=None, http_proxy=None, use_fuzzy_fixer=False, fuzzy_match_map=None, autotag_only=False, profile_kwargs=None):
         super().__init__()
         self.parent_app = parent_app
         self.segments = segments
@@ -5302,6 +5302,9 @@ class PreTranslationWorker(QThread):
         self.base_url = base_url
         self.custom_api_key = custom_api_key  # API-ключ профиля (приоритетнее api_keys.txt)
         self.http_proxy = http_proxy
+        # G3.2b: kwargs из опциональных полей профиля (max_tokens/timeout_seconds/
+        # extra_body/profile_name) — передаются во все LLMClient этого воркера.
+        self.profile_kwargs = profile_kwargs if isinstance(profile_kwargs, dict) else {}
         self.tm_exact_only = tm_exact_only
         self.prompt_manager = prompt_manager
         # FuzzyFixer: при включении проход LLM выполняется по сегментам, чтобы
@@ -5634,7 +5637,8 @@ class PreTranslationWorker(QThread):
                 provider=self.provider_name,
                 model=self.model,
                 base_url=self.base_url,
-                http_proxy=self.http_proxy
+                http_proxy=self.http_proxy,
+                **(self.profile_kwargs or {})
             )
 
             # Переводим с пользовательским промптом
@@ -5773,7 +5777,8 @@ class PreTranslationWorker(QThread):
                 provider=self.provider_name,
                 model=self.model,
                 base_url=self.base_url,
-                http_proxy=self.http_proxy
+                http_proxy=self.http_proxy,
+                **(self.profile_kwargs or {})
             )
 
             # Call LLM. enable_prompt_caching: the system prompt
@@ -5917,6 +5922,7 @@ class PreTranslationWorker(QThread):
                 model=self.model,
                 base_url=self.base_url,
                 http_proxy=self.http_proxy,
+                **(self.profile_kwargs or {})
             )
             result = client.translate(
                 text=segment.source,
@@ -5948,6 +5954,7 @@ class PreTranslationWorker(QThread):
             client = LLMClient(
                 api_key=api_key, provider=self.provider_name, model=self.model,
                 base_url=self.base_url, http_proxy=self.http_proxy,
+                **(self.profile_kwargs or {}),
             )
             new_target, reason = place_tags_via_llm(
                 client, self.prompt_manager, segment.source, clean_target, source_lang, target_lang)
@@ -19418,6 +19425,60 @@ class SupervertalerQt(QMainWindow):
             "locally — nothing is sent to the server."))
         model_layout.addWidget(custom_vision_cb)
 
+        # G3.2b: optional per-profile request parameters (Advanced). Empty
+        # fields = defaults (Max tokens 16384, Request timeout 10 min,
+        # Extra request body = nothing). Keys are written to the profile only
+        # when non-empty; empty fields are removed on save.
+        custom_advanced_label = QLabel(self.tr("Advanced request parameters (optional):"))
+        custom_advanced_label.setStyleSheet("font-size: 9pt; margin-top: 4px;")
+        model_layout.addWidget(custom_advanced_label)
+
+        custom_req_row = QHBoxLayout()
+
+        custom_max_tokens_label = QLabel(self.tr("Max tokens:"))
+        custom_max_tokens_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        custom_req_row.addWidget(custom_max_tokens_label)
+        custom_max_tokens_input = QLineEdit()
+        custom_max_tokens_input.setPlaceholderText(self.tr("default 16384"))
+        custom_max_tokens_input.setMaximumWidth(90)
+        custom_max_tokens_input.setEnabled(custom_radio.isChecked())
+        custom_max_tokens_input.setToolTip(self.tr(
+            "Hard cap for the output of every request made with this profile.\n"
+            "Reasoning models count thinking tokens toward this cap — if the\n"
+            "model exhausts the budget on reasoning (\"exhausted the max_tokens\n"
+            "budget on reasoning\"), increase this value. Leave empty for the\n"
+            "default (16384)."))
+        custom_req_row.addWidget(custom_max_tokens_input)
+
+        custom_timeout_label = QLabel(self.tr("Request timeout, min:"))
+        custom_timeout_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        custom_req_row.addWidget(custom_timeout_label)
+        custom_timeout_input = QLineEdit()
+        custom_timeout_input.setPlaceholderText(self.tr("default 10"))
+        custom_timeout_input.setMaximumWidth(90)
+        custom_timeout_input.setEnabled(custom_radio.isChecked())
+        custom_timeout_input.setToolTip(self.tr(
+            "How long a single LLM request may take (minutes) for this\n"
+            "profile — applied to the SDK client, the proxy client and the\n"
+            "request itself. Slow reasoning models need more. Leave empty\n"
+            "for the default (10 minutes)."))
+        custom_req_row.addWidget(custom_timeout_input)
+
+        custom_extra_label = QLabel(self.tr("Extra request body (JSON):"))
+        custom_extra_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        custom_req_row.addWidget(custom_extra_label)
+        custom_extra_input = QLineEdit()
+        custom_extra_input.setPlaceholderText(self.tr('e.g. {"chat_template_kwargs": {"enable_thinking": false}}'))
+        custom_extra_input.setEnabled(custom_radio.isChecked())
+        custom_extra_input.setToolTip(self.tr(
+            "JSON object merged into the body of every request made with this\n"
+            "profile. To disable thinking on llama.cpp / LM Studio models:\n"
+            "{\"chat_template_kwargs\": {\"enable_thinking\": false}}\n"
+            "Keys model / messages / max_tokens / stream / tools are rejected.\n"
+            "Leave empty for nothing."))
+        custom_req_row.addWidget(custom_extra_input, stretch=1)
+        model_layout.addLayout(custom_req_row)
+
         # Populate fields from active profile
         def _populate_profile_fields(index):
             """Заполняет поля endpoint/model/key из выбранного профиля."""
@@ -19429,11 +19490,25 @@ class SupervertalerQt(QMainWindow):
                 custom_key_input.setText(p.get('api_key', ''))
                 _v = p.get('supports_vision')
                 custom_vision_cb.setChecked(_v if isinstance(_v, bool) else False)
+                # G3.2b: optional request fields (blockSignals — populate is not
+                # a user edit; _sync_fields_to_profile must not fire here)
+                custom_max_tokens_input.blockSignals(True)
+                custom_timeout_input.blockSignals(True)
+                custom_extra_input.blockSignals(True)
+                custom_max_tokens_input.setText(str(p.get('max_tokens', '') or ''))
+                custom_timeout_input.setText(str(p.get('timeout_min', '') or ''))
+                custom_extra_input.setText(str(p.get('extra_body', '') or ''))
+                custom_max_tokens_input.blockSignals(False)
+                custom_timeout_input.blockSignals(False)
+                custom_extra_input.blockSignals(False)
             else:
                 custom_endpoint_input.clear()
                 custom_model_input.clear()
                 custom_key_input.clear()
                 custom_vision_cb.setChecked(False)
+                custom_max_tokens_input.clear()
+                custom_timeout_input.clear()
+                custom_extra_input.clear()
 
         # Initial population
         if custom_profile_combo.count() > 0:
@@ -19451,11 +19526,24 @@ class SupervertalerQt(QMainWindow):
                 _profiles[idx]['model'] = custom_model_input.text().strip()
                 _profiles[idx]['api_key'] = custom_key_input.text().strip()
                 _profiles[idx]['supports_vision'] = custom_vision_cb.isChecked()
+                # G3.2b: optional request fields — write non-empty text, pop
+                # when empty (no keys appended to profiles that never used them)
+                for _key, _widget in (('max_tokens', custom_max_tokens_input),
+                                      ('timeout_min', custom_timeout_input),
+                                      ('extra_body', custom_extra_input)):
+                    _txt = _widget.text().strip()
+                    if _txt:
+                        _profiles[idx][_key] = _txt
+                    else:
+                        _profiles[idx].pop(_key, None)
 
         custom_endpoint_input.editingFinished.connect(_sync_fields_to_profile)
         custom_model_input.editingFinished.connect(_sync_fields_to_profile)
         custom_key_input.editingFinished.connect(_sync_fields_to_profile)
         custom_vision_cb.toggled.connect(_sync_fields_to_profile)
+        custom_max_tokens_input.editingFinished.connect(_sync_fields_to_profile)
+        custom_timeout_input.editingFinished.connect(_sync_fields_to_profile)
+        custom_extra_input.editingFinished.connect(_sync_fields_to_profile)
 
         # Add profile handler
         def _add_custom_profile():
@@ -19523,6 +19611,9 @@ class SupervertalerQt(QMainWindow):
             custom_model_input.setEnabled(_custom_enabled)
             custom_key_input.setEnabled(_custom_enabled)
             custom_vision_cb.setEnabled(_custom_enabled)
+            custom_max_tokens_input.setEnabled(_custom_enabled)
+            custom_timeout_input.setEnabled(_custom_enabled)
+            custom_extra_input.setEnabled(_custom_enabled)
         
         custom_radio.toggled.connect(update_combo_states)
         
@@ -19911,6 +20002,9 @@ class SupervertalerQt(QMainWindow):
             custom_model_input=custom_model_input, custom_enable_cb=custom_enable_cb,
             custom_profile_combo=custom_profile_combo, custom_key_input=custom_key_input,
             custom_vision_cb=custom_vision_cb,
+            custom_max_tokens_input=custom_max_tokens_input,
+            custom_timeout_input=custom_timeout_input,
+            custom_extra_input=custom_extra_input,
             custom_profiles_snapshot=settings
         ))
         layout.addWidget(save_btn)
@@ -23077,6 +23171,8 @@ class SupervertalerQt(QMainWindow):
                                   custom_model_input=None, custom_enable_cb=None,
                                   custom_profile_combo=None, custom_key_input=None,
                                   custom_vision_cb=None,
+                                  custom_max_tokens_input=None, custom_timeout_input=None,
+                                  custom_extra_input=None,
                                   custom_profiles_snapshot=None):
         """Сохраняет все настройки ИИ из единой вкладки AI Settings.
 
@@ -23107,6 +23203,16 @@ class SupervertalerQt(QMainWindow):
                 profiles[idx]['model'] = custom_model_input.text().strip() if custom_model_input else ''
                 profiles[idx]['api_key'] = custom_key_input.text().strip() if custom_key_input else ''
                 profiles[idx]['supports_vision'] = custom_vision_cb.isChecked() if custom_vision_cb else profiles[idx].get('supports_vision', False)
+                # G3.2b: optional request fields — write non-empty text, pop when
+                # empty (profiles that never used them keep their key set intact)
+                for _key, _widget in (('max_tokens', custom_max_tokens_input),
+                                      ('timeout_min', custom_timeout_input),
+                                      ('extra_body', custom_extra_input)):
+                    _txt = _widget.text().strip() if _widget is not None else ''
+                    if _txt:
+                        profiles[idx][_key] = _txt
+                    else:
+                        profiles[idx].pop(_key, None)
             active_profile_name = custom_profile_combo.currentText()
             # Активным может стать только существующий профиль: если имя из
             # комбо в списке не найдено, берём первый (пустой список — пусто).
@@ -23132,6 +23238,19 @@ class SupervertalerQt(QMainWindow):
                 if custom_profile_combo is not None:
                     custom_profile_combo.setCurrentIndex(_gp_idx)
                 return
+
+        # G3.2b: profile request fields (Max tokens / Request timeout / Extra
+        # request body) — invalid values block saving with a clear message and
+        # select the offending profile; nothing is written to disk.
+        for _vp_name, _vp_msg in self._validate_custom_profiles(profiles):
+            QMessageBox.warning(
+                self, self.tr("Invalid Profile Parameters"),
+                self.tr('Profile "{0}": {1}').format(_vp_name, _vp_msg))
+            if custom_profile_combo is not None:
+                _vi = custom_profile_combo.findText(_vp_name)
+                if _vi >= 0:
+                    custom_profile_combo.setCurrentIndex(_vi)
+            return
 
         # For legacy compat, store flat fields from the ACTIVE profile of the
         # list (после синка выше это те же видимые поля; при нуле профилей —
@@ -39059,6 +39178,7 @@ class SupervertalerQt(QMainWindow):
         api_keys = self.load_api_keys()
         base_url = None
         custom_api_key = None
+        profile = None
         if settings:
             profile = self._get_active_custom_profile(settings)
             if profile:
@@ -39079,6 +39199,7 @@ class SupervertalerQt(QMainWindow):
             base_url=base_url,
             custom_api_key=custom_api_key,
             http_proxy=self._get_proxy_url(),
+            profile_kwargs=(self._custom_profile_request_kwargs(profile) if profile else {}),
         )
 
         # Keep reference to prevent GC
@@ -47634,6 +47755,51 @@ class SupervertalerQt(QMainWindow):
 
         return None
 
+    def _custom_profile_request_kwargs(self, profile):
+        """G3.2b: optional profile request fields → LLMClient kwargs.
+
+        max_tokens / timeout_min (minutes→seconds) / extra_body (validated
+        JSON object); absent/empty fields → {} (client defaults: 16384,
+        10 min, no extra body). Validation errors (saved profiles are
+        validated at save; a hand-edited settings.json can't) are logged and
+        the field falls back to its default.
+        """
+        kwargs = {}
+        if not profile:
+            return kwargs
+        from modules.llm_clients import parse_profile_request_fields
+        _mt, _timeout_s, _extra_body, _errors = parse_profile_request_fields(profile)
+        for _msg in _errors:
+            try:
+                self.log(f"⚠ LLM profile '{profile.get('name', '')}': {_msg} — "
+                         f"using the default for this field")
+            except Exception:
+                pass
+        if _mt is not None:
+            kwargs["max_tokens"] = _mt
+        if _timeout_s is not None:
+            kwargs["timeout_seconds"] = _timeout_s
+        if _extra_body:
+            kwargs["extra_body"] = _extra_body
+        _p_name = str(profile.get('name') or '').strip()
+        if _p_name:
+            kwargs["profile_name"] = _p_name
+        return kwargs
+
+    def _validate_custom_profiles(self, profiles):
+        """G3.2b: validate the optional request fields of all profiles.
+
+        Returns [(profile_name, message), ...] for every invalid field value;
+        an empty list means the profile list can be saved."""
+        from modules.llm_clients import parse_profile_request_fields
+        out = []
+        for _idx, _p in enumerate(profiles):
+            _name = str(_p.get('name', '')).strip() or f"#{_idx + 1}"
+            _mt, _to, _eb, _errors = parse_profile_request_fields(_p)
+            for _msg in _errors:
+                out.append((_name, _msg))
+        return out
+
     def _get_custom_mt_profiles(self, settings=None):
         """Возвращает список настроенных профилей Custom MT endpoint."""
         if settings is None:
@@ -47787,8 +47953,12 @@ class SupervertalerQt(QMainWindow):
             supports_vision = False
         # Pass proxy URL to client (None if proxy disabled or not configured)
         http_proxy = self._get_proxy_url()
+        # G3.2b: per-profile request params (Max tokens / Request timeout /
+        # Extra request body); empty/absent fields → client defaults.
+        profile_kwargs = self._custom_profile_request_kwargs(profile)
         return LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url,
-                         http_proxy=http_proxy, supports_vision=supports_vision)
+                         http_proxy=http_proxy, supports_vision=supports_vision,
+                         **profile_kwargs)
 
     def load_provider_enabled_states(self) -> Dict[str, bool]:
         """Загружает состояния включённости провайдеров из предпочтений пользователя.
@@ -49644,7 +49814,8 @@ class SupervertalerQt(QMainWindow):
 
             base_url = profile.get('endpoint') or None
             http_proxy = self._get_proxy_url()
-            client = LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy)
+            client = LLMClient(api_key=api_key, provider=provider, model=model, base_url=base_url, http_proxy=http_proxy,
+                               **self._custom_profile_request_kwargs(profile))
 
             # Use translate() with empty text and custom_prompt for generic AI completion
             # This allows QuickLauncher prompts to do anything (explain, define, search, etc.)
@@ -49895,6 +50066,7 @@ class SupervertalerQt(QMainWindow):
             base_url=custom_base_url, custom_api_key=custom_api_key,
             http_proxy=self._get_proxy_url(),
             autotag_only=True,
+            profile_kwargs=self._custom_profile_request_kwargs(profile),
         )
         dialog = LiveProgressDialog(self, len(targets), f"AutoTagger ({provider} | {model})")
         sc = {'s': 0, 'e': 0}
@@ -50610,6 +50782,9 @@ class SupervertalerQt(QMainWindow):
         # Get base_url and api_key for custom_openai provider (from active profile)
         custom_base_url = None
         custom_api_key = None
+        # G3.2b: per-profile request params for the worker (defaults when the
+        # profile has no advanced fields).
+        profile_kwargs = {}
         if translation_provider_name == 'custom_openai':
             profile = self._get_active_custom_profile(settings)
             if profile:
@@ -50617,6 +50792,7 @@ class SupervertalerQt(QMainWindow):
                 profile_key = (profile.get('api_key') or '').strip()
                 if profile_key:
                     custom_api_key = profile_key
+                profile_kwargs = self._custom_profile_request_kwargs(profile)
 
         # Warn-only monthly-budget pre-flight (advisory; never blocks). LLM only.
         if translation_provider_type == 'LLM':
@@ -50656,6 +50832,7 @@ class SupervertalerQt(QMainWindow):
             http_proxy=self._get_proxy_url(),
             use_fuzzy_fixer=use_fuzzy_fixer,
             fuzzy_match_map=fuzzy_match_map,
+            profile_kwargs=profile_kwargs,
         )
         dialog = LiveProgressDialog(self, len(segments_needing_translation), provider_info)
         
@@ -50809,7 +50986,8 @@ class SupervertalerQt(QMainWindow):
                     provider=provider,
                     model=model,
                     base_url=base_url,
-                    http_proxy=http_proxy
+                    http_proxy=http_proxy,
+                    **self._custom_profile_request_kwargs(_custom_profile)
                 )
 
                 # Build full prompt using prompt manager
@@ -52039,7 +52217,8 @@ class SupervertalerQt(QMainWindow):
                     provider='custom_openai',
                     model=model,
                     base_url=profile.get('endpoint') or None,
-                    http_proxy=self._get_proxy_url()
+                    http_proxy=self._get_proxy_url(),
+                    **self._custom_profile_request_kwargs(profile)
                 )
 
                 translation = client.translate(
