@@ -237,7 +237,10 @@ def parse_profile_request_fields(profile: dict):
     raw_to = profile.get('timeout_min')
     if raw_to is not None and str(raw_to).strip():
         try:
-            to_min = float(str(raw_to).strip())
+            # G3.2g: decimal comma is accepted ("1,5" → 1.5); strings with
+            # several separators ("1,5,5", "1.5,5") become "1.5.5" and stay
+            # invalid (float raises → save stays blocked).
+            to_min = float(str(raw_to).strip().replace(',', '.'))
             if to_min <= 0:
                 raise ValueError
             timeout_seconds = to_min * 60.0

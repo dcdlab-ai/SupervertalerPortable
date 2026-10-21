@@ -19532,6 +19532,8 @@ class SupervertalerQt(QMainWindow):
                                       ('timeout_min', custom_timeout_input),
                                       ('extra_body', custom_extra_input)):
                     _txt = _widget.text().strip()
+                    if _key == 'timeout_min':
+                        _txt = _txt.replace(',', '.')  # G3.2g: dot in the stored profile
                     if _txt:
                         _profiles[idx][_key] = _txt
                     else:
@@ -23209,6 +23211,8 @@ class SupervertalerQt(QMainWindow):
                                       ('timeout_min', custom_timeout_input),
                                       ('extra_body', custom_extra_input)):
                     _txt = _widget.text().strip() if _widget is not None else ''
+                    if _key == 'timeout_min':
+                        _txt = _txt.replace(',', '.')  # G3.2g: dot in the stored profile
                     if _txt:
                         profiles[idx][_key] = _txt
                     else:

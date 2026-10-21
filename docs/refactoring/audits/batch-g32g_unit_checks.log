@@ -1,0 +1,19 @@
+UNIT PASS 1-empty-profile defaults (None,None,None,no-errors)
+UNIT PASS 2-valid set mt=5000 to=300.0s eb parsed
+UNIT PASS 3-max_tokens 'abc' blocked
+UNIT PASS 4-max_tokens '0' blocked
+UNIT PASS 5-max_tokens '-5' blocked
+UNIT PASS 6-timeout_min '-3' blocked
+UNIT PASS 7-timeout_min '0' blocked
+UNIT PASS 8-extra_body array blocked
+UNIT PASS 9-extra_body non-JSON blocked
+UNIT PASS 10-extra_body all 5 forbidden keys blocked
+UNIT PASS 11-whitespace fields treated as empty (defaults, no errors)
+UNIT PASS 12-timeout_min '0,1' -> 6.0s
+UNIT PASS 13-timeout_min '1,5' -> 90.0s
+UNIT PASS 14-timeout_min '1,5,5' blocked
+UNIT PASS 15-timeout_min '1.5,5' blocked
+UNIT PASS 16-timeout_min 'abc' blocked
+UNIT PASS 17-timeout_min '' -> default (None, no errors)
+UNIT BASE 11: 11/11; NEW G3.2g: 6/6
+UNIT PASS 17/17 fails: []
