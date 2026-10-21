@@ -1,0 +1,554 @@
+{
+ "Supervertaler.py": {
+  "sha256": "65d50655727e5568642e86d68edaf823d0c32f0a45a79a7c918d1ceaca87d1c7",
+  "lines": 55456,
+  "crlf": 55456,
+  "bare_lf": 0
+ },
+ "modules/__init__.py": {
+  "sha256": "582dd53b67689200cc23340a0e753797147e2b34a1eead65d9da0a658aee8b85",
+  "lines": 10,
+  "crlf": 0,
+  "bare_lf": 10
+ },
+ "modules/ai_actions.py": {
+  "sha256": "4a0b53538bb03e7b7661896c890b731f40bbef6546e552982ab4bdb1f30b7a93",
+  "lines": 903,
+  "crlf": 0,
+  "bare_lf": 903
+ },
+ "modules/ai_attachment_manager.py": {
+  "sha256": "e09e2ed859c6505ecc44950e6a36c0e67f48705e374f0bd6af1d9c5ab2f19897",
+  "lines": 343,
+  "crlf": 0,
+  "bare_lf": 343
+ },
+ "modules/ai_file_viewer_dialog.py": {
+  "sha256": "94a2aa51494e1158079a6bba691c6a1fb3fa76cfbb7512e4e25b43ca30b01b1b",
+  "lines": 210,
+  "crlf": 0,
+  "bare_lf": 210
+ },
+ "modules/autocorrect.py": {
+  "sha256": "b516fa11d01e88d2a5d121ac7c3f87c346333895f38125abd101404f5edc168a",
+  "lines": 647,
+  "crlf": 0,
+  "bare_lf": 647
+ },
+ "modules/autostart.py": {
+  "sha256": "a0e260c8324279d885e0228a1a0ef9af260bc1a9b91a8b8574c5b22759063382",
+  "lines": 237,
+  "crlf": 0,
+  "bare_lf": 237
+ },
+ "modules/bilingual_markdown_handler.py": {
+  "sha256": "463a523711beb1efa3866475914e9d2d647a6f251b04601cf047cc5ea1bcf8e9",
+  "lines": 873,
+  "crlf": 0,
+  "bare_lf": 873
+ },
+ "modules/chat_backend.py": {
+  "sha256": "cc3b6a2d397f60d419a9eda83f29828d595fc3a40eb8cda64f8eadadbe5afd1a",
+  "lines": 284,
+  "crlf": 0,
+  "bare_lf": 284
+ },
+ "modules/chat_message_delegate.py": {
+  "sha256": "d8f0dd882fdb7082d0f31fe13dd0ad6bf918c0db26c8036bfe126a349ac91659",
+  "lines": 473,
+  "crlf": 0,
+  "bare_lf": 473
+ },
+ "modules/chat_view_widget.py": {
+  "sha256": "38148b43086396f8e00f7048c5741fa98dfc3851b05c32f53ff9d60f054263ff",
+  "lines": 953,
+  "crlf": 0,
+  "bare_lf": 953
+ },
+ "modules/config_manager.py": {
+  "sha256": "ac7402c48346a6e4ac3e89115cbddf23c61d583a5d9fd4a0aef11193e3ca6239",
+  "lines": 444,
+  "crlf": 0,
+  "bare_lf": 444
+ },
+ "modules/database_manager.py": {
+  "sha256": "e4072e6762adde0fe02e96efa3024afdf0b5befd52a90e82f0e4ec313c52b834",
+  "lines": 3365,
+  "crlf": 0,
+  "bare_lf": 3365
+ },
+ "modules/database_migrations.py": {
+  "sha256": "5348c3ea6438763e9b51378f1eeb3f187731aa4094c1abd8f87b55ca371bdb50",
+  "lines": 966,
+  "crlf": 0,
+  "bare_lf": 966
+ },
+ "modules/dialogs/__init__.py": {
+  "sha256": "c30dbffd4b578f3ffec29e5b816790059747b1d90c6717d5c156a4e8f8b62a0f",
+  "lines": 18,
+  "crlf": 0,
+  "bare_lf": 18
+ },
+ "modules/dialogs/advanced_filters.py": {
+  "sha256": "1dba0eb6c4cdec30ed16e87620f656a6a55c54a8c30d7a4c9fe5f27816c3f810",
+  "lines": 229,
+  "crlf": 0,
+  "bare_lf": 229
+ },
+ "modules/dialogs/detached_log.py": {
+  "sha256": "f2dc0c5681fad984ec40f45c1bfc6fc076b0d21a6877a35318241ee5c4e6a2a5",
+  "lines": 79,
+  "crlf": 0,
+  "bare_lf": 79
+ },
+ "modules/dialogs/import_progress.py": {
+  "sha256": "7eacd6501110defa2e1488732c245d3274924604e65dbea0900d8830b731ce79",
+  "lines": 151,
+  "crlf": 0,
+  "bare_lf": 151
+ },
+ "modules/dialogs/live_progress.py": {
+  "sha256": "4b6ce485ad50571bc6105ed4d38d95f037223c78395b5ae1e26dbebc7a28d232",
+  "lines": 168,
+  "crlf": 0,
+  "bare_lf": 168
+ },
+ "modules/dialogs/scratchpad.py": {
+  "sha256": "f6742d6439fe9451ae8e5139c30ec36e83133f63a364bae7d7b9e6c08820b9b2",
+  "lines": 72,
+  "crlf": 0,
+  "bare_lf": 72
+ },
+ "modules/dialogs/theme_editor.py": {
+  "sha256": "9d791299c38a21e6cb1fb07b7a9f9abae0934b6721d7f412d225bd36d7cab5f3",
+  "lines": 222,
+  "crlf": 0,
+  "bare_lf": 222
+ },
+ "modules/document_analyzer.py": {
+  "sha256": "8f2b90293a7d8fd15e30e91b0c24154fea2e3a0f7d4587555bed5dd10dcad94b",
+  "lines": 324,
+  "crlf": 0,
+  "bare_lf": 324
+ },
+ "modules/docx_comments.py": {
+  "sha256": "5fc98642ba88fdd63281d52190b727cfac0c3ca409a06f14efa9d19a5aae50ab",
+  "lines": 271,
+  "crlf": 0,
+  "bare_lf": 271
+ },
+ "modules/docx_handler.py": {
+  "sha256": "d01b4efa8c0e63b0dc85b98b7558850cb288e6837429e737b82e5193b3f95507",
+  "lines": 952,
+  "crlf": 0,
+  "bare_lf": 952
+ },
+ "modules/event_filters.py": {
+  "sha256": "af251e0a556596bfdbb45d48320b5fa148d62a2bde39c7c80d50ad312ada6baf",
+  "lines": 167,
+  "crlf": 0,
+  "bare_lf": 167
+ },
+ "modules/figure_context_manager.py": {
+  "sha256": "2955e10ffbf5e33e35e45577e7475cb1d2d91b86e7cae0b2c68a6e94915c8086",
+  "lines": 440,
+  "crlf": 0,
+  "bare_lf": 440
+ },
+ "modules/file_dialog_helper.py": {
+  "sha256": "c3591cb81de9b3f805716846441a7d651e60f5af082a20b25682eca8dadfa74c",
+  "lines": 148,
+  "crlf": 0,
+  "bare_lf": 148
+ },
+ "modules/find_replace_qt.py": {
+  "sha256": "13f7efb4663372b2723de78cce494325759b6bb9e0473bc1e8f148b992314de5",
+  "lines": 557,
+  "crlf": 0,
+  "bare_lf": 557
+ },
+ "modules/grid/__init__.py": {
+  "sha256": "96cc90b5d01604658e0b2c8d55ce51da4db06a56bd34f851fad143d6700f1922",
+  "lines": 134,
+  "crlf": 0,
+  "bare_lf": 134
+ },
+ "modules/grid/filters.py": {
+  "sha256": "3adaef8a7e570cab39b18374258c9b77a99138be5f300c514c006c21433da68d",
+  "lines": 1277,
+  "crlf": 1277,
+  "bare_lf": 0
+ },
+ "modules/grid/helpers.py": {
+  "sha256": "55024f8e89abe531c0c9384247c47d5c6c3207881142ddc521ce0a60ada9235a",
+  "lines": 507,
+  "crlf": 0,
+  "bare_lf": 507
+ },
+ "modules/grid/pagination.py": {
+  "sha256": "814e0daca056471bfab5cfbbfc909743c4524fed7d0e0358a3d6a9a6d22f39d5",
+  "lines": 584,
+  "crlf": 584,
+  "bare_lf": 0
+ },
+ "modules/help_system.py": {
+  "sha256": "805c397101b50ba6068127c039afefff0b7f82a485b6ecfab4f6bc496fe3f72d",
+  "lines": 254,
+  "crlf": 0,
+  "bare_lf": 254
+ },
+ "modules/i18n.py": {
+  "sha256": "846c47e80c4ca49a7d8eb40dc638229ea041d9f691582b1cbf48fff251da264e",
+  "lines": 390,
+  "crlf": 0,
+  "bare_lf": 390
+ },
+ "modules/image_extractor.py": {
+  "sha256": "30ad8a5049bc2ced986e516c9c46c59679b443d0e4aa1db1af45390382cc98f7",
+  "lines": 665,
+  "crlf": 0,
+  "bare_lf": 665
+ },
+ "modules/keyboard_shortcuts_widget.py": {
+  "sha256": "09e799f14f52a40bcd0fddb1548af1a8111d9bdbaa8eab3f5be8c234641feef7",
+  "lines": 806,
+  "crlf": 0,
+  "bare_lf": 806
+ },
+ "modules/lang_detect.py": {
+  "sha256": "a7e40ee0c045759bbd8937fcb561d303800165c8c744cf2fddde8552278a1c8a",
+  "lines": 105,
+  "crlf": 0,
+  "bare_lf": 105
+ },
+ "modules/language_codes.py": {
+  "sha256": "580ad0ab72356b7a911cd23c15294d9857ec0c22e821ef63d99118b05bb7e6d4",
+  "lines": 293,
+  "crlf": 0,
+  "bare_lf": 293
+ },
+ "modules/llm_clients.py": {
+  "sha256": "93e995521395e6fc1a63c7a6956f1f1fe59d599c2ffc30f29722b1c7d6df784b",
+  "lines": 854,
+  "crlf": 854,
+  "bare_lf": 0
+ },
+ "modules/llm_pricing.py": {
+  "sha256": "e46f6c762d29abfb597e58034e0fc5998e9a9cb4a432e2218e89b6d20cc4c5d8",
+  "lines": 192,
+  "crlf": 0,
+  "bare_lf": 192
+ },
+ "modules/merge_prompt_dialog.py": {
+  "sha256": "3a3ba6cf86ce112323ca407924f6ad27dc69e9a7fc1b0e1de986217e2995ba41",
+  "lines": 176,
+  "crlf": 0,
+  "bare_lf": 176
+ },
+ "modules/models.py": {
+  "sha256": "cac9259d5b6ea6b60a5b364f3b278cb89742498d7b268e390d87ccf556c66c3a",
+  "lines": 544,
+  "crlf": 0,
+  "bare_lf": 544
+ },
+ "modules/okapi_sidecar.py": {
+  "sha256": "b72ec4091b3e66f5cad373bbdb7958854e2f235192509372ccdbfd77f5649ab0",
+  "lines": 947,
+  "crlf": 0,
+  "bare_lf": 947
+ },
+ "modules/pdf_rescue_Qt.py": {
+  "sha256": "9e0f44e109ea3b6ed38a54d467a091953a32bfc105e60a2dee085120719241d1",
+  "lines": 1758,
+  "crlf": 0,
+  "bare_lf": 1758
+ },
+ "modules/platform_helpers.py": {
+  "sha256": "fd2eb0abc54c0f70f55357baa44bdd97d2e7ef497ca85e7cb0df5a2c6b8c6d99",
+  "lines": 2353,
+  "crlf": 0,
+  "bare_lf": 2353
+ },
+ "modules/project_assets.py": {
+  "sha256": "418e41d594836af6238bb15e8eb6ea49068613719ba46ef89dfb610779e7476a",
+  "lines": 101,
+  "crlf": 0,
+  "bare_lf": 101
+ },
+ "modules/prompt_library_migration.py": {
+  "sha256": "88189eaa67f5970e75e9e9d1c2ef13caa12cf66a630b1fa95343827df43cdea2",
+  "lines": 443,
+  "crlf": 0,
+  "bare_lf": 443
+ },
+ "modules/pseudo_translate.py": {
+  "sha256": "5bb26384e4b957af805577ad06f3f28ab31064d23b04cda8079dde60e760c70b",
+  "lines": 149,
+  "crlf": 0,
+  "bare_lf": 149
+ },
+ "modules/pseudo_translate_dialog.py": {
+  "sha256": "981c750fd1495d2a26dd360842bcd933595c9aa30a79357c9d3ebe85fcb2d6d3",
+  "lines": 287,
+  "crlf": 0,
+  "bare_lf": 287
+ },
+ "modules/quicktrans.py": {
+  "sha256": "6a6812be6c7acce66cbb821c83010e66e658abe39ccf286a06945d153fbf8808",
+  "lines": 1635,
+  "crlf": 0,
+  "bare_lf": 1635
+ },
+ "modules/segment_split_merge.py": {
+  "sha256": "3e8752ad40758331354431762487fc62b99e52dc8e93d0378782e80b9d0eedde",
+  "lines": 291,
+  "crlf": 0,
+  "bare_lf": 291
+ },
+ "modules/segmentation_rules.py": {
+  "sha256": "34edc6244b0c106575fddb9b831db07b1ac1d297824f62c7eca67789ed44fc4e",
+  "lines": 285,
+  "crlf": 0,
+  "bare_lf": 285
+ },
+ "modules/segmentation_rules_widget.py": {
+  "sha256": "eeefbccb78b3d4fcd02f4ef4602a33ae24c7b350d38cbb623de0ed72ffcdf3f4",
+  "lines": 380,
+  "crlf": 0,
+  "bare_lf": 380
+ },
+ "modules/settings_service.py": {
+  "sha256": "08a0d943a8b04add8b0255ec5548042b69489a6c34e92c746886b82b68d79667",
+  "lines": 599,
+  "crlf": 599,
+  "bare_lf": 0
+ },
+ "modules/settings_sidebar.py": {
+  "sha256": "6b32d97baffd71a573923d75797aa29bf6c6c53e8ffefeefe04ea8f75d168d21",
+  "lines": 208,
+  "crlf": 0,
+  "bare_lf": 208
+ },
+ "modules/shortcut_display.py": {
+  "sha256": "1e653c579b1bf0fa24f54cbda80c561933d13b2ca2e55a3068a87e8b5ba68f29",
+  "lines": 34,
+  "crlf": 0,
+  "bare_lf": 34
+ },
+ "modules/shortcut_manager.py": {
+  "sha256": "265396e5fd2b27c627d85a79ddade027708dec490eaa7253be414767136359b1",
+  "lines": 1089,
+  "crlf": 0,
+  "bare_lf": 1089
+ },
+ "modules/simple_segmenter.py": {
+  "sha256": "40863ab167732e9c1a5cd5b1e224a123db29246efeb10952bcdd8f65212080b0",
+  "lines": 268,
+  "crlf": 0,
+  "bare_lf": 268
+ },
+ "modules/spellcheck_manager.py": {
+  "sha256": "f689e9f39f86ec305ec3a9bff0f589e11816ae3cedf073e9f34646fea6fdc8a1",
+  "lines": 727,
+  "crlf": 0,
+  "bare_lf": 727
+ },
+ "modules/statistics_analyzer.py": {
+  "sha256": "00310fdc9ab7a26e34fdb69df14df0d426f2a20a5085b033b429eb3d8932e864",
+  "lines": 483,
+  "crlf": 0,
+  "bare_lf": 483
+ },
+ "modules/statistics_dialog_qt.py": {
+  "sha256": "dc43067e4854571b20bbb539c4cfdf0a9cfda6bf4f3e28bb4769ee36f391a717",
+  "lines": 615,
+  "crlf": 0,
+  "bare_lf": 615
+ },
+ "modules/statuses.py": {
+  "sha256": "163156909e533d424532514cc3f02e8c5ddd2577d12c500e761cd2baab9c76a1",
+  "lines": 183,
+  "crlf": 0,
+  "bare_lf": 183
+ },
+ "modules/styled_widgets.py": {
+  "sha256": "76bbfa48a6ebad1407019e5677c5137b40cf4c34bbb3a57e2512d6f2391011e5",
+  "lines": 494,
+  "crlf": 0,
+  "bare_lf": 494
+ },
+ "modules/superlookup.py": {
+  "sha256": "dc8c7056241e450b7ad06f5f6ca5a23da110cd6448a26783ecd4136a51bb0098",
+  "lines": 256,
+  "crlf": 0,
+  "bare_lf": 256
+ },
+ "modules/tag_manager.py": {
+  "sha256": "8ec029fc97ce89fdbafbcc810580b63403bd9bb2c9d3c126862a0183b7638758",
+  "lines": 1719,
+  "crlf": 1719,
+  "bare_lf": 0
+ },
+ "modules/term_picker_dialog.py": {
+  "sha256": "8d9a9904e94af024ff3bee45473bba2039cdb97222ae65eb3d558c9fb1ef6272",
+  "lines": 498,
+  "crlf": 0,
+  "bare_lf": 498
+ },
+ "modules/termbase_entry_editor.py": {
+  "sha256": "f31f519787c5c17f02b7dc2e71d3f185ae82c0b8d17b73e0bbcbc2a686ef1e92",
+  "lines": 1824,
+  "crlf": 0,
+  "bare_lf": 1824
+ },
+ "modules/termbase_import_export.py": {
+  "sha256": "d3bf315a7a2a7965516babc1123e562c3880a77c758c26712cb38ff487841987",
+  "lines": 469,
+  "crlf": 0,
+  "bare_lf": 469
+ },
+ "modules/termbase_manager.py": {
+  "sha256": "b2788a52b4f32b4015faaac137405655f22c0baa88bf7a7f0b526953c592ab27",
+  "lines": 1431,
+  "crlf": 0,
+  "bare_lf": 1431
+ },
+ "modules/termlens_popup.py": {
+  "sha256": "4d325c0f670b4fc422c410e9cb31f725270c673e5915e5592958021152a9bfda",
+  "lines": 746,
+  "crlf": 0,
+  "bare_lf": 746
+ },
+ "modules/termlens_widget.py": {
+  "sha256": "9a45f7d726ccc87f40f2ef989e08616019be25245e82a1dbe1e11d14acc93841",
+  "lines": 2596,
+  "crlf": 0,
+  "bare_lf": 2596
+ },
+ "modules/theme_manager.py": {
+  "sha256": "596ca9726180322ba8a85eaf2e82d20cf6c37d60e775b99baf21b94ca5d013e5",
+  "lines": 567,
+  "crlf": 0,
+  "bare_lf": 567
+ },
+ "modules/tm_editor_dialog.py": {
+  "sha256": "ed0bb688084efd4432d0380e6f0fa2accc8d9facb688e121ae7315f7330f4186",
+  "lines": 99,
+  "crlf": 0,
+  "bare_lf": 99
+ },
+ "modules/tm_manager_qt.py": {
+  "sha256": "90d60c425afcd6c891a931d5e6430c1b0820b65e9d93a8c92a16cacb9c70f90d",
+  "lines": 1255,
+  "crlf": 0,
+  "bare_lf": 1255
+ },
+ "modules/tm_metadata_manager.py": {
+  "sha256": "e5d0045cddd4e3583a6f1216453c813195f2204ee652084b5ed6cc95d5db558d",
+  "lines": 707,
+  "crlf": 0,
+  "bare_lf": 707
+ },
+ "modules/tm_replace.py": {
+  "sha256": "00ba2c7e400ecc33cd88def8a0de34ecaffbfbf2ed50f0fe2bd3f141e0227993",
+  "lines": 160,
+  "crlf": 0,
+  "bare_lf": 160
+ },
+ "modules/tmx_editor.py": {
+  "sha256": "94f3e03bcce07e1551d0dbc3ce1934209afcd854a20dcb0ad5994347f559df02",
+  "lines": 1467,
+  "crlf": 0,
+  "bare_lf": 1467
+ },
+ "modules/tmx_editor_qt.py": {
+  "sha256": "25d29ea2e8a0df8df6fec3ecaa7e221d5cddffe2f73faa49b4d8679d39f5df01",
+  "lines": 2706,
+  "crlf": 0,
+  "bare_lf": 2706
+ },
+ "modules/tmx_generator.py": {
+  "sha256": "1c145b730dfd63f88dfabd2e3e1043e050108303b2201bfbbe273376a8f6ab53",
+  "lines": 268,
+  "crlf": 0,
+  "bare_lf": 268
+ },
+ "modules/translation_memory.py": {
+  "sha256": "e8ff3fdc65e15f967f24b8221f5edf1dbaf0e21839798b4a28eccaeacee783e3",
+  "lines": 863,
+  "crlf": 0,
+  "bare_lf": 863
+ },
+ "modules/translation_results_panel.py": {
+  "sha256": "317a56779a8b0e3e8491339aa0c60e078d7ebcabf2aaad3edc5a0889016322f2",
+  "lines": 2422,
+  "crlf": 0,
+  "bare_lf": 2422
+ },
+ "modules/ui_scale.py": {
+  "sha256": "f62fdb5e0c9dfbd287c8e2745a5c8c7d1a3446043ba3e5db554a52df2b19b3c5",
+  "lines": 113,
+  "crlf": 0,
+  "bare_lf": 113
+ },
+ "modules/undo_manager.py": {
+  "sha256": "1dff8f7cc9af2d445e913ca934dfa7ea14a83a87930ffd2899be89ff962299f3",
+  "lines": 302,
+  "crlf": 302,
+  "bare_lf": 0
+ },
+ "modules/unified_prompt_library.py": {
+  "sha256": "9feb63688f60f20ac3c4d9b27a4dc276983a551e336a82daa30c806c23b79195",
+  "lines": 1110,
+  "crlf": 0,
+  "bare_lf": 1110
+ },
+ "modules/unified_prompt_manager_qt.py": {
+  "sha256": "6bd7beab2eaf4387c2c993e681d8a31a3cefc4d9e7f88ed97b1e4f2d8ed2546b",
+  "lines": 6879,
+  "crlf": 6879,
+  "bare_lf": 0
+ },
+ "modules/usage_log.py": {
+  "sha256": "ba3ce358c9af3f0120e04d056ccbfa1e4c94efa9f5f2f9e0572d4d5ae2bb57a4",
+  "lines": 324,
+  "crlf": 0,
+  "bare_lf": 324
+ },
+ "modules/usage_report_dialog.py": {
+  "sha256": "82a0e67b94de732dd67f12d316404a18af64a8274376ec140cc618a446ad778e",
+  "lines": 148,
+  "crlf": 0,
+  "bare_lf": 148
+ },
+ "modules/usage_statistics.py": {
+  "sha256": "665396442bd06ae8ed343b8cf406b1c2daa0b1bd0964108f14a1be0fcdcdc828",
+  "lines": 295,
+  "crlf": 0,
+  "bare_lf": 295
+ },
+ "modules/workers/__init__.py": {
+  "sha256": "f0f50fa518a0ff42e845689ae03ac3aee2a2fb1a29a961b9217cb28c779639dd",
+  "lines": 7,
+  "crlf": 0,
+  "bare_lf": 7
+ },
+ "modules/workers/glossary.py": {
+  "sha256": "67bb03da58cee8d51317cbdb05f7293c230fce7f90171eb6db5764efd592f1f3",
+  "lines": 81,
+  "crlf": 0,
+  "bare_lf": 81
+ },
+ "modules/workers/proofread.py": {
+  "sha256": "e3cb001d024bbfc7b67a31f18269d1f8cf9d16e2c9e0d31838bb13930697e025",
+  "lines": 154,
+  "crlf": 0,
+  "bare_lf": 154
+ },
+ "modules/workers/tm_search.py": {
+  "sha256": "cee4b9e7128ff5927ec8d84f098fcb301d067ed21da3000c1a0c8d4438188f3e",
+  "lines": 130,
+  "crlf": 0,
+  "bare_lf": 130
+ }
+}

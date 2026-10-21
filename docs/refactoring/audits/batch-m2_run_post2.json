@@ -1,0 +1,426 @@
+{
+ "tag": "m2-matrix",
+ "port": 11732,
+ "sections": [
+  "S0",
+  "S1",
+  "S2",
+  "S3",
+  "S4",
+  "S4b",
+  "S5",
+  "S6",
+  "S7",
+  "S8"
+ ],
+ "requests": [
+  {
+   "mode": "ok",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 659,
+   "ids_in_prompt": [
+    1,
+    3
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segment\\n2. You MUST translate ALL 2 segments\\n"
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 637,
+   "ids_in_prompt": [
+    1,
+    3
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segment\\n2. You MUST translate ALL 2 segments\\n"
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 637,
+   "ids_in_prompt": [
+    1,
+    3
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segment\\n2. You MUST translate ALL 2 segments\\n"
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 2,
+   "user_len": 637,
+   "ids_in_prompt": [
+    1,
+    3
+   ],
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segment\\n2. You MUST translate ALL 2 segments\\n"
+  },
+  {
+   "mode": "ok",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2890,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  },
+  {
+   "mode": "ok",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2890,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  },
+  {
+   "mode": "ok",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "fail",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 710,
+   "ids_in_prompt": [],
+   "head": "The source segment below contains inline tags. Insert these exact tags into the target translation at the positions that match the source meaning (a paired tag "
+  },
+  {
+   "mode": "mt",
+   "path": "/v1/chat/completions",
+   "model": "fake-mt",
+   "n_messages": 2,
+   "user_len": 8,
+   "ids_in_prompt": [],
+   "head": "Text one"
+  },
+  {
+   "mode": "ok",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 1207,
+   "ids_in_prompt": [],
+   "head": "You are a translation proofreader. Your task is to analyze translations for errors.\\n\\nDO NOT translate anything. DO NOT provide corrected translations unless spe"
+  },
+  {
+   "mode": "truncate",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2895,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  },
+  {
+   "mode": "truncate",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2895,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Select Translation Provider'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'",
+  "QDialog.exec QDialog 'Proofreading in Progress'",
+  "QDialog.exec QDialog 'Import Text / Markdown File'"
+ ],
+ "checks": {
+  "s0_qt_normalizes_nbsp": true,
+  "s0_handler_fires_without_block": true,
+  "s0_handler_quiet_with_block": true,
+  "s1_one_request": true,
+  "s1_ids_gate": true,
+  "s1_nbsp_preserved_normal": true,
+  "s1_linkonly_copy": true,
+  "s1_all_draft": true,
+  "s1_console_2_lines": true,
+  "s1_no_tu_written": true,
+  "s2_requests_all_fail": true,
+  "s2_linkonly_copied_draft": true,
+  "s2_normal_failed_empty": true,
+  "s2_console_link_1_error_2": true,
+  "s2_no_tu_written": true,
+  "s3_two_requests_only": true,
+  "s3_linkonly_copy_draft": true,
+  "s3_normal_translated": true,
+  "s3_console_1_line": true,
+  "s3_no_tu_written": true,
+  "s4_only_tagged_request": true,
+  "s4_linkonly_untouched": true,
+  "s4_no_tu_written": true,
+  "s4b_console_error_line": true,
+  "s4b_app_log_line": true,
+  "s5_one_request": true,
+  "s5_linkonly_copy_draft": true,
+  "s5_normal_mt_done": true,
+  "s5_console_1_line": true,
+  "s5_no_tu_written": true,
+  "s6_one_request": true,
+  "s6_payload_excludes_linkonly": true,
+  "s6_log_line": true,
+  "s7_one_request": true,
+  "s7_chip_error": false,
+  "s7_chip_hint_max_tokens": false,
+  "s7_no_modal": true,
+  "s7_log_line": true,
+  "s8_no_net_traps": true
+ },
+ "s0": {
+  "roundtrip_repr": "'a b'",
+  "nbsp_normalized_by_qt": true,
+  "fires_without_block_synchronously": 1,
+  "fires_with_block_after_pump": 0
+ },
+ "s1": {
+  "imported": [
+   [
+    1,
+    "'Text alpha'"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'"
+   ],
+   [
+    3,
+    "'![Image](x.png) Figure shows'"
+   ],
+   [
+    4,
+    "'![Image](y.png)\\xa0'"
+   ]
+  ],
+  "n_requests": 1,
+  "ids_in_prompt": [
+   1,
+   3
+  ],
+  "targets": [
+   [
+    1,
+    "'Trans\\xa0lated1'",
+    "draft"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'",
+    "draft"
+   ],
+   [
+    3,
+    "'Trans\\xa0lated3'",
+    "draft"
+   ],
+   [
+    4,
+    "'![Image](y.png)\\xa0'",
+    "draft"
+   ]
+  ],
+  "widget_plain": [
+   "'Trans lated1'",
+   "'![Image](fig.png)'",
+   "'Trans lated3'",
+   "'![Image](y.png) '"
+  ],
+  "console_link": 2,
+  "tu_delta": 0,
+  "tm_log_lines": []
+ },
+ "s2": {
+  "n_requests": 3,
+  "targets": [
+   [
+    1,
+    "''",
+    "untranslated"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'",
+    "draft"
+   ],
+   [
+    3,
+    "''",
+    "untranslated"
+   ]
+  ],
+  "console_link": 1,
+  "console_batch_error": 2,
+  "tu_delta": 0
+ },
+ "s3": {
+  "n_requests": 2,
+  "targets": [
+   [
+    1,
+    "'Goedemorgen'",
+    "draft"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'",
+    "draft"
+   ],
+   [
+    3,
+    "'Goedemorgen'",
+    "draft"
+   ]
+  ],
+  "console_link": 1,
+  "tu_delta": 0
+ },
+ "s4": {
+  "n_requests": 1,
+  "targets": [
+   [
+    1,
+    "'Hallo <1>wereld</1>'",
+    "untranslated"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'",
+    "untranslated"
+   ]
+  ],
+  "console_no_tags": 0,
+  "tu_delta": 0
+ },
+ "s4b": {
+  "n_requests": 6,
+  "console_fail_lines": [
+   "❌ AutoTagger: AutoTagger on #1: LLM error: Error code: 500 - {'error': {'message': 'Simulated endpoint failure'}}"
+  ],
+  "app_fail_lines": [
+   "❌ AutoTagger batch failed: AutoTagger on #1: LLM error: Error code: 500 - {'error': {'message': 'Simulated endpoint failure'}}"
+  ]
+ },
+ "s5": {
+  "n_requests": 1,
+  "targets": [
+   [
+    1,
+    "'MT-translated'",
+    "draft"
+   ],
+   [
+    2,
+    "'![Image](fig.png)'",
+    "draft"
+   ]
+  ],
+  "console_link": 1,
+  "tu_delta": 0
+ },
+ "s6": {
+  "n_requests": 1,
+  "payload_has_normal": true,
+  "payload_has_linkonly": false,
+  "log_exclusion": [
+   "⤳ 1 link-only segment(s) excluded from proofreading (not sent to LLM)"
+  ],
+  "notes": [
+   [
+    1,
+    "{}"
+   ],
+   [
+    2,
+    "{}"
+   ]
+  ]
+ },
+ "s7": {
+  "n_requests": 1,
+  "chip_present": false,
+  "chip_target": null,
+  "chip_metadata": null,
+  "log_lines": [
+   "⚠ LLM translation failed (shown in LLM chip): Model fake-llm was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Partial answer'"
+  ],
+  "modal_delta": 0
+ },
+ "s7b": {
+  "chip_target": null
+ },
+ "net_traps": [],
+ "verdict": "FAIL"
+}

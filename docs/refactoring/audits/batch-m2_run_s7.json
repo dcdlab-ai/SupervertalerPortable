@@ -1,0 +1,58 @@
+{
+ "tag": "m2-matrix",
+ "port": 11869,
+ "sections": [
+  "S7"
+ ],
+ "requests": [
+  {
+   "mode": "truncate",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2895,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  },
+  {
+   "mode": "truncate",
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "n_messages": 1,
+   "user_len": 2895,
+   "ids_in_prompt": [],
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source text may contain specialized terminology "
+  }
+ ],
+ "modal_log": [
+  "QDialog.exec QDialog 'Import Text / Markdown File'"
+ ],
+ "checks": {
+  "s7_one_request": true,
+  "s7_chip_error": true,
+  "s7_chip_hint_max_tokens": true,
+  "s7_no_modal": true,
+  "s7_log_line": true,
+  "s8_no_net_traps": true
+ },
+ "s7": {
+  "n_requests": 1,
+  "chip_present": true,
+  "chip_target": "\"Model fake-llm was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the…\"",
+  "chip_metadata": {
+   "model": "fake-llm",
+   "provider": "custom_openai",
+   "timestamp": "2026-10-21T19:23:40.068112",
+   "llm_error": "LLMTruncatedError"
+  },
+  "log_lines": [
+   "⚠ LLM translation failed (shown in LLM chip): Model fake-llm was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Partial answer'"
+  ],
+  "modal_delta": 0
+ },
+ "s7b": {
+  "chip_target": "\"Model fake-llm was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the…\""
+ },
+ "net_traps": [],
+ "verdict": "PASS"
+}
