@@ -5997,6 +5997,10 @@ class PreTranslationWorker(QThread):
             return new_target
         except Exception as e:
             print(f"❌ AutoTagger error on #{segment.id}: {e}")
+            # M2.2(b): surface the LLM call failure on the translation_error signal
+            # (the pattern of the batch LLM path) — the bulk dialog prints it as an
+            # "❌ …" console line; previously only the stdout line existed.
+            self.translation_error.emit(f"AutoTagger on #{segment.id}: {e}")
             return None
 
     def _run_autotag_only(self):
@@ -50161,6 +50165,11 @@ class SupervertalerQt(QMainWindow):
 
         worker.progress_update.connect(on_progress)
         worker.translation_complete.connect(on_complete)
+        # M2.2(b): LLM call failures reach the progress console as an "❌ …" line
+        # (same shape as the main batch path), not only stdout.
+        worker.translation_error.connect(
+            lambda msg: (dialog.add_console_line(f"❌ AutoTagger: {msg}", False),
+                         self.log(f"❌ AutoTagger batch failed: {msg}")))
         dialog.rejected.connect(worker.cancel)
         worker.start()
         dialog.exec()
@@ -51108,8 +51117,46 @@ class SupervertalerQt(QMainWindow):
                                     self.log(f"Error updating panel with LLM: {e}")
                         self.log(f"✓ LLM translation added to results pane")
             except Exception as e:
-                # Silently fail - don't interrupt workflow
-                self.log(f"LLM translation failed (silent): {str(e)}")
+                from modules.llm_clients import LLMTruncatedError, LLMEmptyResponseError, LLMTimeoutError
+                if isinstance(e, (LLMTruncatedError, LLMEmptyResponseError, LLMTimeoutError)):
+                    # M2.2(a): typed client errors are shown as one-line text in the
+                    # LLM chip of the match panel (no modal dialog) — the user sees
+                    # WHY the LLM suggestion is missing. The exception text carries the
+                    # "Increase 'Max tokens'" hint for truncation; it is kept as-is,
+                    # collapsed to a single line and shortened.
+                    from modules.translation_results_panel import TranslationMatch
+                    _err_line = " ".join(str(e).split())
+                    if len(_err_line) > 140:
+                        _err_line = _err_line[:137] + "…"
+                    if hasattr(self, 'results_panels') and self.results_panels:
+                        current_row = self.table.currentRow()
+                        if current_row == row_index:
+                            err_match = TranslationMatch(
+                                source=source_text,
+                                target=_err_line,
+                                relevance=0,
+                                metadata={'model': model, 'provider': provider,
+                                          'timestamp': datetime.now().isoformat(),
+                                          'llm_error': type(e).__name__},
+                                match_type='LLM',
+                                compare_source=source_text,
+                                provider_code='CUS')
+                            for panel in self.results_panels:
+                                try:
+                                    if hasattr(panel, 'matches_by_type'):
+                                        existing_matches = panel.matches_by_type.copy()
+                                        existing_matches["LLM"] = [err_match]
+                                        panel.set_matches(existing_matches)
+                                    else:
+                                        panel.set_matches({"LLM": [err_match]})
+                                except Exception as pe:
+                                    self.log(f"Error updating panel with LLM error: {pe}")
+                            self.log(f"⚠ LLM translation failed (shown in LLM chip): {str(e)}")
+                    else:
+                        self.log(f"LLM translation failed (silent): {str(e)}")
+                else:
+                    # Silently fail - don't interrupt workflow
+                    self.log(f"LLM translation failed (silent): {str(e)}")
         
         # Use QTimer to run async (small delay to avoid blocking)
         QTimer.singleShot(100, fetch_and_update)
