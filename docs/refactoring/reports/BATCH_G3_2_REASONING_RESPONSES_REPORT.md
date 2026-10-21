@@ -373,6 +373,7 @@ vision-сегмент), :47898 (`_fetch_llm_translation_async`), :49823 (QuickLa
 | `chat_view_widget.py:626` (`_do_send`) | обычный чат (попап/виджет) | strict raise → пузырь ошибки | **мягко**: partial как ответ ассистента + пометка + warning |
 | `unified_prompt_manager_qt.py:6354` (`_context_aware_send`) | чат AI-ассистента (context-aware, monkey-patch `_do_send`) | strict raise → пузырь ошибки | **мягко** (то же + AI-действия из partial) |
 | `unified_prompt_manager_qt.py:6453` (`_send_ai_request`, non-analysis) | чат легаси-путь | strict raise → пузырь ошибки | **мягко** (то же) |
+| `Supervertaler.py:10076` (`_build_image_extract_ai_callback`) | AI-подпись изображения в Image Extractor (vision, `is_analysis=False`, `images=images_payload`) | strict raise → `except Exception` (:10101) → label=None | **строго, ошибка → подпись пропущена** — вердикт Q10 (2026-10-21, вариант (а)): оставить как есть; лог в хендлере уже есть (:10102) → код не тронут |
 
 **Lenient-флаг (подтверждён Q9, без изменений):** `unified_prompt_manager_qt.py:136`
 (AutoPrompt-воркер, `is_analysis=True`), `workers/glossary.py:28` (Image Extractor,
@@ -442,5 +443,18 @@ text)»; Timeout/Empty в чате — без изменений. Остальн
   продолжается). Варианты: **(а)** оставить как есть; **(б)** по-чатски мягко —
   partial+пометка в подпись; **(в)** lenient-режим для этого вызова. Решение за
   координатором, в G3.2e не исполнено.
+- **Q10 — ответ координатора (вердикт 2026-10-21), sub-batch G3.2f:** вариант **(а)** —
+  оставить как есть (усечение → strict raise → label=None, извлечение продолжается;
+  «подпись короткая, обрезанная подпись вводит в заблуждение, отсутствие подписи видно
+  сразу»). Единственная правка по вердикту — добавить лог-строку, «если `except` в
+  `_build_image_extract_ai_callback` не пишет ничего в лог»; «если лог уже есть — не
+  трогать». **Измерено: лог есть** — `Supervertaler.py:10101-10102`:
+  `except Exception as e:` → `self.log(f"[Image Extractor] AI label call failed for
+  {media_path}: {e}")` (`LLMTruncatedError` наследует `ValueError` → `Exception`,
+  проходит через этот хендлер) → **ноль правок кода в Q10** (монолит 55 338,
+  sha `7c499f03…` не изменился). Вызывающий внесён в таблицу §13.3 со статусом
+  «строго, ошибка → подпись пропущена». Финальный отчёт G3.2 одним файлом —
+  `BATCH_G3_2_FINAL_REPORT.md` (результаты полного оффскрин-набора и матрица 16/16
+  соответствуют финальному состоянию кода: Q10 не изменил ни одного файла).
 
 **Стоп. Дальнейшие шаги — по вердикту координатора. Пуш не выполнялся.**
