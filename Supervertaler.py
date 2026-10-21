@@ -5994,6 +5994,12 @@ class PreTranslationWorker(QThread):
                 client, self.prompt_manager, segment.source, clean_target, source_lang, target_lang)
             if not new_target:
                 print(f"🏷️ AutoTagger skipped #{segment.id}: {reason}")
+                # M2.2(b) follow-through: place_tags_via_llm swallows LLM call
+                # failures into (None, reason), so the except branch below never
+                # sees them — surface the LLM-error reasons on translation_error
+                # (same visible "❌ …" console line as the batch LLM path).
+                if reason and "LLM error" in reason:
+                    self.translation_error.emit(f"AutoTagger on #{segment.id}: {reason}")
             return new_target
         except Exception as e:
             print(f"❌ AutoTagger error on #{segment.id}: {e}")
@@ -50923,7 +50929,18 @@ class SupervertalerQt(QMainWindow):
                         display_text, _ = strip_outer_wrapping_tags(display_text)
                     target_widget = self.table.cellWidget(row_index, 3)
                     if target_widget and isinstance(target_widget, EditableGridTextEditor):
+                        # M2.3 (BACKLOG §9.9 / N1): write the cell without firing
+                        # textChanged. Qt's toPlainText() normalizes NBSP (U+00A0)
+                        # to a plain space, so the synchronous textChanged that
+                        # unblocked setPlainText() triggers used to write the
+                        # normalized text back into segment.target through
+                        # on_target_text_changed (idempotent guard fails: new text
+                        # differs from the stored one) — silently stripping NBSP
+                        # from every batch-translated segment. Same widget pattern
+                        # as the M1 link-only gate and copy_source_to_target_bulk.
+                        target_widget.blockSignals(True)
                         target_widget.setPlainText(display_text)
+                        target_widget.blockSignals(False)
                     else:
                         self.table.setItem(row_index, 3, QTableWidgetItem(display_text))
                     self.update_status_icon(row_index, segment.status)
