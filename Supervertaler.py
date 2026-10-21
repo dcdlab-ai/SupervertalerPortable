@@ -5389,7 +5389,15 @@ class PreTranslationWorker(QThread):
                         if self.provider_type == 'TM':
                             translation = self._translate_from_tm(segment)
                         else:  # MT
-                            translation = self._translate_with_mt(segment)
+                            # M2.1(c): link-only segments carry no translatable content —
+                            # the MT engine call is skipped and the slot is filled with the
+                            # source verbatim (target = source, status "draft", no TM write;
+                            # same rule as the M1 LLM batch gate).
+                            if is_image_links_only(segment.source):
+                                translation = segment.source
+                                print(f"⤳ Segment #{segment.id}: link-only segment skipped — MT engine not called, source copied to target (draft)")
+                            else:
+                                translation = self._translate_with_mt(segment)
                         
                         elapsed = time.time() - start_time
                         
@@ -5402,7 +5410,8 @@ class PreTranslationWorker(QThread):
                                 self.undo_entries.append((segment.id, old_target, translation, old_status, "draft"))
 
                             preview = segment.source[:50] + ("..." if len(segment.source) > 50 else "")
-                            message = f"[{idx+1}/{len(self.segments)}] ✓ {preview} ({elapsed:.1f}s)"
+                            _mt_tag = "⤳ link-only (MT skipped)" if is_image_links_only(segment.source) else "✓"
+                            message = f"[{idx+1}/{len(self.segments)}] {_mt_tag} {preview} ({elapsed:.1f}s)"
                             self.progress_update.emit(idx + 1, len(self.segments), message, True, elapsed)
                             self.success_count += 1
                         else:
@@ -5479,13 +5488,29 @@ class PreTranslationWorker(QThread):
                         # Surface the real reason to the app log once per batch,
                         # not just the per-segment console lines below.
                         self.translation_error.emit(str(e))
-                        # Mark entire batch as failed
+                        # Mark entire batch as failed. M2.1(e) exception: link-only
+                        # segments do not depend on the LLM answer — their slot is
+                        # filled with the source verbatim (target = source, status
+                        # "draft", no TM write), the same rule as on a successful
+                        # batch (closes the M1 §5 "known edge case").
                         for row_index, segment in batch_segments:
                             absolute_idx = start_idx + batch_segments.index((row_index, segment))
                             preview = segment.source[:50] + ("..." if len(segment.source) > 50 else "")
-                            message = f"[{absolute_idx+1}/{len(self.segments)}] ✗ BATCH ERROR: {str(e)}"
-                            self.progress_update.emit(absolute_idx + 1, len(self.segments), message, False, 0)
-                            self.error_count += 1
+                            if is_image_links_only(segment.source):
+                                old_target = segment.target
+                                old_status = segment.status
+                                segment.target = segment.source
+                                segment.status = "draft"
+                                if old_target != segment.source or old_status != "draft":
+                                    self.undo_entries.append((segment.id, old_target, segment.source, old_status, "draft"))
+                                print(f"⤳ Segment #{segment.id}: link-only segment skipped — LLM not called, source copied to target (draft)")
+                                message = f"[{absolute_idx+1}/{len(self.segments)}] ⤳ link-only (LLM skipped) {preview}"
+                                self.progress_update.emit(absolute_idx + 1, len(self.segments), message, True, 0)
+                                self.success_count += 1
+                            else:
+                                message = f"[{absolute_idx+1}/{len(self.segments)}] ✗ BATCH ERROR: {str(e)}"
+                                self.progress_update.emit(absolute_idx + 1, len(self.segments), message, False, 0)
+                                self.error_count += 1
         
             # Check if retry is needed (for LLM mode with retry option enabled)
             if self.retry_enabled and self.provider_type == 'LLM' and self.retry_pass < self.max_retries:
@@ -5856,6 +5881,7 @@ class PreTranslationWorker(QThread):
         внедрить его собственный нечёткий TM-совпадение из fuzzy_match_map
         (пакетный режим FuzzyFixer)."""
         import time
+        from modules.bilingual_markdown_handler import is_image_links_only
         fmap = self.fuzzy_match_map or {}
         total = len(self.segments)
         for idx, (row_index, segment) in enumerate(self.segments):
@@ -5864,9 +5890,17 @@ class PreTranslationWorker(QThread):
             try:
                 start_time = time.time()
                 fuzzy_match = fmap.get(segment.id)
-                from modules import usage_log as _usage_log
-                with _usage_log.UsageContext(task="FuzzyFixer"):
-                    translation = self._translate_single_with_llm(segment, fuzzy_match)
+                # M2.1(a): link-only segments carry no translatable content — the
+                # per-segment LLM call is skipped and the slot is filled with the
+                # source verbatim (the same rule as the M1 batch gate: target =
+                # source, status "draft", no TM write).
+                if is_image_links_only(segment.source):
+                    translation = segment.source
+                    print(f"⤳ Segment #{segment.id}: link-only segment skipped — LLM not called, source copied to target (draft)")
+                else:
+                    from modules import usage_log as _usage_log
+                    with _usage_log.UsageContext(task="FuzzyFixer"):
+                        translation = self._translate_single_with_llm(segment, fuzzy_match)
                 elapsed = time.time() - start_time
 
                 if translation:
@@ -5876,7 +5910,7 @@ class PreTranslationWorker(QThread):
                     segment.status = "draft"
                     if old_target != translation or old_status != "draft":
                         self.undo_entries.append((segment.id, old_target, translation, old_status, "draft"))
-                    tag = "🔧" if fuzzy_match else "✓"
+                    tag = "⤳ link-only (LLM skipped)" if is_image_links_only(segment.source) else ("🔧" if fuzzy_match else "✓")
                     preview = segment.source[:50] + ("..." if len(segment.source) > 50 else "")
                     message = f"[{idx+1}/{total}] {tag} {preview} ({elapsed:.1f}s)"
                     self.progress_update.emit(idx + 1, total, message, True, elapsed)
@@ -39135,6 +39169,22 @@ class SupervertalerQt(QMainWindow):
     
     def _run_proofreading(self, segments_to_check, provider, model, custom_prompt="", settings=None):
         """Запускает вычитку выбранных сегментов в фоновом потоке."""
+        # M2.1(d): link-only segments are excluded from the checked set — their
+        # target is (after M1) a verbatim copy of the source, and the proofreader
+        # would flag the copy as "not translated". The row indices are preserved
+        # (proofreading_notes are addressed by row index), filtering is safe.
+        from modules.bilingual_markdown_handler import is_image_links_only
+        _n_before = len(segments_to_check)
+        segments_to_check = [(i, seg) for i, seg in segments_to_check
+                             if not is_image_links_only(seg.source)]
+        _n_skipped = _n_before - len(segments_to_check)
+        if _n_skipped:
+            self.log(f"⤳ {_n_skipped} link-only segment(s) excluded from proofreading (not sent to LLM)")
+        if not segments_to_check:
+            QMessageBox.information(
+                self, "No Segments",
+                "All matching segments are link-only (image links) — nothing to proofread.")
+            return
         # «Не настроено» (Batch #9.3): без активного профиля Custom с endpoint
         # вычитка не запускается — вежливое сообщение вместо ошибок батчей.
         if provider == 'custom_openai' and not self._custom_llm_ready(settings):
