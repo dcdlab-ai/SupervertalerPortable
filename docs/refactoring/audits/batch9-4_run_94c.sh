@@ -1,8 +1,8 @@
 #!/bin/bash
 # Batch 9.4c offscreen protection suite
 cd /e/Dev/SupervertalerPortable
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
-S=/d/Temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
 PY=E:/Dev/python-embed/python.exe
 # Kill ONLY bundled-runtime pythons and project java; NEVER by image name
 # (i:\AI\StrataPortable\python\python.exe must stay untouched).

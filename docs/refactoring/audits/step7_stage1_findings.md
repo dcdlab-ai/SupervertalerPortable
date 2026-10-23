@@ -519,7 +519,7 @@ user_data через `ConfigManager.get_user_data_path()`.** ConfigManager пр�
 * Ни `modules/settings_service.py`, ни иные файлы-заглушки не создавались;
   `modules/config_manager.py` не трогался.
 * Все измерения регенерируемы скриптами из
-  `D:\Temp\SupervertalerPortable\refactoring\batch7_stage1\run-001\`
+  `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage1\run-001\`
   (`inv.py methods|audit|gaps|body|deps|calls`, `usage.py`, `dump_methods.py`,
   `callsites_scan.py`, `summarize.py`, `dead_check.py`, `gen_tables.py`,
   `publish_artifacts.py`).

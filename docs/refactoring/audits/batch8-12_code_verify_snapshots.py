@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 REPO = pathlib.Path(r"E:\Dev\SupervertalerPortable")
-S = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-12\snapshots")
+S = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-12\snapshots")
 
 BLOCKS = [
     ("modules/statuses.py", 4, 4, "statuses_import_typing.txt"),

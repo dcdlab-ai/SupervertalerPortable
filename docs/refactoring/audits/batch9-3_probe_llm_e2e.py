@@ -21,7 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 tree = pathlib.Path(sys.argv[1]).resolve()
 iso = pathlib.Path(sys.argv[2]).resolve()
 tag = sys.argv[3]
-OUT = pathlib.Path(rf"D:\Temp\SupervertalerPortable\refactoring\b9-3\llm_e2e_verdict_{tag}.json")
+OUT = pathlib.Path(rf"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3\llm_e2e_verdict_{tag}.json")
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 os.environ["USERPROFILE"] = str(iso)
@@ -120,7 +120,7 @@ QMessageBox.question = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Y
 open_queue = [str(tree / "user_data" / "samples" / "sample_en_nl.txt")]
 if not pathlib.Path(open_queue[0]).exists():
     open_queue = [str(inputs) for inputs in [
-        r"D:\Temp\SupervertalerPortable\refactoring\b9-3\inputs\test.txt"]]
+        r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3\inputs\test.txt"]]
 
 
 def fake_open(*a, **k):

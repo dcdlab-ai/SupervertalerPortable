@@ -6,7 +6,7 @@
 **Дрейф-чек:** `git merge-base --is-ancestor 20b5675b HEAD` → предок, OK.
 **Supervertaler.py:** 68216 строк, SHA256 `025b192456f308f24b84f1332ff44ce40df1a7f85f9e3e11610c98e8783c778e` (= состояние после 8.1, коммит 20b5675b не менял монолит до 80a8552b — все промежуточные коммиты docs-only).
 **py_compile baseline:** 137 файлов (монолит + 136 модулей) — OK=137, FAIL=0
-(скрипт `D:\Temp\SupervertalerPortable\refactoring\b8-a2\py_compile_all.py`).
+(скрипт `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-a2\py_compile_all.py`).
 **Статус:** READ-ONLY. Код не менялся; отчёт — единственный новый файл.
 
 **Решение Дмитрия (финальное, постановка A2):** вкладка SuperLookup ОСТАЁТСЯ как
@@ -36,7 +36,7 @@ Embedded/External, глобальный хоткей Ctrl+Alt+L. Подвкла�
 
 ## 2. Карта методов SuperlookupTab по подвкладкам
 
-Полная карта: `D:\Temp\SupervertalerPortable\refactoring\b8-a2\sltab_map.json`
+Полная карта: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-a2\sltab_map.json`
 (AST, реальные границы `lineno`–`end_lineno`). Сводка по группам:
 
 ### 2.1 Группа WEB (DELETE-SAFE, 19 методов, 1258 строк)
@@ -211,7 +211,7 @@ MT-блок **удаляется в 8.10**.
 подвкладку по выбору, а при отсутствии результата — «⚙️ SuperLookup Settings».
 Статический анализ этого не объясняет, поэтому поставлена изолированная
 offscreen-проба полного приложения
-(`D:\Temp\SupervertalerPortable\refactoring\b8-a2\landing_probe.py`,
+(`E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-a2\landing_probe.py`,
 изолированные HOME/USERPROFILE/APPDATA, указатель на временный user_data,
 подложенный `settings.json` с `general.superlookup_landing_tab`, модалки
 нейтрализованы как в 8.1; маршрут Ctrl+Alt+L воспроизведён вызовом
@@ -521,6 +521,6 @@ Settings», наличие `source_text`/`search_btn`/`lang_from_combo`/`lang_to
    PowerShell fallback»).
 
 ---
-Аудит read-only; рабочие файлы `D:\Temp\SupervertalerPortable\refactoring\b8-a2\`
+Аудит read-only; рабочие файлы `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-a2\`
 (sltab_map.json, callers.py, py_compile_all.py). Все численные утверждения —
 AST `lineno`–`end_lineno` либо grep с указанием строк.

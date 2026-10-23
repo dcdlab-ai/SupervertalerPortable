@@ -1,8 +1,8 @@
 #!/bin/bash
 # Batch 9.4b offscreen protection suite (repo tree = E:\Dev\SupervertalerPortable)
 cd /e/Dev/SupervertalerPortable
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
-S=/d/Temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
 PY=E:/Dev/python-embed/python.exe
 # Kill ONLY processes launched from the bundled runtime (E:\Dev\python-embed) and
 # Okapi java from this project. NEVER kill by image name: unrelated pythons

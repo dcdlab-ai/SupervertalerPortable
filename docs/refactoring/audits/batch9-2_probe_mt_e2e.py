@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 tree = pathlib.Path(sys.argv[1]).resolve()
 iso = pathlib.Path(sys.argv[2]).resolve()
 tag = sys.argv[3]
-OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b9-2\mt_e2e_verdict.json")
+OUT = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-2\mt_e2e_verdict.json")
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 os.environ["USERPROFILE"] = str(iso)

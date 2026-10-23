@@ -10,7 +10,7 @@ HEAD: b5c46e7 ("update VALIDATION_BACKLOG.md"); предыдущий функц�
 Класс-цель: SupervertalerQt — AST 6054–62458, 819 прямых методов.
 Артефакты: docs/refactoring/audits/batch7_stage1_*.txt и
 docs/refactoring/audits/step7_stage1_findings.md; рабочие скрипты —
-D:\Temp\SupervertalerPortable\refactoring\batch7_stage1\run-001\.
+E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage1\run-001\.
 
 Все девять подзадач (1.1–1.9) закрыты. Чужой незавершённой работы не было: файл
 docs/refactoring/audits/step7_stage1_findings.md до этой сессии не существовал,

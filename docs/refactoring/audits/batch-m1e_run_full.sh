@@ -4,9 +4,9 @@
 # (stage-regress / stage-smoke / stage-tb) and probe scripts are the same
 # as in M1, so logs compare 1:1 against batch-m1_* baselines.
 cd /e/Dev/SupervertalerPortable
-S=/d/Temp/SupervertalerPortable/refactoring/batch-m1
-S94=/d/Temp/SupervertalerPortable/refactoring/batch9-4
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch-m1
+S94=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
 PY=E:/Dev/python-embed/python.exe
 TAG=${1:-m1e}
 kill_leftovers() {

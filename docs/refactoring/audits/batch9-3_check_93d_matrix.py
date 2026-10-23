@@ -7,7 +7,7 @@ custom_openai, '', неизвестная строка, отсутствует �
 import json, os, pathlib, sys, tempfile
 
 sys.path.insert(0, r"E:\Dev\SupervertalerPortable")
-tmp = pathlib.Path(tempfile.mkdtemp(dir=r"D:\Temp\SupervertalerPortable\refactoring\b9-3"))
+tmp = pathlib.Path(tempfile.mkdtemp(dir=r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3"))
 work = tmp / "workbench" / "settings"; work.mkdir(parents=True)
 ptr = tmp / "_cfg"; (ptr / "Supervertaler").mkdir(parents=True)
 os.environ["APPDATA"] = str(ptr)

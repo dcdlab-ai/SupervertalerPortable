@@ -19,7 +19,7 @@ EXTERNAL_STATE_AUDIT_REPORT.md (§1 п. 1, 7; §3; §4), BATCH8_10_SUPERLOOKUP_T
 | Защита 3 baseline | pyflakes: 680 warnings, **149 undefined name** (`undefined_names_before.txt`) |
 | EOL baseline | `git ls-files --eol`: Supervertaler.py i/lf w/crlf; setup_wizard.py i/lf w/lf |
 
-Stage-каталог: `D:\Temp\SupervertalerPortable\refactoring\b8-8\` (snapshots/, probes/, baseline-файлы).
+Stage-каталог: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-8\` (snapshots/, probes/, baseline-файлы).
 
 ### Offscreen-пробы «ДО» (изолированный профиль, QT_QPA_PLATFORM=offscreen, USERPROFILE/APPDATA/HOME → временные папки)
 
@@ -116,7 +116,7 @@ Diff-план: порядок вызовов не меняется; все ге�
 | 0 | 43133–43165 | `_migrate_voice_dictation_default_off` | удалить |
 | — | — | `modules/setup_wizard.py` (354 строки) | `git rm` |
 
-Снапшоты зон с sha256: `D:\Temp\SupervertalerPortable\refactoring\b8-8\snapshots\zone_*.txt` (+ `.sha256`). SHA-guard до правок: `b7fb94cd…` OK. Каждая правка — с assert якорей первой/последней непустой строки.
+Снапшоты зон с sha256: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-8\snapshots\zone_*.txt` (+ `.sha256`). SHA-guard до правок: `b7fb94cd…` OK. Каждая правка — с assert якорей первой/последней непустой строки.
 
 **Итог:** монолит 62387 → **61743** строки (−644); `git diff --stat HEAD~1 HEAD`: Supervertaler.py +12/−656, setup_wizard.py −354 (всего +12/−1010). EOL: w/crlf восстановлен (12 вставленных строк нормализованы в CRLF; `\r\r\n` = 0). SHA256 после: `db37188c79c7434597abce9f0ddb11c36858838c85f047c94126ecb702cacd0d`.
 

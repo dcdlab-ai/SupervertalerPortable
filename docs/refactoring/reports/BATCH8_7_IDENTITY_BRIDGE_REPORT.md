@@ -21,7 +21,7 @@
 | Защита (б) baseline | pyflakes: 149 уникальных undefined names — множество **идентично** 8.5-after |
 | Защита (в) baseline (offscreen-проба) | main_tabs 6; страниц Settings 15 (включая «👤 User Identity»); `window bridge attrs: ['_bridge_server', '_on_bridge_prompt_request']`, `_bridge_server = SupervertalerBridgeServer`; QTimer 3, QThread 0; Trados-кнопок 3 |
 
-Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-7\` — `probe_before.log`, `startup_chain_before.json`, `undefined_names_before.txt`, `un_before_sorted.txt`, `iso-before/`.
+Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-7\` — `probe_before.log`, `startup_chain_before.json`, `undefined_names_before.txt`, `un_before_sorted.txt`, `iso-before/`.
 
 Примечание о детекте bridge: сервер пишет свой лог только в файл `<user_data>/workbench/runtime/sidekick-bridge.log` (не в stdout), а порт выбирает ядро (`port 0` → случайный высокий) — поэтому факт создания сервера в offscreen-пробе фиксировался по атрибуту окна `_bridge_server` (до: создан; после: отсутствует).
 

@@ -1,6 +1,14 @@
 # env-baseline_q-a.txt — эталон среды dev-рантайма на момент BATCH Q-A (фиксация, не требование)
 # Дата: 2026-10-23. Рантайм: E:\Dev\python-embed (Python 3.13.15, pip 26.2.1, python313._pth с 'import site').
 # Снято по решению координатора (Q-A Q7). 'pip check': No broken requirements found.
+#
+# ПЕРЕЕЗД РАБОЧЕЙ ОБЛАСТИ 2026-10-23 (распоряжение Дмитрия, после отключения Storage Sense):
+# всё уцелевшее из D:\Temp\SupervertalerPortable перенесено в E:\Dev\Work_temp\SupervertalerPortable
+# (robocopy /E /COPY:DAT /DCOPY:DAT, байты 1:1 524 132 207, 6570 файлов, mtime сохранены;
+# 9 git-worktree перерегистрированы). Пути в этом файле обновлены на новое расположение;
+# ИСТОРИЧЕСКИ команды [4] выполнялись с целями D:\Temp\... — на момент выполнения.
+# Причина переезда: возрастная зачистка D:\Temp 2026-10-22 12:00:26–50 (см. [5] и расследование
+# в переписке Q-A) повредила внешнюю pyflakes-библиотеку и старые stage-каталоги.
 
 [1] pip freeze (39 пакетов)
 annotated-types==0.8.0
@@ -143,12 +151,12 @@ urllib3==2.7.0
 [4] pip-команды, выполненные агентом в BATCH Q-A (все)
   2026-10-23  E:\Dev\python-embed\python.exe -m pip install pyflakes
               → установка 4.0.3 в site-packages рантайма. ОТКЛОНЕНИЕ: статикиBatch 8.15–M2
-                использовали ВНЕШНИЮ библиотеку D:\Temp\SupervertalerPortableefactoring8-9\pyflakes_lib
+                использовали ВНЕШНИЮ библиотеку E:\Dev\Work_temp\SupervertalerPortableefactoring8-9\pyflakes_lib
                 (4.0.1, добавлялась sys.path.insert в batch8-15_run_pyflakes.py:4), а не рантайм;
                 pyflakes в рантайме не был установлен НИКОГДА. Первоначальный диагноз
                 «pyflakes пропал из рантайма» был ошибочен — см. [5]. По вердикту координатора
                 Q7: установку НЕ откатывать, рантайм больше не менять, в requirements не добавлять.
-  2026-10-23  E:\Dev\python-embed\python.exe -m pip install --target D:\Temp\SupervertalerPortable\qa\env\pyflakes-ext pyflakes
+  2026-10-23  E:\Dev\python-embed\python.exe -m pip install --target E:\Dev\Work_temp\SupervertalerPortable\qa\env\pyflakes-ext pyflakes
               → санкционированный механизм на будущее: инструмент ВНЕ рантайма. Встраиваемый
                 Python с ._pth ИГНОРИРУЕТ PYTHONPATH, поэтому подключение — sys.path.insert
                 в batch8-15_run_pyflakes.py (минимальная правка Q-A Q7).

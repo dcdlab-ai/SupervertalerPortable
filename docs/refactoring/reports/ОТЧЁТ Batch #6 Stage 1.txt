@@ -5,7 +5,7 @@
 Режим: READ-ONLY ANALYSIS. Ни одна строка кода не изменена
 (git status чистый, кроме новых файлов docs/refactoring/* и PROJECT_STATUS.md).
 Артефакты измерений: docs/refactoring/audits/batch6_stage1_*.txt
-(исходные скрипты: D:\Temp\SupervertalerPortable\refactoring\batch6_stage1\).
+(исходные скрипты: E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch6_stage1\).
 
 Монолит: 69 696 строк (без изменений с Batch #5 Stage 2).
 Класс SupervertalerQt: строки 6051–63768, 819 методов (AST).

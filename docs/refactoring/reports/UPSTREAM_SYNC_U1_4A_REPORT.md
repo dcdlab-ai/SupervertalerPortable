@@ -167,7 +167,7 @@ AST-сверка против `763291e8:Supervertaler.py` (после право
 | 4 | `modules/segmentation_rules.py` | `34edc6244b0c106575fddb9b831db07b1ac1d297824f62c7eca67789ed44fc4e` | НОВЫЙ файл, 285 строк, blob == тег 372 |
 | 5 | `modules/segment_split_merge.py` | `3e8752ad40758331354431762487fc62b99e52dc8e93d0378782e80b9d0eedde` | 291 строка, дельта 763291e8 |
 
-Тестовые данные (созданы вне репо): `D:\Temp\SupervertalerPortable\refactoring\u1-port4\testdata\` — `sample_en.txt` (LF), `sample_crlf.txt` (то же CRLF), `sample.md` (ссылки с inline-кодом), `expected_segments.md` (таблица ожидаемых сегментов, вычислена новым сегментером; 27 сегментов).
+Тестовые данные (созданы вне репо): `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port4\testdata\` — `sample_en.txt` (LF), `sample_crlf.txt` (то же CRLF), `sample.md` (ссылки с inline-кодом), `expected_segments.md` (таблица ожидаемых сегментов, вычислена новым сегментером; 27 сегментов).
 
 ## 6. СЦЕНАРИИ ПРОВЕРКИ
 

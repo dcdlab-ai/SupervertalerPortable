@@ -80,7 +80,7 @@ silent stop and requires a manual "продолжай" to resume. Rules:
 
 ### Temporary files and test artifacts
 Use the dedicated project temporary workspace:
-`D:\Temp\SupervertalerPortable\`
+`E:\Dev\Work_temp\SupervertalerPortable\`
 Do not use the following locations for project-generated temporary files or test artifacts unless the task explicitly requires it:
 * `%TEMP%`;
 * `%TMP%`;
@@ -88,14 +88,14 @@ Do not use the following locations for project-generated temporary files or test
 * the user's profile directories;
 * system-wide temporary directories.
 Each independent task, test run, or work stage must have its own subdirectory under:
-`D:\Temp\SupervertalerPortable\`
+`E:\Dev\Work_temp\SupervertalerPortable\`
 Use descriptive stage-specific directories, for example:
-`D:\Temp\SupervertalerPortable\analysis\`
-`D:\Temp\SupervertalerPortable\translation\`
-`D:\Temp\SupervertalerPortable\refactoring\`
-`D:\Temp\SupervertalerPortable\tests\`
+`E:\Dev\Work_temp\SupervertalerPortable\analysis\`
+`E:\Dev\Work_temp\SupervertalerPortable\translation\`
+`E:\Dev\Work_temp\SupervertalerPortable\refactoring\`
+`E:\Dev\Work_temp\SupervertalerPortable\tests\`
 For repeated or potentially conflicting runs, create a unique run subdirectory, for example:
-`D:\Temp\SupervertalerPortable\tests\run-001\`
+`E:\Dev\Work_temp\SupervertalerPortable\tests\run-001\`
 Do not reuse the same temporary directory for unrelated stages when doing so could mix artifacts.
 Keep temporary artifacts that may be useful for debugging, comparison, or verification until the current task has been successfully completed.
 Temporary artifacts may be deleted after successful completion when they are no longer needed and are not required for reproducibility or debugging.
@@ -127,11 +127,11 @@ Rules:
 ### Environment variables
 Do not permanently modify global Windows user or system environment variables merely to perform a project task.
 When a project command or test needs explicit temporary directories, set `TEMP` and `TMP` for that process to the appropriate stage-specific directory under:
-`D:\Temp\SupervertalerPortable\`
+`E:\Dev\Work_temp\SupervertalerPortable\`
 For example:
 ```bat
-set "TEMP=D:\Temp\SupervertalerPortable\tests\run-001"
-set "TMP=D:\Temp\SupervertalerPortable\tests\run-001"
+set "TEMP=E:\Dev\Work_temp\SupervertalerPortable\tests\run-001"
+set "TMP=E:\Dev\Work_temp\SupervertalerPortable\tests\run-001"
 E:\Dev\python-embed\python.exe ...
 ```
 Prefer process-local environment variables over permanent changes to the Windows environment.
@@ -151,7 +151,7 @@ Before running project commands, verify:
    `E:\Dev\python-embed\python.exe`
 3. Python packages are being resolved from the bundled runtime.
 4. Temporary project artifacts are being written to the appropriate directory under:
-   `D:\Temp\SupervertalerPortable\`
+   `E:\Dev\Work_temp\SupervertalerPortable\`
 If a tool reports a different Python interpreter, package location, working directory, or temporary directory than specified here, correct the environment before continuing.
 ### Bundled runtime quirk: CWD is not on sys.path
 The embedded distribution (`E:\Dev\python-embed\`) ignores the current directory
@@ -165,7 +165,7 @@ Symptom if forgotten: `ModuleNotFoundError: No module named 'modules'`.
 
 ### Path and tooling quirks (Git Bash on Windows)
 * The embedded Python does not understand Git Bash `/tmp` paths (they map to
-  `D:\Temp`). Pass explicit `D:\Temp\SupervertalerPortable\...` paths to Python
+  `D:\Temp`). Pass explicit `E:\Dev\Work_temp\SupervertalerPortable\...` paths to Python
   scripts, never `/tmp/...`.
 * The bundled `grep.exe` prints backslash path separators on Windows
   (`modules\dialogs\file.py`). Forward-slash `grep -v` filters will not match
@@ -204,7 +204,7 @@ Run GUI checks offscreen and non-interactively:
   (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='python.exe' or
   Name='java.exe'" | Select-Object ProcessId, CommandLine`), keep only PIDs
   whose command line belongs to this session's run (the probe script path, the
-  stage directory under `D:\Temp\SupervertalerPortable\`, the `python-embed`
+  stage directory under `E:\Dev\Work_temp\SupervertalerPortable\`, the `python-embed`
   interpreter, the sidecar jar), kill exactly those PIDs with
   `taskkill /F /PID <pid>`, and leave every unmatched process running.
   Report the survivor list in the batch log.

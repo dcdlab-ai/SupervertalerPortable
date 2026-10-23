@@ -1,7 +1,7 @@
 import os, pathlib, sys
 
-OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-12")
-sys.path.insert(0, str(pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
+OUT = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-12")
+sys.path.insert(0, str(pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
 os.chdir(r"E:\Dev\SupervertalerPortable")
 
 from pyflakes.api import checkPath

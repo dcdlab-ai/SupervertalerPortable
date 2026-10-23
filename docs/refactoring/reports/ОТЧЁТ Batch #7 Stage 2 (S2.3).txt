@@ -8,7 +8,7 @@ S2.3 — Settings Service, LLM/proxy/provider/api keys (Batch #7 Stage 2, под
 docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.3 llm-proxy-keys).txt.
 Разведка Б2 (границы 10 методов) принята; пересчитаны только границы/кластеры и
 callsites на этом дереве (1.2/1.4). Артефакты: docs/refactoring/audits/batch7s23_*;
-рабочий прогон — D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\
+рабочий прогон — E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage2_s23\run-001\
 (скрипты, снапшоты, JSON, логи; head-wt — worktree HEAD 7a2de37).
 
 ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 373 → 68 285 строк (−88; git --numstat 47/135 по

@@ -12,7 +12,7 @@
 - `Supervertaler.py`: **61 743** строки, SHA256 рабочей копии (CRLF) `db37188c79c7434597abce9f0ddb11c36858838c85f047c94126ecb702cacd0d`; git-блоб (LF) `3419012b3763a2e1b0031e512b822efa18bc206ccb58ebc70d4f538987bcb27d`.
 - py_compile baseline: 138/138 файлов (120 модулей + монолит + прочее).
 - Строки 9 удаляемых модулей (git HEAD, `wc -l`): memoqrtf_handler 688, mqxliff_handler 717, cafetran_docx_handler 379, trados_docx_handler 433, sdlppx_handler 2270, phrase_docx_handler 669, dejavurtf_handler 784, batch_offload 372, sdltm_handler 237 → **6 549**.
-- Baseline-артефакты защит (`D:\Temp\SupervertalerPortable\refactoring\b8-9\`): `startup_chain_before.json` (1179 вызовов, 2 неразрешённых), `undefined_names_before.txt` (149 строк / 12 уникальных имён), `headless_before.txt` (114 ok / 6 fail / 120), `cli_before.txt`, `probe_before_clean.log` (90 MENU-строк), `probe_before_upgrade.log` (hash-diff пустой).
+- Baseline-артефакты защит (`E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-9\`): `startup_chain_before.json` (1179 вызовов, 2 неразрешённых), `undefined_names_before.txt` (149 строк / 12 уникальных имён), `headless_before.txt` (114 ok / 6 fail / 120), `cli_before.txt`, `probe_before_clean.log` (90 MENU-строк), `probe_before_upgrade.log` (hash-diff пустой).
 
 ## 1. Рекон
 
@@ -228,7 +228,7 @@ REPL (4, каждая assert count==1): tooltip Quick Count (форматы), do
 
 ---
 
-Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-9\` — `implement_89.py`, `snapshots\` (35 зон, sha256), `verify_snapshots.py`, `startup_chain_{before,after}.json`, `undefined_names_{before,after}.txt`, `protection2.py`, `counts_{before,after}.txt`, `regress_common.py` + `regress\regress_{before,after}.log` + `regress\out-{before,after}\`, `probes\probe_{before,after}_{clean,upgrade}.log` + `menu_{before,after}.txt`, `headless_{before,after}.txt`, `cli_{before,after}.txt`, `head-wt\` (worktree HEAD).
+Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-9\` — `implement_89.py`, `snapshots\` (35 зон, sha256), `verify_snapshots.py`, `startup_chain_{before,after}.json`, `undefined_names_{before,after}.txt`, `protection2.py`, `counts_{before,after}.txt`, `regress_common.py` + `regress\regress_{before,after}.log` + `regress\out-{before,after}\`, `probes\probe_{before,after}_{clean,upgrade}.log` + `menu_{before,after}.txt`, `headless_{before,after}.txt`, `cli_{before,after}.txt`, `head-wt\` (worktree HEAD).
 
 **Push — только после подтверждения Дмитрия.**
 

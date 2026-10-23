@@ -23,7 +23,7 @@ targets.add("Supervertaler")
 targets.add("setup")
 orphans = set()
 mode = False
-for line in open(r"D:\Temp\SupervertalerPortable\refactoring\batch8-12\reach_v3.txt", encoding="utf-8"):
+for line in open(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch8-12\reach_v3.txt", encoding="utf-8"):
     line = line.strip()
     if line.startswith("=== ORPHANS"):
         mode = True

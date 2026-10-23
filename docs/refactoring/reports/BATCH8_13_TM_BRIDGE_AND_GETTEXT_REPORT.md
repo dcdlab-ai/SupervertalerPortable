@@ -16,7 +16,7 @@
 
 ## 0. Baseline (Этап 0)
 
-Все прогоны — в `D:\Temp\SupervertalerPortable\refactoring\b8-13\`, интерпретатор
+Все прогоны — в `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-13\`, интерпретатор
 `E:\Dev\python-embed\python.exe`, CWD = репозиторий.
 
 | Проверка | Baseline | Комментарий |

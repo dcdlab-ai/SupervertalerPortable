@@ -1,7 +1,7 @@
 # E1 — Аудит внешнего состояния Portable (read-only)
 
 Дата: 2026-10-03. Исполнитель: ZCode (GLM). Режим: READ-ONLY — код не менялся, реестр только читался (`reg query`), user_data не затронут, приложение не запускалось.
-Рабочие скрипты и дампы: `D:\Temp\SupervertalerPortable\refactoring\e1\` (`qfdump.py`, `qfiledialog_dump.json`, pyc/) — вне репозитория.
+Рабочие скрипты и дампы: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\e1\` (`qfdump.py`, `qfiledialog_dump.json`, pyc/) — вне репозитория.
 
 Контекст: на тестовых сборках «новые установки подхватывают путь сохранения проектов». Задача — найти всё состояние приложения/ОС вне папки user_data, общее между сборками под одной учётной записью Windows, и дать вход для Batch #8.8 (first-run).
 

@@ -6,7 +6,7 @@ modules/grid/ (helpers.py — МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ, реше
 Stage 1 §6) + 17 тонких делегатов в монолите с точными исходными
 именами/сигнатурами. Артефакты измерений:
 docs/refactoring/audits/*batch6stage2*.txt; скрипты и прогоны:
-D:\Temp\SupervertalerPortable\refactoring\batch6_stage2\
+E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch6_stage2\
 
 ═══════════════════════════════════════════════════════════════════════════════
 1. ЭТАП 0 — БАЗОВАЯ ЛИНИЯ

@@ -11,7 +11,7 @@ and user-data isolation»). Цель — не переписывать их с �
 ## Стейдж-каталог
 
 Артефакты прогона складывать в
-`D:\Temp\SupervertalerPortable\refactoring\batch-<N>\run-001\`
+`E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-<N>\run-001\`
 (см. AGENTS.md «Temporary files and test artifacts»). В репозиторий попадает
 только отчёт «ОТЧЁТ Batch #N.txt» (gitignored) и, при необходимости, правки
 планировочных документов.

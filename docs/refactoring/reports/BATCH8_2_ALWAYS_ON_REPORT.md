@@ -16,7 +16,7 @@
 | modules/*.py | 136; py_compile **137/137, 0 ошибок** |
 | EOL до | `i/lf w/lf` (Supervertaler.py, shortcut_manager.py) |
 
-Базовые значения защит (каталог `D:\Temp\SupervertalerPortable\refactoring\b8-2\`):
+Базовые значения защит (каталог `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-2\`):
 - (а) резолв стартовой цепочки **ДО** (расширенная цепочка, см. §4): 369 вызовов, 0 неразрешённых (`startup_chain_before.json`);
 - (б) pyflakes ДО: **149** undefined names (совпало с ожиданием задания), всего warnings 721 (`undefined_names_before.txt`);
 - (в) offscreen-проба ДО: успешно (`probe_before.log`, см. §4).
@@ -123,7 +123,7 @@ AST-инвентаризация (`recon_alwayson.py`, вывод `recon_alwayso
 | EOL | i/lf w/lf | i/lf w/lf | ✓ |
 | `git diff --stat` | — | только Supervertaler.py + modules/shortcut_manager.py | ✓ |
 
-Offscreen-проба (изолированная: `QT_QPA_PLATFORM=offscreen`, USERPROFILE/APPDATA/LOCALAPPDATA/HOME/TEMP → `D:\Temp\SupervertalerPortable\refactoring\b8-2\iso\{before,after}`, модалки нейтрализованы, opt-in statistics отключён, faulthandler-таймаут):
+Offscreen-проба (изолированная: `QT_QPA_PLATFORM=offscreen`, USERPROFILE/APPDATA/LOCALAPPDATA/HOME/TEMP → `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-2\iso\{before,after}`, модалки нейтрализованы, opt-in statistics отключён, faulthandler-таймаут):
 
 | Факт | ДО (HEAD d3b319e5) | ПОСЛЕ (7d9cf7dc) |
 |---|---|---|

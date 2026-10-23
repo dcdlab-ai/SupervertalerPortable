@@ -90,7 +90,7 @@ pseudo_translate_dialog.py:264 — без изменений).
     Дополнительно: в монолите не осталось ни одного обращения к
     self.undo_stack/redo_stack/max_undo_levels.
 3.5 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, живое приложение; харнес
-    D:\Temp\SupervertalerPortable\refactoring\batch5-stage2\undo_scenarios.py;
+    E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch5-stage2\undo_scenarios.py;
     итог 38/38 PASS):
     ✅ S0: _undo_manager — экземпляр UndoManager; стеки живут в менеджере
        (max=100); все 8 duck-typed имён есть на окне; менеджер НЕ держит ссылку
@@ -171,6 +171,6 @@ of EXTRACTION_PLAN.md)».
 Дальше — СТОП до подтверждения владельца (Step 6: Grid helpers/pagination/filters,
 будущий Batch #6).
 
-Вспомогательные скрипты прогона: D:\Temp\SupervertalerPortable\refactoring\batch5-stage2\
+Вспомогательные скрипты прогона: E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch5-stage2\
 (stage2_check.py, stage2_baseline.py, snapshot_move_blocks.py, apply_transfer.py,
 verify_transfer.py, after_counts.py, manifest_diff.py, undo_scenarios.py + выводы).

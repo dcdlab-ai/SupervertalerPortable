@@ -8,7 +8,7 @@ docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.1 settings core
 Разведка Б2 (Batch #7 Stage 1) принята как есть — повторный AST-обход состава не
 делался; пересчитывались только границы после правок (3.5) и остаток Stage 2.
 Артефакты: docs/refactoring/audits/batch7s21_*; рабочие прогоны —
-D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\ (скрипты,
+E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\ (скрипты,
 снапшоты, JSON-результаты; head-wt — worktree HEAD для DO/POS-сравнения).
 
 ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 386 → 68 400 строк (+14; git diff --numstat
@@ -458,7 +458,7 @@ N12. АВТОМАТИЧЕСКИХ ТЕСТОВ В ПРОЕКТЕ НЕТ: все 
     - Предсуществующий краш teardown (0xC0000005) в offscreen-прогонах — кандидат
       в VALIDATION_BACKLOG.
     - Stage-каталог и worktree сохраняются для отладки:
-      D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\
+      E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage2_s21\run-001\
       (+ head-wt на 043da2a; удалять worktree — по решению координатора).
 
 ════════════════════════════════════════════════════════════════════════════════

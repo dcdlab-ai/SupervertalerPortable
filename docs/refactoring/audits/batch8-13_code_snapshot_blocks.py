@@ -4,7 +4,7 @@ import hashlib, pathlib, sys
 
 src = pathlib.Path(r"E:\Dev\SupervertalerPortable\Supervertaler.py").read_bytes()
 lines = src.split(b"\n")
-out = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-13\snapshots")
+out = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-13\snapshots")
 out.mkdir(exist_ok=True)
 
 BLOCKS = {

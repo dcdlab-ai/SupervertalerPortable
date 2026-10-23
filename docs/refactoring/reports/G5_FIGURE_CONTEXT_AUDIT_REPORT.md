@@ -400,7 +400,7 @@ Fake-endpoint 127.0.0.1 + ловушка сети; профиль `supports_visi
   `get_images_for_text` по сегментам md-импорта (раздел C, правка 2026-10-15).
 - `docs/refactoring/samples/` — фикстуры (`Miniature Wargames #520.translation.md` — 3 строки,
   сокращена координатором; `Figure 1A.png`; `Figure 2.jpg`).
-- Stage-директория прогонов: `D:\Temp\SupervertalerPortable\refactoring\g5\` и `…\g5-fix\`.
+- Stage-директория прогонов: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\g5\` и `…\g5-fix\`.
 
 ---
 

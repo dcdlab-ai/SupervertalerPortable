@@ -2,7 +2,7 @@
 
 **Дата:** 2026-10-11 · **База:** HEAD `bdff36df` (код `4ed6eba4`, Batch #8.15) · **Режим:** рекон,
 код не тронут. Написаны только этот отчёт и скрипты/артефакты `docs/refactoring/audits/r9_*`.
-**Изоляция:** все пробы — в изо-профилях `D:\Temp\SupervertalerPortable\analysis\r9\iso-*`
+**Изоляция:** все пробы — в изо-профилях `E:\Dev\Work_temp\SupervertalerPortable\analysis\r9\iso-*`
 (offscreen; USERPROFILE/APPDATA/LOCALAPPDATA/HOME/TEMP перенаправлены; указатель
 `config.json` → локальный user_data; реальных данных Дмитрия не касались; сети не было).
 Таймауты: отдельные операции пробы ограничены; сам старт приложения ~2 мин (допущение по
@@ -144,7 +144,7 @@ add/remove/dangling.
 ## ЧАСТЬ 2 — Инвентарь провайдеров
 
 Полные данные: `docs/refactoring/audits/r9_provider_inventory.py` → JSON
-`D:\Temp\SupervertalerPortable\analysis\r9\r9_provider_inventory.json` (семья → файл →
+`E:\Dev\Work_temp\SupervertalerPortable\analysis\r9\r9_provider_inventory.json` (семья → файл →
 владелец-метод → строки). Ниже — сводка с классификацией.
 
 ### 2.1 Монолит Supervertaler.py — по семьям (попаданий строк / владельцев)
@@ -452,14 +452,14 @@ llm_claude/llm_gemini/llm_mistral/llm_openrouter/llm_ollama` и все `mt_*` п
 ## Стоп-условия
 
 Не сработало ни одно: реальные данные не затронуты (все пробы в изо-профилях
-`D:\Temp\SupervertalerPortable\analysis\r9\iso-*`), сеть не требовалась (fake-endpoint не
+`E:\Dev\Work_temp\SupervertalerPortable\analysis\r9\iso-*`), сеть не требовалась (fake-endpoint не
 понадобился — баг воспроизводится чисто на UI/файле; loopback-конструирование клиента без
 запросов), код не правился. Возвращаю управление Дмитрию.
 
 ## Артефакты
 
 - `docs/refactoring/audits/r9_provider_inventory.py` + JSON-инвентарь
-  (`D:\Temp\SupervertalerPortable\analysis\r9\r9_provider_inventory.json`)
+  (`E:\Dev\Work_temp\SupervertalerPortable\analysis\r9\r9_provider_inventory.json`)
 - `docs/refactoring/audits/r9_probe_profiles.py`, `r9_seed_profiles.py`,
   `r9_log_a.txt`, `r9_log_ctrl.txt`, `r9_log_rm.txt`
-- Изо-профили и промежуточные материалы: `D:\Temp\SupervertalerPortable\analysis\r9\`
+- Изо-профили и промежуточные материалы: `E:\Dev\Work_temp\SupervertalerPortable\analysis\r9\`

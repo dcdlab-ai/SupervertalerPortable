@@ -164,7 +164,7 @@ AST-сравнение тел (upstream@371 vs Portable@HEAD) для всех з
 - Кумулятивный `git diff --stat caa5f0f6..2e258269`: ровно 5 ожидаемых файлов (365+/64−).
 
 ### 4.3 Тесты апстрима — 13/13 PASS
-`tests/test_tm_replace.py` + `tests/test_tmx_import_languages.py` (оба импортируют только `modules.*`, монолит не импортируют) запущены из временной копии вне репо (`D:\Temp\SupervertalerPortable\refactoring\u1-port\repo-sim\`, junction на `modules/`; `E:\Dev\python-embed\python.exe -m pytest … -q`):
+`tests/test_tm_replace.py` + `tests/test_tmx_import_languages.py` (оба импортируют только `modules.*`, монолит не импортируют) запущены из временной копии вне репо (`E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port\repo-sim\`, junction на `modules/`; `E:\Dev\python-embed\python.exe -m pytest … -q`):
 ```
 13 passed in 10.35s
 ```
@@ -266,4 +266,4 @@ AST-сравнение тел (upstream@371 vs Portable@HEAD) для всех з
    **→ ЗАКРЫТ (2026-10-02): «проверять только при использовании»** — пока нет наработанной TM.
 
 ---
-*Артефакты: `D:\Temp\SupervertalerPortable\refactoring\u1-port3\` — диффы двух коммитов (`fe1a_mono.diff`, `ee7_mono.diff`, `ee7_db.diff`, `tm_replace_from_tag.py`), скрипты (`hunk_map.py`, `body_diff.py`, `verify_fe1a.py`, `verify_ee7.py`, `validate_u13.py`, `dep_check.py`), headless-прогон (`headless/hl_check.py`, `headless/before/`, `after`-результаты `before.json`/`after.json`); снимок монолита `mono_head_snapshot.py` (sha256 `82d2e5d5…`).*
+*Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port3\` — диффы двух коммитов (`fe1a_mono.diff`, `ee7_mono.diff`, `ee7_db.diff`, `tm_replace_from_tag.py`), скрипты (`hunk_map.py`, `body_diff.py`, `verify_fe1a.py`, `verify_ee7.py`, `validate_u13.py`, `dep_check.py`), headless-прогон (`headless/hl_check.py`, `headless/before/`, `after`-результаты `before.json`/`after.json`); снимок монолита `mono_head_snapshot.py` (sha256 `82d2e5d5…`).*

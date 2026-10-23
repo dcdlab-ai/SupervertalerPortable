@@ -8,7 +8,7 @@ S2.2 — Settings Service, general + clipboard reading (Batch #7 Stage 2,
 docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.2 general).txt.
 Разведка Б2 принята как есть; пересчитаны только границы и callsites на этом
 дереве (1.2/1.4). Артефакты: docs/refactoring/audits/batch7s22_*; рабочие
-прогоны — D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s22\run-001\
+прогоны — E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage2_s22\run-001\
 (скрипты, снапшоты, JSON-результаты, логи; head-wt — worktree HEAD 25627c9).
 
 ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 400 → 68 373 строк (−27; git --numstat 23/50 по

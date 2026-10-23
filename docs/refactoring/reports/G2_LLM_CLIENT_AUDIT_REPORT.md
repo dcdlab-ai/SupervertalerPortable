@@ -3,7 +3,7 @@
 Дата: 2026-10-04. Исполнитель: ZCode.
 Репозиторий: `E:\Dev\SupervertalerPortable`, HEAD `dc8d80c7` (= origin/main).
 Код приложения НЕ менялся. Создан только этот отчёт и временные скрипты в
-`D:\Temp\SupervertalerPortable\refactoring\g2\` (вне репо).
+`E:\Dev\Work_temp\SupervertalerPortable\refactoring\g2\` (вне репо).
 
 ---
 
@@ -18,7 +18,7 @@
 | py_compile (формула 8.2: `modules/**` + `Supervertaler.py`) | **137/137 OK** (полный прогон со `tools/batch_validation` — 145/145) |
 
 Приложение не запускалось; user_data не читался и не менялся; внешних сетевых запросов не было.
-Headless-проверки парсеров: `D:\Temp\SupervertalerPortable\refactoring\g2\test_parsers.py`
+Headless-проверки парсеров: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\g2\test_parsers.py`
 (импортирует реальный `modules.llm_clients.LLMClient`, работает только с методами очистки/парсинга,
 без сети; вывод — `test_parsers_out.txt`).
 

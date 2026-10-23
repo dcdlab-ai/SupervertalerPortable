@@ -3,9 +3,9 @@
 # Copy of batch-g32_run_full.sh with S pointed to batch-g32e and TAG=g32e;
 # shared probe scripts/fixtures unchanged, logs compare 1:1 against batch-g32/M1e baselines.
 cd /e/Dev/SupervertalerPortable
-S=/d/Temp/SupervertalerPortable/refactoring/batch-g32e
-S94=/d/Temp/SupervertalerPortable/refactoring/batch9-4
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch-g32e
+S94=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
 PY=E:/Dev/python-embed/python.exe
 TAG=${1:-g32e}
 kill_leftovers() {

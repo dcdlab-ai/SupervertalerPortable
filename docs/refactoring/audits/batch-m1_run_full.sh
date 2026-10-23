@@ -3,9 +3,9 @@
 # Copy of batch-g5-12/run_full.sh with the stage directory pointed to batch-m1
 # and the batch9-4 probe scripts referenced in place.
 cd /e/Dev/SupervertalerPortable
-S=/d/Temp/SupervertalerPortable/refactoring/batch-m1
-S94=/d/Temp/SupervertalerPortable/refactoring/batch9-4
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch-m1
+S94=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
 PY=E:/Dev/python-embed/python.exe
 TAG=${1:-m1}
 kill_leftovers() {

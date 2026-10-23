@@ -519,4 +519,4 @@ A2 −2250 — отмечено в отчёте 8.10).
 headless_before.txt, undefined_names_before/trial.txt, importers.json, reach_v3.txt,
 reach.py, importer_scan.py, dep_scan.py/dep_scan_v2.txt, def_scan.txt, settings_keys.txt,
 dead_methods.txt, section_I_trados_sample.txt, probe_trial.log, probe_trial_tm.py.
-Рабочая копия прогона: `D:\Temp\SupervertalerPortable\refactoring\batch8-12\`.*
+Рабочая копия прогона: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch8-12\`.*

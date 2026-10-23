@@ -1,7 +1,7 @@
 # Batch #8, Этап 1 — Read-only аудит зависимостей для удаления фич F1–F6
 
 Дата: 2026-10-02. Исполнитель: ZCode (GLM). Режим: только статический анализ (git, AST, grep); приложение не запускалось, user_data не затронут.
-Рабочие скрипты и сырые данные: `D:\Temp\SupervertalerPortable\refactoring\b8-s1\` (вне репозитория):
+Рабочие скрипты и сырые данные: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-s1\` (вне репозитория):
 - `ast_map.json`, `ast_map.py` — AST-карта монолита (классы/методы/границы);
 - `main.txt`, `init.txt`, `create_main_layout.txt`, `top_tabs.txt`, `create_menus.txt`, `tray.txt`, `alwayson_tray.txt`, `global_shortcuts.txt`, `create_settings_tab.txt`, `switch_tabs.txt`, `f1_*.txt` — дампы методов с номерами строк;
 - `notes_stage0_1.md`, `notes_stage2_4.md` — сырые инвентари по этапам.

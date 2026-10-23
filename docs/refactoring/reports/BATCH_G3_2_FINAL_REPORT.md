@@ -118,7 +118,7 @@ Timeout/Empty в чате — без изменений: пузырь «⚠ Erro
 
 Харнесс: fake loopback OpenAI-endpoint (`batch-g32_fake_endpoint_probe.py`,
 ThreadingHTTPServer на `127.0.0.1:0`), изолированные iso-профили
-(`D:\Temp\SupervertalerPortable\refactoring\batch-g32*`), завершение только своих PID
+(`E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g32*`), завершение только своих PID
 по фильтру командной строки (kill по имени образа не выполняется).
 
 | # | Кейс | Результат |
@@ -239,7 +239,7 @@ Image Extractor (Q10): усечение AI-ответа подписи → по�
 
 ## §11. Изоляция и правила (соблюдены)
 
-- Все пробы/наборы — изолированные iso-профили под `D:\Temp\SupervertalerPortable\`,
+- Все пробы/наборы — изолированные iso-профили под `E:\Dev\Work_temp\SupervertalerPortable\`,
   реальные данные пользователя не тронуты; сети — только loopback (net-traps).
 - Завершение процессов — только свои PID по фильтру командной строки; kill по имени
   образа не выполнялся ни разу.

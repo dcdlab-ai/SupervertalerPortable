@@ -6,7 +6,7 @@ modules/grid/pagination.py (МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ, тот ж�
 + 14 тонких делегатов в монолите с точными исходными именами/сигнатурами
 + 2 module-level константы, снятые с класса. Артефакты измерений:
 docs/refactoring/audits/*batch6stage3*.txt; скрипты и прогоны:
-D:\Temp\SupervertalerPortable\refactoring\batch6_stage3\ (run-001\).
+E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch6_stage3\ (run-001\).
 
 ═══════════════════════════════════════════════════════════════════════════════
 1. ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
@@ -36,7 +36,7 @@ D:\Temp\SupervertalerPortable\refactoring\batch6_stage3\ (run-001\).
   populate-кластера физически лежат в «пропуске» 28429–28447 — НЕ переносились,
   остались в монолите (Step 8).
 - Снимки: snapshot_index.txt + 16 файлов тел в
-  D:\Temp\SupervertalerPortable\refactoring\batch6_stage3\snapshot\ с sha256;
+  E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch6_stage3\snapshot\ с sha256;
   снимок 2 NOT-MOVE методов → docs/refactoring/audits/
   not_moved_methods_batch6stage3_snapshot.txt
   (_start_background_populate sha256 729b187ad0799eab0e6dd6d3d172902ae3cbd7ea6915416bdc58396468057411,

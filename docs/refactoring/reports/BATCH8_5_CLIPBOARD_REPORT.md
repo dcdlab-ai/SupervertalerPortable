@@ -14,7 +14,7 @@
 | Baseline файлов | modules/**/*.py = 125; py_compile монолита+модулей = **126/126** | OK |
 | EOL до | Supervertaler.py i/lf **w/crlf**; shortcut_manager / keyboard_shortcuts_widget / settings_service / clipboard_manager_widget i/lf **w/lf** — предсуществующий набор | OK |
 
-Базовые значения защит (стадийная папка `D:\Temp\SupervertalerPortable\refactoring\b8-5\`):
+Базовые значения защит (стадийная папка `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-5\`):
 
 | Защита | ДО | Источник |
 |---|---|---|

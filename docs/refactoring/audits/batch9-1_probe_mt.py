@@ -7,7 +7,7 @@ import faulthandler, hashlib, json, os, pathlib, sys
 
 tree = pathlib.Path(sys.argv[1]).resolve()
 iso = pathlib.Path(sys.argv[2]).resolve()
-OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b9-1\mt_verdict.json")
+OUT = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-1\mt_verdict.json")
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 os.environ["USERPROFILE"] = str(iso)

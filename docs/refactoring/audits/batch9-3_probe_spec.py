@@ -18,7 +18,7 @@ import json, os, pathlib, socket, sys
 tree = pathlib.Path(sys.argv[1]).resolve()
 iso = pathlib.Path(sys.argv[2]).resolve()
 tag = sys.argv[3]
-OUT = pathlib.Path(rf"D:\Temp\SupervertalerPortable\refactoring\b9-3\spec_verdict_{tag}.json")
+OUT = pathlib.Path(rf"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3\spec_verdict_{tag}.json")
 
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 os.environ["USERPROFILE"] = str(iso)
@@ -79,7 +79,7 @@ QMessageBox.warning = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Ok
 QMessageBox.critical = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Ok)
 QMessageBox.question = staticmethod(lambda *a, **k: QMessageBox.StandardButton.Yes)
 
-open_queue = [r"D:\Temp\SupervertalerPortable\refactoring\b9-3\inputs\test.txt"]
+open_queue = [r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3\inputs\test.txt"]
 QFileDialog.getOpenFileName = staticmethod(lambda *a, **k: (open_queue.pop(0) if open_queue else "", ""))
 
 # ---------- A. сид: legacy ollama-настройки, БЕЗ custom-профилей ----------

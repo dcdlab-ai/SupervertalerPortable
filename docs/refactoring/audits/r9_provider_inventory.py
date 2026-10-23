@@ -11,7 +11,7 @@
 import ast, json, os, re, sys
 
 ROOT = os.getcwd()
-STAGE = r"D:\Temp\SupervertalerPortable\analysis\r9"
+STAGE = r"E:\Dev\Work_temp\SupervertalerPortable\analysis\r9"
 
 FAMILIES = {
     "openai":      r"openai",

@@ -5,9 +5,9 @@
 # TAG=qa; shared probe scripts/fixtures unchanged, logs compare 1:1 against
 # the batch-m2 baselines.
 cd /e/Dev/SupervertalerPortable
-S=/d/Temp/SupervertalerPortable/refactoring/batch-qa
-S94=/d/Temp/SupervertalerPortable/refactoring/batch9-4
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch-qa
+S94=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
 PY=E:/Dev/python-embed/python.exe
 TAG=${1:-qa}
 kill_leftovers() {

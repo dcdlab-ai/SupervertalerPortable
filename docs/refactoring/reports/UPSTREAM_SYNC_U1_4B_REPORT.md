@@ -25,7 +25,7 @@ segmenter that never drops text», #191). Ядро перенесено в U1.4a
 | `py_compile` монолит + `modules/**/*.py` (до) | 137/137 OK |
 | EOL (до) | `i/lf w/lf` для `Supervertaler.py` |
 
-Stage-каталог: `D:\Temp\SupervertalerPortable\refactoring\u1-port5\`.
+Stage-каталог: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port5\`.
 
 ## 1. Аудит (Этап 1 ТЗ)
 
@@ -240,7 +240,7 @@ Monkeypatch: `QMessageBox.*` (записаны 2 вызова: Export/Import inf
 | 1 | `modules/segmentation_rules_widget.py` | `eeefbccb78b3d4fcd02f4ef4602a33ae24c7b350d38cbb623de0ed72ffcdf3f4` | новый файл |
 | 2 | `Supervertaler.py` | `5080fd5b4e6a5bdd58cc5b2a45f4d8c248578ec20c6eb1eae006dbc455d573d2` | −139/+12 строк против базы |
 
-Больше ни один файл не менялся. Тестовые данные: `D:\Temp\SupervertalerPortable\refactoring\u1-port5\testdata\`
+Больше ни один файл не менялся. Тестовые данные: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port5\testdata\`
 — `sample_initials.txt` (LF, SHA256 см. ниже), `expected_default.md`, `expected_with_rule.md`,
 `srx_roundtrip.md`.
 

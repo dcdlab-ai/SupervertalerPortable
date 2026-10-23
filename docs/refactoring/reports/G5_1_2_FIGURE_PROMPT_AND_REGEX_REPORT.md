@@ -2,7 +2,7 @@
 
 Дата: 2026-10-15. Промпт: «BATCH G5.1 + G5.2 — РОЛЬ КАРТИНКИ В ПРОМПТЕ + РАСШИРЕНИЕ ДЕТЕКТА ССЫЛОК НА РИСУНКИ» (координатор — Дмитрий). Роль: исполнитель. Пуш не выполнялся (по промпту).
 
-База: HEAD `c2ab7f46`. SHA/строки шести файлов совпали с промптом: `Supervertaler.py` fe5f706c…/55040, `llm_clients.py` 7f2b9ee9…/579, `settings_service.py` 08a0d943…/599, `unified_prompt_manager_qt.py` cec2ef68…/6833, `quicktrans.py` 6a6812be…/1635, `figure_context_manager.py` d396c761…/347. Снимки «до» — `D:\Temp\SupervertalerPortable\refactoring\batch-g5-12\snap\*.before`.
+База: HEAD `c2ab7f46`. SHA/строки шести файлов совпали с промптом: `Supervertaler.py` fe5f706c…/55040, `llm_clients.py` 7f2b9ee9…/579, `settings_service.py` 08a0d943…/599, `unified_prompt_manager_qt.py` cec2ef68…/6833, `quicktrans.py` 6a6812be…/1635, `figure_context_manager.py` d396c761…/347. Снимки «до» — `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g5-12\snap\*.before`.
 
 ## §1. Коммиты
 

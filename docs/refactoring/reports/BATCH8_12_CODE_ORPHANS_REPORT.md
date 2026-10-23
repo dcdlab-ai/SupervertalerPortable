@@ -7,7 +7,7 @@
 Кодовый коммит: **f804d447** «Batch #8.12: remove orphan modules and dead definitions».
 База кода: **d308a93f** (HEAD на старте = 768fe720 = origin/main; после d308a93f —
 только docs-коммиты, проверено `git diff --name-only d308a93f..HEAD`).
-Все артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-12\`.
+Все артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-12\`.
 
 ---
 
@@ -551,7 +551,7 @@ T8.12.4 — **ПОДТВЕРЖДЕНО**. Batch #8.12 принят.
 
 ---
 
-Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-12\` —
+Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-12\` —
 baseline/, snapshots/ (9 шт., sha256), probes/ (4 лога + iso-профили),
 regress/ (before/after), smoke/ (before/before2/after), tb-regress/ (before/after),
 recon_importers.json, recon_public_names.txt, protection2_grep.txt,

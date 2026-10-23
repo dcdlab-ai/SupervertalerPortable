@@ -9,7 +9,7 @@ import hashlib
 import pathlib
 
 REPO = pathlib.Path(r"E:\Dev\SupervertalerPortable")
-S = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-12\snapshots")
+S = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-12\snapshots")
 S.mkdir(parents=True, exist_ok=True)
 
 BLOCKS = [

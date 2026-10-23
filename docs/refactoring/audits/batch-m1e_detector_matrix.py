@@ -31,5 +31,5 @@ extra = {"zwsp_link_period": is_image_links_only("![Image](x)\u200b."),
          "multiline_links": is_image_links_only("![a](p1)\n![b](p2)."),
          "fullwidth_digit": is_image_links_only("![Image](x)１")}
 print(json.dumps({"matrix": out, "expect": EXPECT, "verdict": verdict, "extra": extra}, ensure_ascii=False, indent=1))
-with open(r"D:\Temp\SupervertalerPortable\refactoring\batch-m1\m1e-run-001\m1e_detector_matrix.json", "w", encoding="utf-8") as f:
+with open(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-m1\m1e-run-001\m1e_detector_matrix.json", "w", encoding="utf-8") as f:
     json.dump({"matrix": out, "expect": EXPECT, "verdict": verdict, "extra": extra}, f, ensure_ascii=False, indent=1)

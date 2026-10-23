@@ -71,6 +71,6 @@ T-G3.2.1–T-G3.2.8 без изменений. Поведение новое: в
 
 `docs/refactoring/audits/batch-g32g_unit_checks.py` + `.log`,
 `batch-g32g_smoke_after_g32g.log`, `batch-g32g_static.log` (4 файла).
-Stage: `D:\Temp\SupervertalerPortable\refactoring\batch-g32g\`.
+Stage: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g32g\`.
 
 **Стоп до вердикта координатора по G3.2g. Пуш не выполнялся.**

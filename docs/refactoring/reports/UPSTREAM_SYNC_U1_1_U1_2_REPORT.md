@@ -56,7 +56,7 @@
 Все имена, импортируемые из `modules.platform_helpers` по всему Portable (AST: `Supervertaler.py:119,11801,25784,29788,54712,66763,66901,66914,66921,66956,67399,67456,67489,67643,67651`; `modules/clipboard_manager_widget.py` и др.), присутствуют в версии v1.10.372. Фикс чисто аддитивный (`send_unicode_text`, `altgr_character`, `_WinKeyboard`, `VK_RMENU/VK_LCONTROL/VK_CAPITAL`, `_KEYEVENTF_UNICODE` + расширение `GlobalHotkeyManager`). **Ломающего API нет.**
 
 ### Трёхсторонние диффы монолитных методов (п.5) — дрейфа нет
-Для каждого затронутого метода сверены тела: апстрим@371 → Portable@HEAD — **в затронутых регионах совпадают дословно** (у `_save_ai_settings_from_ui`/`_create_ai_settings_tab` Portable расширял метод в ДРУГИХ регионах — mistral/deepseek/openrouter уже были и в апстриме 371; `existing_settings = self.load_llm_settings()` на rel-строке 47 в обеих версиях — сверено AST). Тело «апстрим 371 → коммит» = таблица в §3. Диффы: `D:\Temp\SupervertalerPortable\refactoring\u1-port\{f5_mono,626_mono,da4_mono,626_ksw,da4_llm_clients,f5_modules}.diff`.
+Для каждого затронутого метода сверены тела: апстрим@371 → Portable@HEAD — **в затронутых регионах совпадают дословно** (у `_save_ai_settings_from_ui`/`_create_ai_settings_tab` Portable расширял метод в ДРУГИХ регионах — mistral/deepseek/openrouter уже были и в апстриме 371; `existing_settings = self.load_llm_settings()` на rel-строке 47 в обеих версиях — сверено AST). Тело «апстрим 371 → коммит» = таблица в §3. Диффы: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port\{f5_mono,626_mono,da4_mono,626_ksw,da4_llm_clients,f5_modules}.diff`.
 
 ---
 
@@ -138,7 +138,7 @@ Docs: `VALIDATION_BACKLOG.md` #26 → CLOSED (ссылка на сценарий
 
 ## 4. Статическая валидация
 
-### 4.1 AST-проверки (скрипт `D:\Temp\SupervertalerPortable\refactoring\u1-port\validate_u1.py`)
+### 4.1 AST-проверки (скрипт `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port\validate_u1.py`)
 - **(а)** Вызовов `save_general_settings()` без аргументов во всём Portable: **0** (AST по монолиту + все modules).
 - **(б)** Все изменённые методы в ожидаемых классах: `_create_ai_settings_tab`, `_create_mt_quick_lookup_settings_tab`, `_add_mt_and_llm_matches`, `_save_general_settings_from_ui`, `_save_ai_settings_from_ui`, `_apply_ollama_timeout_setting` → `SupervertalerQt`; `_find_autohotkey_executable`, `_browse_for_autohotkey`, `_register_hotkey_external_script` → `SuperlookupTab`. Совпадение множеств классов — OK (ловушка одноимённого `SuperlookupTab.create_settings_tab`/`_SearchTermHighlighter.highlightBlock` не сработала).
 - **(в)** Diff `settings_service.py` vs 7b895c93: ровно 8 строк — дефолт `claude_model` (±2) и комментарий об оговорке S2.2 (±6). Логика/сигнатуры не тронуты.
@@ -150,7 +150,7 @@ Docs: `VALIDATION_BACKLOG.md` #26 → CLOSED (ссылка на сценарий
 - EOL всех 12 затронутых файлов до и после: `i/lf w/lf` — не изменились.
 
 ### 4.3 Тесты апстрима — 36/36 PASS
-`tests/test_llm_pricing.py`, `test_chat_backend_cost.py`, `test_ollama_timeout.py`, `test_altgr_hotkeys.py` (все — только `modules.*`, монолит не импортируют) запущены из временной копии вне репо (`D:\Temp\SupervertalerPortable\refactoring\u1-port\repo-sim\`, junction на `modules/`; `E:\Dev\python-embed\python.exe -m pytest … -q`):
+`tests/test_llm_pricing.py`, `test_chat_backend_cost.py`, `test_ollama_timeout.py`, `test_altgr_hotkeys.py` (все — только `modules.*`, монолит не импортируют) запущены из временной копии вне репо (`E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port\repo-sim\`, junction на `modules/`; `E:\Dev\python-embed\python.exe -m pytest … -q`):
 ```
 36 passed in 1.34s
 ```
@@ -267,4 +267,4 @@ Baseline сборки: коммит `7b895c93`. Файлы заменяются 
 4. **Q4 — очерёдность:** следующие под-батчи U1.3 (фиксы TM/тегов/хоткеев) — после вашего прогона T-сценариев на тестовой сборке или параллельно? **→ ОТКРЫТ** (прогон частично выполнен, §6.1; момент старта U1.3 — на усмотрение Дмитрия).
 
 ---
-*Артефакты: `D:\Temp\SupervertalerPortable\refactoring\u1-port\` — диффы семи коммитов (`f5_mono.diff`, `626_mono.diff`, `da4_mono.diff`, `626_ksw.diff`, `f5_modules.diff`, `da4_llm_clients.diff`), `validate_u1.py`, `headless_settings_check.py`, `repo-sim/tests/` (копии тестов апстрима).*
+*Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\u1-port\` — диффы семи коммитов (`f5_mono.diff`, `626_mono.diff`, `da4_mono.diff`, `626_ksw.diff`, `f5_modules.diff`, `da4_llm_clients.diff`), `validate_u1.py`, `headless_settings_check.py`, `repo-sim/tests/` (копии тестов апстрима).*

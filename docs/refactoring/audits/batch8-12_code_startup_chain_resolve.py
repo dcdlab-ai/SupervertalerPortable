@@ -122,7 +122,7 @@ def main():
                 continue
             walk_calls(fn, cls_name)
 
-    out_path = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-10")
+    out_path = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-10")
     tag = sys.argv[2] if len(sys.argv) > 2 else "after"
     (out_path / f"startup_chain_{tag}.json").write_text(
         json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8"

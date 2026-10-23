@@ -18,7 +18,7 @@
 | Защита 3 (pyflakes, ДО) | 720 предупреждений, из них **149 undefined names** (совпадает с 8.2; состав: tk×100, messagebox×19, …) |
 | Offscreen-проба ДО | main_tabs 8: Editor, TMs, Termbases, AI, SuperLookup, Clipboard Manager, **Voice**, Settings; voice_tab_index/_voice_top_widget присутствуют; страницы Settings **17** (🎤 Voice между AI Settings и Clipboard); кнопка «🎤 Dictate (Ctrl+Shift+Space)» на месте; хоткеи при старте: `ctrl+alt+l, ctrl+alt+q, ctrl+alt+c, ctrl+shift+space, ctrl+alt+v` |
 
-Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-3\` (startup_chain_before/after.json,
+Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-3\` (startup_chain_before/after.json,
 undefined_names_before/after.txt, probe_before/after.log, recon_table.md, snapshots/).
 
 ## 1. Рекон (Этап 1)

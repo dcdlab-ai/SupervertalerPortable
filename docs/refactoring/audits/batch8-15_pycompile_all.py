@@ -6,7 +6,7 @@
 import py_compile, subprocess, sys, pathlib
 
 ROOT = r"E:\Dev\SupervertalerPortable"
-PYC = r"D:\Temp\SupervertalerPortable\refactoring\b8-15\_pyc.pyc"
+PYC = r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-15\_pyc.pyc"
 files = subprocess.run(["git", "ls-files", "*.py"], capture_output=True, text=True,
                        cwd=ROOT).stdout.split()
 app_files = [f for f in files if not f.startswith("docs/")]

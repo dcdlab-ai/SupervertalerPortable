@@ -17,7 +17,7 @@ for f in files:
         "crlf": b.count(b"\r\n"),
         "bare_lf": b.count(b"\n") - b.count(b"\r\n"),
     }
-outp = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\batch-m2") / f"manifest_{tag}.json"
+outp = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-m2") / f"manifest_{tag}.json"
 outp.write_text(json.dumps(out, indent=1), encoding="utf-8")
 print("monolith:", json.dumps(out["Supervertaler.py"]))
 print("modules/tag_manager.py:", json.dumps(out.get("modules/tag_manager.py")))

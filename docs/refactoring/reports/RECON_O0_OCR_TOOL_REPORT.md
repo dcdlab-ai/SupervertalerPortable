@@ -75,7 +75,7 @@ HEAD: `9321764b` == `origin/main` (Шаг 0 чистый). Код продукт
 * только **target** (source как fallback при радиокнопке «Use source text», `:30111-30115`); склейка предложений по `paragraph_id` + `join_segments` (`:30193-30207`); запись `newline='\n'` (**LF**), кодировки UTF-8 / UTF-8-BOM / Latin-1 / Windows-1252 (`:30127-30131`, **cp1251 нет**).
 * Экспорт требует хотя бы один переведённый сегмент (гейт `translated_count==0` `:30074-30081`).
 
-**Round-trip проба на текущем коде** (offscreen, полный app, изолированный профиль `user_data` в стаге, мок диалогов; скрипт и JSON в стаге `D:\Temp\SupervertalerPortable\recon-o0\roundtrip\`):
+**Round-trip проба на текущем коде** (offscreen, полный app, изолированный профиль `user_data` в стаге, мок диалогов; скрипт и JSON в стаге `E:\Dev\Work_temp\SupervertalerPortable\recon-o0\roundtrip\`):
 * A (без сегментации по предложениям, вход CRLF, target=source): 10 строк → 10 сегментов, экспорт **байт-в-байт совпал** с ожидаемым LF-файлом (CRLF входа нормализуется в LF, финальный перевод строки добавляется). Сохранены: кириллица, `<1>`/`<10>`-теги, литеральный `\n` (два символа), `![Image](/path/file.png)`, `<br>`, табы, ведущие/концевые пробелы, пустая строка.
 * S (сегментация по предложениям ON): 13 сегментов; многосрочная строка «First sentence. Second sentence! Third? End.» разрезана на 4 с `join_before=' '` и **склеена на экспорте байт-в-байт**; md-ссылка осталась атомарной (мягкий гейт сегментер-стража не дал резать по «.png)»). **Потеря**: ведущие/концевые пробелы строки (`.strip()`, `simple_segmenter.py:100-109`) — единственная байт-несовпадение.
 * B: fallback «Use source text» работает (переведённый сегмент → target, прочие → source).
@@ -177,6 +177,6 @@ modules/ocr_tool/
 ## Handover (конец O.0)
 
 * Код продукта не изменён. Изменения репозитория: этот отчёт + AGENTS.md (правило проверки процессов Python перед kill) + PROJECT_STATUS (строка O.0). Один docs-only коммит, пуш не выполнялся.
-* Артефакты пробы: `D:\Temp\SupervertalerPortable\recon-o0\roundtrip\` (скрипт `probe_o0_roundtrip.py`, `roundtrip_results.json`, `probe_out.txt`, in_*/out_*) — сохранены до вердикта координатора.
+* Артефакты пробы: `E:\Dev\Work_temp\SupervertalerPortable\recon-o0\roundtrip\` (скрипт `probe_o0_roundtrip.py`, `roundtrip_results.json`, `probe_out.txt`, in_*/out_*) — сохранены до вердикта координатора.
 * Инцидент: после пробы выполнен `taskkill /F /IM python.exe` (и `java.exe`) по имени образа — убиты чужие процессы пользователя. Ошибка исполнителя; правило предотвращения записано в AGENTS.md (секция GUI-testing). Записи в реестр (QSettings HKCU MTQuickPopup/autostart), как и всегда в offscreen-пробах, машинно-глобальные.
 * Стоп. Ожидаю вердикта координатора и промпта следующей стадии; следующих батчей не начинаю.

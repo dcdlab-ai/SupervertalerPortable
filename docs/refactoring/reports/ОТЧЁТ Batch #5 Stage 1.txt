@@ -368,7 +368,7 @@ Batch #2/#3c (делегаты-обёртки как переходный пер
 Ни одна строка кода не изменена: правок в Supervertaler.py, modules/** и любых
 других .py не производилось ни одним шагом Stage 1. Все измерения выполнены
 вспомогательными скриптами в
-D:\Temp\SupervertalerPortable\analysis\batch5-stage1\
+E:\Dev\Work_temp\SupervertalerPortable\analysis\batch5-stage1\
 (inventory.py, bounds.py, callsites.py, owners.py; выводы — *_out.txt).
 Единственные добавленные файлы: этот отчёт (docs/refactoring/reports/) и
 снимок docs/refactoring/audits/not_moved_methods_batch5_snapshot.txt

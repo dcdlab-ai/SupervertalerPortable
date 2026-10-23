@@ -1,14 +1,14 @@
 import os, pathlib, sys
 
-OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-15")
-sys.path.insert(0, str(pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
+OUT = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-15")
+sys.path.insert(0, str(pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
 # Q-A Q7 (координатор 2026-10-23): dev-рантайм агент не меняет — pyflakes
 # ставится ВНЕ рантайма (pip install --target). Встраиваемый Python (._pth)
 # игнорирует PYTHONPATH, поэтому внешний каталог добавляется прямо здесь.
 # Исторический b8-9/pyflakes_lib повреждён 2026-10-22 (у пакета удалены .py,
 # остались только __pycache__ — см. env-baseline_q-a.txt); новый эталон —
 # qa/env/pyflakes-ext (4.0.3; счётчики совпадают с базой 4.0.1: 548/126/4).
-sys.path.insert(0, r"D:\Temp\SupervertalerPortable\qa\env\pyflakes-ext")
+sys.path.insert(0, r"E:\Dev\Work_temp\SupervertalerPortable\qa\env\pyflakes-ext")
 os.chdir(r"E:\Dev\SupervertalerPortable")
 
 from pyflakes.api import checkPath

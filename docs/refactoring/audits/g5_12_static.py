@@ -15,9 +15,9 @@ import sys
 
 ROOT = pathlib.Path(r"E:\Dev\SupervertalerPortable")
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
+sys.path.insert(0, str(pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-9") / "pyflakes_lib"))
 tag = sys.argv[1] if len(sys.argv) > 1 else "after"
-OUT = pathlib.Path(r"D:\Temp\SupervertalerPortable\refactoring\batch-g5-12")
+OUT = pathlib.Path(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g5-12")
 OUT.mkdir(parents=True, exist_ok=True)
 
 # --- chain ---

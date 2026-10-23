@@ -6,7 +6,7 @@
 **Отчёт:** отдельный docs-коммит (этот файл).
 **Основание:** постановка 8.10 (промпт Дмитрия), `BATCH8_A2_SUPERLOOKUP_TRIM_AUDIT_REPORT.md`
 (§2.1/§2.2/§2.4a/§2.3, §3, §4, §7, §9, §10), `BATCH8_STAGE1_AUDIT_REPORT.md` ред. 2 (§4.1).
-**Рабочие файлы:** `D:\Temp\SupervertalerPortable\refactoring\b8-10\`
+**Рабочие файлы:** `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-10\`
 (снапшоты всех вырезанных зон `snapshots\cut_*.txt`, скрипты `implement_810.py`,
 `fix_810.py`, `startup_chain_resolve.py`, `ast_checks_810.py`, `probe_window.py`,
 `headless_imports.py`, логи проб `probe_before/after/after2.log`).

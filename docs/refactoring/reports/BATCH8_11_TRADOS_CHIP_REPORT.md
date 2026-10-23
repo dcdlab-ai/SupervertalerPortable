@@ -21,7 +21,7 @@
 | Blob-хэши (git HEAD) | chat_view_widget `2cfcb4ff…` (1155), unified_prompt_manager_qt `073a1cc5…` (6861), trados_bridge_client `212d1031…` (524) |
 | EOL (`git ls-files --eol`) | все три файла `i/lf w/lf attr=text=auto eol=lf` |
 
-Базовые значения (Этап 0 п.5, артефакты в `D:\Temp\SupervertalerPortable\refactoring\b8-11\`):
+Базовые значения (Этап 0 п.5, артефакты в `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-11\`):
 
 - **(а) AST-резолв self-вызовов** (`chain_resolve.py before`): ChatViewWidget — **24 метода**
   (BFS от `__init__`/`_init_ui`/`_init_context_chips`/`_on_chip_toggled`/`_do_send`/`_send_message`
@@ -330,7 +330,7 @@ unified_prompt_manager_qt `cd56aa486b3a8d15f9c23a803c584ea25fd93e251049c76e48844
 
 ---
 
-Артефакты: `D:\Temp\SupervertalerPortable\refactoring\b8-11\` — `implement_811.py`,
+Артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-11\` — `implement_811.py`,
 `snapshots\` (10 зон, sha256), `verify_snapshots.py` (10/10 OK vs 40441230),
 `chain_resolve.py` + `chain_{before,after}.json`, `run_pyflakes.py` +
 `undefined_names_{before,after}.txt` + `pyflakes_{before,after}.txt`,

@@ -6,7 +6,7 @@
 modules/grid/filters.py (МОДУЛЬ ЧИСТЫХ ФУНКЦИЙ — тот же принцип, что
 helpers.py/pagination.py) + 20 тонких делегатов в монолите с точными исходными
 именами/сигнатурами. Артефакты измерений: docs/refactoring/audits/
-*batch6stage4*; скрипты и прогоны: D:\Temp\SupervertalerPortable\refactoring\
+*batch6stage4*; скрипты и прогоны: E:\Dev\Work_temp\SupervertalerPortable\refactoring\
 batch6_stage4\ (run-001 — перенос и первичная валидация, run-002/run-003 —
 финальные измерения на итоговом дереве).
 

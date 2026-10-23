@@ -176,7 +176,7 @@ for p in nonpy_files():
                 nonpy_hits[m].append((rel, i, "nonpy", line.strip()[:140]))
 
 out = {"py_importers": result, "nonpy_hits": nonpy_hits}
-with open(r"D:\Temp\SupervertalerPortable\refactoring\batch8-12\importers.json", "w", encoding="utf-8") as fh:
+with open(r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch8-12\importers.json", "w", encoding="utf-8") as fh:
     json.dump(out, fh, ensure_ascii=False, indent=1)
 
 # summary

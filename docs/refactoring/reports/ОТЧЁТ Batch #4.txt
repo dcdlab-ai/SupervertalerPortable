@@ -173,7 +173,7 @@
   перепроверено повторно непосредственно перед коммитом).
 
 3.6 ФУНКЦИОНАЛЬНЫЕ СЦЕНАРИИ (offscreen, реальные QThread-потоки; скрипт и лог —
-  D:\Temp\SupervertalerPortable\refactoring\batch4\run-001\):
+  E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch4\run-001\):
   - TMSearchWorker — точное совпадение по реальной тестовой TM-базе
     (sqlite, схема translation_units): results_ready(1, [similarity 1.0,
     match_pct 100, target «Hallo wereld», tm_name «Test TM»]) — PASS

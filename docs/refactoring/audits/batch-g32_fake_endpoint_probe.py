@@ -16,8 +16,8 @@ ThreadingHTTPServer; the trap assertion checks the Host header of every
 recorded request is the loopback endpoint.
 
 Usage (bundled runtime, project root as CWD):
-  E:/Dev/python-embed/python.exe -u docs/refactoring/audits/batch-g32_fake_endpoint_probe.py capture D:/Temp/SupervertalerPortable/refactoring/batch-g32
-  E:/Dev/python-embed/python.exe -u docs/refactoring/audits/batch-g32_fake_endpoint_probe.py verify  D:/Temp/SupervertalerPortable/refactoring/batch-g32
+  E:/Dev/python-embed/python.exe -u docs/refactoring/audits/batch-g32_fake_endpoint_probe.py capture E:/Dev/Work_temp/SupervertalerPortable/refactoring/batch-g32
+  E:/Dev/python-embed/python.exe -u docs/refactoring/audits/batch-g32_fake_endpoint_probe.py verify  E:/Dev/Work_temp/SupervertalerPortable/refactoring/batch-g32
 """
 
 import hashlib

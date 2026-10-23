@@ -24,7 +24,7 @@
 - ключи удалённых провайдеров в settings.json **не удалять** (инертны);
 - страницы Settings **не переименовывать**.
 
-Baseline ДО (замерено на 59290c98 в stage `D:\Temp\SupervertalerPortable\refactoring\batch9-4\`):
+Baseline ДО (замерено на 59290c98 в stage `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch9-4\`):
 - AST chain: **907 / 0 unresolved**; pyflakes: **562** (undefined 126 строк / 4 имени: tk 100,
   messagebox 19, filedialog 2, ttk 5 — база Дмитрия из ответа 4 на вопросы 9.3);
 - py_compile канонический **110/0**, справочный 168/0; headless 91/2 (setuptools, fitz);

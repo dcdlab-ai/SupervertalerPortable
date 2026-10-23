@@ -9,7 +9,7 @@ docs/refactoring/prompts/Promt - EXTRACTION BATCH #7 STAGE 2 (S2.4 languages-spe
 Разведка Б2 (границы 4 методов) принята; пересчитаны AST только границы,
 кластеры, зависимости и callsites на этом дереве (1.2/1.3/1.4). Артефакты:
 docs/refactoring/audits/batch7s24_*; рабочий прогон —
-D:\Temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\
+E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch7_stage2_s24\run-001\
 (скрипты, снапшоты 12 блоков, JSON, логи; head-wt — worktree HEAD f600e00).
 
 ИТОГ ОДНОЙ СТРОКОЙ: монолит 68 285 → 68 274 строк (−11; git --numstat 27/38 по

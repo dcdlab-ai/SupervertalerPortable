@@ -4,7 +4,7 @@ files = subprocess.run(["git", "ls-files", "*.py"], capture_output=True, text=Tr
 ok, fail = 0, []
 for f in files:
     try:
-        py_compile.compile(f, doraise=True, cfile=r"D:\Temp\SupervertalerPortable\refactoring\b8-13\_pyc.pyc")
+        py_compile.compile(f, doraise=True, cfile=r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-13\_pyc.pyc")
         ok += 1
     except Exception as e:
         fail.append((f, str(e)))

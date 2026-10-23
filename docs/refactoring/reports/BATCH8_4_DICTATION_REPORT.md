@@ -2,7 +2,7 @@
 
 Кодовый коммит: `bf821d0f` «Batch #8.4: remove voice dictation, vocabulary, termbase 🎤 UI (F1)».
 База: состояние после Batch #8.3 (HEAD `03308061`, Supervertaler.py `74b05eaf…`, 67157 строк).
-Стейдж-каталог: `D:\Temp\SupervertalerPortable\refactoring\b8-4\`.
+Стейдж-каталог: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b8-4\`.
 
 ## 0. Baseline и git-синхронизация
 

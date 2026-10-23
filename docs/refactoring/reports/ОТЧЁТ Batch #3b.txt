@@ -2,7 +2,7 @@
 =================================================================
 Дата: 2026-09-13. База: коммит 740f440 (HEAD на старте; история: c7497d6 = Batch #3a).
 Исполнитель: ZCode. Интерпретатор всех проверок: E:\Dev\python-embed\python.exe (AGENTS.md соблюдён;
-артефакты этапа — в D:\Temp\SupervertalerPortable\refactoring\batch-3b\run-001\).
+артефакты этапа — в E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-3b\run-001\).
 
 ЭТАП 0 — БАЗОВАЯ ЛИНИЯ
 ----------------------
@@ -185,7 +185,7 @@
 - Валидация документации: CODE_MAP_REFACTOR.md (§3 таблица диапазонов, §12.1, §13.2)
   и EXTRACTION_PLAN.md (статус Step 3 после Batch #3b; фактические диапазоны воркеров
   для Step 4) обновлены с пометками об устаревших числах.
-- Артефакты валидации: D:\Temp\SupervertalerPortable\refactoring\batch-3b\run-001\
+- Артефакты валидации: E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-3b\run-001\
   (manifest_before/after_batch3b.txt, baseline_counts_batch3b.txt,
   counts_after_batch3b.txt, callsites_before/after_batch3b.txt, refblocks/ — эталонные
   блоки и sha256, сценарии и их выводы).

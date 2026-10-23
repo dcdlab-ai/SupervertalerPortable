@@ -3,7 +3,7 @@
 делегат монолита == реализация сервиса (15 кейсов 9.1b)."""
 import json, os, pathlib, sys, tempfile
 sys.path.insert(0, r"E:\Dev\SupervertalerPortable")
-tmp = tempfile.mkdtemp(dir=r"D:\Temp\SupervertalerPortable\refactoring\b9-3")
+tmp = tempfile.mkdtemp(dir=r"E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-3")
 work = pathlib.Path(tmp) / "workbench" / "settings"
 work.mkdir(parents=True)
 ptr = pathlib.Path(tmp) / "_cfg"

@@ -2,8 +2,8 @@
 # Batch 9.4i offscreen suite against a worktree (per-commit validation of 9.4i-1)
 # usage: run_94i_worktree.sh <worktree-path> <tag>
 cd /e/Dev/SupervertalerPortable
-P=/d/Temp/SupervertalerPortable/refactoring/b8-15/probes
-S=/d/Temp/SupervertalerPortable/refactoring/batch9-4
+P=/e/Dev/Work_temp/SupervertalerPortable/refactoring/b8-15/probes
+S=/e/Dev/Work_temp/SupervertalerPortable/refactoring/batch9-4
 PY=E:/Dev/python-embed/python.exe
 T=$1
 TAG=$2

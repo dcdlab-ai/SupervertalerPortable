@@ -10,7 +10,7 @@
   (строки идентичны, различие только в переводах строк). **Не тронуто** (по указанию).
 - Рабочий интерпретатор: `E:\Dev\python-embed\python.exe` (3.13.15), CWD =
   `E:\Dev\SupervertalerPortable`. Временные каталоги:
-  `D:\Temp\SupervertalerPortable\refactoring\batch-g32\` (пробы/захваты),
+  `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g32\` (пробы/захваты),
   общие сид-каталоги этапов — `...\batch-m1\` (совместно с M1/M1e-набором).
 
 Итог батча: **3 коммита** (`951b54cd` G3.2a, `35873b2d` G3.2b, `a17fcb63` G3.2c),
@@ -106,7 +106,7 @@
 Скрипт: `docs/refactoring/audits/batch-g32_fake_endpoint_probe.py`
 (ThreadingHTTPServer на `127.0.0.1:0`; пишет сырые тела запросов + Host;
 режимы capture/verify). Все пробы — изолированные iso-профили
-(`D:\Temp\SupervertalerPortable\refactoring\batch-g32\` и общие batch-m1-каталоги),
+(`E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-g32\` и общие batch-m1-каталоги),
 реальные данные не тронуты. `kill_leftovers` — только свои PID по фильтру
 командной строки (без kill по имени образа, по правилу).
 

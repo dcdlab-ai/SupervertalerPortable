@@ -77,7 +77,7 @@
 | Новых модулей `modules/` | 22 (class A/D ниже) |
 | Коммитов без правок монолита | 6 (8e8be3d4, 0d5375e0, 75a621a1, b3f76ee7, f90edc12, a5857227) |
 
-Методы монолита определялись AST-маппером (изменённые строки `+`/`-` резолвились в охватывающий метод состояния файла на момент коммита; артефакты: `D:\Temp\SupervertalerPortable\refactoring\upstream-stage1\{commit_methods.txt, anchor_map.txt, d_*.diff}`).
+Методы монолита определялись AST-маппером (изменённые строки `+`/`-` резолвились в охватывающий метод состояния файла на момент коммита; артефакты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\upstream-stage1\{commit_methods.txt, anchor_map.txt, d_*.diff}`).
 
 ### 2.2 Таблица коммитов (хронологически)
 
@@ -288,5 +288,5 @@
 ---
 
 ### Приложения (артефакты этапа, вне репо)
-`D:\Temp\SupervertalerPortable\refactoring\upstream-stage1\`:
+`E:\Dev\Work_temp\SupervertalerPortable\refactoring\upstream-stage1\`:
 `commits_files.txt` (файлы по коммитам), `commit_methods.txt/json` (AST-маппинг хунков), `anchor_map.txt/json` (существование якорей в Portable), `hunk_to_method.py`, `anchor_check.py`, `d_*.diff` (диффы ключевых модулей), `d_1f8cad1_mono.diff`.

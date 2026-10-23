@@ -73,7 +73,7 @@
 | 9.1b | перед `_get_active_custom_profile` | новый `@staticmethod _normalize_custom_endpoint` | (вставка) |
 
 Все правки — строковые замены с assert count==1 (CRLF сохранён: после каждого коммита
-`\r\r\n`=0, LF-only=0). Снапшоты: `D:\Temp\SupervertalerPortable\refactoring\b9-1\snapshots\`.
+`\r\r\n`=0, LF-only=0). Снапшоты: `E:\Dev\Work_temp\SupervertalerPortable\refactoring\b9-1\snapshots\`.
 
 **Объём:** 56 524 → **56 587** строк (9.1a +19/−7 по git = +12 нетто; 9.1b +58/−7 = +51 нетто;
 итого +77/−14). Итоговый SHA256 `5cdae632fa5a259fb5cc6128422f8a366b1cf4db96b92eab51cbfebae9a285f2`.
