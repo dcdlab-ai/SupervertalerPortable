@@ -151,6 +151,9 @@ try:
     dt = time.time() - t0
     ok = (res.startswith("[Error:") and "timed out" in res
           and "profile 'Local proxy'" in res and "\n" not in res)
+    # Q1 verdict (coordinator 2026-10-23): neutral hint, no menu path
+    ok = ok and "the profile's 'Request timeout' field" in res
+    ok = ok and "Settings" not in res
     check("timeout_error_text", ok, res)
     check("timeout_no_misleading_proxy_text", "proxy not running" not in res, res)
 except Exception:

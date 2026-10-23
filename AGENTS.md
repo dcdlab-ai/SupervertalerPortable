@@ -26,6 +26,17 @@ Do not install project dependencies into:
 * another Python installation.
 When installing or upgrading a package, verify that pip is associated with:
 `E:\Dev\python-embed\python.exe`
+**The agent does not modify the dev runtime on its own initiative** (Dmitry's
+decision, BATCH Q-A Q7 verdict 2026-10-23): never run `pip install` / `pip
+uninstall` against `E:\Dev\python-embed` unless the batch prompt explicitly
+says so. If a validation tool is missing (e.g. pyflakes), install it OUTSIDE
+the runtime:
+`E:\Dev\python-embed\python.exe -m pip install --target <dir outside the runtime> <tool>`
+and wire it via `sys.path.insert` in the audit script (the embedded `._pth`
+ignores PYTHONPATH). Environment reference snapshot:
+`docs/refactoring/audits/env-baseline_q-a.txt`. History: pyflakes statics
+have used an external `--target` library since Batch #8.15; the runtime copy
+(4.0.3, 2026-10-23) was an accepted one-time deviation.
 ### Refactoring batch documents
 Finished per-batch documents are committed to the repository (NOT to `D:\Temp` and NOT to the repo root):
 * `docs/refactoring/prompts/` — the per-batch prompt files (`Promt - EXTRACTION BATCH #N.txt`);

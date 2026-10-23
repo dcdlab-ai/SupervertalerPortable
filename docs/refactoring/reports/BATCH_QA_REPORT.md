@@ -13,7 +13,8 @@
 | Q.1 — поля max_tokens/timeout_min/extra_body в MT-профилях + видимые ошибки MT | `4535b46c` | `Supervertaler.py` (+117/−7), аудиты `batch-qa_q1_*` |
 | Q.2 — link-only гейт в QuickTrans (панель + попап, MT + LLM) | `46c174ce` | `modules/quicktrans.py` (+40/−18 от базы), аудиты `batch-qa_q2_*` |
 | Q.6 — кооперативная отмена при закрытии QuickTrans | `dd1c5b97` | `modules/quicktrans.py` (+66/−13 к Q.2), аудиты `batch-qa_q6_*` |
-| Q-A docs (этот отчёт, PROJECT_STATUS, BACKLOG, промпт, suite-логи, статика) | финальный коммит | docs |
+| Q-A docs (отчёт, PROJECT_STATUS, BACKLOG, промпт, suite-логи, статика) | `a9096a27` | docs |
+| Q-A финализация (вердикты координатора Q1–Q8: правка текста таймаута llm_clients, env-baseline, правило AGENTS, BACKLOG X1, обновлённые пробы/статика) | финальный коммит | `modules/llm_clients.py` (1 строка), docs, AGENTS.md |
 
 ### Пакет файлов (итоговое состояние, wc/sha256 по байтам файла)
 
@@ -21,7 +22,7 @@
 |---|---|---|---|
 | `Supervertaler.py` | 55 573 (было 55 456) | CRLF 55 573 / bare-LF **0** | `bf8f64f2faaa308588eb8680c120dc6a9a5a2c1a99995039677135af011accb4` (2 971 113 B) |
 | `modules/quicktrans.py` | 1 741 (было 1 635) | LF 1 741 / CR-байт **0** | `81a6a3f8d77b4fc6aec926b4d45e9e44dfeb6b861f8a4f85be31e71b93134143` (76 183 B) |
-| `modules/llm_clients.py` | 854 | без изменений | `93e995521395e6fc1a63c7a6956f1f1fe59d599c2ffc30f29722b1c7d6df784b` (== базе Q-A) |
+| `modules/llm_clients.py` | 854 → **853** (вердикт Q1: правка текста таймаута, см. §1.5) | CRLF | до: `93e995521395e6fc…` (40 216 B, 854 CRLF / bare-LF 0); после: `e1c13c64e591a85d…` (`e1c13c64e591a85db4a7c1372daa6824ff6b7777b6396025890d5adffe9d04b8`, 40 170 B, 853 CRLF / bare-LF 0) |
 | `modules/settings_service.py` | 599 | без изменений; **не коммитился** (CRLF-артефакт M) | `08a0d943…` (== состоянию до батча) |
 | `modules/bilingual_markdown_handler.py` | 873 | без изменений | `463a5237…` (детектор `is_image_links_only` :412 не тронут) |
 
@@ -63,6 +64,23 @@
 
 - Профиль без новых ключей → `_custom_profile_request_kwargs` возвращает только `profile_name` (на тело запроса не влияет: `api_params` = model/messages/timeout/max_tokens/temperature/extra_body, llm_clients :795–804) → **тела запросов байт-идентичны** (проба §4.1: sha256 `bfdf4403c83f05e7…` до == после).
 - Старый settings.json без полей читается и сохраняется без дописывания ключей (пробы parse + save).
+
+### 1.5 Финализация по вердикту координатора Q1 (2026-10-23): нейтральная подсказка таймаута
+
+Разрешена ОДНА точечная правка текста в `modules/llm_clients.py` — выполнена (:811–816, единственная строка изменена, 2 строки → 1):
+
+| | Текст конца сообщения `LLMTimeoutError` |
+|---|---|
+| до | `… profile 'X'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.` |
+| после | `… profile 'X'. Increase the profile's 'Request timeout' field and retry.` |
+
+Файл: до `93e995521395e6fc…` (40 216 B, 854 строки CRLF, bare-LF 0) → после `e1c13c64e591a85d…` (40 170 B, 853 строки CRLF, bare-LF 0); py_compile 0; больше в llm_clients.py не изменено ничего. Формулировка нейтральна (без пути по меню), едина для LLM- и MT-вызовов.
+
+Ожидания проб: ни одна проба G3.2 не проверяла точный фрагмент (`batch-g32_fake_endpoint_probe.py` — только комментарий); ожидание пробы Q.1 **усилено** (`batch-qa_q1_probe.py`:153–160): новая формулировка `the profile's 'Request timeout' field` обязательна, слово «Settings» в тексте запрещено. Перезапуск пробы: **post 20/20 PASS** (в detail — новый текст), **pre 11 PASS / 9 FAIL** (старое поведение: генерик-`[Custom MT error: …]`, новой формулировки нет). Подтверждение после правки: статика tag `qafin` идентична (chain 893/0, pyflakes 548 (126/4), canon 109/0, reference 214/0, headless 90/2, grep CLEAN); e2e-проба (`batch9-3_probe_llm_e2e`, iso `qafin`) — 5 запросов, тела/авторизации/модели идентичны suite-прогону `qa`, единственный дельта-лог — счётчик скорости termbase-воркера (487710 → 466034 seg/sec, артефакт таймингов).
+
+### 1.6 Известное поведение (вердикт Q2)
+
+Save при невалидном MT-профиле блокируется до записи чего-либо (включая чекбоксы QuickTrans-таба); после исправления сохраняется всё вместе.
 
 ---
 
@@ -118,7 +136,7 @@
 
 ## 4. Матрица проб
 
-### 4.1 Q.1 — `batch-qa_q1_probe.py` (fake loopback OpenAI-endpoint; стаб с реальными методами `SupervertalerQt`; pre = worktree базы `090810fe`)
+### 4.1 Q.1 — `batch-qa_q1_probe.py` (fake loopback OpenAI-endpoint; стаб с реальными методами `SupervertalerQt`; pre = worktree базы `090810fe`) — исходный прогон батча; усиленный прогон финализации Q1 — §1.5 (20/20)
 
 | # | Проверка | post | pre |
 |---|---|---|---|
@@ -177,13 +195,29 @@ fb(9.4h), profiles(9.4f), qtchat, statusbar-prof, e2e, S-clean, S-upgrade, regre
 | headless imports | 90/2 (setuptools, fitz) | **90/2** | известные |
 | grep-gate | CLEAN | **CLEAN** (вкл. quicktrans.py) | OK |
 
-**Заметка среды:** пакет `pyflakes` отсутствовал в `E:\Dev\python-embed` (последний раз фиксировался в M2 2026-10-21) — переустановлен `E:\Dev\python-embed\python.exe -m pip install pyflakes` (4.0.3), после чего статика воспроизводится 1:1.
+**Заметка среды (исправлена финализацией, см. §4.6):** прогон статики Q-A 2026-10-23 упал на `ModuleNotFoundError: No module named 'pyflakes.api'`; на тот момент это было диагнозировано как «pyflakes пропал из рантайма» — диагноз был неверен, истинная причина и меры — §4.6 (вердикт Q7).
+
+### 4.6 Среда dev-рантайма (вердикт координатора Q7 + форензика)
+
+Эталон среды зафиксирован: **`docs/refactoring/audits/env-baseline_q-a.txt`** (pip freeze 39 пакетов, инвентарь site-packages с датами, все pip-команды батча, форензика; фиксация, не требование). `pip check` чистый.
+
+**Исправление первоначального диагноза.** Утверждение «pyflakes пропал из бандл-рантайма» было ошибкой: **pyflakes в рантайме не был установлен никогда**. Конвейер статики с Batch #8.15 использовал ВНЕШНЮЮ библиотеку `D:\Temp\SupervertalerPortable\refactoring\b8-9\pyflakes_lib` (pyflakes **4.0.1**, `pip install --target`; подключалась `sys.path.insert(0, …)` в `batch8-15_run_pyflakes.py:4`). Причина сбоя 2026-10-23: **повреждение этой внешней библиотеки 2026-10-22 12:00:35** — из `pyflakes_lib\pyflakes\` удалены все `.py`-файлы (остались только `__pycache__`, `scripts\`, `test\`; `bin\` пуст; mtime всех затронутых каталогов — одна секунда). Пакет без `.py` импортируется как пустой namespace-пакет → «No module named 'pyflakes.api'». M2 прогнал статику зелёно 2026-10-21 (библиотека была цела). Кто/что вычистило `.py` — по mtimes не определяется; рантайм `E:\Dev\python-embed` этим событием затронут не был (вопрос координатору/Дмитрию).
+
+**Сравнение с последним документированным состоянием.** Полного списка site-packages в репозитории не существовало — `env-baseline_q-a.txt` становится первым. Датировка по mtime каталогов согласуется с документированными событиями: 2026-08-14 pip 26.2.1 (базовая сборка); 2026-09-12 базовые зависимости (PyQt6 6.11.0, pillow 12.3.0 — версия зафиксирована в 8.15 §9, lxml, requests, PyYAML 6.0.3 и др.); 2026-10-01 pytest 9.1.1 с окружением; 2026-10-11 openai 3.24.0 с зависимостями (документированная установка 9.1/9.2: «перед 9.2: поставить openai»); 2026-10-23 pyflakes 4.0.3 — единственная запись с датой батча (моя установка). Иных следов вмешательств в рантайм между 2026-10-11 и 2026-10-23 нет.
+
+**PyYAML:** версия 6.0.3, dist-info не менялся с 2026-09-12; ни одной команды в адрес PyYAML агент не выполнял. Строка «PyYAML 6.3.0 → 6.0.3» в сводной таблице моего сообщения 2026-10-23 — ошибка оформления ответа (лишний фрагмент с «→»), никакого перехода не было.
+
+**pip-команды агента в этом батче (все):** (1) `E:\Dev\python-embed\python.exe -m pip install pyflakes` (2026-10-23) — отклонение от правила «агент не меняет dev-рантайм»; по вердикту: НЕ откатывать, больше не повторять, в requirements не добавлять; (2) `E:\Dev\python-embed\python.exe -m pip install --target D:\Temp\SupervertalerPortable\qa\env\pyflakes-ext pyflakes` — санкционированный механизм (вне рантайма).
+
+**Механизм на будущее (по вердикту).** Внешний каталог + `PYTHONPATH` невозможен напрямую: встроенный Python с `python313._pth` **игнорирует PYTHONPATH** (проверено). Поэтому одна минимальная правка в живом скрипте статики `batch8-15_run_pyflakes.py` (+8 строк с комментарием): `sys.path.insert(0, r"D:\Temp\SupervertalerPortable\qa\env\pyflakes-ext")` после исторической строки-вставки. Резолюция проверена (`pyflakes.__file__` → `…\qa\env\pyflakes-ext\…`, не site-packages); прогон статики tag `qafin` через раннер — метрики идентичны. Исторический `g5_12_static.py` не правлен: вне живого конвейера (статика идёт через `batch9-4_run_94i_static.sh` → `batch8-15_run_pyflakes.py`). Счётчики 4.0.1 (исторические базы) и 4.0.3 (Q-A) совпадают: pyflakes 548 (126/4).
+
+**Правило зафиксировано в AGENTS.md** (секция «Python packages»): агент не модифицирует dev-рантайм по собственной инициативе; недостающий инструмент ставить через `pip install --target` вне рантайма с подключением `sys.path.insert` в аудит-скрипте; эталон — `env-baseline_q-a.txt`.
 
 ---
 
 ## 5. Защиты (что не тронуто)
 
-- `modules/llm_clients.py`, `modules/settings_service.py`, `modules/bilingual_markdown_handler.py` и остальные 89 модулей — байт-идентичны базе (правки только `Supervertaler.py` + `modules/quicktrans.py`).
+- `modules/settings_service.py`, `modules/bilingual_markdown_handler.py` и остальные 88 модулей — байт-идентичны базе. Единственное исключение — `modules/llm_clients.py`: одна строка текста таймаута по вердикту Q1 (§1.5), больше ничего (до/после sha256 — §0).
 - Формат хранения: миграции settings.json нет; ключи пишутся только при непустом значении; старые файлы читаются без изменений (пробы).
 - LLM-редактор AI Settings (:19476–19592) и его Save (:23290–23301) не менялись — MT-редактор копирует образец.
 - Легаси-конвенция ошибок QuickTrans (`[...]`) сохранена; тексты `[MT proxy not running. Start it.]` / `[Custom MT: endpoint unreachable.]` / `[Custom MT error: …]` — только для реальных сетевых состояний.
@@ -235,27 +269,31 @@ fb(9.4h), profiles(9.4f), qtchat, statusbar-prof, e2e, S-clean, S-upgrade, regre
 
 ## 7. Артефакты (docs/refactoring/audits/)
 
-- `batch-qa_q1_probe.py` / `batch-qa_q1_result_{post,pre}.json` / `batch-qa_q1_run_{post,pre}.log` — пробы Q.1 (+ inline-прогон легаси-текста: закрытый порт → `[MT proxy not running. Start it.]`, вывод `LEGACY_REFUSED_TEXT_OK` в §1.3; в JSON пробы не входит).
+- `batch-qa_q1_probe.py` / `batch-qa_q1_result_{post,pre}.json` / `batch-qa_q1_run_{post,pre}.log` — пробы Q.1 исходные; **финализация Q1**: проба дополнена ожиданием нейтральной подсказки, перезапущена — `batch-qa_q1_run_{post2,pre2}.log` (result-JSON перезаписаны актуальными).
 - `batch-qa_q2_probe.py` / `batch-qa_q2_result_{post,pre}.json` / `batch-qa_q2_run_{post,pre}.log`.
 - `batch-qa_q6_probe.py` / `batch-qa_q6_result_{post,pre}.json` / `batch-qa_q6_run_{post,pre}.log`.
-- `batch-qa_run_full.sh` (раннер) + 16 логов этапов `batch-qa_{probe_qa_fb,probe_qa_profiles,probe_qa_qtchat,probe_qa_statusbar_prof,e2e_after_qa,probe_after_qa_clean,probe_after_qa_upgrade,regress_after_qa,smoke_after_qa,tb_after_qa,about_after_qa,probe_qa_save,probe_qa_save_legacy,probe_qa_r9_a,probe_qa_r9_ctrl,probe_qa_rm}.log` + `batch-qa_run_full_main.log`.
-- `batch-qa_static_qa.log` / `batch-qa_static_qafinal.log` (статика до/после suite — идентична).
-- Снимки базы: `qa/recon/snaps/` в stage-каталоге (Supervertaler.py.HEAD `0189f591…`, quicktrans.py.HEAD `6a6812be…`, llm_clients.py.HEAD `93e99552…`), worktree `qa/head-wt` (база `090810fe`).
+- `batch-qa_run_full.sh` (раннер) + 16 логов этапов `batch-qa_{…}.log` + `batch-qa_run_full_main.log`.
+- `batch-qa_static_qa.log` / `batch-qa_static_qafinal.log` (до/после suite) + **`batch-qa_static_qafin.log`** (финализация: после правки llm_clients, pyflakes из внешнего каталога; метрики идентичны).
+- **`env-baseline_q-a.txt`** — эталон среды dev-рантайма (вердикт Q7): pip freeze, инвентарь site-packages с датами, pip-команды батча, форензика pyflakes_lib, заметка PyYAML.
+- **`batch8-15_run_pyflakes.py`** — минимальная правка Q7: подключение внешнего каталога pyflakes (`qa/env/pyflakes-ext`) через `sys.path.insert` (PYTHONPATH игнорируется `._pth`); историческая вставка `b8-9/pyflakes_lib` сохранена.
+- e2e-проверка финализации: `D:\Temp\SupervertalerPortable\refactoring\b9-3\llm_e2e_verdict_qafin.json` против `…_qa.json` (5 запросов идентичны; дельта — счётчик скорости termbase-воркера), лог `D:\Temp\SupervertalerPortable\qa\e2e\e2e_after_qafin.log`.
+- Снимки базы: `qa/recon/snaps/` в stage-каталоге (+ `llm_clients.py.preQ1v` — до правки вердикта Q1), worktree `qa/head-wt` (база `090810fe`).
 
-## 8. Журнал вопросов
+## 8. Журнал вопросов и вердикты координатора (2026-10-23)
 
-- **Q1 (Q.1, формат таймаут-подсказки):** текст таймаут-ошибки завершается «Increase 'Request timeout' in Settings → AI Settings (profile fields)» — формулировка из llm_clients (общая для LLM и MT). Для MT поля живут в Settings → ⚡ QuickTrans. Текст не менял (правка llm_clients вне объёма). Подтвердить/поправить текст в отдельном docs-проходе?
-- **Q2 (Q.1, порядок сохранения):** при невалидном MT-профиля Save блокируется ДО записи чего-либо (включая чекбоксы QuickTrans-таба). До правки чекбоксы сохранялись раньше профилей — теперь при ошибке придётся нажать Save дважды (после исправления). Приемлемо?
-- **Q3 (Q.2, вид ряда):** на link-only сегменте ряд показывается для каждого включённого провайдера (как обычные результаты) — все с одинаковым исходником и пометкой. Альтернатива — один общий ряд без чипа провайдера. Сделано по первому варианту (не менял структуру рядов); подтвердить.
-- **Q4 (Q.2, NBSP-контекст):** вставка link-only исходника идёт через `setPlainText` в 3 известных местах NBSP-экспозиции (список M2.3, QuickTrans-вставки 35785/7519/7523) — NBSP в исходнике при вставке нормализуется Qt (та же известная проблема M2.3, вне объёма Q-A; вставка link-only редко содержит NBSP).
-- **Q5 (Q.6, app-exit):** при выходе из приложения с работающим QuickTrans-запросом детачнутый поток живёт до ответа сервера; принудительное завершение интерпретатора в этот момент может напечатать Qt-предупреждение (не воспроизводится в пробах; поведение не хуже базы, где wait(1000) отваливался по таймауту).
-- **Q6 (новая база chain):** AST chain 883 → **893** (+10 вызовов блока виджетов Q.1, все резолвятся); дальнейшие батчи сверять с 893/0.
-- **Q7 (среда):** `pyflakes` пропал из бандл-рантайма между M2 и Q-A (последний задокументированный прогон — M2, 2026-10-21); переустановлен (4.0.3). Если кто-то чистил site-packages — проверить, не пропало ли ещё что-то (`pip check` чистый).
-- **Q8 (Q.1, тултип таймаута):** тултип MT-поля «How long a single request may take (minutes) for this profile — applied to the SDK client and the request itself…» — сокращён против LLM-версии (убрано «the proxy client», у MT-вызова его нет). Подписи/плейсхолдеры/дефолты идентичны LLM.
+- **Q1 (подсказка таймаута) → РАЗРЕШЕНА одна правка текста в llm_clients.py:** нейтральная формулировка «Increase the profile's 'Request timeout' field» (без пути по меню), одинаково для LLM и MT; больше в llm_clients ничего не менять; ожидания проб G3.2/Q-A обновить; до/после (sha256, длина, EOL) показать. **Выполнено — §1.5** (пробы G3.2 фрагмент не проверяли — без правок; ожидание пробы Q.1 усилено и перезапущено: 20/20).
+- **Q2 (порядок сохранения) → приемлемо:** Save при невалидном профиле блокируется до записи чего-либо; после исправления сохраняется всё вместе. Записано как известное поведение — §1.6.
+- **Q3 (вид рядов) → подтверждён** вариант «ряд на каждого включённого провайдера», структуру рядов не менять (реализовано так и было).
+- **Q4 (NBSP-экспозиция вставок QuickTrans) → принято, вне объёма Q-A;** покрывается Q.7 (общая вставка в target с сохранением NBSP).
+- **Q5 (app-exit) → принято;** добавлено в BACKLOG пунктом **X1**: «при выходе во время запроса QuickTrans поток доживает до ответа» (POST_BATCH8_BACKLOG.md, G3.2-список).
+- **Q6 (новая база chain) → зафиксировано:** AST chain = **893/0** (этот отчёт §4.5 и PROJECT_STATUS; до вердикта уже внесено).
+- **Q7 (pyflakes/среда) → исполнено по вердикту:** ничего не чистить и не переустанавливать в рантайме; site-packages перечислен и сравнён (§4.6 — с исправлением диагноза: pyflakes в рантайме не бывало, повреждена ВНЕШНЯЯ библиотека 8.15, mtime 2026-10-22 12:00:35; вопрос о причине — координатору/Дмитрию); pyflakes в requirements не добавлен; `pip freeze` → `env-baseline_q-a.txt`; будущее правило — `pip install --target` вне рантайма + подключение в аудит-скрипте (PYTHONPATH игнорируется `._pth`) — реализовано минимальной правкой `batch8-15_run_pyflakes.py`, проверено прогоном tag `qafin`; правило внесено в AGENTS.md. Переустановка pyflakes в рантайм признана отклонением: оставлена (не откатывается), не повторяется. Дополнение (PyYAML): объяснено — §4.6, никакие команды в адрес PyYAML не выполнялись, строка «6.3.0 → 6.0.3» была ошибкой оформления моего сообщения.
+- **Q8 (сокращённый тултип MT-таймаута) → принят.**
 
 ## 9. Не тронуто / вне объёма
 
 - Пакетный MT-диалог/воркер (`_translate_with_mt`) — без изменений; поля применяются автоматически через активный профиль.
 - `_reset_and_refetch` попапа (quit/wait при re-translate), вставка TM/черновиков, Match Panel — не тронуты.
+- llm_clients.py — ровно одна строка текста таймаута (вердикт Q1, §1.5); `g5_12_static.py` и исторические отчёты с цитатами старого текста — не правлены (исторические записи).
 - Тестовая сборка не пересобиралась (решение Дмитрия); пакет для пересборки — §0.
-- Пуш не выполнялся; коммиты локальные: `4535b46c` (Q.1), `46c174ce` (Q.2), `dd1c5b97` (Q.6) + финальный docs-коммит. **Стоп до вердикта координатора.**
+- Пуш не выполнялся; коммиты локальные: `4535b46c` (Q.1), `46c174ce` (Q.2), `dd1c5b97` (Q.6), `a9096a27` (Q-A docs) + финальный коммит финализации. **Стоп до вердикта координатора.**

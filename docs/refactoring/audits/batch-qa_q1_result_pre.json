@@ -83,11 +83,11 @@
  },
  "save_old_format_no_new_keys": {
   "status": "PASS",
-  "detail": "({'name': 'Old', 'endpoint': 'http://127.0.0.1:54596/v1', 'model': 'm', 'api_key': '', 'raw_mode': True, 'enabled': True}, [])"
+  "detail": "({'name': 'Old', 'endpoint': 'http://127.0.0.1:35315/v1', 'model': 'm', 'api_key': '', 'raw_mode': True, 'enabled': True}, [])"
  },
  "_meta": {
   "tree": "D:\\Temp\\SupervertalerPortable\\qa\\head-wt",
-  "port": 54596,
+  "port": 35315,
   "captured_requests": 7,
   "stub_log_tail": [
    "✓ QuickTrans settings saved",

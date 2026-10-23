@@ -1,0 +1,170 @@
+# env-baseline_q-a.txt — эталон среды dev-рантайма на момент BATCH Q-A (фиксация, не требование)
+# Дата: 2026-10-23. Рантайм: E:\Dev\python-embed (Python 3.13.15, pip 26.2.1, python313._pth с 'import site').
+# Снято по решению координатора (Q-A Q7). 'pip check': No broken requirements found.
+
+[1] pip freeze (39 пакетов)
+annotated-types==0.8.0
+anyio==4.15.1
+certifi==2026.7.22
+chardet==7.6.0
+charset-normalizer==3.5.1
+colorama==0.4.6
+et_xmlfile==2.0.0
+h11==0.16.0
+httpcore2==2.13.1
+httpx2==2.13.1
+idna==3.19
+iniconfig==2.3.0
+jiter==0.17.0
+lxml==6.1.3
+Markdown==3.10.3
+openai==3.24.0
+openpyxl==3.1.5
+packaging==26.3
+pillow==12.3.0
+pluggy==1.6.0
+pydantic==2.14.0
+pydantic_core==2.50.0
+pyflakes==4.0.3
+Pygments==2.21.0
+pyperclip==1.11.0
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.2
+PyQt6_sip==13.12.0
+pyspellchecker==0.9.0
+pytest==9.1.1
+python-docx==1.2.0
+PyYAML==6.0.3
+requests==2.34.2
+sniffio==1.3.1
+spylls==0.1.7
+truststore==0.10.4
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.7.0
+
+[2] Инвентарь site-packages (83 записи) с датами изменения каталогов
+2026-09-12  PIL
+2026-09-12  PyQt6
+2026-10-01  __pycache__
+2026-10-01  _pytest
+2026-09-12  _yaml
+2026-10-11  annotated_types
+2026-10-11  annotated_types-0.8.0.dist-info
+2026-10-11  anyio
+2026-10-11  anyio-4.15.1.dist-info
+2026-09-12  certifi
+2026-09-12  certifi-2026.7.22.dist-info
+2026-09-12  chardet
+2026-09-12  chardet-7.6.0.dist-info
+2026-09-12  charset_normalizer
+2026-09-12  charset_normalizer-3.5.1.dist-info
+2026-10-01  colorama
+2026-10-01  colorama-0.4.6.dist-info
+2026-09-12  docx
+2026-09-12  et_xmlfile
+2026-09-12  et_xmlfile-2.0.0.dist-info
+2026-10-11  h11
+2026-10-11  h11-0.16.0.dist-info
+2026-10-11  httpcore2
+2026-10-11  httpcore2-2.13.1.dist-info
+2026-10-11  httpx2
+2026-10-11  httpx2-2.13.1.dist-info
+2026-09-12  idna
+2026-09-12  idna-3.19.dist-info
+2026-10-01  iniconfig
+2026-10-01  iniconfig-2.3.0.dist-info
+2026-10-11  jiter
+2026-10-11  jiter-0.17.0.dist-info
+2026-09-12  lxml
+2026-09-12  lxml-6.1.3.dist-info
+2026-09-12  markdown
+2026-09-12  markdown-3.10.3.dist-info
+2026-10-11  openai
+2026-10-11  openai-3.24.0.dist-info
+2026-09-12  openpyxl
+2026-09-12  openpyxl-3.1.5.dist-info
+2026-10-01  packaging
+2026-10-01  packaging-26.3.dist-info
+2026-09-12  pillow-12.3.0.dist-info
+2026-08-14  pip
+2026-08-14  pip-26.2.1.dist-info
+2026-10-01  pluggy
+2026-10-01  pluggy-1.6.0.dist-info
+2026-10-01  py.py
+2026-10-11  pydantic
+2026-10-11  pydantic-2.14.0.dist-info
+2026-10-11  pydantic_core
+2026-10-11  pydantic_core-2.50.0.dist-info
+2026-10-23  pyflakes
+2026-10-23  pyflakes-4.0.3.dist-info
+2026-10-01  pygments
+2026-10-01  pygments-2.21.0.dist-info
+2026-09-12  pyperclip
+2026-09-12  pyperclip-1.11.0.dist-info
+2026-09-12  pyqt6-6.11.0.dist-info
+2026-09-12  pyqt6_qt6-6.11.2.dist-info
+2026-09-12  pyqt6_sip-13.12.0.dist-info
+2026-09-12  pyspellchecker-0.9.0.dist-info
+2026-10-01  pytest
+2026-10-01  pytest-9.1.1.dist-info
+2026-09-12  python_docx-1.2.0.dist-info
+2026-09-12  pyyaml-6.0.3.dist-info
+2026-09-12  requests
+2026-09-12  requests-2.34.2.dist-info
+2026-10-11  sniffio
+2026-10-11  sniffio-1.3.1.dist-info
+2026-09-12  spellchecker
+2026-09-12  spylls
+2026-09-12  spylls-0.1.7.dist-info
+2026-09-12  tests
+2026-10-11  truststore
+2026-10-11  truststore-0.10.4.dist-info
+2026-09-12  typing_extensions-4.16.0.dist-info
+2026-09-12  typing_extensions.py
+2026-10-11  typing_inspection
+2026-10-11  typing_inspection-0.4.4.dist-info
+2026-09-12  urllib3
+2026-09-12  urllib3-2.7.0.dist-info
+2026-09-12  yaml
+
+[3] Датировка установок (по mtime каталогов)
+  2026-08-14  pip 26.2.1 (базовая сборка рантайма)
+  2026-09-12  базовые зависимости продукта: PyQt6 6.11.0 (+Qt6 6.11.2, sip), PIL/pillow 12.3.0,
+              lxml, requests, urllib3, certifi, chardet, charset-normalizer, idna, PyYAML 6.0.3,
+              openpyxl/et_xmlfile, python-docx, Markdown, pyperclip, pyspellchecker, spylls,
+              typing_extensions
+  2026-10-01  pytest 9.1.1 (+colorama, iniconfig, packaging, pluggy, pygments)
+  2026-10-11  openai 3.24.0 (+anyio, h11, httpcore2, httpx2, jiter, sniffio, truststore,
+              annotated-types, pydantic 2.14.0/pydantic_core, typing-inspection) —
+              документированная установка (BATCH 9.1/9.2: «перед 9.2: поставить openai»)
+  2026-10-23  pyflakes 4.0.3 — ЕДИНСТВЕННОЕ изменение этого батча (deviation, см. [4])
+
+[4] pip-команды, выполненные агентом в BATCH Q-A (все)
+  2026-10-23  E:\Dev\python-embed\python.exe -m pip install pyflakes
+              → установка 4.0.3 в site-packages рантайма. ОТКЛОНЕНИЕ: статикиBatch 8.15–M2
+                использовали ВНЕШНИЮ библиотеку D:\Temp\SupervertalerPortableefactoring8-9\pyflakes_lib
+                (4.0.1, добавлялась sys.path.insert в batch8-15_run_pyflakes.py:4), а не рантайм;
+                pyflakes в рантайме не был установлен НИКОГДА. Первоначальный диагноз
+                «pyflakes пропал из рантайма» был ошибочен — см. [5]. По вердикту координатора
+                Q7: установку НЕ откатывать, рантайм больше не менять, в requirements не добавлять.
+  2026-10-23  E:\Dev\python-embed\python.exe -m pip install --target D:\Temp\SupervertalerPortable\qa\env\pyflakes-ext pyflakes
+              → санкционированный механизм на будущее: инструмент ВНЕ рантайма. Встраиваемый
+                Python с ._pth ИГНОРИРУЕТ PYTHONPATH, поэтому подключение — sys.path.insert
+                в batch8-15_run_pyflakes.py (минимальная правка Q-A Q7).
+
+[5] Форензика pyflakes_lib (что «пропало» на самом деле)
+  D:\Temp\...8-9\pyflakes_lib\pyflakes\ — остались ТОЛЬКО __pycache__, scripts\, test\;
+  самих .py-файлов пакета НЕТ; bin\ пуст; dist-info 4.0.1 на месте.
+  Каталоги pyflakes\, bin\, __pycache__\, scripts\, test\, dist-info имеют mtime
+  2026-10-22 12:00:35 (одна секунда) — в этот момент из них удалены файлы.
+  M2 прогнал статику зелёно 2026-10-21 (библиотека была цела); Q-A 2026-10-23 получил
+  «ModuleNotFoundError: No module named 'pyflakes.api'» (пакет без .py = пустой
+  namespace-пакет). Кто/что вычистило .py 2026-10-22 12:00:35 — по mtimes не определяется;
+  рантайм E:\Dev\python-embed этим событием затронут НЕ был. (Для решения Дмитрия.)
+  Счётчики: исторические базы (4.0.1) и Q-A (4.0.3) совпадают — pyflakes 548 (126/4).
+
+[6] PyYAML: версия 6.0.3, dist-info mtime 2026-09-12 — не менялся с базовой установки.
+  Строка «PyYAML 6.3.0 → 6.0.3» в табличке агента (сообщение 2026-10-23) — ошибка
+  оформления ответа: никакого перехода/установки/отката PyYAML не было.
+

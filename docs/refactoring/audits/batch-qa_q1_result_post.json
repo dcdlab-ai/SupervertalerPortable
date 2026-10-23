@@ -31,11 +31,11 @@
  },
  "timeout_error_text": {
   "status": "PASS",
-  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.]"
+  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase the profile's 'Request timeout' field and retry.]"
  },
  "timeout_no_misleading_proxy_text": {
   "status": "PASS",
-  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.]"
+  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase the profile's 'Request timeout' field and retry.]"
  },
  "truncated_error_text": {
   "status": "PASS",
@@ -67,15 +67,15 @@
  },
  "save_blocked_abc": {
   "status": "PASS",
-  "detail": "['(<__main__.SaveStub object at 0x000002CA5AC87230>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Max tokens\\\\\\' must be a positive whole number (e.g. 20000); leave empty for the default (16384']"
+  "detail": "['(<__main__.SaveStub object at 0x000002A9501270E0>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Max tokens\\\\\\' must be a positive whole number (e.g. 20000); leave empty for the default (16384']"
  },
  "save_blocked_1555": {
   "status": "PASS",
-  "detail": "['(<__main__.SaveStub object at 0x000002CA5ABF7390>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Request timeout\\\\\\' must be a positive number of minutes (e.g. 10); leave empty for the default']"
+  "detail": "['(<__main__.SaveStub object at 0x000002A950097390>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Request timeout\\\\\\' must be a positive number of minutes (e.g. 10); leave empty for the default']"
  },
  "save_blocked_forbidden_key": {
   "status": "PASS",
-  "detail": "['(<__main__.SaveStub object at 0x000002CA5ABF74D0>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Extra request body\\\\\\' must not contain the key(s): model — these are managed by the request bu']"
+  "detail": "['(<__main__.SaveStub object at 0x000002A9500974D0>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Extra request body\\\\\\' must not contain the key(s): model — these are managed by the request bu']"
  },
  "save_comma_to_dot": {
   "status": "PASS",
@@ -83,11 +83,11 @@
  },
  "save_old_format_no_new_keys": {
   "status": "PASS",
-  "detail": "({'name': 'Old', 'endpoint': 'http://127.0.0.1:54597/v1', 'model': 'm', 'api_key': '', 'raw_mode': True, 'enabled': True}, [])"
+  "detail": "({'name': 'Old', 'endpoint': 'http://127.0.0.1:35295/v1', 'model': 'm', 'api_key': '', 'raw_mode': True, 'enabled': True}, [])"
  },
  "_meta": {
   "tree": "E:\\Dev\\SupervertalerPortable",
-  "port": 54597,
+  "port": 35295,
   "captured_requests": 7,
   "stub_log_tail": [
    "✓ QuickTrans settings saved",

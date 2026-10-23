@@ -812,8 +812,7 @@ class LLMClient:
                 f"Request to model {self.model} timed out after "
                 f"{timeout_seconds / 60.0:g} minutes ({timeout_seconds:g} s) — "
                 f"profile '{self.profile_name or 'Custom LLM'}'. Increase "
-                f"'Request timeout' in Settings → AI Settings (profile fields) "
-                f"and retry.",
+                f"the profile's 'Request timeout' field and retry.",
                 finish_reason=None, has_reasoning=False,
                 reasoning_tokens=0) from exc
 
