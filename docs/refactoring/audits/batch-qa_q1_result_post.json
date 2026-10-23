@@ -1,0 +1,97 @@
+{
+ "old_profile_result": {
+  "status": "PASS",
+  "detail": "TRANSLATED-OK"
+ },
+ "old_profile_request_count_1": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "old_profile_body": {
+  "status": "INFO",
+  "sha256": "bfdf4403c83f05e75fb99c9cbd922279b147eb7b127b066a1bddbaab8c1bef3d",
+  "length": 237,
+  "body": "{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"Hello world\"}],\"max_tokens\":16384,\"temperature\":0.3}"
+ },
+ "max_tokens_in_body": {
+  "status": "PASS",
+  "detail": "20000"
+ },
+ "max_tokens_result": {
+  "status": "PASS",
+  "detail": "TRANSLATED-OK"
+ },
+ "max_tokens_one_request": {
+  "status": "PASS",
+  "detail": "2"
+ },
+ "extra_body_in_body": {
+  "status": "PASS",
+  "detail": "{'enable_thinking': False}"
+ },
+ "timeout_error_text": {
+  "status": "PASS",
+  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.]"
+ },
+ "timeout_no_misleading_proxy_text": {
+  "status": "PASS",
+  "detail": "[Error: Request to model m timed out after 0.005 minutes (0.3 s) — profile 'Local proxy'. Increase 'Request timeout' in Settings → AI Settings (profile fields) and retry.]"
+ },
+ "truncated_error_text": {
+  "status": "PASS",
+  "detail": "[Error: Model m was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Trans lated partial']"
+ },
+ "truncated_not_generic": {
+  "status": "PASS",
+  "detail": "[Error: Model m was cut off at max_tokens mid-answer (finish_reason='length'); the translation is incomplete. Increase 'Max tokens' in the profile. Partial text: 'Trans lated partial']"
+ },
+ "parse_old_format_clean": {
+  "status": "PASS",
+  "detail": "(None, None, None, [])"
+ },
+ "parse_comma_timeout": {
+  "status": "PASS",
+  "detail": "(90.0, [])"
+ },
+ "parse_multi_separator_rejected": {
+  "status": "PASS",
+  "detail": "[\"'Request timeout' must be a positive number of minutes (e.g. 10); leave empty for the default (10 minutes).\"]"
+ },
+ "parse_abc_rejected": {
+  "status": "PASS",
+  "detail": "[\"'Max tokens' must be a positive whole number (e.g. 20000); leave empty for the default (16384).\"]"
+ },
+ "parse_forbidden_key_rejected": {
+  "status": "PASS",
+  "detail": "[\"'Extra request body' must not contain the key(s): model — these are managed by the request builder.\"]"
+ },
+ "save_blocked_abc": {
+  "status": "PASS",
+  "detail": "['(<__main__.SaveStub object at 0x000002CA5AC87230>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Max tokens\\\\\\' must be a positive whole number (e.g. 20000); leave empty for the default (16384']"
+ },
+ "save_blocked_1555": {
+  "status": "PASS",
+  "detail": "['(<__main__.SaveStub object at 0x000002CA5ABF7390>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Request timeout\\\\\\' must be a positive number of minutes (e.g. 10); leave empty for the default']"
+ },
+ "save_blocked_forbidden_key": {
+  "status": "PASS",
+  "detail": "['(<__main__.SaveStub object at 0x000002CA5ABF74D0>, \\'Invalid Profile Parameters\\', \\'Profile \"Local proxy\": \\\\\\'Extra request body\\\\\\' must not contain the key(s): model — these are managed by the request bu']"
+ },
+ "save_comma_to_dot": {
+  "status": "PASS",
+  "detail": "('1.5', [])"
+ },
+ "save_old_format_no_new_keys": {
+  "status": "PASS",
+  "detail": "({'name': 'Old', 'endpoint': 'http://127.0.0.1:54597/v1', 'model': 'm', 'api_key': '', 'raw_mode': True, 'enabled': True}, [])"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "port": 54597,
+  "captured_requests": 7,
+  "stub_log_tail": [
+   "✓ QuickTrans settings saved",
+   "✓ QuickTrans settings saved"
+  ]
+ }
+}

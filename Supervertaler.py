@@ -20178,6 +20178,57 @@ class SupervertalerQt(QMainWindow):
             "instruction-following LLM that should see a full 'translate this' prompt.")
         mt_layout.addWidget(self._custom_mt_raw_cb)
 
+        # Q.1: optional per-profile request parameters (Advanced), mirroring the
+        # LLM editor's G3.2b fields (same labels, hints and defaults). Empty
+        # fields = defaults (Max tokens 16384, Request timeout 10 min, Extra
+        # request body = nothing); keys are written to the profile only when
+        # non-empty and validated at Save (same as AI Settings).
+        _cmt_advanced_label = QLabel(self.tr("Advanced request parameters (optional):"))
+        _cmt_advanced_label.setStyleSheet("font-size: 9pt; margin-top: 4px;")
+        mt_layout.addWidget(_cmt_advanced_label)
+
+        _cmt_req_row = QHBoxLayout()
+
+        _cmt_max_tokens_label = QLabel(self.tr("Max tokens:"))
+        _cmt_max_tokens_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        _cmt_req_row.addWidget(_cmt_max_tokens_label)
+        self._custom_mt_max_tokens_input = QLineEdit()
+        self._custom_mt_max_tokens_input.setPlaceholderText(self.tr("default 16384"))
+        self._custom_mt_max_tokens_input.setMaximumWidth(90)
+        self._custom_mt_max_tokens_input.setToolTip(self.tr(
+            "Hard cap for the output of every request made with this profile.\n"
+            "Reasoning models count thinking tokens toward this cap — if the\n"
+            "model exhausts the budget on reasoning (\"exhausted the max_tokens\n"
+            "budget on reasoning\"), increase this value. Leave empty for the\n"
+            "default (16384)."))
+        _cmt_req_row.addWidget(self._custom_mt_max_tokens_input)
+
+        _cmt_timeout_label = QLabel(self.tr("Request timeout, min:"))
+        _cmt_timeout_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        _cmt_req_row.addWidget(_cmt_timeout_label)
+        self._custom_mt_timeout_input = QLineEdit()
+        self._custom_mt_timeout_input.setPlaceholderText(self.tr("default 10"))
+        self._custom_mt_timeout_input.setMaximumWidth(90)
+        self._custom_mt_timeout_input.setToolTip(self.tr(
+            "How long a single request may take (minutes) for this profile —\n"
+            "applied to the SDK client and the request itself. Slow models\n"
+            "need more. Leave empty for the default (10 minutes)."))
+        _cmt_req_row.addWidget(self._custom_mt_timeout_input)
+
+        _cmt_extra_label = QLabel(self.tr("Extra request body (JSON):"))
+        _cmt_extra_label.setStyleSheet("font-size: 9pt; margin-top: 2px;")
+        _cmt_req_row.addWidget(_cmt_extra_label)
+        self._custom_mt_extra_input = QLineEdit()
+        self._custom_mt_extra_input.setPlaceholderText(self.tr('e.g. {"chat_template_kwargs": {"enable_thinking": false}}'))
+        self._custom_mt_extra_input.setToolTip(self.tr(
+            "JSON object merged into the body of every request made with this\n"
+            "profile. To disable thinking on llama.cpp / LM Studio models:\n"
+            "{\"chat_template_kwargs\": {\"enable_thinking\": false}}\n"
+            "Keys model / messages / max_tokens / stream / tools are rejected.\n"
+            "Leave empty for nothing."))
+        _cmt_req_row.addWidget(self._custom_mt_extra_input, stretch=1)
+        mt_layout.addLayout(_cmt_req_row)
+
         # Remove whitespace AND control/non-printable characters (e.g. a stray
         # NUL pasted into a field, which makes requests reject the URL).
         def _cmt_clean(s):
@@ -20191,12 +20242,26 @@ class SupervertalerQt(QMainWindow):
                 self._custom_mt_key_input.setText(_pp.get('api_key', ''))
                 self._custom_mt_raw_cb.setChecked(bool(_pp.get('raw_mode', True)))
                 self._custom_mt_show_cb.setChecked(bool(_pp.get('enabled', True)))
+                # Q.1: request fields (blockSignals — populate is not a user
+                # edit; _cmt_sync must not fire here, as in the LLM editor)
+                self._custom_mt_max_tokens_input.blockSignals(True)
+                self._custom_mt_timeout_input.blockSignals(True)
+                self._custom_mt_extra_input.blockSignals(True)
+                self._custom_mt_max_tokens_input.setText(str(_pp.get('max_tokens', '') or ''))
+                self._custom_mt_timeout_input.setText(str(_pp.get('timeout_min', '') or ''))
+                self._custom_mt_extra_input.setText(str(_pp.get('extra_body', '') or ''))
+                self._custom_mt_max_tokens_input.blockSignals(False)
+                self._custom_mt_timeout_input.blockSignals(False)
+                self._custom_mt_extra_input.blockSignals(False)
             else:
                 self._custom_mt_endpoint_input.clear()
                 self._custom_mt_model_input.clear()
                 self._custom_mt_key_input.clear()
                 self._custom_mt_raw_cb.setChecked(True)
                 self._custom_mt_show_cb.setChecked(True)
+                self._custom_mt_max_tokens_input.clear()
+                self._custom_mt_timeout_input.clear()
+                self._custom_mt_extra_input.clear()
 
         def _cmt_sync():
             _i = self._custom_mt_profile_combo.currentIndex()
@@ -20206,6 +20271,19 @@ class SupervertalerQt(QMainWindow):
                 self._custom_mt_profiles[_i]['api_key'] = _cmt_clean(self._custom_mt_key_input.text())
                 self._custom_mt_profiles[_i]['raw_mode'] = self._custom_mt_raw_cb.isChecked()
                 self._custom_mt_profiles[_i]['enabled'] = self._custom_mt_show_cb.isChecked()
+                # Q.1: request fields — write non-empty text (decimal comma →
+                # dot in timeout, G3.2g), pop when empty (profiles that never
+                # used the fields keep no keys)
+                for _key, _widget in (('max_tokens', self._custom_mt_max_tokens_input),
+                                      ('timeout_min', self._custom_mt_timeout_input),
+                                      ('extra_body', self._custom_mt_extra_input)):
+                    _txt = _cmt_clean(_widget.text())
+                    if _key == 'timeout_min':
+                        _txt = _txt.replace(',', '.')  # dot in the stored profile
+                    if _txt:
+                        self._custom_mt_profiles[_i][_key] = _txt
+                    else:
+                        self._custom_mt_profiles[_i].pop(_key, None)
 
         def _cmt_add():
             from PyQt6.QtWidgets import QInputDialog, QMessageBox
@@ -20238,6 +20316,9 @@ class SupervertalerQt(QMainWindow):
         self._custom_mt_endpoint_input.editingFinished.connect(_cmt_sync)
         self._custom_mt_model_input.editingFinished.connect(_cmt_sync)
         self._custom_mt_key_input.editingFinished.connect(_cmt_sync)
+        self._custom_mt_max_tokens_input.editingFinished.connect(_cmt_sync)
+        self._custom_mt_timeout_input.editingFinished.connect(_cmt_sync)
+        self._custom_mt_extra_input.editingFinished.connect(_cmt_sync)
         self._custom_mt_raw_cb.toggled.connect(lambda _checked: _cmt_sync())
         self._custom_mt_show_cb.toggled.connect(lambda _checked: _cmt_sync())
         _cmt_add_btn.clicked.connect(_cmt_add)
@@ -20351,12 +20432,10 @@ class SupervertalerQt(QMainWindow):
             if _k in _old_mtql:
                 mt_quick_settings[_k] = _old_mtql[_k]
 
-        general_settings['mt_quick_lookup'] = mt_quick_settings
-        self.save_general_settings(general_settings)
-
-        # Persist Custom MT endpoint profiles to llm_settings (kept separate from
-        # the AI custom endpoint). The enable flag itself rides in mt_quick_settings
-        # via self._mtql_checkboxes['mtql_custom_mt'] above.
+        # Q.1: sync the visible Custom MT profile fields into the working list
+        # (now including the advanced request fields) BEFORE any write, then
+        # validate every profile — invalid values block saving with the same
+        # message as AI Settings; nothing is written to disk.
         if getattr(self, '_custom_mt_profile_combo', None) is not None:
             idx = self._custom_mt_profile_combo.currentIndex()
             if 0 <= idx < len(self._custom_mt_profiles):
@@ -20370,6 +20449,32 @@ class SupervertalerQt(QMainWindow):
                 self._custom_mt_profiles[idx]['api_key'] = _clean(self._custom_mt_key_input.text())
                 self._custom_mt_profiles[idx]['raw_mode'] = self._custom_mt_raw_cb.isChecked()
                 self._custom_mt_profiles[idx]['enabled'] = self._custom_mt_show_cb.isChecked()
+                for _key, _widget in (('max_tokens', self._custom_mt_max_tokens_input),
+                                      ('timeout_min', self._custom_mt_timeout_input),
+                                      ('extra_body', self._custom_mt_extra_input)):
+                    _txt = _clean(_widget.text())
+                    if _key == 'timeout_min':
+                        _txt = _txt.replace(',', '.')  # dot in the stored profile
+                    if _txt:
+                        self._custom_mt_profiles[idx][_key] = _txt
+                    else:
+                        self._custom_mt_profiles[idx].pop(_key, None)
+            for _vp_name, _vp_msg in self._validate_custom_profiles(self._custom_mt_profiles):
+                QMessageBox.warning(
+                    self, self.tr("Invalid Profile Parameters"),
+                    self.tr('Profile "{0}": {1}').format(_vp_name, _vp_msg))
+                _vi = self._custom_mt_profile_combo.findText(_vp_name)
+                if _vi >= 0:
+                    self._custom_mt_profile_combo.setCurrentIndex(_vi)
+                return
+
+        general_settings['mt_quick_lookup'] = mt_quick_settings
+        self.save_general_settings(general_settings)
+
+        # Persist Custom MT endpoint profiles to llm_settings (kept separate from
+        # the AI custom endpoint). The enable flag itself rides in mt_quick_settings
+        # via self._mtql_checkboxes['mtql_custom_mt'] above.
+        if getattr(self, '_custom_mt_profile_combo', None) is not None:
             llm_settings = self.load_llm_settings()
             llm_settings['custom_mt_profiles'] = self._custom_mt_profiles
             llm_settings['custom_mt_active_profile'] = self._custom_mt_profile_combo.currentText()
@@ -47899,7 +48004,7 @@ class SupervertalerQt(QMainWindow):
                 Custom MT. Возвращает переведённую строку или сообщение об ошибке
                 в скобках при сбое (конвенция QuickTrans)."""
         try:
-            from modules.llm_clients import LLMClient
+            from modules.llm_clients import LLMClient, LLMResponseError
 
             if profile is None:
                 profile = self._get_active_custom_mt_profile()
@@ -47930,6 +48035,11 @@ class SupervertalerQt(QMainWindow):
                 model=model,
                 base_url=endpoint,
                 http_proxy=http_proxy,
+                # Q.1: per-profile request params (Max tokens / Request timeout /
+                # Extra request body) of THIS profile — QuickTrans passes the
+                # row's own profile, the batch path the active one; absent
+                # fields → client defaults (byte-identical request bodies).
+                **self._custom_profile_request_kwargs(profile)
             )
 
             # Raw MT mode (default for MT endpoints): send ONLY the source text as
@@ -47972,6 +48082,13 @@ class SupervertalerQt(QMainWindow):
                         or (result.startswith("'") and result.endswith("'"))):
                     result = result[1:-1]
             return result or "[Custom MT: no translation returned]"
+        except LLMResponseError as e:
+            # Q.1: typed endpoint responses (truncated / empty / timeout) say
+            # something real about the request, not about connectivity — show
+            # the short error text (one line, no traceback) in the QuickTrans
+            # row instead of the misleading proxy-down string. Red via the
+            # '[…]' convention (fetch_single marks such rows as errors).
+            return f"[Error: {str(e)}]"
         except Exception as e:
             msg = str(e)
             low = msg.lower()
