@@ -1,0 +1,83 @@
+{
+ "popup_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 2}"
+ },
+ "popup_close_fast": {
+  "status": "FAIL",
+  "detail": "1.008s"
+ },
+ "popup_closed_flag": {
+  "status": "FAIL",
+  "detail": "attr missing (pre)"
+ },
+ "popup_no_late_result": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False), ('TRANSLATED-OK', False)]"
+ },
+ "popup_no_insert_after_close": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "popup_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1481831099888, False)]"
+ },
+ "popup_detached_registry_empty": {
+  "status": "FAIL",
+  "detail": "attr missing (pre)"
+ },
+ "panel_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 3}"
+ },
+ "panel_close_fast": {
+  "status": "FAIL",
+  "detail": "1.010s"
+ },
+ "panel_closed_flag": {
+  "status": "FAIL",
+  "detail": "attr missing (pre)"
+ },
+ "panel_no_late_result": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False)]"
+ },
+ "panel_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1481869618352, False)]"
+ },
+ "panel_detached_registry_empty": {
+  "status": "FAIL",
+  "detail": "attr missing (pre)"
+ },
+ "s3_button_present": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "s3_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 2}"
+ },
+ "s3_close_fast": {
+  "status": "PASS",
+  "detail": "0.001s"
+ },
+ "s3_no_late_result": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False), ('TRANSLATED-OK', False)]"
+ },
+ "s3_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1481871974608, False)]"
+ },
+ "s3_detached_registry_empty": {
+  "status": "FAIL",
+  "detail": "attr missing (pre)"
+ },
+ "_meta": {
+  "tree": "D:\\Temp\\SupervertalerPortable\\qa\\head-wt",
+  "port": 31453,
+  "total_requests": 2
+ }
+}

@@ -179,6 +179,41 @@ class MTFetchWorker(QThread):
         self.all_complete.emit()
 
 
+# Q.6: workers cooperatively detached from a closing popup/panel. The window
+# releases them (no parent, no handlers touching its widgets); this registry
+# keeps each QThread object alive until run() returns — the network request is
+# NOT aborted and lives until the server answers or times out; all_complete
+# then removes the worker so it is garbage-collected with a finished thread
+# (never destroyed while running).
+_DETACHED_WORKERS: List[MTFetchWorker] = []
+
+
+def _detach_worker_for_close(worker: MTFetchWorker) -> None:
+    """Detach a still-running worker from a closing QuickTrans window (Q.6):
+    drop its signal connections (a queued emission already in flight is also
+    stopped by the window's ``_closed`` guard), unparent it, and park it in the
+    module-level registry until the in-flight request completes."""
+    try:
+        worker.result_ready.disconnect()
+    except TypeError:
+        pass
+    try:
+        worker.all_complete.disconnect()
+    except TypeError:
+        pass
+    if worker.parent() is not None:
+        worker.setParent(None)
+    _DETACHED_WORKERS.append(worker)
+
+    def _remove_from_detached(_w=worker):
+        try:
+            _DETACHED_WORKERS.remove(_w)
+        except ValueError:
+            pass
+
+    worker.all_complete.connect(_remove_from_detached)
+
+
 class MTSuggestionItem(QFrame):
     """A single MT suggestion row in the popup"""
 
@@ -583,6 +618,9 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
         self.suggestion_items: List[MTSuggestionItem] = []
         self.selected_index = -1
         self.worker = None
+        # Q.6: set by closeEvent — every result/complete handler returns early
+        # so a response arriving after close never touches the dead UI.
+        self._closed = False
         # Guards the language-pair selector's change handler so the initial
         # setCurrentText() during build doesn't trigger a spurious re-fetch.
         self._lang_bar_ready = False
@@ -1114,6 +1152,8 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
             self._fetch_workers.append(worker)
 
             def on_ready(pn, pc, tr, err, lo=False):
+                if self._closed:
+                    return  # Q.6: response after close is dropped
                 if self.loading_label.isVisible():
                     self.loading_label.hide()
                 idx = self.suggestions_layout.indexOf(row)
@@ -1201,6 +1241,8 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
     def _on_result_ready(self, provider_name: str, provider_code: str, translation: str,
                          is_error: bool, link_only: bool = False):
         """Handle a single MT result"""
+        if self._closed:
+            return  # Q.6: response after close is dropped
         # Hide loading label on first result
         if self.loading_label.isVisible():
             self.loading_label.hide()
@@ -1238,6 +1280,8 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
 
     def _on_all_complete(self):
         """Handle completion of all MT fetches"""
+        if self._closed:
+            return  # Q.6: completion after close is dropped
         if not self.suggestions:
             self.loading_label.setText("⚠️ No translations available.")
             self.loading_label.show()
@@ -1331,18 +1375,28 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
                 self.close()
 
     def closeEvent(self, event):
-        """Clean up worker on close and save window size and position"""
+        """Q.6: cooperative cancel on close — mark closed, detach in-flight
+        workers, save window geometry. The network request is NOT aborted: it
+        lives until the server answers or times out; the detached QThread is
+        parked in _DETACHED_WORKERS, its late result dropped (handlers
+        disconnected + ``_closed`` guard), and it is garbage-collected once
+        finished — no dangling threads, no post-close UI writes."""
+        self._closed = True
+        if self.worker is not None:
+            if self.worker.isRunning():
+                _detach_worker_for_close(self.worker)
+            self.worker = None
+        for w in list(getattr(self, '_fetch_workers', []) or []):
+            if w.isRunning():
+                _detach_worker_for_close(w)
+        self._fetch_workers = []
+
         # Save window size and position for next time
         settings = QSettings("Supervertaler", "MTQuickPopup")
         settings.setValue("width", self.width())
         settings.setValue("height", self.height())
         settings.setValue("x", self.x())
         settings.setValue("y", self.y())
-
-        # Clean up worker
-        if self.worker and self.worker.isRunning():
-            self.worker.quit()
-            self.worker.wait(1000)
         super().closeEvent(event)
 
 
@@ -1376,6 +1430,9 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self._fetch_token: int = 0          # bumped each fetch; stale workers are ignored
         self._workers: List[MTFetchWorker] = []   # keep refs so threads aren't GC'd mid-run
         self.suggestions: List[MTSuggestion] = []
+        # Q.6: set by closeEvent — late worker results are dropped, not written
+        # into the closed panel's UI.
+        self._closed = False
 
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -1486,6 +1543,8 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self._ai_header = None
 
     def _do_fetch(self):
+        if self._closed:
+            return  # Q.6: no new fetches on a closed panel
         if not self._pending:
             return
         source_text, src, tgt = self._pending
@@ -1540,11 +1599,12 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self._workers.append(worker)
 
         def _ready(pn, pc, tr, err, lo=False, _tok=token):
-            if _tok == self._fetch_token:
-                on_ready(pn, pc, tr, err, lo)
+            if self._closed or _tok != self._fetch_token:
+                return  # Q.6 / stale-token: result is dropped
+            on_ready(pn, pc, tr, err, lo)
 
         def _done(_w=worker, _tok=token):
-            if on_complete is not None and _tok == self._fetch_token:
+            if not self._closed and on_complete is not None and _tok == self._fetch_token:
                 on_complete()
             if _w in self._workers:
                 self._workers.remove(_w)
@@ -1626,6 +1686,8 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
             self._workers.append(worker)
 
             def on_ready(pn, pc, tr, err, lo=False):
+                if self._closed:
+                    return  # Q.6: response after close is dropped
                 idx = self.results_layout.indexOf(row)
                 if idx < 0:
                     idx = self.results_layout.count() - 1
@@ -1666,10 +1728,14 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         return False
 
     def closeEvent(self, event):
-        # Let any in-flight workers finish so QThreads aren't destroyed while
-        # running. They're short (one HTTP round-trip) and stale results are
-        # already ignored via the fetch token.
+        # Q.6: cooperative cancel on close — mark closed and detach in-flight
+        # workers (no abort: each request lives until the server answers or
+        # times out; the QThread is parked in _DETACHED_WORKERS and released
+        # when finished, so no thread is destroyed while running and no late
+        # result reaches this panel's UI).
+        self._closed = True
         for w in list(self._workers):
             if w.isRunning():
-                w.wait(1000)
+                _detach_worker_for_close(w)
+        self._workers = []
         super().closeEvent(event)
