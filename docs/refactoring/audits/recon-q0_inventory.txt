@@ -1,0 +1,115 @@
+========================================================================
+RECON Q.0 INVENTORY  (read-only, HEAD 8507dd55 product code)
+========================================================================
+
+[1] Legacy chain caller counts (0 = unreachable in live app)
+  _schedule_delayed_lookup               defs=1 refs=2 def@[39868] call@[39870, 39899]
+  _perform_delayed_lookup                defs=1 refs=2 def@[39901] call@[39897, 39945]
+  _fetch_llm_translation_async           defs=1 refs=1 def@[51021] call@[40172]
+  _fetch_mt_translation_async            defs=1 refs=1 def@[51181] call@[40175]
+  _add_mt_and_llm_matches_progressive    defs=1 refs=1 def@[51993] call@[51770]
+  _add_mt_and_llm_matches                defs=1 refs=0 def@[52276] call@[]
+  create_assistance_panel                defs=1 refs=0 def@[25780] call@[]
+  _show_instant_tm_match                 defs=1 refs=3 def@[51511] call@[37207, 37622, 51702]
+  _update_both_termlens                  defs=1 refs=9 def@[14232] call@[14319, 14482, 15536, 37497, 37749, 37750, 37921, 37922]
+  request_update                         defs=0 refs=1 def@[] call@[14281]
+  assistance_widget assignments in monolith: [] (empty = gate never opens)
+
+[2] target-cell setPlainText sites (M2 NBSP list) + blockSignals check
+  Supervertaler.py:7519   blockSignals=False  target_widget.setPlainText(translation)
+  Supervertaler.py:7523   blockSignals=False  target_widget.setPlainText(translation)
+  Supervertaler.py:26008  blockSignals=False  target_widget.setPlainText(match_text)
+  Supervertaler.py:35785  blockSignals=False  target_widget.setPlainText(translation)
+  Supervertaler.py:40524  blockSignals=False  target_widget.setPlainText(display_text)
+  Supervertaler.py:41302  blockSignals=False  target_widget.setPlainText(translation)
+  Supervertaler.py:45770  blockSignals=False  target_widget.setPlainText(display_text)
+  Supervertaler.py:46251  blockSignals=False  target_widget.setPlainText(display_text)
+  Supervertaler.py:46787  blockSignals=False  target_widget.setPlainText(match_target)
+  Supervertaler.py:46974  blockSignals=False  target_widget.setPlainText(display_text)
+  Supervertaler.py:49167  blockSignals=False  target_widget.setPlainText(tm_match)
+  Supervertaler.py:49336  blockSignals=False  target_widget.setPlainText(translation)
+  Supervertaler.py:49595  blockSignals=False  target_widget.setPlainText(display_target)
+  Supervertaler.py:51970  blockSignals=False  target_widget.setPlainText(target_text)
+  total target_widget.setPlainText sites: 20 -> [7519, 7523, 26008, 35785, 38673, 38798, 38864, 40524, 41302, 41908, 45770, 46251, 46787, 46974, 49066, 49167, 49336, 49595, 50942, 51970]
+
+[3] is_image_links_only
+  def: bilingual_markdown_handler.py:412
+  Supervertaler.py:5340   from modules.bilingual_markdown_handler import is_image_links_only
+  Supervertaler.py:5396   if is_image_links_only(segment.source):
+  Supervertaler.py:5413   _mt_tag = "⤳ link-only (MT skipped)" if is_image_links_only(segment.source) el
+  Supervertaler.py:5473   _tag = "⤳ link-only (LLM skipped)" if is_image_links_only(segment.source) else
+  Supervertaler.py:5499   if is_image_links_only(segment.source):
+  Supervertaler.py:5686   from modules.bilingual_markdown_handler import is_image_links_only
+  Supervertaler.py:5699   link_only_ids = {seg.id for _, seg in batch_segments if is_image_links_only(se
+  Supervertaler.py:5884   from modules.bilingual_markdown_handler import is_image_links_only
+  Supervertaler.py:5897   if is_image_links_only(segment.source):
+  Supervertaler.py:5913   tag = "⤳ link-only (LLM skipped)" if is_image_links_only(segment.source) else 
+  Supervertaler.py:39186  from modules.bilingual_markdown_handler import is_image_links_only
+  Supervertaler.py:39189  if not is_image_links_only(seg.source)]
+  Supervertaler.py:49051  from modules.bilingual_markdown_handler import is_image_links_only
+  Supervertaler.py:49052  if is_image_links_only(segment.source):
+  quicktrans.py call sites: 0 (0 = no gate in QuickTrans)
+
+[4] QuickTrans request entry points (modules/quicktrans.py)
+  quicktrans.py:111    class MTFetchWorker(QThread):
+  quicktrans.py:970    self.worker.quit()
+  quicktrans.py:1027   self.worker = MTFetchWorker(
+  quicktrans.py:1036   self.worker.start()
+  quicktrans.py:1074   worker = MTFetchWorker(self.source_text, self.source_lang, self.target_lang,
+  quicktrans.py:1079   if self.loading_label.isVisible():
+  quicktrans.py:1098   worker.start()
+  quicktrans.py:1166   if self.loading_label.isVisible():
+  quicktrans.py:1293   def closeEvent(self, event):
+  quicktrans.py:1304   self.worker.quit()
+  quicktrans.py:1306   super().closeEvent(event)
+  quicktrans.py:1336   self._fetch_token: int = 0          # bumped each fetch; stale workers are i
+  quicktrans.py:1340   self._debounce = QTimer(self)
+  quicktrans.py:1341   self._debounce.setSingleShot(True)
+  quicktrans.py:1342   self._debounce.setInterval(300)
+  quicktrans.py:1343   self._debounce.timeout.connect(self._do_fetch)
+  quicktrans.py:1409   if self.isVisible() and source_text and source_text != self._last_fetched:
+  quicktrans.py:1410   self._debounce.start()
+  quicktrans.py:1417   self._debounce.start()
+  quicktrans.py:1459   self._fetch_token += 1
+  quicktrans.py:1460   token = self._fetch_token
+  quicktrans.py:1499   worker = MTFetchWorker(source_text, src, tgt, providers)
+  quicktrans.py:1503   if _tok == self._fetch_token:
+  quicktrans.py:1507   if on_complete is not None and _tok == self._fetch_token:
+  quicktrans.py:1514   worker.start()
+  quicktrans.py:1585   worker = MTFetchWorker(source_text, src, tgt, [(name, code, call_func)])
+  quicktrans.py:1606   worker.start()
+  quicktrans.py:1628   def closeEvent(self, event):
+  quicktrans.py:1635   super().closeEvent(event)
+
+[5] mtql_* keys
+  Supervertaler.py:20104  self._mtql_checkboxes = {}
+  Supervertaler.py:20122  cmt_enable.setChecked(mt_quick_settings.get("mtql_custom_mt", False))
+  Supervertaler.py:20126  self._mtql_checkboxes["mtql_custom_mt"] = cmt_enable
+  Supervertaler.py:20269  popup_ai_cb.setChecked(mt_quick_settings.get("mtql_popup_ai_autofetch", True))
+  Supervertaler.py:20274  self._mtql_checkboxes["mtql_popup_ai_autofetch"] = popup_ai_cb
+  Supervertaler.py:20278  self._mtql_llm_combos = {}
+  Supervertaler.py:20289  # is always on; mtql_llm_profiles stores the enabled profile names.
+  Supervertaler.py:20290  self._mtql_llm_profile_cbs = {}
+  Supervertaler.py:20292  _enabled_names = mt_quick_settings.get('mtql_llm_profiles')
+  Supervertaler.py:20304  self._mtql_llm_profile_cbs[_pname] = _cb
+  Supervertaler.py:20330  for key, checkbox in self._mtql_checkboxes.items():
+  Supervertaler.py:20334  for key, widget in self._mtql_llm_combos.items():
+  Supervertaler.py:20341  if getattr(self, '_mtql_llm_profile_cbs', None):
+  Supervertaler.py:20342  mt_quick_settings['mtql_llm_profiles'] = [
+  Supervertaler.py:20343  name for name, cb in self._mtql_llm_profile_cbs.items() if cb.isChecked()]
+  Supervertaler.py:20345  # Batch #9.4i: мастер-чекбокс убран; mtql_custom_openai и
+  Supervertaler.py:20346  # mtql_custom_openai_model — инертные легаси-ключи: Save переносит их
+  Supervertaler.py:20350  for _k in ('mtql_custom_openai', 'mtql_custom_openai_model'):
+  Supervertaler.py:20359  # via self._mtql_checkboxes['mtql_custom_mt'] above.
+  quicktrans.py:321    # Custom MT endpoint(s): when the master 'mtql_custom_mt' toggle is on,
+  quicktrans.py:325    if (mt_quick_settings.get('mtql_custom_mt', False)
+  quicktrans.py:355    mtql_custom_openai убран — чипы есть всегда; mtql_llm_profiles выбирает
+  quicktrans.py:365    enabled = mt_quick_settings.get('mtql_llm_profiles')
+  quicktrans.py:985    'mtql_popup_ai_autofetch' setting (default on) so the popup doesn't make
+  quicktrans.py:999    autofetch_ai = bool(self._load_mt_quick_settings().get('mtql_popup_ai_autofetch', True))
+
+[6] baseline
+  Supervertaler.py lines=55457 sha256=65d50655727e5568642e86d68edaf823d0c32f0a45a79a7c918d1ceaca87d1c7
+  modules/quicktrans.py lines=1636 sha256=6a6812be6c7acce66cbb821c83010e66e658abe39ccf286a06945d153fbf8808
+
+DONE
