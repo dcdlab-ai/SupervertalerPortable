@@ -56,6 +56,29 @@ def _is_ai_code(code: str) -> bool:
     return code in _AI_PROVIDER_CODES
 
 
+# Q.2: marker shown in a QuickTrans row when the segment is link-only (one or
+# more Markdown image links with no other letters/digits — same detector as
+# the batch translator, modules.bilingual_markdown_handler.is_image_links_only).
+# The network request is skipped; the row carries the source verbatim plus
+# this note, and inserting it puts the untouched source into the target (draft,
+# M1 behaviour). Mixed segments (a link plus words/digits) are fetched normally.
+LINK_ONLY_MARKER = "⤳ link-only — не отправлено"
+
+
+def _is_link_only_text(text: str) -> bool:
+    """True for link-only segments (Q.2). Lazy import mirrors _canonical_lang_name."""
+    if not text:
+        return False
+    try:
+        from modules.bilingual_markdown_handler import is_image_links_only
+    except Exception:
+        return False
+    try:
+        return bool(is_image_links_only(text))
+    except Exception:
+        return False
+
+
 # Canonical list of translation languages, shared by the QuickTrans popup's
 # language-pair selector and Settings → Language Pair (Supervertaler.py imports
 # this so the two stay in sync). Full display names – the same strings the
@@ -106,12 +129,15 @@ class MTSuggestion:
     provider_code: str  # Short code: "CMT", "CUS", …
     translation: str
     is_error: bool = False
+    # Q.2: link-only row — request skipped, translation holds the source
+    # verbatim; the row shows LINK_ONLY_MARKER and stays clickable.
+    link_only: bool = False
 
 
 class MTFetchWorker(QThread):
     """Background worker to fetch MT translations in parallel"""
 
-    result_ready = pyqtSignal(str, str, str, bool)  # provider_name, provider_code, translation, is_error
+    result_ready = pyqtSignal(str, str, str, bool, bool)  # provider_name, provider_code, translation, is_error, link_only
     all_complete = pyqtSignal()
 
     def __init__(self, source_text: str, source_lang: str, target_lang: str,
@@ -126,23 +152,29 @@ class MTFetchWorker(QThread):
         """Fetch translations from all providers in parallel"""
         def fetch_single(provider_info):
             name, code, call_func = provider_info
+            # Q.2: the lowest common gate of every QuickTrans entry (popup and
+            # docked panel, MT auto-fetch and LLM Fetch buttons) — a link-only
+            # segment never reaches the network: the row carries the source
+            # verbatim. Covers MT and LLM call functions alike.
+            if _is_link_only_text(self.source_text):
+                return (name, code, self.source_text, False, True)
             try:
                 result = call_func(self.source_text, self.source_lang, self.target_lang)
                 is_error = result.startswith('[') and 'error' in result.lower()
-                return (name, code, result, is_error)
+                return (name, code, result, is_error, False)
             except Exception as e:
-                return (name, code, f"[Error: {str(e)}]", True)
+                return (name, code, f"[Error: {str(e)}]", True, False)
 
         # Use ThreadPoolExecutor for parallel execution
         with ThreadPoolExecutor(max_workers=6) as executor:
             futures = {executor.submit(fetch_single, p): p for p in self.providers}
             for future in as_completed(futures):
                 try:
-                    name, code, translation, is_error = future.result()
-                    self.result_ready.emit(name, code, translation, is_error)
+                    name, code, translation, is_error, link_only = future.result()
+                    self.result_ready.emit(name, code, translation, is_error, link_only)
                 except Exception as e:
                     provider = futures[future]
-                    self.result_ready.emit(provider[0], provider[1], f"[Error: {str(e)}]", True)
+                    self.result_ready.emit(provider[0], provider[1], f"[Error: {str(e)}]", True, False)
 
         self.all_complete.emit()
 
@@ -227,6 +259,12 @@ class MTSuggestionItem(QFrame):
             text_label.setStyleSheet("color: #333; font-size: 11px;")
 
         layout.addWidget(text_label, 1, Qt.AlignmentFlag.AlignTop)
+
+        # Q.2: link-only rows show the skip note next to the (verbatim) source.
+        if suggestion.link_only:
+            marker_label = QLabel(LINK_ONLY_MARKER)
+            marker_label.setStyleSheet("color: #999; font-size: 9px; border: none;")
+            layout.addWidget(marker_label, 0, Qt.AlignmentFlag.AlignTop)
 
         self._update_style()
 
@@ -1075,13 +1113,13 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
                                    [(name, code, call_func)])
             self._fetch_workers.append(worker)
 
-            def on_ready(pn, pc, tr, err):
+            def on_ready(pn, pc, tr, err, lo=False):
                 if self.loading_label.isVisible():
                     self.loading_label.hide()
                 idx = self.suggestions_layout.indexOf(row)
                 if idx < 0:
                     idx = self.suggestions_layout.count() - 1
-                suggestion = MTSuggestion(pn, pc, tr, err)
+                suggestion = MTSuggestion(pn, pc, tr, err, link_only=lo)
                 item = MTSuggestionItem(0, suggestion)  # number assigned by renumber
                 item.clicked.connect(self._on_item_clicked)
                 self.suggestions_layout.insertWidget(idx, item)
@@ -1160,7 +1198,8 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
                 # the time even without the defer.
                 self.parent_app.open_mt_quick_lookup_settings()
 
-    def _on_result_ready(self, provider_name: str, provider_code: str, translation: str, is_error: bool):
+    def _on_result_ready(self, provider_name: str, provider_code: str, translation: str,
+                         is_error: bool, link_only: bool = False):
         """Handle a single MT result"""
         # Hide loading label on first result
         if self.loading_label.isVisible():
@@ -1171,7 +1210,8 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
             provider_name=provider_name,
             provider_code=provider_code,
             translation=translation,
-            is_error=is_error
+            is_error=is_error,
+            link_only=link_only
         )
         self.suggestions.append(suggestion)
 
@@ -1499,9 +1539,9 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         worker = MTFetchWorker(source_text, src, tgt, providers)
         self._workers.append(worker)
 
-        def _ready(pn, pc, tr, err, _tok=token):
+        def _ready(pn, pc, tr, err, lo=False, _tok=token):
             if _tok == self._fetch_token:
-                on_ready(pn, pc, tr, err)
+                on_ready(pn, pc, tr, err, lo)
 
         def _done(_w=worker, _tok=token):
             if on_complete is not None and _tok == self._fetch_token:
@@ -1520,9 +1560,9 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
     def _hide_status(self):
         self.status_label.hide()
 
-    def _on_mt_result(self, provider_name, provider_code, translation, is_error):
+    def _on_mt_result(self, provider_name, provider_code, translation, is_error, link_only=False):
         self._hide_status()
-        self._append_result(provider_name, provider_code, translation, is_error)
+        self._append_result(provider_name, provider_code, translation, is_error, link_only)
 
     def _on_mt_complete(self):
         # If nothing rendered at all (no MT rows AND no LLM buttons – only the
@@ -1531,8 +1571,8 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
             self.status_label.setText("No translations available.")
             self._show_status()
 
-    def _append_result(self, name, code, translation, is_error) -> 'MTSuggestionItem':
-        suggestion = MTSuggestion(name, code, translation, is_error)
+    def _append_result(self, name, code, translation, is_error, link_only=False) -> 'MTSuggestionItem':
+        suggestion = MTSuggestion(name, code, translation, is_error, link_only=link_only)
         self.suggestions.append(suggestion)
         item = MTSuggestionItem(len(self.suggestions), suggestion)
         item.clicked.connect(self._on_item_clicked)
@@ -1585,11 +1625,11 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
             worker = MTFetchWorker(source_text, src, tgt, [(name, code, call_func)])
             self._workers.append(worker)
 
-            def on_ready(pn, pc, tr, err):
+            def on_ready(pn, pc, tr, err, lo=False):
                 idx = self.results_layout.indexOf(row)
                 if idx < 0:
                     idx = self.results_layout.count() - 1
-                suggestion = MTSuggestion(pn, pc, tr, err)
+                suggestion = MTSuggestion(pn, pc, tr, err, link_only=lo)
                 self.suggestions.append(suggestion)
                 item = MTSuggestionItem(len(self.suggestions), suggestion)
                 item.clicked.connect(self._on_item_clicked)

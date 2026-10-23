@@ -1,0 +1,79 @@
+{
+ "panel_link1_no_requests": {
+  "status": "FAIL",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png)\"}],\"max_tokens\":16384,\"temperature\":0.3}'}]"
+ },
+ "panel_link1_rows": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False, None)]"
+ },
+ "panel_link2_no_requests": {
+  "status": "FAIL",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png).\"}],\"max_tokens\":16384,\"temperature\":0.3}'}]"
+ },
+ "panel_link2_rows": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False, None)]"
+ },
+ "panel_mixed_requests": {
+  "status": "PASS",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png) see figure two\"}],\"max_tokens\":16384,\"temperature\":0.3}'}]"
+ },
+ "panel_mixed_rows_normal": {
+  "status": "PASS",
+  "detail": "[('TRANSLATED-OK', False, None)]"
+ },
+ "panel_llm_button_present": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "panel_llm_button_no_requests": {
+  "status": "FAIL",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png)\"}],\"max_tokens\":16384,\"temperature\":0.3}'}, {'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a translation engine. Output only the translated text. Never add explanations, alternatives, notes, or commenta"
+ },
+ "panel_llm_button_row_source": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', None), ('TRANSLATED-OK', None)]"
+ },
+ "popup_link1_no_requests": {
+  "status": "FAIL",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a translation engine. Output only the translated text. Never add explanations, alternatives, notes, or commentary. Never wrap the output in quotes. If the text is already in the target language, output it unchanged.\"},{\"role\":\"user\",\"conte'}, {'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translate"
+ },
+ "popup_link1_rows": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', False, None), ('TRANSLATED-OK', False, None)]"
+ },
+ "popup_insert_source": {
+  "status": "FAIL",
+  "detail": "['TRANSLATED-OK']"
+ },
+ "popup_fetchmode_mt_row": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', None)]"
+ },
+ "popup_fetchmode_button_present": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "popup_fetchmode_click_no_requests": {
+  "status": "FAIL",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png).\"}],\"max_tokens\":16384,\"temperature\":0.3}'}, {'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"You are a translation engine. Output only the translated text. Never add explanations, alternatives, notes, or comment"
+ },
+ "popup_fetchmode_click_row": {
+  "status": "FAIL",
+  "detail": "[('TRANSLATED-OK', None), ('TRANSLATED-OK', None)]"
+ },
+ "popup_mixed_requests": {
+  "status": "PASS",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png) see figure two\"}],\"max_tokens\":16384,\"temperature\":0.3}'}]"
+ },
+ "popup_mixed_rows_normal": {
+  "status": "PASS",
+  "detail": "[('TRANSLATED-OK', None)]"
+ },
+ "_meta": {
+  "tree": "D:\\Temp\\SupervertalerPortable\\qa\\head-wt",
+  "port": 23903,
+  "total_requests": 1
+ }
+}
