@@ -286,3 +286,14 @@ The rules in this section may be overridden only when:
 * a specific external tool cannot operate with the bundled runtime;
 * the project itself explicitly requires another location.
 When an exception is necessary, keep it limited to the affected command or process and do not permanently modify the project's standard environment.
+
+## Manual test instructions for the project owner
+The owner is not a programmer. Every manual test (T-xxx) in a report must be written so it can be done without reading code:
+1. Goal in one sentence.
+2. Preconditions: server/model to use (name), profile settings to change, and how to restore them afterwards.
+3. Exact steps with menu paths as shown in the UI (not internal names), and a ready test file with its full path if a file is needed.
+4. Expected result: where to look (console / panel / file / server log) and the exact text or behaviour to expect.
+5. What counts as a failure.
+Do not use internal terms (variable names, widget class names, batch codes) without explaining them.
+Keep the number of mandatory tests small (aim for 3-5). Anything that needs a special setup or rarely used feature is marked "optional / covered by probe X" with the probe named.
+Put the mandatory tests first and the optional ones in a separate list.
