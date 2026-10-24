@@ -1,0 +1,317 @@
+=== setPlainText sites in the 14-site functions (current line numbers) ===
+7519: in insert_translation
+7523: in insert_translation
+26113: in on_match_inserted
+35890: in _insert_quicktrans_translation
+40629: in search_and_display_tm_matches
+41407: in insert_term_translation
+45875: in copy_source_to_grid_target
+46356: in _replace_current_target_segment_text
+46892: in _check_auto_confirm_100_percent
+47079: in _auto_propagate_to_identical
+49183: in translate_current_segment
+49284: in translate_current_segment
+49453: in translate_current_segment
+49712: in autotag_current_segment
+52087: in _auto_insert_tm_match
+
+
+########## insert_translation @ 7519 ##########
+7512:                     cursor = focus_widget.textCursor()
+7513:                     if cursor.hasSelection():
+7514:                         # Replace selection only
+7515:                         cursor.insertText(translation)
+7516:                         self.log(f"✅ Replaced selection with MT translation")
+7517:                     else:
+7518:                         # No selection in target, replace entire target
+7519:                         target_widget.setPlainText(translation)
+7520:                         self.log(f"✅ Inserted MT translation")
+7521:                 else:
+7522:                     # Focus was elsewhere, replace entire target
+7523:                     target_widget.setPlainText(translation)
+7524:                     self.log(f"✅ Inserted MT translation")
+7525: 
+7526:                 # Mark segment as modified
+7527:                 if hasattr(self, 'segments') and current_row < len(self.segments):
+7528:                     new_target = target_widget.toPlainText()
+7529:                     # v1.9.306: Strip invisible markers before saving to segment data
+
+########## insert_translation @ 7523 ##########
+7516:                         self.log(f"✅ Replaced selection with MT translation")
+7517:                     else:
+7518:                         # No selection in target, replace entire target
+7519:                         target_widget.setPlainText(translation)
+7520:                         self.log(f"✅ Inserted MT translation")
+7521:                 else:
+7522:                     # Focus was elsewhere, replace entire target
+7523:                     target_widget.setPlainText(translation)
+7524:                     self.log(f"✅ Inserted MT translation")
+7525: 
+7526:                 # Mark segment as modified
+7527:                 if hasattr(self, 'segments') and current_row < len(self.segments):
+7528:                     new_target = target_widget.toPlainText()
+7529:                     # v1.9.306: Strip invisible markers before saving to segment data
+7530:                     if hasattr(self, 'reverse_invisible_replacements'):
+7531:                         new_target = self.reverse_invisible_replacements(new_target)
+7532:                     self.segments[current_row].target = new_target
+7533:                     self.mark_segment_modified(current_row)
+
+########## on_match_inserted @ 26113 ##########
+26106:                     try:
+26107:                         self.record_undo_state(segment.id, _undo_old_target, match_text, _undo_old_status, _undo_old_status)
+26108:                     except Exception:
+26109:                         pass  # never let undo failure break the actual operation
+26110: 
+26111:                     # Try to update via cellWidget first
+26112:                     if target_widget:
+26113:                         target_widget.setPlainText(match_text)
+26114: 
+26115:                     self.log(f"✓ Match inserted into segment {row + 1}")
+26116:                 else:
+26117:                     self.log(f"⚠ Please click on the target cell first to insert match")
+26118:             
+26119:         except Exception as e:
+26120:             self.log(f"Error inserting match: {e}")
+26121:             import traceback
+26122:             traceback.print_exc()
+26123:     
+
+########## _insert_quicktrans_translation @ 35890 ##########
+35883:                 return
+35884:             focus_widget = QApplication.focusWidget()
+35885:             if (focus_widget is target_widget and hasattr(focus_widget, 'textCursor')
+35886:                     and focus_widget.textCursor().hasSelection()):
+35887:                 cursor = focus_widget.textCursor()
+35888:                 cursor.insertText(translation)
+35889:             else:
+35890:                 target_widget.setPlainText(translation)
+35891:             if hasattr(self, 'segments') and row < len(self.segments):
+35892:                 new_target = target_widget.toPlainText()
+35893:                 if hasattr(self, 'reverse_invisible_replacements'):
+35894:                     new_target = self.reverse_invisible_replacements(new_target)
+35895:                 self.segments[row].target = new_target
+35896:                 self.mark_segment_modified(row)
+35897:             self.log("✅ Inserted QuickTrans translation")
+35898:         except Exception as e:
+35899:             self.log(f"Error inserting QuickTrans translation: {e}")
+35900: 
+
+########## search_and_display_tm_matches @ 40629 ##########
+40622:                                 # Update grid (using cell widget)
+40623:                                 target_widget = self.table.cellWidget(current_row, 3)
+40624:                                 if target_widget and isinstance(target_widget, EditableGridTextEditor):
+40625:                                     # Strip outer wrapping tags if setting is enabled
+40626:                                     display_text = segment.target
+40627:                                     if self.hide_outer_wrapping_tags:
+40628:                                         display_text, _ = strip_outer_wrapping_tags(display_text)
+40629:                                     target_widget.setPlainText(display_text)
+40630: 
+40631:                                 # Update status column to reflect draft/confirmed
+40632:                                 try:
+40633:                                     self._refresh_segment_status(segment)
+40634:                                 except Exception:
+40635:                                     pass
+40636: 
+40637:                                 # Update project modified status (progress is handled by status bar)
+40638:                                 self.log(f"✨ Auto-filled 100% TM match for segment #{current_row + 1}")
+40639:             
+
+########## insert_term_translation @ 41407 ##########
+41400:             # Insert translation (using cell widget)
+41401:             segment = self.current_project.segments[row]
+41402:             old_target = segment.target
+41403:             old_status = segment.status
+41404:             segment.target = translation
+41405:             target_widget = self.table.cellWidget(row, 3)
+41406:             if target_widget and isinstance(target_widget, EditableGridTextEditor):
+41407:                 target_widget.setPlainText(translation)
+41408: 
+41409:             # Update status
+41410:             new_status = old_status
+41411:             if segment.status in (DEFAULT_STATUS.key, 'pretranslated', 'rejected'):
+41412:                 segment.status = 'draft'
+41413:                 new_status = 'draft'
+41414:                 self.update_status_icon(row, 'draft')
+41415:             else:
+41416:                 self._refresh_segment_status(segment)
+41417: 
+
+########## copy_source_to_grid_target @ 45875 ##########
+45868:                 self.log(f"⚠ Undo recording failed for copy_source_to_grid_target: {undo_err}")
+45869: 
+45870:         # Обновляем ячейку сетки — перевод в столбце 3 (ID=0, Status=1, Source=2, Target=3)
+45871:         # v1.9.306: применяем маркеры невидимых символов для отображения
+45872:         target_widget = self.table.cellWidget(current_row, 3)
+45873:         if target_widget and isinstance(target_widget, EditableGridTextEditor):
+45874:             display_text = self.apply_invisible_replacements(segment.source) if hasattr(self, 'apply_invisible_replacements') else segment.source
+45875:             target_widget.setPlainText(display_text)
+45876: 
+45877:         self.project_modified = True
+45878:         self.log(f"📋 Copied source to target in segment {segment.id}")
+45879: 
+45880:     def clear_grid_target(self):
+45881:         """Очищает перевод в текущей выбранной строке сетки."""
+45882:         if not hasattr(self, 'table') or not self.table:
+45883:             return
+45884: 
+45885:         current_row = self.table.currentRow()
+
+########## _replace_current_target_segment_text @ 46356 ##########
+46349:             # Fallback: no editor widget, update data and (if possible) update cell
+46350:             segment.target = new_text
+46351:             if target_widget and hasattr(target_widget, 'setPlainText'):
+46352:                 # Strip outer wrapping tags if setting is enabled
+46353:                 display_text = new_text
+46354:                 if self.hide_outer_wrapping_tags:
+46355:                     display_text, _ = strip_outer_wrapping_tags(display_text)
+46356:                 target_widget.setPlainText(display_text)
+46357:             label = f" ({source_label})" if source_label else ""
+46358:             self.log(f"✓ Replaced target text in segment {segment_id}{label}")
+46359:             self._play_sound_effect('match_inserted')
+46360: 
+46361:         except Exception as e:
+46362:             self.log(f"Error replacing target text: {e}")
+46363:             import traceback
+46364:             traceback.print_exc()
+46365: 
+46366:     def _play_sound_effect(self, event: str):
+
+########## _check_auto_confirm_100_percent @ 46892 ##########
+46885: 
+46886:             overwrite_note = " (overwriting existing)" if not target_is_empty else " (empty target)"
+46887:             self.log(f"🎯 Auto-confirm: Found 100% TM match for segment {seg.id}{overwrite_note}")
+46888: 
+46889:             # Insert the match into the target cell
+46890:             target_widget = self.table.cellWidget(row, 3)
+46891:             if target_widget:
+46892:                 target_widget.setPlainText(match_target)
+46893:                 seg.target = match_target
+46894:                 seg.status = 'confirmed'
+46895:                 self.update_status_icon(row, 'confirmed')
+46896:                 self.project_modified = True
+46897: 
+46898:                 # Save to TM
+46899:                 try:
+46900:                     self.save_segment_to_activated_tms(seg.source, seg.target)
+46901:                     self.log(f"💾 Auto-confirmed and saved segment {seg.id} to TM")
+46902:                 except Exception as e:
+
+########## _auto_propagate_to_identical @ 47079 ##########
+47072:                     row = self._find_row_for_segment(other.id)
+47073:                     if row >= 0:
+47074:                         target_widget = self.table.cellWidget(row, 3)
+47075:                         if target_widget and hasattr(target_widget, 'setPlainText'):
+47076:                             display_text = other.target
+47077:                             if getattr(self, 'hide_outer_wrapping_tags', False):
+47078:                                 display_text, _ = strip_outer_wrapping_tags(display_text)
+47079:                             target_widget.setPlainText(display_text)
+47080:                         self._refresh_segment_status(other)
+47081:                 except Exception:
+47082:                     pass
+47083: 
+47084:                 count += 1
+47085: 
+47086:             if count > 0:
+47087:                 self.project_modified = True
+47088:                 self.update_progress_stats()
+47089:                 self.log(f"↪ Auto-propagated to {count} identical segment(s)")
+
+########## translate_current_segment @ 49183 ##########
+49176:             except Exception:
+49177:                 pass  # never let undo failure break the actual operation
+49178:             # Update grid - Column 3 is Target (using cell widget), display form
+49179:             target_widget = self.table.cellWidget(current_row, 3)
+49180:             if target_widget and isinstance(target_widget, EditableGridTextEditor):
+49181:                 target_display = self.apply_invisible_replacements(segment.source) if hasattr(self, 'apply_invisible_replacements') else segment.source
+49182:                 target_widget.blockSignals(True)
+49183:                 target_widget.setPlainText(target_display)
+49184:                 target_widget.blockSignals(False)
+49185:             else:
+49186:                 self.table.setItem(current_row, 3, QTableWidgetItem(segment.source))
+49187:             self.update_status_icon(current_row, "draft")
+49188:             self._auto_resize_single_row(current_row)
+49189:             self.project_modified = True
+49190:             self.update_window_title()
+49191:             self.log(f"⤳ Segment #{segment.id}: link-only segment (image links) skipped — LLM not called, source copied to target (draft)")
+49192:             self.status_bar.showMessage(f"⤳ Segment #{segment.id}: image link copied to target (no LLM call)", 3000)
+49193:             return
+
+########## translate_current_segment @ 49284 ##########
+49277:                     pass  # never let undo failure break the actual operation
+49278:                 self.project_modified = True
+49279:                 self.update_window_title()
+49280: 
+49281:                 # Update grid (using cell widget)
+49282:                 target_widget = self.table.cellWidget(current_row, 3)
+49283:                 if target_widget and isinstance(target_widget, EditableGridTextEditor):
+49284:                     target_widget.setPlainText(tm_match)
+49285:                 else:
+49286:                     # Fallback if widget doesn't exist
+49287:                     self.table.setItem(current_row, 3, QTableWidgetItem(tm_match))
+49288:                 self.update_status_icon(current_row, "draft")
+49289:                 
+49290:                 # Auto-resize the row to fit the new content
+49291:                 self._auto_resize_single_row(current_row)
+49292:                 
+49293:                 # Add to TM if not already there
+49294:                 if self.tm_database:
+
+########## translate_current_segment @ 49453 ##########
+49446:                     self.record_undo_state(segment.id, _undo_old_target, translation, _undo_old_status, "draft")
+49447:                 except Exception:
+49448:                     pass  # never let undo failure break the actual operation
+49449: 
+49450:                 # Update grid - Column 3 is Target (using cell widget)
+49451:                 target_widget = self.table.cellWidget(current_row, 3)
+49452:                 if target_widget and isinstance(target_widget, EditableGridTextEditor):
+49453:                     target_widget.setPlainText(translation)
+49454:                 else:
+49455:                     # Fallback: create new widget if none exists
+49456:                     self.table.setItem(current_row, 3, QTableWidgetItem(translation))
+49457:                 self.update_status_icon(current_row, "draft")
+49458:                 
+49459:                 # Auto-resize the row to fit the new content
+49460:                 self._auto_resize_single_row(current_row)
+49461:                 
+49462:                 # Add to Translation Memory
+49463:                 if self.tm_database:
+
+########## autotag_current_segment @ 49712 ##########
+49705:         try:
+49706:             if target_widget is not None and getattr(target_widget, '_compact_tag_map', None) is not None:
+49707:                 display_target = compact_tags(display_target, target_widget._compact_tag_map)
+49708:             display_target = self.apply_invisible_replacements(display_target)
+49709:         except Exception:
+49710:             display_target = new_target   # display nicety only; never block the write
+49711:         if target_widget and isinstance(target_widget, EditableGridTextEditor):
+49712:             target_widget.setPlainText(display_target)
+49713:         else:
+49714:             self.table.setItem(current_row, 3, QTableWidgetItem(display_target))
+49715:         self.update_status_icon(current_row, segment.status)
+49716:         self._auto_resize_single_row(current_row)
+49717:         self.project_modified = True
+49718:         self.update_window_title()
+49719:         n = len(autotag_extract_tags(segment.source))
+49720:         self.log(f"🏷️ AutoTagger placed {n} tag(s) in #{segment.id}")
+49721:         self.status_bar.showMessage(f"🏷️ AutoTagger placed {n} tag(s) in segment #{segment.id}", 3000)
+49722: 
+
+########## _auto_insert_tm_match @ 52087 ##########
+52080:                     target_widget = self.table.cellWidget(target_row, 3)
+52081:                     if target_widget:
+52082:                         self.log(f"🔧 Auto-insert: Got target widget, type={type(target_widget).__name__}")
+52083:                         if hasattr(target_widget, 'setPlainText'):
+52084:                             # CRITICAL: Do NOT block signals - we need textChanged to update segment.target
+52085:                             # The segment was already updated above (line ~13855), but the widget needs to trigger
+52086:                             # the handler so they stay in sync
+52087:                             target_widget.setPlainText(target_text)
+52088:                             self.log(f"🔧 Auto-insert: Set widget text to '{target_text[:50]}...'")
+52089:                         else:
+52090:                             self.log(f"⚠️ Auto-insert: Widget has no setPlainText method!")
+52091:                     else:
+52092:                         self.log(f"⚠️ Auto-insert: No target widget found at row {target_row}, col 3")
+52093:                     
+52094:                     # Update status icon
+52095:                     self.update_status_icon(target_row, fill_status)
+52096:                     self.log(f"🔧 Auto-insert: Updated status icon to '{fill_status}'")
+52097:                     

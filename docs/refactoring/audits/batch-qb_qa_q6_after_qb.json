@@ -1,0 +1,83 @@
+{
+ "popup_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 2}"
+ },
+ "popup_close_fast": {
+  "status": "PASS",
+  "detail": "0.001s"
+ },
+ "popup_closed_flag": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "popup_no_late_result": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "popup_no_insert_after_close": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "popup_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1759804863696, False)]"
+ },
+ "popup_detached_registry_empty": {
+  "status": "PASS",
+  "detail": "attr missing (pre)"
+ },
+ "panel_close_while_inflight": {
+  "status": "FAIL",
+  "detail": "{'requests': 2}"
+ },
+ "panel_close_fast": {
+  "status": "PASS",
+  "detail": "0.000s"
+ },
+ "panel_closed_flag": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "panel_no_late_result": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "panel_threads_finished": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "panel_detached_registry_empty": {
+  "status": "PASS",
+  "detail": "attr missing (pre)"
+ },
+ "s3_button_present": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "s3_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 2}"
+ },
+ "s3_close_fast": {
+  "status": "PASS",
+  "detail": "0.000s"
+ },
+ "s3_no_late_result": {
+  "status": "PASS",
+  "detail": "[('TRANSLATED-OK', False)]"
+ },
+ "s3_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1759845907536, False)]"
+ },
+ "s3_detached_registry_empty": {
+  "status": "PASS",
+  "detail": "attr missing (pre)"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "port": 38318,
+  "total_requests": 2
+ }
+}

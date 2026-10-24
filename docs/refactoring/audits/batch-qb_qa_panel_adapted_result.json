@@ -1,0 +1,79 @@
+{
+ "adapt_panel_link1_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "adapt_panel_link1_rows": {
+  "status": "PASS",
+  "detail": "[('Local proxy', '![Image](y.png)', False, True), ('LLM prof', '![Image](y.png)', False, True)]"
+ },
+ "adapt_panel_link1_no_buttons": {
+  "status": "PASS",
+  "detail": "0"
+ },
+ "adapt_panel_link2_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "adapt_panel_link2_rows": {
+  "status": "PASS",
+  "detail": "[('Local proxy', '![Image](y.png).', False, True), ('LLM prof', '![Image](y.png).', False, True)]"
+ },
+ "adapt_panel_link2_no_buttons": {
+  "status": "PASS",
+  "detail": "0"
+ },
+ "adapt_panel_mixed_no_auto_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "adapt_panel_mixed_rows_empty": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "adapt_panel_mixed_fetch_rows": {
+  "status": "PASS",
+  "detail": "2"
+ },
+ "adapt_panel_mixed_fetch_requests": {
+  "status": "PASS",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png) s'}]"
+ },
+ "adapt_panel_mixed_fetch_row_normal": {
+  "status": "PASS",
+  "detail": "[('TRANSLATED-OK', False, False)]"
+ },
+ "adapt_q6_fetch_row_present": {
+  "status": "PASS",
+  "detail": "2"
+ },
+ "adapt_q6_close_while_inflight": {
+  "status": "PASS",
+  "detail": "{'requests': 2}"
+ },
+ "adapt_q6_close_fast": {
+  "status": "PASS",
+  "detail": "0.000s"
+ },
+ "adapt_q6_closed_flag": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "adapt_q6_no_late_result": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "adapt_q6_threads_finished": {
+  "status": "PASS",
+  "detail": "[(1883262342864, False)]"
+ },
+ "adapt_q6_detached_registry_empty": {
+  "status": "PASS",
+  "detail": "attr missing"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "port": 38860,
+  "total_requests": 2
+ }
+}
