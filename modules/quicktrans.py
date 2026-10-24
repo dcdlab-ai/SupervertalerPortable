@@ -14,7 +14,8 @@ Features:
 
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QFrame,
-    QScrollArea, QWidget, QPushButton, QApplication, QSizePolicy, QComboBox, QTextEdit
+    QScrollArea, QWidget, QPushButton, QApplication, QSizePolicy, QComboBox,
+    QTextEdit
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer, QSettings
 from PyQt6.QtGui import QKeySequence, QShortcut, QCursor, QFont
@@ -77,6 +78,17 @@ def _is_link_only_text(text: str) -> bool:
         return bool(is_image_links_only(text))
     except Exception:
         return False
+
+
+def _is_panel_error_text(translation: str) -> bool:
+    """True for the app's bracketed notice strings ('[Error: …]', '[MT proxy
+    …]', '[Custom MT …]', '[No translation returned]', …) that the fetch
+    layer returns instead of raising. The worker's is_error flag only covers
+    texts containing 'error', so the panel normalises here (Q.4): every
+    bracketed notice becomes an error ROW of the panel — no Paste button,
+    Ctrl+N skips it — while the popup keeps its own unchanged handling."""
+    t = (translation or '').strip()
+    return t.startswith('[') and t.endswith(']')
 
 
 # Canonical list of translation languages, shared by the QuickTrans popup's
@@ -347,6 +359,162 @@ class MTSuggestionItem(QFrame):
         if event.button() == Qt.MouseButton.LeftButton and not self.suggestion.is_error:
             self.clicked.emit(self.suggestion.translation)
         super().mousePressEvent(event)
+
+
+class PanelResultRow(QFrame):
+    """A single result row in the docked QuickTrans panel (Q.4).
+
+    Unlike the popup's MTSuggestionItem (click inserts the translation), a
+    panel row never inserts on click — a click only places the cursor in the
+    editable field. Insertion goes through the row's Paste button or the
+    panel's Ctrl+1..9 shortcuts, both of which read the field's CURRENT text
+    (user edits included), not the original provider answer. Error rows
+    carry the error text for visibility but get no Paste button, and Ctrl+N
+    skips them, so an error message can never reach the target cell.
+    Link-only rows (Q.2) hold the source verbatim; Paste inserts it
+    unchanged (draft, M1 behaviour)."""
+
+    paste_requested = pyqtSignal(str)  # text to insert into the target cell
+
+    _FIELD_MIN_H = 26  # single-line height floor for the result field
+
+    def __init__(self, number: int, suggestion: MTSuggestion, parent=None):
+        super().__init__(parent)
+        self.suggestion = suggestion
+        self.number = number
+
+        # Static card look: the row is no longer click-to-insert (Q.4), so
+        # there is no pointing-hand cursor, hover highlight or selection state.
+        self.setStyleSheet("""
+            PanelResultRow {
+                background-color: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+            }
+        """)
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(8, 5, 8, 5)
+        layout.setSpacing(8)
+
+        # Number badge — same compact pill as the popup rows.
+        self.num_label = QLabel(str(number))
+        self.num_label.setFixedSize(18, 18)
+        self.num_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.num_label.setStyleSheet("""
+            QLabel {
+                background-color: #ff9800;
+                color: white;
+                font-weight: bold;
+                font-size: 10px;
+                border-radius: 4px;
+            }
+        """)
+        layout.addWidget(self.num_label, 0, Qt.AlignmentFlag.AlignTop)
+
+        # Provider chip in the fixed-width column — same as the popup rows,
+        # so the result text starts at the same x-position in every row.
+        provider_label = QLabel(suggestion.provider_name)
+        provider_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        provider_label.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        bg_color = PROVIDER_COLORS.get(suggestion.provider_code, "#666")
+        provider_label.setStyleSheet(f"""
+            QLabel {{
+                background-color: {bg_color};
+                color: white;
+                font-weight: 600;
+                font-size: 9px;
+                border-radius: 9px;
+                padding: 1px 8px;
+            }}
+        """)
+        chip_cell = QWidget()
+        chip_cell.setFixedWidth(PROVIDER_CHIP_COLUMN_WIDTH)
+        chip_cell_layout = QHBoxLayout(chip_cell)
+        chip_cell_layout.setContentsMargins(0, 0, 0, 0)
+        chip_cell_layout.setSpacing(0)
+        chip_cell_layout.addWidget(
+            provider_label, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        chip_cell_layout.addStretch()
+        layout.addWidget(chip_cell, 0, Qt.AlignmentFlag.AlignTop)
+
+        # Q.4: editable result field — text is selectable, copyable and
+        # editable; the row height follows the text. QTextEdit (rich text
+        # off) rather than QPlainTextEdit: its document layout reports the
+        # laid-out height in PIXELS and re-reports on wrap/width changes,
+        # which the auto-height below needs (QPlainTextEdit reports line
+        # counts instead).
+        # NB: set via setPlainText, not the QTextEdit(text) constructor — the
+        # constructor's insertion path collapses "\n" into a space (verified
+        # offscreen), setPlainText keeps paragraph breaks.
+        self.field = QTextEdit()
+        self.field.setPlainText(suggestion.translation or "")
+        self.field.setAcceptRichText(False)
+        self.field.setTabChangesFocus(True)
+        if suggestion.is_error:
+            self.field.setStyleSheet(
+                "QPlainTextEdit { color: #ff6b6b; font-size: 11px; "
+                "border: 1px solid #f3d6d6; border-radius: 3px; background: white; }")
+        else:
+            self.field.setStyleSheet(
+                "QPlainTextEdit { color: #333; font-size: 11px; "
+                "border: 1px solid #e0e0e0; border-radius: 3px; background: white; }")
+        layout.addWidget(self.field, 1)
+
+        # Q.2: link-only rows show the skip note next to the (verbatim) source.
+        if suggestion.link_only:
+            marker_label = QLabel(LINK_ONLY_MARKER)
+            marker_label.setStyleSheet("color: #999; font-size: 9px; border: none;")
+            layout.addWidget(marker_label, 0, Qt.AlignmentFlag.AlignTop)
+
+        # Q.4: Paste inserts the field's current text (selection first) into
+        # the target cell through the panel's existing insert path. Not shown
+        # for error rows — an error message must not reach the target.
+        if not suggestion.is_error:
+            paste_btn = QPushButton("Paste")
+            paste_btn.setFixedHeight(22)
+            paste_btn.setToolTip(
+                "Insert into the target cell: the selected fragment of this "
+                "field, or the whole field text if nothing is selected")
+            paste_btn.clicked.connect(self._on_paste)
+            layout.addWidget(paste_btn, 0, Qt.AlignmentFlag.AlignTop)
+
+        # Auto-height: follow the document's laid-out height (line count after
+        # wrapping at the current field width). documentSizeChanged fires on
+        # text edits, width changes and font resolution, keeping the row snug.
+        self.field.document().documentLayout().documentSizeChanged.connect(self._adjust_height)
+        self._adjust_height()
+
+    def _adjust_height(self):
+        doc = self.field.document()
+        h = int(round(doc.documentLayout().documentSize().height()))
+        m = self.field.contentsMargins()
+        h += m.top() + m.bottom() + 2 * self.field.frameWidth() + 2  # rounding slack
+        self.field.setFixedHeight(max(self._FIELD_MIN_H, h))
+
+    def _on_paste(self):
+        """Emit the text Paste should insert: the field's selection if there
+        is one, else the whole current field text (user edits included).
+        QTextCursor.selectedText() uses U+2029 for paragraph breaks."""
+        cursor = self.field.textCursor()
+        if cursor.hasSelection():
+            text = cursor.selectedText().replace('\u2029', '\n')
+        else:
+            text = self.field.toPlainText()
+        if text:
+            self.paste_requested.emit(text)
+
+    def current_text(self) -> str:
+        """The field's current text (user edits included) — what Ctrl+1..9
+        and Paste insert for this row."""
+        return self.field.toPlainText()
+
+    def set_number(self, number: int):
+        """Update the displayed pick-number (rows are renumbered in visual
+        order as results arrive)."""
+        self.number = number
+        if getattr(self, 'num_label', None) is not None:
+            self.num_label.setText(str(number))
 
 
 class QuickTransProviderMixin:
@@ -1409,8 +1577,10 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
     header ("Machine translation", "AI / LLM") carries a "Fetch all" button.
     A request leaves the panel only when the user presses a row's Fetch
     button (or Fetch all). Link-only segments (Q.2) show the source verbatim
-    in every row immediately, with no network at all. Clicking a result row
-    inserts it into the current target cell.
+    in every row immediately, with no network at all. Q.4: each result row
+    is an editable field with a Paste button — clicking a row only places
+    the cursor in its field; insertion goes through Paste or Ctrl+1..9, both
+    reading the field's current (possibly edited) text.
 
     A Fetch result is bound to the segment it was requested for: the next
     segment change bumps ``_fetch_token`` and rebuilds the rows in their
@@ -1438,6 +1608,7 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self._fetch_token: int = 0          # bumped each fetch; stale workers are ignored
         self._workers: List[MTFetchWorker] = []   # keep refs so threads aren't GC'd mid-run
         self.suggestions: List[MTSuggestion] = []
+        self._rows: List[PanelResultRow] = []     # result rows in visual order (Q.4)
         # Q.3: (row, fetch-button) pairs of the current segment's still-unfetched
         # rows, per block — what the block-header "Fetch all" button fires.
         self._mt_fetch_rows: List[Tuple[QFrame, QPushButton]] = []
@@ -1580,6 +1751,7 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
                 w.setParent(None)
                 w.deleteLater()
         self.suggestions = []
+        self._rows = []
         # Section-header anchors and fetch-row bookkeeping are recreated per
         # rebuild (see _do_fetch).
         self._mt_header = None
@@ -1684,28 +1856,38 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self.status_label.hide()
 
     def _renumber_rows(self):
-        """Keep pick-numbers (and self.suggestions) in top-to-bottom visual
-        order so Ctrl+1..9 always inserts the numbered row the user sees.
-        Q.3 made every provider on-demand, so result rows now resolve in
-        arbitrary arrival order — re-walk the layout after each insertion."""
+        """Keep pick-numbers (and self.suggestions / self._rows) in
+        top-to-bottom visual order so Ctrl+1..9 always inserts the numbered
+        row the user sees. Q.3 made every provider on-demand, so result rows
+        now resolve in arbitrary arrival order — re-walk the layout after
+        each insertion."""
         items = []
         for i in range(self.results_layout.count()):
             w = self.results_layout.itemAt(i).widget()
-            if isinstance(w, MTSuggestionItem):
+            if isinstance(w, PanelResultRow):
                 items.append(w)
         self.suggestions = [w.suggestion for w in items]
+        self._rows = items
         for n, w in enumerate(items, 1):
             w.set_number(n)
 
     def _append_result(self, name, code, translation, is_error, link_only=False,
-                       at_index=None) -> 'MTSuggestionItem':
-        """Append a result row. Default placement follows the block routing
-        (MT above the AI header, AI below it); ``at_index`` pins the row to a
-        specific position (used when a Fetch row is replaced by its result)."""
-        suggestion = MTSuggestion(name, code, translation, is_error, link_only=link_only)
+                       at_index=None) -> 'PanelResultRow':
+        """Append a result row (Q.4: an editable PanelResultRow). Default
+        placement follows the block routing (MT above the AI header, AI below
+        it); ``at_index`` pins the row to a specific position (used when a
+        Fetch row is replaced by its result)."""
+        # Q.4: bracketed notice strings ('[MT proxy …]', '[Custom MT …]', …)
+        # are error rows in the panel even where the worker's is_error flag
+        # doesn't cover them — no Paste, no Ctrl+N (see _is_panel_error_text).
+        row_error = is_error or _is_panel_error_text(translation)
+        suggestion = MTSuggestion(name, code, translation, row_error, link_only=link_only)
         self.suggestions.append(suggestion)
-        item = MTSuggestionItem(len(self.suggestions), suggestion)
-        item.clicked.connect(self._on_item_clicked)
+        item = PanelResultRow(len(self.suggestions), suggestion)
+        # Q.4: Paste emits through the panel's existing translation_selected
+        # path (the host's _insert_quicktrans_translation) — nothing new is
+        # added to the target-write chain.
+        item.paste_requested.connect(self.translation_selected)
         if at_index is not None:
             idx = at_index
         else:
@@ -1804,22 +1986,24 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
 
         btn.clicked.connect(on_click)
 
-    def _on_item_clicked(self, translation: str):
-        self.translation_selected.emit(translation)
-
     def insert_match_by_number(self, number: int) -> bool:
-        """Insert the Nth currently-displayed QuickTrans result into the target.
+        """Insert the Nth currently-displayed QuickTrans row into the target.
 
-        N is 1-based and matches the pick-number shown on each row. Returns True
-        if a (non-error) result existed and was emitted for insertion, else False
+        N is 1-based and matches the pick-number shown on each row. Q.4: the
+        inserted text is the row field's CURRENT content (user edits
+        included), not the original provider answer. Error rows are skipped,
+        so an error message can never reach the target cell. Returns True if
+        a (non-error) row existed and was emitted for insertion, else False
         so the caller can fall back to another panel.
         """
         idx = number - 1
-        if 0 <= idx < len(self.suggestions):
-            s = self.suggestions[idx]
-            if not s.is_error and s.translation:
-                self.translation_selected.emit(s.translation)
-                return True
+        if 0 <= idx < len(self._rows):
+            row = self._rows[idx]
+            if not row.suggestion.is_error:
+                text = row.current_text()
+                if text:
+                    self.translation_selected.emit(text)
+                    return True
         return False
 
     def closeEvent(self, event):

@@ -1,0 +1,19 @@
+{
+ "q4_main_crashed": {
+  "status": "FAIL",
+  "detail": "Traceback (most recent call last):\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q4_probe.py\", line 160, in <module>\n    ok = wait_until(lambda: len(panel._rows) == 1 and not panel._workers)\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q4_probe.py\", line 119, in wait_until\n    if pred():\n       ~~~~^^\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\he"
+ },
+ "q4_error_case_crashed": {
+  "status": "FAIL",
+  "detail": "Traceback (most recent call last):\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q4_probe.py\", line 275, in <module>\n    ok = wait_until(lambda: len(panel2._rows) == 3 and not panel2._workers)  # 2 MT + 1 LLM\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q4_probe.py\", line 119, in wait_until\n    if pred():\n       ~~~~^^\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refac"
+ },
+ "q4_linkonly_crashed": {
+  "status": "FAIL",
+  "detail": "Traceback (most recent call last):\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q4_probe.py\", line 318, in <module>\n    for r in panel3._rows]\n             ^^^^^^^^^^^^\nAttributeError: 'QuickTransPanel' object has no attribute '_rows'\n"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt",
+  "port": 38085,
+  "total_requests": 0
+ }
+}
