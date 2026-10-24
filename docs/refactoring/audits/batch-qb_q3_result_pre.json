@@ -1,0 +1,37 @@
+{
+ "q3_sel3_no_requests": {
+  "status": "FAIL",
+  "detail": "{'A': 3, 'B': 3}"
+ },
+ "q3_rows_initial": {
+  "status": "FAIL",
+  "detail": "{'names': ['LLM prof'], 'workers': 0}"
+ },
+ "q3_no_endpoint_or_disabled_hidden": {
+  "status": "PASS",
+  "detail": "['LLM prof']"
+ },
+ "q3_no_result_rows_yet": {
+  "status": "FAIL",
+  "detail": "[('MT prof A', 'TRANSLATED-A', False, False), ('MT prof B', 'TRANSLATED-B', False, False)]"
+ },
+ "q3_fetch_all_buttons": {
+  "status": "FAIL",
+  "detail": "[]"
+ },
+ "q3_probe_crashed": {
+  "status": "FAIL",
+  "detail": "Traceback (most recent call last):\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt\\docs\\refactoring\\audits\\batch-qb_q3_probe.py\", line 200, in <module>\n    btn_a = next(b for n, b in fb if n == 'MT prof A')\nStopIteration\n"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qb\\head-wt",
+  "bases": {
+   "A": "http://127.0.0.1:36767/v1",
+   "B": "http://127.0.0.1:36768/v1"
+  },
+  "requests": {
+   "A": 3,
+   "B": 3
+  }
+ }
+}

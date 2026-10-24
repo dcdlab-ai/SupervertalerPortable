@@ -1403,12 +1403,20 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
 class QuickTransPanel(QuickTransProviderMixin, QWidget):
     """Docked QuickTrans panel for the under-grid tab area.
 
-    A trimmed, always-on version of the QuickTrans popup. It auto-fetches the
-    cheap/free MT engines (Google, MyMemory, Microsoft, ...) for the current
-    segment's source text whenever the panel is visible. LLM providers
-    (Claude, OpenAI, Gemini, ...) are NOT auto-fetched – each gets an
-    on-demand "Fetch" button so paid AI calls only happen when the user asks.
-    Clicking any result row inserts it into the current target cell.
+    A trimmed, always-on version of the QuickTrans popup. Q.3: it sends NO
+    automatic requests — on every segment change each enabled provider (MT
+    engines and LLMs alike) gets an on-demand "Fetch" row, and each block
+    header ("Machine translation", "AI / LLM") carries a "Fetch all" button.
+    A request leaves the panel only when the user presses a row's Fetch
+    button (or Fetch all). Link-only segments (Q.2) show the source verbatim
+    in every row immediately, with no network at all. Clicking a result row
+    inserts it into the current target cell.
+
+    A Fetch result is bound to the segment it was requested for: the next
+    segment change bumps ``_fetch_token`` and rebuilds the rows in their
+    initial "press Fetch" state, so a late answer from the previous segment
+    is dropped (the request itself is never aborted, as in Q.6 — it lives
+    until the server answers or times out).
 
     The host wires it up by:
         panel = QuickTransPanel(main_window)
@@ -1430,6 +1438,10 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         self._fetch_token: int = 0          # bumped each fetch; stale workers are ignored
         self._workers: List[MTFetchWorker] = []   # keep refs so threads aren't GC'd mid-run
         self.suggestions: List[MTSuggestion] = []
+        # Q.3: (row, fetch-button) pairs of the current segment's still-unfetched
+        # rows, per block — what the block-header "Fetch all" button fires.
+        self._mt_fetch_rows: List[Tuple[QFrame, QPushButton]] = []
+        self._ai_fetch_rows: List[Tuple[QFrame, QPushButton]] = []
         # Q.6: set by closeEvent — late worker results are dropped, not written
         # into the closed panel's UI.
         self._closed = False
@@ -1455,7 +1467,8 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
 
         self._refresh_btn = QPushButton("🔄")
         self._refresh_btn.setFixedSize(22, 22)
-        self._refresh_btn.setToolTip("Re-fetch translations for the current segment")
+        self._refresh_btn.setToolTip(
+            "Reset QuickTrans rows for the current segment (clears results; no requests are sent)")
         self._refresh_btn.setStyleSheet(_PANEL_ICON_BTN_STYLE)
         self._refresh_btn.clicked.connect(self._force_refresh)
         header.addWidget(self._refresh_btn)
@@ -1496,7 +1509,10 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
     # ── update lifecycle ────────────────────────────────────────────────
     def request_update(self, source_text: str, source_lang: str = None, target_lang: str = None):
         """Called by the host on every segment change. Stores the pending
-        segment and (if the panel is visible) schedules a debounced fetch."""
+        segment and (if the panel is visible) schedules a debounced rebuild
+        of the rows. Q.3: the rebuild is local only — selecting a segment
+        never sends a network request; requests leave solely via the rows'
+        Fetch buttons."""
         source_text = (source_text or "").strip()
         if source_lang:
             self.source_lang = source_lang
@@ -1507,14 +1523,18 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
             self._debounce.start()
 
     def showEvent(self, event):
-        """When the tab becomes visible, fetch the pending segment (the
-        panel doesn't fetch while hidden, to avoid needless MT calls)."""
+        """When the tab becomes visible, rebuild the rows for the pending
+        segment (the panel doesn't rebuild while hidden; no network either
+        way — Fetch is manual since Q.3)."""
         super().showEvent(event)
         if self._pending and self._pending[0] and self._pending[0] != self._last_fetched:
             self._debounce.start()
 
     def _force_refresh(self):
-        """Manual ↻: re-fetch the current segment even if unchanged."""
+        """Manual ↻: rebuild the current segment's rows from scratch — any
+        fetched results are discarded and every row returns to its initial
+        'press Fetch' state (the providers list is re-read, so a settings
+        change shows up here too)."""
         self._last_fetched = None
         if self._pending and self._pending[0]:
             self._do_fetch()
@@ -1529,6 +1549,28 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         )
         return lbl
 
+    def _make_section_header_with_fetch(self, text: str, on_fetch_all) -> QWidget:
+        """Group-header row carrying the block's 'Fetch all' button (Q.3):
+        one press fires every still-unfetched row of the block (in-flight
+        rows are skipped — their Fetch button is disabled while running)."""
+        bar = QWidget()
+        h = QHBoxLayout(bar)
+        h.setContentsMargins(0, 0, 0, 0)
+        h.setSpacing(4)
+        h.addWidget(self._make_section_header(text))
+        h.addStretch()
+        btn = QPushButton("Fetch all")
+        btn.setFixedHeight(18)
+        btn.setStyleSheet(
+            "QPushButton { color: #666; font-size: 8pt; border: none; "
+            "padding: 0 4px; }"
+            "QPushButton:hover { color: #2196F3; }"
+        )
+        btn.setToolTip("Fetch every row of this block (one request per provider)")
+        btn.clicked.connect(on_fetch_all)
+        h.addWidget(btn)
+        return bar
+
     def _clear_results(self):
         # Remove every widget except the trailing stretch (last item).
         while self.results_layout.count() > 1:
@@ -1538,11 +1580,20 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
                 w.setParent(None)
                 w.deleteLater()
         self.suggestions = []
-        # Section-header anchors are recreated per fetch (see _do_fetch).
+        # Section-header anchors and fetch-row bookkeeping are recreated per
+        # rebuild (see _do_fetch).
         self._mt_header = None
         self._ai_header = None
+        self._mt_fetch_rows = []
+        self._ai_fetch_rows = []
 
     def _do_fetch(self):
+        """Rebuild the panel for the pending segment (Q.3): every enabled
+        provider — MT engines and LLMs alike — gets an on-demand Fetch row.
+        NO automatic network request is made; the panel only calls out when
+        the user presses a row's Fetch button or a block's Fetch all. The
+        token bump drops any still-running worker's late result from the
+        previous segment (the request itself lives on, Q.6)."""
         if self._closed:
             return  # Q.6: no new fetches on a closed panel
         if not self._pending:
@@ -1555,8 +1606,9 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
 
         # Bump the token so any still-running worker from a previous segment
         # has its (late) results ignored rather than appended to this one.
+        # (Fetch rows capture the current generation when their button is
+        # pressed — see _add_fetch_row.)
         self._fetch_token += 1
-        token = self._fetch_token
 
         mt_providers = self._get_enabled_providers(include_mt=True, include_llms=False)
         llm_providers = self._get_enabled_providers(include_mt=False, include_llms=True)
@@ -1566,31 +1618,42 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
             self._show_status()
             return
 
+        self._hide_status()
+
         # Group headers: Machine translation first, then AI / LLM. MT rows are
-        # inserted above the AI header; LLM rows below it (see _append_result and
-        # _add_llm_button). A header is only shown if its section has providers.
+        # inserted above the AI header; LLM rows below it (see _add_fetch_row
+        # and _append_result). A header is only shown if its section has providers.
         self._mt_header = None
         self._ai_header = None
+
+        # Q.2/Q.3: link-only segment — every enabled profile's row carries the
+        # source verbatim plus the skip note immediately: no Fetch buttons, no
+        # network (the gate is free and reads the text only).
+        if _is_link_only_text(source_text):
+            if mt_providers:
+                self._mt_header = self._make_section_header("⚡  Machine translation")
+                self.results_layout.insertWidget(self.results_layout.count() - 1, self._mt_header)
+            if llm_providers:
+                self._ai_header = self._make_section_header("\U0001F916  AI / LLM  ·  billed per use")
+                self.results_layout.insertWidget(self.results_layout.count() - 1, self._ai_header)
+            for name, code, _call in mt_providers + llm_providers:
+                self._append_result(name, code, source_text, False, True)
+            return
+
         if mt_providers:
-            self._mt_header = self._make_section_header("⚡  Machine translation")
+            self._mt_header = self._make_section_header_with_fetch(
+                "⚡  Machine translation", self._fetch_all_mt)
             self.results_layout.insertWidget(self.results_layout.count() - 1, self._mt_header)
         if llm_providers:
-            self._ai_header = self._make_section_header("\U0001F916  AI / LLM  ·  billed per use")
+            self._ai_header = self._make_section_header_with_fetch(
+                "\U0001F916  AI / LLM  ·  billed per use", self._fetch_all_ai)
             self.results_layout.insertWidget(self.results_layout.count() - 1, self._ai_header)
 
-        # Auto-fetch the cheap MT engines.
-        if mt_providers:
-            self.status_label.setText("Fetching…")
-            self._show_status()
-            self._start_worker(source_text, src, tgt, mt_providers,
-                               on_ready=self._on_mt_result, token=token,
-                               on_complete=self._on_mt_complete)
-        else:
-            self._hide_status()
-
-        # LLMs: on-demand buttons only (no automatic, billable calls).
+        # One on-demand Fetch row per provider — MT and AI alike.
+        for name, code, call_func in mt_providers:
+            self._add_fetch_row(name, code, call_func, source_text, src, tgt, 'mt')
         for name, code, call_func in llm_providers:
-            self._add_llm_button(name, code, call_func, source_text, src, tgt)
+            self._add_fetch_row(name, code, call_func, source_text, src, tgt, 'ai')
 
     def _start_worker(self, source_text, src, tgt, providers, on_ready, token, on_complete=None):
         """Start an MTFetchWorker, tracking it so it isn't GC'd mid-run and
@@ -1620,34 +1683,65 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
     def _hide_status(self):
         self.status_label.hide()
 
-    def _on_mt_result(self, provider_name, provider_code, translation, is_error, link_only=False):
-        self._hide_status()
-        self._append_result(provider_name, provider_code, translation, is_error, link_only)
+    def _renumber_rows(self):
+        """Keep pick-numbers (and self.suggestions) in top-to-bottom visual
+        order so Ctrl+1..9 always inserts the numbered row the user sees.
+        Q.3 made every provider on-demand, so result rows now resolve in
+        arbitrary arrival order — re-walk the layout after each insertion."""
+        items = []
+        for i in range(self.results_layout.count()):
+            w = self.results_layout.itemAt(i).widget()
+            if isinstance(w, MTSuggestionItem):
+                items.append(w)
+        self.suggestions = [w.suggestion for w in items]
+        for n, w in enumerate(items, 1):
+            w.set_number(n)
 
-    def _on_mt_complete(self):
-        # If nothing rendered at all (no MT rows AND no LLM buttons – only the
-        # trailing stretch remains), surface a friendly message.
-        if not self.suggestions and self.results_layout.count() <= 1:
-            self.status_label.setText("No translations available.")
-            self._show_status()
-
-    def _append_result(self, name, code, translation, is_error, link_only=False) -> 'MTSuggestionItem':
+    def _append_result(self, name, code, translation, is_error, link_only=False,
+                       at_index=None) -> 'MTSuggestionItem':
+        """Append a result row. Default placement follows the block routing
+        (MT above the AI header, AI below it); ``at_index`` pins the row to a
+        specific position (used when a Fetch row is replaced by its result)."""
         suggestion = MTSuggestion(name, code, translation, is_error, link_only=link_only)
         self.suggestions.append(suggestion)
         item = MTSuggestionItem(len(self.suggestions), suggestion)
         item.clicked.connect(self._on_item_clicked)
-        # MT rows live above the AI / LLM header so MT stays grouped at the top;
-        # fall back to before the trailing stretch when there is no AI section.
-        ai_header = getattr(self, '_ai_header', None)
-        if ai_header is not None and self.results_layout.indexOf(ai_header) >= 0:
-            idx = self.results_layout.indexOf(ai_header)
+        if at_index is not None:
+            idx = at_index
         else:
-            idx = self.results_layout.count() - 1
+            # MT rows live above the AI / LLM header so MT stays grouped at
+            # the top; fall back to before the trailing stretch when there is
+            # no AI section.
+            ai_header = getattr(self, '_ai_header', None)
+            if (not _is_ai_code(code)
+                    and ai_header is not None
+                    and self.results_layout.indexOf(ai_header) >= 0):
+                idx = self.results_layout.indexOf(ai_header)
+            else:
+                idx = self.results_layout.count() - 1
         self.results_layout.insertWidget(idx, item)
+        self._renumber_rows()
         return item
 
-    def _add_llm_button(self, name, code, call_func, source_text, src, tgt):
-        """Add an on-demand 'Fetch' row for an LLM provider."""
+    def _fetch_all_mt(self):
+        """'Fetch all' of the Machine translation block (Q.3)."""
+        for _row, btn in list(self._mt_fetch_rows):
+            if btn.isEnabled():
+                btn.click()
+
+    def _fetch_all_ai(self):
+        """'Fetch all' of the AI / LLM block (Q.3)."""
+        for _row, btn in list(self._ai_fetch_rows):
+            if btn.isEnabled():
+                btn.click()
+
+    def _add_fetch_row(self, name, code, call_func, source_text, src, tgt, block):
+        """Add an on-demand 'Fetch' row (Q.3) — one per enabled provider, MT
+        and AI alike. Visually and behaviourally identical for both blocks:
+        pressing Fetch starts exactly one request for this provider and the
+        result replaces the row in place. The worker runs through
+        _start_worker, so a segment change (token bump) or panel close (Q.6)
+        drops its late result; the request itself is never aborted."""
         row = QFrame()
         row.setStyleSheet(
             "QFrame { background: #fafafa; border: 1px dashed #cfcfcf; border-radius: 4px; }"
@@ -1667,45 +1761,46 @@ class QuickTransPanel(QuickTransProviderMixin, QWidget):
         )
         h.addWidget(chip, 0, Qt.AlignmentFlag.AlignVCenter)
 
-        hint = QLabel("AI – click to fetch")
+        hint = QLabel("MT – click to fetch" if block == 'mt' else "AI – click to fetch")
         hint.setStyleSheet("color: #999; font-size: 9pt; border: none;")
         h.addWidget(hint)
         h.addStretch()
 
         btn = QPushButton("Fetch")
         btn.setFixedHeight(22)
-        btn.setToolTip(f"Fetch an AI translation from {name} (makes one API call)")
+        btn.setToolTip(f"Fetch a translation from {name} (makes one API call)")
         h.addWidget(btn)
 
-        self.results_layout.insertWidget(self.results_layout.count() - 1, row)
+        # MT rows live above the AI / LLM header so MT stays grouped at the
+        # top; AI rows go below it (before the trailing stretch).
+        anchor = self._ai_header if block == 'mt' else None
+        if anchor is not None and self.results_layout.indexOf(anchor) >= 0:
+            idx = self.results_layout.indexOf(anchor)
+        else:
+            idx = self.results_layout.count() - 1
+        self.results_layout.insertWidget(idx, row)
+
+        rows_list = self._mt_fetch_rows if block == 'mt' else self._ai_fetch_rows
+        rows_list.append((row, btn))
 
         def on_click():
             btn.setEnabled(False)
             btn.setText("…")
-            worker = MTFetchWorker(source_text, src, tgt, [(name, code, call_func)])
-            self._workers.append(worker)
 
             def on_ready(pn, pc, tr, err, lo=False):
-                if self._closed:
-                    return  # Q.6: response after close is dropped
-                idx = self.results_layout.indexOf(row)
-                if idx < 0:
-                    idx = self.results_layout.count() - 1
-                suggestion = MTSuggestion(pn, pc, tr, err, link_only=lo)
-                self.suggestions.append(suggestion)
-                item = MTSuggestionItem(len(self.suggestions), suggestion)
-                item.clicked.connect(self._on_item_clicked)
-                self.results_layout.insertWidget(idx, item)
+                try:
+                    rows_list.remove((row, btn))
+                except ValueError:
+                    pass
+                idx2 = self.results_layout.indexOf(row)
+                if idx2 < 0:
+                    idx2 = self.results_layout.count() - 1
+                self._append_result(pn, pc, tr, err, link_only=lo, at_index=idx2)
                 row.setParent(None)
                 row.deleteLater()
 
-            def on_done(_w=worker):
-                if _w in self._workers:
-                    self._workers.remove(_w)
-
-            worker.result_ready.connect(on_ready)
-            worker.all_complete.connect(on_done)
-            worker.start()
+            self._start_worker(source_text, src, tgt, [(name, code, call_func)],
+                               on_ready=on_ready, token=self._fetch_token)
 
         btn.clicked.connect(on_click)
 

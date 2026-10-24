@@ -1,0 +1,81 @@
+{
+ "q3_sel3_no_requests": {
+  "status": "PASS",
+  "detail": "{'A': 0, 'B': 0}"
+ },
+ "q3_rows_initial": {
+  "status": "PASS",
+  "detail": "{'names': ['MT prof A', 'MT prof B', 'LLM prof'], 'workers': 0}"
+ },
+ "q3_no_endpoint_or_disabled_hidden": {
+  "status": "PASS",
+  "detail": "['MT prof A', 'MT prof B', 'LLM prof']"
+ },
+ "q3_no_result_rows_yet": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "q3_fetch_all_buttons": {
+  "status": "PASS",
+  "detail": "['Fetch all', 'Fetch all']"
+ },
+ "q3_fetch_one_result": {
+  "status": "PASS",
+  "detail": "[('MT prof A', 'TRANSLATED-A', False, False)]"
+ },
+ "q3_fetch_one_request_routed": {
+  "status": "PASS",
+  "detail": "{'A': 1, 'B': 0}"
+ },
+ "q3_fetch_all_mt_rows": {
+  "status": "PASS",
+  "detail": "[('MT prof A', 'TRANSLATED-A', False, False), ('MT prof B', 'TRANSLATED-B', False, False)]"
+ },
+ "q3_fetch_all_mt_requests": {
+  "status": "PASS",
+  "detail": "{'A': 0, 'B': 1, 'llm_row_still_unfetched': ['LLM prof']}"
+ },
+ "q3_fetch_all_ai_rows": {
+  "status": "PASS",
+  "detail": "[('MT prof A', 'TRANSLATED-A', False, False), ('MT prof B', 'TRANSLATED-B', False, False), ('LLM prof', 'TRANSLATED-A', False, False)]"
+ },
+ "q3_fetch_all_ai_requests": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "q3_stale_inflight_dropped": {
+  "status": "PASS",
+  "detail": "{'in_flight': True, 'requests': 1, 'rows': []}"
+ },
+ "q3_rows_reset_after_change": {
+  "status": "PASS",
+  "detail": "['MT prof A', 'MT prof B', 'LLM prof']"
+ },
+ "q3_late_answer_not_shown": {
+  "status": "PASS",
+  "detail": "{'workers_left': 0, 'rows': [], 'requests': 1}"
+ },
+ "q3_linkonly_rows": {
+  "status": "PASS",
+  "detail": "[('MT prof A', '![Image](y.png)', False, True), ('MT prof B', '![Image](y.png)', False, True), ('LLM prof', '![Image](y.png)', False, True)]"
+ },
+ "q3_linkonly_no_requests": {
+  "status": "PASS",
+  "detail": "{'A': 0, 'B': 0}"
+ },
+ "q3_linkonly_no_fetchall": {
+  "status": "PASS",
+  "detail": "0"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "bases": {
+   "A": "http://127.0.0.1:36654/v1",
+   "B": "http://127.0.0.1:36655/v1"
+  },
+  "requests": {
+   "A": 0,
+   "B": 0
+  }
+ }
+}
