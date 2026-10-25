@@ -1,0 +1,129 @@
+{
+ "tag": "q5",
+ "servers": {
+  "A": 32561,
+  "B": 32562
+ },
+ "checks": {
+  "p1_default_requests_to_A": {
+   "status": "PASS",
+   "detail": "A=1 B=0"
+  },
+  "p1_default_model_llm_a": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-a', 'max_tokens': 16384, 'max_completion_tokens': None, 'foo': None, 'user_head': 'You are a translation proofreader. Your task is to analyze translations for errors.\\\\n\\\\nDO NOT translat'}"
+  },
+  "p1_notes_keyed_llm_a": {
+   "status": "PASS",
+   "detail": "{'llm-a'}"
+  },
+  "p2_selB_requests_to_B": {
+   "status": "PASS",
+   "detail": "A=0 B=1"
+  },
+  "p2_selB_model_llm_b": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': 'You are a translation proofreader. Your task is to analyze translations for errors.\\\\n\\\\nDO NOT translat'}"
+  },
+  "p2_selB_max_tokens_777": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': 'You are a translation proofreader. Your task is to analyze translations for errors.\\\\n\\\\nDO NOT translat'}"
+  },
+  "p2_selB_extra_body_foo": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': 'You are a translation proofreader. Your task is to analyze translations for errors.\\\\n\\\\nDO NOT translat'}"
+  },
+  "p2_active_profile_still_A": {
+   "status": "PASS",
+   "detail": "'LLM A'"
+  },
+  "p2_settings_json_untouched": {
+   "status": "PASS",
+   "detail": "identical"
+  },
+  "p3_default_requests_to_A": {
+   "status": "PASS",
+   "detail": "A=6 B=0"
+  },
+  "p3_default_model_llm_a": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-a', 'max_tokens': 16384, 'max_completion_tokens': None, 'foo': None, 'user_head': '**SEGMENTS TO TRANSLATE (2 segments):**\\\\n\\\\n⚠️ CRITICAL INSTRUCTIONS:\\\\n1. You must provide EXACTLY one t'}"
+  },
+  "p4_selB_requests_to_B": {
+   "status": "PASS",
+   "detail": "A=0 B=6"
+  },
+  "p4_selB_model_llm_b": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': '**SEGMENTS TO TRANSLATE (2 segments):**\\\\n\\\\n⚠️ CRITICAL INSTRUCTIONS:\\\\n1. You must provide EXACTLY one t'}"
+  },
+  "p4_selB_max_tokens_777": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': '**SEGMENTS TO TRANSLATE (2 segments):**\\\\n\\\\n⚠️ CRITICAL INSTRUCTIONS:\\\\n1. You must provide EXACTLY one t'}"
+  },
+  "p4_selB_extra_body_foo": {
+   "status": "PASS",
+   "detail": "{'model': 'llm-b', 'max_tokens': 777, 'max_completion_tokens': None, 'foo': 'bar', 'user_head': '**SEGMENTS TO TRANSLATE (2 segments):**\\\\n\\\\n⚠️ CRITICAL INSTRUCTIONS:\\\\n1. You must provide EXACTLY one t'}"
+  },
+  "p4_active_profile_still_A": {
+   "status": "PASS",
+   "detail": "'LLM A'"
+  },
+  "p5_mt_selB_requests_to_B": {
+   "status": "PASS",
+   "detail": "A=0 B=2"
+  },
+  "p5_mt_selB_model_mt_b": {
+   "status": "PASS",
+   "detail": "{'model': 'mt-b', 'max_tokens': 16384, 'max_completion_tokens': None, 'foo': None, 'user_head': 'First segment text'}"
+  },
+  "p6_gate_message_shown": {
+   "status": "PASS",
+   "detail": "[\"warn 'Custom LLM profile is not configured'\"]"
+  },
+  "trap_network_empty": {
+   "status": "PASS",
+   "detail": "[]"
+  }
+ },
+ "evidence": {
+  "p5_request_user_head": "First segment text",
+  "modal_log_head": [
+   "QDialog.exec QDialog 'Import Text / Markdown File'",
+   "QDialog.exec QDialog '✅ Proofread Translation'",
+   "QDialog.exec QDialog 'Proofreading in Progress'",
+   "QDialog.exec QDialog '✅ Proofread Translation'",
+   "QDialog.exec QDialog 'Proofreading in Progress'",
+   "QDialog.exec QDialog 'Import Text / Markdown File'",
+   "QDialog.exec QMessageBox 'Re-import Document'",
+   "QDialog.exec QDialog 'Select Translation Provider'",
+   "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+   "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+   "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+   "QDialog.exec LiveProgressDialog 'Batch Translation Progress'"
+  ]
+ },
+ "checks_summary": {
+  "p1_default_requests_to_A": "PASS",
+  "p1_default_model_llm_a": "PASS",
+  "p1_notes_keyed_llm_a": "PASS",
+  "p2_selB_requests_to_B": "PASS",
+  "p2_selB_model_llm_b": "PASS",
+  "p2_selB_max_tokens_777": "PASS",
+  "p2_selB_extra_body_foo": "PASS",
+  "p2_active_profile_still_A": "PASS",
+  "p2_settings_json_untouched": "PASS",
+  "p3_default_requests_to_A": "PASS",
+  "p3_default_model_llm_a": "PASS",
+  "p4_selB_requests_to_B": "PASS",
+  "p4_selB_model_llm_b": "PASS",
+  "p4_selB_max_tokens_777": "PASS",
+  "p4_selB_extra_body_foo": "PASS",
+  "p4_active_profile_still_A": "PASS",
+  "p5_mt_selB_requests_to_B": "PASS",
+  "p5_mt_selB_model_mt_b": "PASS",
+  "p6_gate_message_shown": "PASS",
+  "trap_network_empty": "PASS"
+ },
+ "ok": true
+}
