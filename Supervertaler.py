@@ -5307,7 +5307,7 @@ class PreTranslationWorker(QThread):
     translation_error = pyqtSignal(str)  # параметр: error_message
     retry_needed = pyqtSignal(list)  # параметр empty_segments — список (row_index, segment)
     
-    def __init__(self, parent_app, segments, provider_type, provider_name, model, tm_exact_only=False, prompt_manager=None, retry_enabled=False, retry_pass=0, tm_ids=None, glossary_terms=None, base_url=None, custom_api_key=None, http_proxy=None, use_fuzzy_fixer=False, fuzzy_match_map=None, autotag_only=False, profile_kwargs=None):
+    def __init__(self, parent_app, segments, provider_type, provider_name, model, tm_exact_only=False, prompt_manager=None, retry_enabled=False, retry_pass=0, tm_ids=None, glossary_terms=None, base_url=None, custom_api_key=None, http_proxy=None, use_fuzzy_fixer=False, fuzzy_match_map=None, autotag_only=False, profile_kwargs=None, mt_profile=None):
         super().__init__()
         self.parent_app = parent_app
         self.segments = segments
@@ -5317,6 +5317,8 @@ class PreTranslationWorker(QThread):
         self.base_url = base_url
         self.custom_api_key = custom_api_key  # API-ключ профиля (приоритетнее api_keys.txt)
         self.http_proxy = http_proxy
+        # Q.5: выбранный в диалоге MT-профиль (dict); None = активный, как раньше
+        self.mt_profile = mt_profile
         # G3.2b: kwargs из опциональных полей профиля (max_tokens/timeout_seconds/
         # extra_body/profile_name) — передаются во все LLMClient этого воркера.
         self.profile_kwargs = profile_kwargs if isinstance(profile_kwargs, dict) else {}
@@ -5412,7 +5414,7 @@ class PreTranslationWorker(QThread):
                                 translation = segment.source
                                 print(f"⤳ Segment #{segment.id}: link-only segment skipped — MT engine not called, source copied to target (draft)")
                             else:
-                                translation = self._translate_with_mt(segment)
+                                translation = self._translate_with_mt(segment, profile=self.mt_profile)
                         
                         elapsed = time.time() - start_time
                         
@@ -5614,15 +5616,19 @@ class PreTranslationWorker(QThread):
             traceback.print_exc()
             return None
     
-    def _translate_with_mt(self, segment):
-        """Переводит один сегмент через custom MT endpoint (активный профиль)."""
+    def _translate_with_mt(self, segment, profile=None):
+        """Переводит один сегмент через custom MT endpoint.
+
+        profile (Q.5) — профиль, выбранный в диалоге пакетного перевода;
+        None = активный MT-профиль (прежнее поведение)."""
         try:
             source_lang = getattr(self.parent_app.current_project, 'source_lang', 'en')
             target_lang = getattr(self.parent_app.current_project, 'target_lang', 'nl')
             # С Batch #9.2 единственный MT-движок — custom MT endpoint:
             # call_custom_mt сам резолвит активный профиль. parent_app уже
             # используется воркером в TM/LLM-режимах — новых потоковых рисков нет.
-            result = self.parent_app.call_custom_mt(segment.source, source_lang, target_lang)
+            result = self.parent_app.call_custom_mt(segment.source, source_lang, target_lang,
+                                                    profile=profile)
             if result and not result.startswith('['):
                 return result
             print(f"MT translation skipped: {result}")
@@ -39189,15 +39195,33 @@ class SupervertalerQt(QMainWindow):
         
         layout.addSpacing(10)
         
-        # LLM provider info (Batch #9.3: модель — из активного профиля Custom,
-        # как и всюду: плоский ключ custom_openai_model протухает)
+        # LLM provider selection (Q.5): the read-only "Using: …" label is now a
+        # combo of the Custom LLM profiles (default = active). The choice
+        # applies to THIS run only — the global active profile and settings.json
+        # are not touched. An empty profile list keeps the old
+        # "Custom LLM profile is not configured" gate in _run_proofreading.
         settings = self.load_llm_settings()
         llm_provider = settings.get('provider', 'custom_openai')
         llm_model = self._resolve_provider_model(settings, llm_provider, 'gpt-5.5')
-        
-        llm_info = QLabel(f"📊 Using: {llm_provider.title()} ({llm_model})")
-        llm_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px 0;")
-        layout.addWidget(llm_info)
+
+        profile_row = QHBoxLayout()
+        profile_row.addWidget(QLabel(self.tr("📊 LLM profile:")))
+        profile_combo = QComboBox()
+        _profiles = settings.get('custom_openai_profiles', []) or []
+        for _p in _profiles:
+            _name = (_p.get('name') or '').strip() or 'Custom'
+            _model = (_p.get('model') or '').strip()
+            profile_combo.addItem(_name if not _model else f"{_name}  ({_model})", _name)
+        if _profiles:
+            _active = (settings.get('custom_openai_active_profile') or '').strip()
+            _idx = profile_combo.findData(_active)
+            profile_combo.setCurrentIndex(_idx if _idx >= 0 else 0)
+        else:
+            profile_combo.addItem(self.tr("(no profiles configured)"), None)
+            profile_combo.setEnabled(False)
+        profile_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        profile_row.addWidget(profile_combo)
+        layout.addLayout(profile_row)
         
         layout.addSpacing(10)
         
@@ -39303,11 +39327,21 @@ class SupervertalerQt(QMainWindow):
             return
         
         custom_prompt = prompt_text.toPlainText().strip()
-        
+
+        # Q.5: the picker's selected profile (None = list empty / legacy path)
+        selected_profile_name = profile_combo.currentData() if _profiles else None
+        if selected_profile_name:
+            _sel = self._get_active_custom_profile(settings, selected_profile_name)
+            _sel_model = (_sel.get('model') or '').strip() if _sel else ''
+            if _sel_model:
+                llm_model = _sel_model
+
         # Start proofreading
-        self._run_proofreading(segments_to_check, llm_provider, llm_model, custom_prompt, settings)
-    
-    def _run_proofreading(self, segments_to_check, provider, model, custom_prompt="", settings=None):
+        self._run_proofreading(segments_to_check, llm_provider, llm_model, custom_prompt, settings,
+                               profile_name=selected_profile_name)
+
+    def _run_proofreading(self, segments_to_check, provider, model, custom_prompt="", settings=None,
+                          profile_name=None):
         """Запускает вычитку выбранных сегментов в фоновом потоке."""
         # M2.1(d): link-only segments are excluded from the checked set — their
         # target is (after M1) a verbatim copy of the source, and the proofreader
@@ -39327,7 +39361,8 @@ class SupervertalerQt(QMainWindow):
             return
         # «Не настроено» (Batch #9.3): без активного профиля Custom с endpoint
         # вычитка не запускается — вежливое сообщение вместо ошибок батчей.
-        if provider == 'custom_openai' and not self._custom_llm_ready(settings):
+        # Q.5: profile_name — выбранное в диалоге имя (None = активный).
+        if provider == 'custom_openai' and not self._custom_llm_ready(settings, profile_name):
             QMessageBox.warning(
                 self, "Custom LLM profile is not configured",
                 "Custom LLM profile is not configured — Settings → AI Settings.\n\n"
@@ -39369,12 +39404,14 @@ class SupervertalerQt(QMainWindow):
         dialog_layout.addLayout(button_layout)
 
         # Resolve custom_openai settings before spawning thread
+        # Q.5: the dialog's picked profile (None = active), so endpoint/model/
+        # key/max_tokens/timeout/extra_body come from the SELECTED profile.
         api_keys = self.load_api_keys()
         base_url = None
         custom_api_key = None
         profile = None
         if settings:
-            profile = self._get_active_custom_profile(settings)
+            profile = self._get_active_custom_profile(settings, profile_name)
             if profile:
                 profile_key = (profile.get('api_key') or '').strip()
                 if profile_key:
@@ -48000,17 +48037,19 @@ class SupervertalerQt(QMainWindow):
             settings = self.load_llm_settings()
         return settings.get('custom_mt_profiles', []) or []
 
-    def _get_active_custom_mt_profile(self, settings=None):
+    def _get_active_custom_mt_profile(self, settings=None, profile_name=None):
         """Возвращает словарь активного профиля Custom MT endpoint (name,
                 endpoint, model, api_key).
-        
-                Зеркалит _get_active_custom_profile, но для выделенного набора
-                MT-endpoint'ов, независимого от кастомного ИИ-endpoint'а.
-                Возвращает None, если не задан."""
+
+                profile_name (Q.5) — конкретный профиль по имени (выбор в
+                диалоге пакетного перевода); без него — активный (активный
+                по имени -> первый). Зеркалит _get_active_custom_profile, но
+                для выделенного набора MT-endpoint'ов, независимого от
+                кастомного ИИ-endpoint'а. Возвращает None, если не задан."""
         if settings is None:
             settings = self.load_llm_settings()
         profiles = self._get_custom_mt_profiles(settings)
-        active_name = settings.get('custom_mt_active_profile', '')
+        active_name = profile_name if profile_name else settings.get('custom_mt_active_profile', '')
         for p in profiles:
             if p.get('name') == active_name:
                 q = dict(p)
@@ -50529,20 +50568,60 @@ class SupervertalerQt(QMainWindow):
 
             dialog_layout.addSpacing(10)
 
-            # Show current LLM settings
+            # Q.5: profile pickers instead of the read-only "Current LLM" label.
+            # LLM combo — Custom LLM profiles (default = active); MT combo —
+            # enabled Custom MT profiles (default = active MT). The choice
+            # applies to THIS run only: the global active profiles and
+            # settings.json are not touched. Each picker is enabled only in
+            # its own mode (LLM checkbox / MT checkbox).
             settings = self.load_llm_settings()
             llm_provider = settings.get('provider', 'custom_openai')
             llm_model = self._resolve_provider_model(settings, llm_provider, 'gpt-5.5')
 
-            if llm_provider == 'custom_openai':
-                profile = self._get_active_custom_profile(settings)
-                profile_name = profile.get('name', 'Custom') if profile else 'Custom'
-                provider_display = f"Custom: {profile_name}"
+            profile_row = QHBoxLayout()
+            profile_row.addWidget(QLabel(self.tr("🤖 LLM profile:")))
+            llm_profile_combo = QComboBox()
+            _llm_profiles = settings.get('custom_openai_profiles', []) or []
+            for _p in _llm_profiles:
+                _name = (_p.get('name') or '').strip() or 'Custom'
+                _model = (_p.get('model') or '').strip()
+                llm_profile_combo.addItem(_name if not _model else f"{_name}  ({_model})", _name)
+            if _llm_profiles:
+                _active = (settings.get('custom_openai_active_profile') or '').strip()
+                _idx = llm_profile_combo.findData(_active)
+                llm_profile_combo.setCurrentIndex(_idx if _idx >= 0 else 0)
             else:
-                provider_display = llm_provider.title()
-            llm_info = QLabel(f"📊 Current LLM: {provider_display} ({llm_model})")
-            llm_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px 0;")
-            dialog_layout.addWidget(llm_info)
+                llm_profile_combo.addItem(self.tr("(no profiles configured)"), None)
+            llm_profile_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            profile_row.addWidget(llm_profile_combo)
+            dialog_layout.addLayout(profile_row)
+
+            mt_profile_row = QHBoxLayout()
+            mt_profile_row.addWidget(QLabel(self.tr("🌐 MT profile:")))
+            mt_profile_combo = QComboBox()
+            _mt_profiles = [p for p in self._get_custom_mt_profiles(settings)
+                            if (p.get('endpoint') or '').strip()]
+            for _p in _mt_profiles:
+                _name = (_p.get('name') or '').strip() or 'Custom MT'
+                mt_profile_combo.addItem(_name, _name)
+            if _mt_profiles:
+                _mt_active = self._get_active_custom_mt_profile(settings)
+                _mt_active_name = ((_mt_active or {}).get('name') or '').strip()
+                _idx = mt_profile_combo.findData(_mt_active_name)
+                mt_profile_combo.setCurrentIndex(_idx if _idx >= 0 else 0)
+            else:
+                mt_profile_combo.addItem(self.tr("(no MT profiles)"), None)
+            mt_profile_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            mt_profile_row.addWidget(mt_profile_combo)
+            dialog_layout.addLayout(mt_profile_row)
+
+            # A picker is enabled only while its mode's checkbox is checked
+            llm_checkbox.toggled.connect(
+                lambda checked: llm_profile_combo.setEnabled(checked and bool(_llm_profiles)))
+            mt_checkbox.toggled.connect(
+                lambda checked: mt_profile_combo.setEnabled(checked and bool(_mt_profiles)))
+            llm_profile_combo.setEnabled(llm_checkbox.isChecked() and bool(_llm_profiles))
+            mt_profile_combo.setEnabled(mt_checkbox.isChecked() and bool(_mt_profiles))
 
             dialog_layout.addSpacing(10)
         
@@ -50666,7 +50745,8 @@ class SupervertalerQt(QMainWindow):
                 self.log(f"📖 Using Translation Memory for batch pre-translation{mode_str}{confirm_str}")
             
             elif use_mt:
-                # Use MT provider (custom MT endpoint, active profile)
+                # Use MT provider (custom MT endpoint, Q.5: the picked profile,
+                # default = active MT as before)
                 translation_provider_type = 'MT'
                 translation_provider_name = 'Custom MT'
                 if not mt_providers_available:
@@ -50675,6 +50755,9 @@ class SupervertalerQt(QMainWindow):
                         "No custom MT endpoint configured. Add a profile in Settings → QuickTrans."
                     )
                     return
+                # Q.5: remember the picker's choice for the worker + retry passes
+                self._batch_mt_profile_name = (mt_profile_combo.currentData()
+                                               if _mt_profiles else None)
 
             else:
                 # Use LLM provider (Batch #9.3: только custom_openai; ключ
@@ -50683,8 +50766,9 @@ class SupervertalerQt(QMainWindow):
 
                 # «Не настроено»: без активного профиля Custom с endpoint батч
                 # не запускается — вежливое сообщение вместо ошибок на каждый
-                # сегмент в фоновом воркере.
-                if not self._custom_llm_ready(settings):
+                # сегмент в фоновом воркере. Q.5: проверяем ВЫБРАННЫЙ профиль.
+                _llm_sel_name = llm_profile_combo.currentData() if _llm_profiles else None
+                if not self._custom_llm_ready(settings, _llm_sel_name):
                     # локальный импорт: в translate_batch ниже будет локальный
                     # from PyQt6.QtWidgets import QMessageBox (бюджет-блок) — он затеняет
                     # имя для всей функции
@@ -50696,8 +50780,15 @@ class SupervertalerQt(QMainWindow):
                     return
 
                 translation_provider_name = llm_provider
-                model = llm_model
-            
+                # Q.5: model comes from the SELECTED profile (fallback: the
+                # old resolve — active/flat), and the choice is stored for
+                # retry passes (they skip the dialog).
+                _sel_profile = self._get_active_custom_profile(settings, _llm_sel_name)
+                model = (_sel_profile.get('model') or '').strip() if _sel_profile else ''
+                if not model:
+                    model = llm_model
+                self._batch_profile_name = _llm_sel_name
+
                 # Store settings for potential retry passes
                 self._batch_provider_type = translation_provider_type
                 self._batch_provider_name = translation_provider_name
@@ -50709,7 +50800,12 @@ class SupervertalerQt(QMainWindow):
 
         # Create provider info string for dialog
         if translation_provider_type == 'MT':
-            provider_info = f"Provider: {translation_provider_name} (Machine Translation)"
+            # Q.5: show the effective MT profile (picked in the dialog or active)
+            _mt_sel_name = getattr(self, '_batch_mt_profile_name', None)
+            _mt_eff = self._get_active_custom_mt_profile(settings, _mt_sel_name) if _mt_sel_name \
+                else self._get_active_custom_mt_profile(settings)
+            _mt_disp = ((_mt_eff or {}).get('name') or '').strip() or translation_provider_name
+            provider_info = f"Provider: {_mt_disp} (Machine Translation)"
         elif translation_provider_type == 'TM':
             mode = "Exact matches only" if tm_exact_only else "with fuzzy matching"
             provider_info = f"Provider: Translation Memory ({mode})"
@@ -50997,7 +51093,9 @@ class SupervertalerQt(QMainWindow):
         # profile has no advanced fields).
         profile_kwargs = {}
         if translation_provider_name == 'custom_openai':
-            profile = self._get_active_custom_profile(settings)
+            # Q.5: the dialog-picked profile (None = active), also on retry
+            # passes (the name is stored with the other _batch_* settings).
+            profile = self._get_active_custom_profile(settings, getattr(self, '_batch_profile_name', None))
             if profile:
                 custom_base_url = profile.get('endpoint') or None
                 profile_key = (profile.get('api_key') or '').strip()
@@ -51026,6 +51124,12 @@ class SupervertalerQt(QMainWindow):
             except Exception:
                 pass
 
+        # Q.5: MT branch — the profile picked in the dialog (None = active,
+        # the worker's _translate_with_mt then resolves it exactly as before).
+        _mt_sel = getattr(self, '_batch_mt_profile_name', None)
+        mt_profile = (self._get_active_custom_mt_profile(settings, _mt_sel)
+                      if translation_provider_type == 'MT' and _mt_sel else None)
+
         worker = PreTranslationWorker(
             self,
             segments_needing_translation,  # Use filtered segments after TM pre-check
@@ -51044,6 +51148,7 @@ class SupervertalerQt(QMainWindow):
             use_fuzzy_fixer=use_fuzzy_fixer,
             fuzzy_match_map=fuzzy_match_map,
             profile_kwargs=profile_kwargs,
+            mt_profile=mt_profile,
         )
         dialog = LiveProgressDialog(self, len(segments_needing_translation), provider_info)
         
