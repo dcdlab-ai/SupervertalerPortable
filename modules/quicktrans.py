@@ -226,19 +226,6 @@ def _detach_worker_for_close(worker: MTFetchWorker) -> None:
     worker.all_complete.connect(_remove_from_detached)
 
 
-def _field_text_keep_nbsp(field):
-    """Field text for insertion (Q.7r): QTextEdit.toPlainText() normalises
-    NBSP (U+00A0) to a plain space, which would silently strip NBSP from
-    every Paste/Ctrl+N insertion; document().toRawText() keeps it (paragraph/
-    line separators U+2029/U+2028 and Qt's internal markers U+FDD0/U+FDD1
-    become '\n' — exactly the replacements toPlainText() performs besides the
-    NBSP swap). Mirrors the monolith's _cell_text_keep_nbsp."""
-    raw = field.document().toRawText()
-    for sep in ('\u2029', '\u2028', '\ufdd0', '\ufdd1'):
-        raw = raw.replace(sep, '\n')
-    return raw
-
-
 class MTSuggestionItem(QFrame):
     """A single MT suggestion row in the popup"""
 
@@ -508,21 +495,19 @@ class PanelResultRow(QFrame):
     def _on_paste(self):
         """Emit the text Paste should insert: the field's selection if there
         is one, else the whole current field text (user edits included).
-        QTextCursor.selectedText() uses U+2029 for paragraph breaks (NBSP is
-        kept by both reads — Q.7r raw reads, no normalisation)."""
+        QTextCursor.selectedText() uses U+2029 for paragraph breaks."""
         cursor = self.field.textCursor()
         if cursor.hasSelection():
             text = cursor.selectedText().replace('\u2029', '\n')
         else:
-            text = _field_text_keep_nbsp(self.field)
+            text = self.field.toPlainText()
         if text:
             self.paste_requested.emit(text)
 
     def current_text(self) -> str:
         """The field's current text (user edits included) — what Ctrl+1..9
-        and Paste insert for this row. Q.7r: raw document read keeps NBSP
-        (toPlainText() would turn U+00A0 into a plain space)."""
-        return _field_text_keep_nbsp(self.field)
+        and Paste insert for this row."""
+        return self.field.toPlainText()
 
     def set_number(self, number: int):
         """Update the displayed pick-number (rows are renumbered in visual
