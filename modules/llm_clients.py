@@ -199,6 +199,21 @@ class LLMTimeoutError(LLMResponseError):
     """The request timed out under the profile's timeout value (G3.2b)."""
 
 
+class LLMConnectionError(LLMResponseError):
+    """TCP/TLS connect failed (Q.8b): host unreachable, server stopped or the
+    connection was refused within the connect-timeout window. A genuine read
+    timeout (server accepted the connection and stayed silent) stays
+    LLMTimeoutError with its own message."""
+
+
+# Q.8b: dedicated TCP-connect timeout (seconds) for every client this module
+# creates. The read timeout stays the profile's 'Request timeout' (default
+# 10 min); connect failures used to ride the SAME budget, and with the SDK's
+# 3 attempts an unreachable LAN host cost ~65 s (Windows connect ~21 s × 3)
+# before surfacing as a misleading "timed out after 10 minutes (600 s)".
+CONNECT_TIMEOUT_SECONDS = 15.0
+
+
 # Copy-pasteable example for the "Extra request body" fix hint: disables
 # thinking in llama.cpp/LM Studio chat templates.
 _DISABLE_THINKING_EXAMPLE = '{"chat_template_kwargs": {"enable_thinking": false}}'
@@ -751,7 +766,8 @@ class LLMClient:
         стабильные префиксы на своей стороне.
         """
         try:
-            from openai import OpenAI, APITimeoutError
+            from openai import (OpenAI, APITimeoutError, APIConnectionError,
+                                APIStatusError)
         except ImportError:
             raise ImportError("OpenAI library not installed. Install with: pip install openai")
 
@@ -760,18 +776,29 @@ class LLMClient:
         # G3.2b: timeout from the profile ('Request timeout', minutes×60) or the
         # 10-minute default; the old 120 s is replaced, name-based 600 s kept.
         timeout_seconds = self._effective_timeout_seconds()
+        # Q.8b: split the CONNECT phase out of the profile's read budget —
+        # httpx.Timeout(<default for read/write/pool>, connect=N) is the SDK's
+        # own convention. The bundled runtime ships httpx2 (openai 3.x's fork)
+        # and may have no `httpx` package — fall back like the proxy branch.
+        try:
+            import httpx
+        except ImportError:
+            import httpx2 as httpx
+        request_timeout = httpx.Timeout(timeout_seconds, connect=CONNECT_TIMEOUT_SECONDS)
 
-        client_kwargs = {"api_key": self.api_key, "timeout": timeout_seconds}
+        # Q.8b: SDK-level retries are OFF (its single budget also retried
+        # CONNECT failures — 3×15 s to a dead host); the loop below keeps the
+        # SDK's own retryable semantics for everything else: retryable STATUS
+        # codes (408/409/429/5xx, Retry-After honoured, 2 retries, 0.5·2ⁿ
+        # backoff capped at 8 s) and READ timeouts (server accepted and went
+        # silent) — exactly what the SDK used to retry besides connects.
+        client_kwargs = {"api_key": self.api_key, "timeout": request_timeout,
+                         "max_retries": 0}
         if self.base_url:
             client_kwargs["base_url"] = self.base_url
         if self.http_proxy:
-            # The bundled runtime ships httpx2 (openai 3.x's fork) and has no
-            # `httpx` package — fall back to it so a configured proxy works.
-            try:
-                import httpx
-            except ImportError:
-                import httpx2 as httpx
-            client_kwargs["http_client"] = httpx.Client(proxy=self.http_proxy, timeout=timeout_seconds)
+            client_kwargs["http_client"] = httpx.Client(proxy=self.http_proxy,
+                                                        timeout=request_timeout)
         client = OpenAI(**client_kwargs)
 
         if max_tokens is not None:
@@ -792,7 +819,7 @@ class LLMClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": content})
 
-        api_params = {"model": self.model, "messages": messages, "timeout": timeout_seconds}
+        api_params = {"model": self.model, "messages": messages, "timeout": request_timeout}
         if is_reasoning_model:
             api_params["max_completion_tokens"] = tokens_to_use
         else:
@@ -803,18 +830,70 @@ class LLMClient:
         if self.extra_body:
             api_params["extra_body"] = dict(self.extra_body)
 
+        # Q.8b: one-line connection message («Cannot connect to … within
+        # 15 s — host unreachable or server stopped — profile '…'.») with the
+        # endpoint's host:port; no read-timeout wording for connect failures.
         try:
-            response = client.chat.completions.create(**api_params)
-        except APITimeoutError as exc:
-            # G3.2b: clear message with profile name + current timeout value,
-            # not a raw SDK traceback.
-            raise LLMTimeoutError(
-                f"Request to model {self.model} timed out after "
-                f"{timeout_seconds / 60.0:g} minutes ({timeout_seconds:g} s) — "
-                f"profile '{self.profile_name or 'Custom LLM'}'. Increase "
-                f"the profile's 'Request timeout' field and retry.",
-                finish_reason=None, has_reasoning=False,
-                reasoning_tokens=0) from exc
+            from urllib.parse import urlsplit
+            _netloc = urlsplit(self.base_url or "").netloc or (self.base_url or "endpoint")
+        except Exception:
+            _netloc = self.base_url or "endpoint"
+
+        def _connection_error():
+            return LLMConnectionError(
+                f"Cannot connect to {_netloc} within "
+                f"{CONNECT_TIMEOUT_SECONDS:g} s — host unreachable or server "
+                f"stopped — profile '{self.profile_name or 'Custom LLM'}'.",
+                finish_reason=None, has_reasoning=False, reasoning_tokens=0)
+
+        _RETRYABLE_STATUS = {408, 409, 429}
+        response = None
+        _last_status_exc = None
+        for _attempt in range(3):  # 1 try + 2 retries (the SDK default)
+            try:
+                response = client.chat.completions.create(**api_params)
+                break
+            except APITimeoutError as exc:
+                # Connect-phase timeout (host never answered TCP) fails fast
+                # with the connection message; a READ timeout (connection
+                # established, server silent) keeps the old retry + message.
+                if isinstance(getattr(exc, "__cause__", None), httpx.ConnectTimeout):
+                    raise _connection_error() from exc
+                if _attempt == 2:
+                    # G3.2b: clear message with profile name + current timeout
+                    # value, not a raw SDK traceback.
+                    raise LLMTimeoutError(
+                        f"Request to model {self.model} timed out after "
+                        f"{timeout_seconds / 60.0:g} minutes ({timeout_seconds:g} s) — "
+                        f"profile '{self.profile_name or 'Custom LLM'}'. Increase "
+                        f"the profile's 'Request timeout' field and retry.",
+                        finish_reason=None, has_reasoning=False,
+                        reasoning_tokens=0) from exc
+                time.sleep(min(0.5 * (2 ** _attempt), 8.0))
+            except APIConnectionError as exc:
+                # Refused / unreachable without any server response
+                raise _connection_error() from exc
+            except APIStatusError as exc:
+                _status = getattr(exc, "status_code", None)
+                if _status is None:
+                    _resp = getattr(exc, "response", None)
+                    _status = getattr(_resp, "status_code", None)
+                if (_status is None or
+                        not (_status >= 500 or _status in _RETRYABLE_STATUS) or
+                        _attempt == 2):
+                    raise
+                _last_status_exc = exc
+                delay = min(0.5 * (2 ** _attempt), 8.0)
+                try:
+                    _ra = exc.response.headers.get("retry-after")
+                    if _ra is not None:
+                        delay = max(delay, min(float(_ra), 60.0))
+                except Exception:
+                    pass
+                time.sleep(delay)
+        if response is None:
+            raise _last_status_exc or RuntimeError(
+                "request failed without a response")
 
         text = _parse_completion_response(response, self.model, lenient=lenient_on_truncation)
 

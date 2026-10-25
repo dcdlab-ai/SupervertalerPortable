@@ -1,0 +1,80 @@
+{
+ "tag": "q8b",
+ "port": 3210,
+ "checks": {
+  "s4_5xx_retried_to_success": {
+   "status": "PASS",
+   "detail": "outcome=returned requests=3"
+  },
+  "s2_testnet_default_conn_error": {
+   "status": "FAIL",
+   "detail": "exc=LLMTimeoutError wall=64.4"
+  },
+  "s2_testnet_default_message": {
+   "status": "FAIL",
+   "detail": "\"Request to model probe-model timed out after 10 minutes (600 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.\""
+  },
+  "s2_refused_fast_conn_error": {
+   "status": "FAIL",
+   "detail": "exc=APIConnectionError wall=7.4"
+  },
+  "s2_silent_read_timeout_preserved": {
+   "status": "PASS",
+   "detail": "exc=LLMTimeoutError wall=10.4 msg=Request to model probe-model timed out after 0.05 minutes (3 s) — profile 'Probe"
+  },
+  "s3_mt_localhost_legacy_text": {
+   "status": "FAIL",
+   "detail": "[]"
+  },
+  "s3_llm_remote_single_brackets": {
+   "status": "FAIL",
+   "detail": "''"
+  },
+  "s3_llm_remote_new_message": {
+   "status": "FAIL",
+   "detail": "''"
+  },
+  "trap_network_empty": {
+   "status": "PASS",
+   "detail": "[]"
+  }
+ },
+ "evidence": {
+  "s1": {
+   "outcome": "returned",
+   "result": "Goedemorgen",
+   "wall": 2.1
+  },
+  "s1_body_sha256": "44f972f251632958a7ac518f2da929ffded72bca612317c89d2cd49a9c2dbd95",
+  "s2_testnet_default": {
+   "outcome": "raised",
+   "exc": "LLMTimeoutError",
+   "exc_module": "modules.llm_clients",
+   "cause": "APITimeoutError",
+   "msg": "Request to model probe-model timed out after 10 minutes (600 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.",
+   "wall": 64.4
+  },
+  "s2_refused": {
+   "outcome": "raised",
+   "exc": "APIConnectionError",
+   "exc_module": "openai",
+   "cause": "ConnectError",
+   "msg": "Connection error.",
+   "wall": 7.4
+  },
+  "s2_silent_read": {
+   "outcome": "raised",
+   "exc": "LLMTimeoutError",
+   "exc_module": "modules.llm_clients",
+   "cause": "APITimeoutError",
+   "msg": "Request to model probe-model timed out after 0.05 minutes (3 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.",
+   "wall": 10.4
+  },
+  "s3_mt_rows": 1,
+  "s3_mt_row_text": [],
+  "s3_llm_rows": 1,
+  "s3_llm_row_text": [],
+  "s3_llm_wall": 25.0
+ },
+ "ok": false
+}

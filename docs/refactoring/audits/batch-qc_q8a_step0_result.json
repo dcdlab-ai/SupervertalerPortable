@@ -1,0 +1,16 @@
+{
+ "direct_llm_call": {
+  "text": "[Error: Connection error.]",
+  "seconds": 8.1
+ },
+ "ai_rows": 1,
+ "panel_llm_row": [
+  "[Error: Connection error.]"
+ ],
+ "mt_rows": 1,
+ "panel_all_rows_after_mt": [
+  "[MT proxy not running. Start it.]",
+  "[Error: Connection error.]"
+ ],
+ "direct_mt_call": "[Custom MT error: 'ParentStub' object has no attribute '_get_active_custom_mt_profile']"
+}

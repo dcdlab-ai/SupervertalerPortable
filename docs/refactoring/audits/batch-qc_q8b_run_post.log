@@ -1,0 +1,18 @@
+[PASS] s4_5xx_retried_to_success: outcome=returned requests=3
+[PASS] s2_testnet_default_conn_error: exc=LLMConnectionError wall=15.0
+[PASS] s2_testnet_default_message: "Cannot connect to 192.0.2.1:65500 within 15 s — host unreachable or server stopped — profile 'Probe profile'."
+[PASS] s2_refused_fast_conn_error: exc=LLMConnectionError wall=2.0
+[PASS] s2_silent_read_timeout_preserved: exc=LLMTimeoutError wall=10.6 msg=Request to model probe-model timed out after 0.05 minutes (3 s) — profile 'Probe
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
+This plugin does not support propagateSizeHints()
+[USER MODE] Using 'user_data/' folder
+[PASS] s3_mt_localhost_legacy_text: ['[MT proxy not running. Start it.]']
+[PASS] s3_llm_remote_single_brackets: "[Error: Cannot connect to 192.0.2.1:65500 within 15 s — host unreachable or server stopped — profile 'LLM dead'.]"
+[PASS] s3_llm_remote_new_message: "[Error: Cannot connect to 192.0.2.1:65500 within 15 s — host unreachable or server stopped — profile 'LLM dead'.]"
+[PASS] trap_network_empty: []
+Q8B-PROBE GREEN 9/9
+QThreadStorage: entry 1 destroyed before end of thread 0x27ebb2f1580

@@ -1,0 +1,46 @@
+[
+ {
+  "case": "refused-closed-port",
+  "endpoint": "http://127.0.0.1:1/v1",
+  "timeout_minutes": 0.05,
+  "outcome": "raised",
+  "exc_class": "APIConnectionError",
+  "exc_module": "openai",
+  "cause_class": "ConnectError",
+  "exc_str": "Connection error.",
+  "wall_seconds": 8.2
+ },
+ {
+  "case": "silent-server-read-timeout",
+  "endpoint": "http://127.0.0.1:61678/v1",
+  "timeout_minutes": 0.05,
+  "outcome": "raised",
+  "exc_class": "LLMTimeoutError",
+  "exc_module": "modules.llm_clients",
+  "cause_class": "APITimeoutError",
+  "exc_str": "Request to model probe-model timed out after 0.05 minutes (3 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.",
+  "wall_seconds": 10.3
+ },
+ {
+  "case": "testnet-short-timeout",
+  "endpoint": "http://192.0.2.1:65500/v1",
+  "timeout_minutes": 0.05,
+  "outcome": "raised",
+  "exc_class": "LLMTimeoutError",
+  "exc_module": "modules.llm_clients",
+  "cause_class": "APITimeoutError",
+  "exc_str": "Request to model probe-model timed out after 0.05 minutes (3 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.",
+  "wall_seconds": 10.5
+ },
+ {
+  "case": "testnet-default-timeout",
+  "endpoint": "http://192.0.2.1:65500/v1",
+  "timeout_minutes": null,
+  "outcome": "raised",
+  "exc_class": "LLMTimeoutError",
+  "exc_module": "modules.llm_clients",
+  "cause_class": "APITimeoutError",
+  "exc_str": "Request to model probe-model timed out after 10 minutes (600 s) — profile 'Probe profile'. Increase the profile's 'Request timeout' field and retry.",
+  "wall_seconds": 64.3
+ }
+]

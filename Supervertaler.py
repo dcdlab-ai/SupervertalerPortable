@@ -48068,7 +48068,7 @@ class SupervertalerQt(QMainWindow):
                 Custom MT. Возвращает переведённую строку или сообщение об ошибке
                 в скобках при сбое (конвенция QuickTrans)."""
         try:
-            from modules.llm_clients import LLMClient, LLMResponseError
+            from modules.llm_clients import LLMClient, LLMResponseError, LLMConnectionError
 
             if profile is None:
                 profile = self._get_active_custom_mt_profile()
@@ -48146,6 +48146,15 @@ class SupervertalerQt(QMainWindow):
                         or (result.startswith("'") and result.endswith("'"))):
                     result = result[1:-1]
             return result or "[Custom MT: no translation returned]"
+        except LLMConnectionError as e:
+            # Q.8b: connect-phase failure (refused/unreachable within the
+            # 15 s connect timeout). A localhost endpoint keeps the wording
+            # Dmitry validated; a remote host surfaces the one-line typed
+            # message through the same '[Error: …]' convention.
+            host = locals().get('endpoint', '') or ''
+            if any(h in host for h in ('127.0.0.1', 'localhost', '0.0.0.0')):
+                return "[MT proxy not running. Start it.]"
+            return f"[Error: {str(e)}]"
         except LLMResponseError as e:
             # Q.1: typed endpoint responses (truncated / empty / timeout) say
             # something real about the request, not about connectivity — show
