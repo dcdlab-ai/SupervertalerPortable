@@ -1,0 +1,103 @@
+{
+ "q4_row_created": {
+  "status": "PASS",
+  "detail": "[('MT good', 'First line of the translation.\\nSecond line continues here.')]"
+ },
+ "q4_field_is_editable_widget": {
+  "status": "PASS",
+  "detail": "QTextEdit"
+ },
+ "q4_field_content": {
+  "status": "PASS",
+  "detail": "First line of the translation.\nSecond line continues here."
+ },
+ "q4_field_auto_height": {
+  "status": "PASS",
+  "detail": "{'one': 28, 'two': 42, 'four': 70}"
+ },
+ "q4_field_editable": {
+  "status": "PASS",
+  "detail": "Edited by hand: first\nEdited by hand: second"
+ },
+ "q4_selection_copyable": {
+  "status": "PASS",
+  "detail": "'Edite'"
+ },
+ "q4_paste_selection": {
+  "status": "PASS",
+  "detail": "['Edite']"
+ },
+ "q4_paste_whole_edited": {
+  "status": "PASS",
+  "detail": "['Edited by hand: first\\nEdited by hand: second']"
+ },
+ "q4_ctrl_n_edited_text": {
+  "status": "PASS",
+  "detail": "{'inserted': True, 'emitted': ['Edited by hand: first\\nEdited by hand: second']}"
+ },
+ "q4_field_focused": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "q4_ctrl_shortcut_through_focus": {
+  "status": "PASS",
+  "detail": "{'emitted': ['Edited by hand: first\\nEdited by hand: second'], 'field': 'Edited by hand: first\\nEdited by hand: second'}"
+ },
+ "q4_click_no_insert": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "q4_click_focuses_field": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "q4_number_badges": {
+  "status": "PASS",
+  "detail": "['1']"
+ },
+ "q4_error_row_flagged": {
+  "status": "PASS",
+  "detail": "[('MT dead', '[MT proxy not running. Start it.]', True), ('MT good', 'First line of the translation.\\nSecond line continues here.', False), ('LLM prof', 'First line of the translation.\\nSecond line continues here.', False)]"
+ },
+ "q4_error_text_style_red": {
+  "status": "PASS",
+  "detail": "QPlainTextEdit { color: #ff6b6b; font-size: 11px; border: 1px solid #f3d6d6; border-radius: 3px; background: white; }"
+ },
+ "q4_error_row_no_paste": {
+  "status": "PASS",
+  "detail": "False"
+ },
+ "q4_error_ctrl_n_refused": {
+  "status": "PASS",
+  "detail": "{'res': False, 'emitted': []}"
+ },
+ "q4_healthy_row_still_inserts": {
+  "status": "PASS",
+  "detail": "{'res': True, 'emitted': ['First line of the translation.\\nSecond line continues here.']}"
+ },
+ "q4_linkonly_row": {
+  "status": "PASS",
+  "detail": "[('![Image](y.png)', False, True), ('![Image](y.png)', False, True)]"
+ },
+ "q4_linkonly_no_requests": {
+  "status": "PASS",
+  "detail": "0"
+ },
+ "q4_linkonly_paste_button": {
+  "status": "PASS",
+  "detail": "True"
+ },
+ "q4_linkonly_paste_source": {
+  "status": "PASS",
+  "detail": "['![Image](y.png)']"
+ },
+ "q4_linkonly_ctrl_n_source": {
+  "status": "PASS",
+  "detail": "{'res': True, 'emitted': ['![Image](y.png)']}"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "port": 6409,
+  "total_requests": 0
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "panel_link1_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "panel_link1_rows": {
+  "status": "FAIL",
+  "detail": "[('![Image](y.png)', False, True), ('![Image](y.png)', False, True)]"
+ },
+ "panel_link2_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "panel_link2_rows": {
+  "status": "FAIL",
+  "detail": "[('![Image](y.png).', False, True), ('![Image](y.png).', False, True)]"
+ },
+ "panel_mixed_requests": {
+  "status": "FAIL",
+  "detail": "[]"
+ },
+ "panel_mixed_rows_normal": {
+  "status": "FAIL",
+  "detail": "[]"
+ },
+ "panel_llm_button_present": {
+  "status": "FAIL",
+  "detail": "0"
+ },
+ "popup_link1_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "popup_link1_rows": {
+  "status": "PASS",
+  "detail": "[('![Image](y.png)', False, True), ('![Image](y.png)', False, True)]"
+ },
+ "popup_insert_source": {
+  "status": "PASS",
+  "detail": "['![Image](y.png)']"
+ },
+ "popup_fetchmode_mt_row": {
+  "status": "PASS",
+  "detail": "[('![Image](y.png).', True)]"
+ },
+ "popup_fetchmode_button_present": {
+  "status": "PASS",
+  "detail": "1"
+ },
+ "popup_fetchmode_click_no_requests": {
+  "status": "PASS",
+  "detail": "[]"
+ },
+ "popup_fetchmode_click_row": {
+  "status": "PASS",
+  "detail": "[('![Image](y.png).', True), ('![Image](y.png).', True)]"
+ },
+ "popup_mixed_requests": {
+  "status": "PASS",
+  "detail": "[{'path': '/v1/chat/completions', 'body': '{\"model\":\"m\",\"messages\":[{\"role\":\"system\",\"content\":\"Translate from English to Dutch. Output only the translated text — no quotes, notes, or explanations.\"},{\"role\":\"user\",\"content\":\"![Image](y.png) see figure two\"}],\"max_tokens\":16384,\"temperature\":0.3}'}]"
+ },
+ "popup_mixed_rows_normal": {
+  "status": "PASS",
+  "detail": "[('TRANSLATED-OK', False)]"
+ },
+ "_meta": {
+  "tree": "E:\\Dev\\SupervertalerPortable",
+  "port": 5953,
+  "total_requests": 1
+ }
+}

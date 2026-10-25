@@ -1,0 +1,22 @@
+=== chain qc ===
+total calls: 893, unresolved: 0
+=== pyflakes qc ===
+=== py_compile ===
+=== headless ===
+headless imports (with setup.py): 90 ok / 2 fail / 92 total
+FAIL setup: ModuleNotFoundError: No module named 'setuptools'
+FAIL modules.pdf_rescue_Qt: ModuleNotFoundError: No module named 'fitz'
+=== grep gate ===
+== Supervertaler.py (монолит) ==
+  allowed get_google_translation: 2 (comment/разрешённые зоны)
+  allowed provider == 'gemini': 1 (comment/разрешённые зоны)
+== modules/llm_clients.py ==
+  CLEAN (0 hits)
+== modules/settings_service.py ==
+  CLEAN (0 hits)
+== modules/chat_backend.py ==
+  CLEAN (0 hits)
+== modules/chat_view_widget.py ==
+  CLEAN (0 hits)
+== modules/quicktrans.py ==
+=== DONE static ===
