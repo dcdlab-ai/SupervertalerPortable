@@ -1,0 +1,101 @@
+{
+ "ok": true,
+ "results": {
+  "qt_version": {
+   "status": "PASS",
+   "detail": "PyQt 6.11.0 / Qt 6.11.0"
+  },
+  "a_block_text_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'a\\xa0b c\\xa0d'"
+  },
+  "a_cursor_text_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'a\\xa0b c\\xa0d'"
+  },
+  "b_torawtext_returns_nbsp": {
+   "status": "PASS",
+   "detail": "'a\\xa0b c\\xa0d'"
+  },
+  "b_toplaintext_replaces_nbsp": {
+   "status": "PASS",
+   "detail": "'a b c d'"
+  },
+  "c_nbsp_only_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp='a b' helper='a\\xa0b'"
+  },
+  "c_nbsp_only_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='a\\xa0b'"
+  },
+  "c_nbsp_multiblock_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp='one two\\nthree four' helper='one\\xa0two\\nthree\\xa0four'"
+  },
+  "c_nbsp_multiblock_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='one\\xa0two\\u2029three\\xa0four'"
+  },
+  "c_nbsp_edges_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp=' lead and trail ' helper='\\xa0lead and trail\\xa0'"
+  },
+  "c_nbsp_edges_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='\\xa0lead and trail\\xa0'"
+  },
+  "c_nbsp_runs_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp='x   y' helper='x\\xa0\\xa0\\xa0y'"
+  },
+  "c_nbsp_runs_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='x\\xa0\\xa0\\xa0y'"
+  },
+  "c_plain_ascii_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp='no special chars here' helper='no special chars here'"
+  },
+  "c_plain_ascii_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='no special chars here'"
+  },
+  "c_tabs_helper_equals_tp_modulo_nbsp": {
+   "status": "PASS",
+   "detail": "tp='tab\\there' helper='tab\\there'"
+  },
+  "c_tabs_raw_separator_is_u2029": {
+   "status": "PASS",
+   "detail": "raw='tab\\there'"
+  },
+  "c_u2028_helper_newline": {
+   "status": "PASS",
+   "detail": "tp='startsoft\\nbreak' helper='startsoft\\nbreak'"
+  },
+  "c_u2028_helper_equals_tp": {
+   "status": "PASS",
+   "detail": "tp='startsoft\\nbreak' helper='startsoft\\nbreak'"
+  },
+  "d_keystroke_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'ax\\xa0b'"
+  },
+  "d_keystroke_toplaintext_normalizes": {
+   "status": "PASS",
+   "detail": "'ax b'"
+  },
+  "d_helper_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'ax\\xa0b'"
+  },
+  "d_delete_after_nbsp": {
+   "status": "PASS",
+   "detail": "'a\\xa0cd'"
+  },
+  "api_torawtext_binding": {
+   "status": "PASS",
+   "detail": "QTextDocument.toRawText present"
+  }
+ }
+}

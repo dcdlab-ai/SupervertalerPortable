@@ -1,0 +1,25 @@
+{
+ "ok": true,
+ "results": {
+  "wysiwyg_sethtml_raw_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'bold\\xa0word plain\\xa0tail'"
+  },
+  "wysiwyg_sethtml_rebuild_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'<b>bold\\xa0word</b> plain\\xa0tail'"
+  },
+  "wysiwyg_sethtml_rebuild_tags": {
+   "status": "PASS",
+   "detail": "'<b>bold\\xa0word</b> plain\\xa0tail'"
+  },
+  "wysiwyg_setplain_rebuild_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'plain\\xa0cell'"
+  },
+  "wysiwyg_keystroke_rebuild_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'plainX\\xa0cell'"
+  }
+ }
+}

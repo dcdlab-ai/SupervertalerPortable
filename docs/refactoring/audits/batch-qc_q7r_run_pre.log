@@ -1,0 +1,190 @@
+QFontDatabase: Cannot find font directory E:/Dev/python-embed/Lib/site-packages/PyQt6/Qt6/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+[USER MODE] Using 'user_data/' folder
+[Data Paths] User data: E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-qc\q7r\pre2\iso\Supervertaler
+[LangSettings] Loaded from settings.json: English → Dutch
+📊 Creating database tables...
+✓ Added external_source_path column to translation_memories
+✓ Added external_last_sync_id column to translation_memories
+✓ Added external_last_sync_date column to translation_memories
+✓ Added external_last_mtime column to translation_memories
+✓ Added bridged_to_trados column to translation_memories
+✓ Added superlookup_enabled column to translation_memories (default: included)
+✓ Added url column to termbase_terms
+✓ Added source_abbreviation column to termbase_terms
+✓ Added target_abbreviation column to termbase_terms
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+⚠️ Migration needed - clipboard_history table missing
+⚠️ Migration needed - termbase_synonyms table missing
+⚠️ Migration needed - termbases.ai_inject column missing
+⚠️ Migration needed - translation_units.target_hash index missing
+
+============================================================
+DATABASE MIGRATIONS
+============================================================
+✅ Database schema is up to date
+📊 Creating termbase_synonyms table...
+✅ termbase_synonyms table created successfully
+✅ Synonym table schema is up to date
+📊 Adding 'ai_inject' column to termbases...
+  ✓ Column 'ai_inject' added successfully
+📊 Creating clipboard_history table...
+✅ clipboard_history table created successfully
+✅ translation_units.target_hash ready — reverse exact matches are now indexed
+============================================================
+[LOG] [OK] Database connected: supervertaler.db
+📊 Creating database tables...
+✅ Database tables created and committed successfully
+🔍 Checking database schema for migrations...
+🔍 Found termbase_terms columns: ['case_sensitive', 'client', 'context', 'created_date', 'definition', 'domain', 'forbidden', 'forbidden_terms', 'id', 'is_nontranslatable', 'modified_date', 'note', 'notes', 'part_of_speech', 'priority', 'project', 'project_id', 'source_abbreviation', 'source_lang', 'source_term', 'synonyms', 'target_abbreviation', 'target_lang', 'target_term', 'term_uuid', 'termbase_id', 'tm_source_id', 'url', 'usage_count']
+✅ Database schema is current - checking UUIDs...
+[LOG] [OK] Database connected: supervertaler.db
+[LOG] 🔌 Table signals connected: currentCellChanged, itemClicked, cellDoubleClicked, itemSelectionChanged
+[LOG] TM Browser: Loaded 0 entries
+[LOG] TM statistics refreshed
+[LOG] 📋 Refreshing termbase list (project_id: 0)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Prompt library already migrated (or no old structure found)
+[LOG] ✓ Prompt library migration completed successfully
+[LOG]   ✓ Created default prompt: Default Translation Prompt
+[LOG]   ✓ Created default prompt: Default Proofreading Prompt
+[LOG]   ✓ Created default prompt: UK to US English Localization
+[LOG]   ✓ Created default prompt: Assess how I translated the current segment
+[LOG]   ✓ Created default prompt: Define
+[LOG]   ✓ Created default prompt: Explain selection (in general)
+[LOG] ✓ Loaded 6 prompts from unified library
+[LOG] [ChatBackend] LLM client: custom_openai/fake-llm
+[LOG] ✓ Attachment directories initialized: E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-qc\q7r\pre2\iso\Supervertaler\workbench\ai_assistant
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: False
+[Superlookup] Successfully imported SuperlookupEngine
+[Global Hotkeys] Manager available: True
+[LOG] [Global Hotkeys] Manager available: True
+[Global Hotkeys] Registering: ctrl+alt+q
+[LOG] [Global Hotkeys] Registering: ctrl+alt+q
+[GlobalHotkeyManager] Failed to register ctrl+alt+q (may be in use by another application)
+[Global Hotkeys] Started: True
+[LOG] [Global Hotkeys] Started: True
+⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+[LOG] ⚠ [Global Hotkeys] Failed to register: ctrl+alt+q (claimed by another app)
+⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⌨ [Global Hotkeys] Registered via winapi: 
+[LOG] ⚠ Global hotkeys: some failed to register: ctrl+alt+q
+[LOG] Welcome to Supervertaler Workbench v1.10.371
+[LOG] Supervertaler: The Ultimate Translation Workbench.
+[LOG] 📊 Usage statistics declined – no data will be sent.
+[LOG] Auto backup enabled: every 5 minute(s)
+[LOG] ✓ UI chrome: compact
+[LOG] ✓ Alternating row colors applied
+[LOG] ℹ️ Okapi sidecar not installed yet – will offer to download on first DOCX import
+[Superlookup] SuperlookupTab.__init__ called
+[Superlookup] theme_manager: True
+[Superlookup] Successfully imported SuperlookupEngine
+[CrossPlatformKeySender] AHK not found – will use PowerShell fallback
+[LOG] 📄 Importing simple text file: q7r_a.txt
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2723907838240): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 2723905437072): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 2 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 1900999567)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 2 segments from 2 lines (text file)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 2 segments...
+[LOG] ✅ Termbase batch worker complete: 2 segments in 0.00s (233017 seg/sec, 0 with matches)
+[LOG] ℹ️ No TM is switched on for this project, so no TM matches can be shown. Tick 'Read' for the TM you want in Resources → TM. (A new project starts with every TM off.)
+[PASS] a_panel_exists: QuickTransPanel
+[PASS] a_ai_fetch_row_present: 1 AI rows
+[FAIL] a_result_has_nbsp: ['Paneel vertaling NBSP']
+[LOG] ✅ Inserted QuickTrans translation
+[FAIL] a_model_keeps_nbsp: 'Paneel vertaling NBSP'
+[PASS] a_status_unchanged_by_insert: untranslated
+[FAIL] a_undo_single_raw_entry: ['Paneel vertaling NBSP']
+[PASS] a_widget_shows_text: 'Paneel vertaling NBSP'
+[LOG] ✅ Inserted QuickTrans translation
+[LOG] ✅ Inserted QuickTrans translation
+[PASS] f_repeat_insert_no_extra_undo: 1->1->1
+[FAIL] f_repeat_insert_keeps_nbsp: 'Paneel vertaling NBSP'
+[LOG] 🚨 search_and_display_tm_matches called with source_text: 'QuickTrans segment one...'
+[LOG] ✨ Auto-filled 100% TM match for segment #1
+[LOG] Error searching TM: 'SupervertalerQt' object has no attribute 'assistance_widget'
+[FAIL] b_autofill_model_keeps_nbsp: 'TM vol zin'
+[PASS] b_autofill_undo_once_raw: ['', 'TM\xa0vol\xa0zin', 'TM vol zin']
+[PASS] b_autofill_status: draft
+[LOG] 🔧 Auto-insert: Starting for segment 2 at row 1, target='TMauto target...'
+[LOG] 🔧 Auto-insert: BEFORE - segment.id=2, segment object ID=2723905437072, old_target='EMPTY'
+[LOG] 🔧 Auto-insert: AFTER - segment.id=2, segment object ID=2723905437072, new_target='TMauto target'
+[LOG] 🔧 Auto-insert: Updated segment.target, status=draft
+[LOG] 🔧 Auto-insert: Using provided row 1
+[LOG] 🔧 Auto-insert: Got target widget, type=EditableGridTextEditor
+[LOG] 🔧 Auto-insert: Set widget text to 'TMauto target...'
+[LOG] 🔧 Auto-insert: Updated status icon to 'draft'
+[LOG] ✅ Auto-inserted 100% TM match into segment 2
+[FAIL] b_autoinsert_model_keeps_nbsp: 'TMauto target'
+[FAIL] b_autoinsert_single_text_rewrite: [['', 'TMauto\xa0target'], ['TMauto\xa0target', 'TMauto target'], ['TMauto target', 'TMauto target']]
+[LOG] 📄 Importing simple text file: q7r_c.txt
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2723960089616): target='EMPTY...', len=0, status=untranslated
+[LOG] 🔄   Seg 2 (obj 2723960089936): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 2 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] Warning: Could not configure TM database: 'FakeTMDB' object has no attribute 'set_tm_languages'
+[LOG] 📋 Refreshing termbase list (project_id: 771401747)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 2 segments from 2 lines (text file)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 2 segments...
+[LOG] ✅ Termbase batch worker complete: 2 segments in 0.00s (233017 seg/sec, 0 with matches)
+[LOG] 📊 Project has 2 segments → Will translate ALL of them
+🚀 _translate_batch_with_llm: Starting batch of 2 segments
+🚀 Languages: en → nl
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ═══════════════════════════════════════════════════════════
+[LOG] ✓ Batch Translation Complete
+[LOG]    Translated: 2 | Failed: 0
+[LOG] ═══════════════════════════════════════════════════════════
+[PASS] c_batch_models_keep_nbsp: ['Batch\xa0antwoord\xa01', 'Batch\xa0antwoord\xa02']
+[PASS] c_batch_statuses_draft: ['draft', 'draft']
+[PASS] c_batch_requests_went_to_fake: 1 requests
+[PASS] d_cell_holds_nbsp_before_edit: 'Batch\xa0antwoord\xa01'
+[FAIL] d_manual_edit_keeps_nbsp: 'BatchX antwoord 1'
+[PASS] d_manual_undo_recorded: 1 undo entries
+[PASS] d_status_stays_draft: draft
+[LOG] 📄 Importing simple text file: q7r_e.txt
+[LOG] 🔄🔄🔄 load_segments_to_grid CALLED - this will RELOAD grid from segment data!
+[LOG] 🔄 BEFORE LOAD: First 7 segments:
+[LOG] 🔄   Seg 1 (obj 2723966599248): target='EMPTY...', len=0, status=untranslated
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] ✓ Loaded 1 segments to grid
+[LOG] ✓ Auto-resized rows to fit content (compact)
+[LOG] TM database configured (en → nl)
+[LOG] 📋 Refreshing termbase list (project_id: 3666150326)
+[LOG]   Found 0 termbase(s) in database
+[LOG] ✓ Spellcheck initialized for target language: nl
+[LOG] ✓ Loaded 1 segments from 1 lines (text file)
+[LOG] 📍 Project language pair: EN → NL
+[LOG] ✅ Built termbase index: 0 terms in 0.00s
+[LOG] 🔄 Starting background termbase batch processor for 1 segments...
+[LOG] ✅ Termbase batch worker complete: 1 segments in 0.00s (119837 seg/sec, 0 with matches)
+[LOG] ✓ Segment #1 translated with custom_openai/fake-llm
+[FAIL] e_ctrlt_model_keeps_nbsp: 'CtrlT antwoord'
+[PASS] e_ctrlt_status_draft: draft
+[PASS] e_ctrlt_request_sent: 1 requests
+[LOG] ✓ Exported 1 lines (1 segments) to: export_out.txt
+[LOG]   Encoding: utf-8
+[FAIL] g_export_txt_keeps_nbsp: 'CtrlT antwoord\n'
+[PASS] trap_network_empty: []
+Q7R-PROBE RED 16/26
+QThreadStorage: entry 1 destroyed before end of thread 0x27a2efe1f70

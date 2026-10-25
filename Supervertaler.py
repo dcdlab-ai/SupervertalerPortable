@@ -3196,6 +3196,21 @@ class TagHighlighter(QSyntaxHighlighter):
             self.setFormat(match.start(1), len(match.group(1)), self.md_heading_format)
 
 
+def _cell_text_keep_nbsp(widget):
+    """Текст ячейки для пути СОХРАНЕНИЯ (Q.7r): QTextDocument.toPlainText()
+    подменяет неразрывные пробелы (U+00A0) обычными, из-за чего ЛЮБАЯ правка
+    ячейки теряла NBSP в segment.target. document().toRawText() возвращает
+    сырой текст; приводим его к результату toPlainText() (разделители
+    абзацев/строк U+2029/U+2028 и внутренние маркеры Qt U+FDD0/U+FDD1 → '\\n')
+    с единственной разницей — NBSP остаётся NBSP. Подтверждено пробой на
+    PyQt 6.11 (шаг 0 Q.7r). Для UI/поиска/отображения по-прежнему читать
+    toPlainText(); этот хелпер — только там, где текст идёт в модель."""
+    raw = widget.document().toRawText()
+    for sep in ('\u2029', '\u2028', '\ufdd0', '\ufdd1'):
+        raw = raw.replace(sep, '\n')
+    return raw
+
+
 class EditableGridTextEditor(QTextEdit):
     """Редактируемый QTextEdit для ячеек цели перевода — поддерживает выделение текста и редактирование."""
     
@@ -33143,15 +33158,20 @@ class SupervertalerQt(QMainWindow):
                 # from the cell's actual formatting instead; fall back to plain
                 # text on any error so an edit is never lost. Tags/Compact view
                 # already show the literal tags, so they stay on toPlainText().
+                # Q.7r: every read below goes through _cell_text_keep_nbsp —
+                # toPlainText() normalises NBSP (U+00A0) to a plain space, which
+                # lost NBSP from segment.target on EVERY cell edit; the raw
+                # document text keeps it (WYSIWYG rebuild reads raw fragments
+                # and keeps NBSP natively — probed, no fix needed there).
                 if getattr(self, 'tag_view_mode', 'tags') == 'wysiwyg':
                     try:
                         new_text = self._wysiwyg_document_to_tagged_text(editor_widget)
                     except Exception as _e:
-                        new_text = editor_widget.toPlainText()
+                        new_text = _cell_text_keep_nbsp(editor_widget)
                         if getattr(self, 'debug_mode_enabled', False):
                             self.log(f"⚠ WYSIWYG tag rebuild failed, kept plain text: {_e}")
                 else:
-                    new_text = editor_widget.toPlainText()
+                    new_text = _cell_text_keep_nbsp(editor_widget)
 
                 # Reverse compact tag placeholders before saving
                 compact_map = getattr(editor_widget, '_compact_tag_map', None)
@@ -33238,13 +33258,18 @@ class SupervertalerQt(QMainWindow):
                     if compact_map:
                         display_source = compact_tags(display_source, compact_map)
                     display_text = self.apply_invisible_replacements(display_source)
-                    if display_text != editor_widget.toPlainText():
+                    # Q.7r: compare against the RAW cell text — display_text now
+                    # carries NBSP (built from the raw new_text), while
+                    # toPlainText() would normalise it to a space and force a
+                    # pointless display re-render on every keystroke of an
+                    # NBSP-containing cell.
+                    if display_text != _cell_text_keep_nbsp(editor_widget):
                         # Cursor position in the clean (marker-free) new_text.
                         # The widget currently shows the old display text; we need to
                         # map the cursor to its position in new_text first.
                         cur = editor_widget.textCursor()
                         old_display_pos = cur.position()
-                        old_display = editor_widget.toPlainText()
+                        old_display = _cell_text_keep_nbsp(editor_widget)
                         # Convert old_display_pos → clean-text position by stripping
                         # markers that appear before cursor in the OLD display text.
                         old_before_cursor = old_display[:old_display_pos]

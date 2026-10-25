@@ -1,0 +1,241 @@
+{
+ "tag": "q7r",
+ "port": 61661,
+ "requests": [
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "head": "Translate the following text from English to Dutch.\\nOutput ONLY the translation, nothing else. No explanations, no alter"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "head": "**SEGMENTS TO TRANSLATE (2 segments):**\\n\\n⚠️ CRITICAL INSTRUCTIONS:\\n1. You must provide EXACTLY one translation per segme"
+  },
+  {
+   "path": "/v1/chat/completions",
+   "model": "fake-llm",
+   "head": "# SYSTEM PROMPT\\n\\n⚠️ **PROFESSIONAL TRANSLATION CONTEXT:**\\nYou are performing professional translation work. The source t"
+  }
+ ],
+ "checks": {
+  "a_panel_exists": {
+   "status": "PASS",
+   "detail": "QuickTransPanel"
+  },
+  "a_ai_fetch_row_present": {
+   "status": "PASS",
+   "detail": "1 AI rows"
+  },
+  "a_result_has_nbsp": {
+   "status": "PASS",
+   "detail": "['Paneel\\xa0vertaling\\xa0NBSP']"
+  },
+  "a_model_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'Paneel\\xa0vertaling\\xa0NBSP'"
+  },
+  "a_status_unchanged_by_insert": {
+   "status": "PASS",
+   "detail": "untranslated"
+  },
+  "a_undo_single_raw_entry": {
+   "status": "PASS",
+   "detail": "['Paneel\\xa0vertaling\\xa0NBSP']"
+  },
+  "a_widget_shows_text": {
+   "status": "PASS",
+   "detail": "'Paneel vertaling NBSP'"
+  },
+  "f_repeat_insert_no_extra_undo": {
+   "status": "PASS",
+   "detail": "1->1->1"
+  },
+  "f_repeat_insert_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'Paneel\\xa0vertaling\\xa0NBSP'"
+  },
+  "b_autofill_model_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'TM\\xa0vol\\xa0zin'"
+  },
+  "b_autofill_undo_once_raw": {
+   "status": "PASS",
+   "detail": "['', 'TM\\xa0vol\\xa0zin']"
+  },
+  "b_autofill_status": {
+   "status": "PASS",
+   "detail": "draft"
+  },
+  "b_autoinsert_model_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'TMauto\\xa0target'"
+  },
+  "b_autoinsert_single_text_rewrite": {
+   "status": "PASS",
+   "detail": "[['', 'TMauto\\xa0target'], ['TMauto\\xa0target', 'TMauto\\xa0target']]"
+  },
+  "c_batch_models_keep_nbsp": {
+   "status": "PASS",
+   "detail": "['Batch\\xa0antwoord\\xa01', 'Batch\\xa0antwoord\\xa02']"
+  },
+  "c_batch_statuses_draft": {
+   "status": "PASS",
+   "detail": "['draft', 'draft']"
+  },
+  "c_batch_requests_went_to_fake": {
+   "status": "PASS",
+   "detail": "1 requests"
+  },
+  "d_cell_holds_nbsp_before_edit": {
+   "status": "PASS",
+   "detail": "'Batch\\xa0antwoord\\xa01'"
+  },
+  "d_manual_edit_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'BatchX\\xa0antwoord\\xa01'"
+  },
+  "d_manual_undo_recorded": {
+   "status": "PASS",
+   "detail": "1 undo entries"
+  },
+  "d_status_stays_draft": {
+   "status": "PASS",
+   "detail": "draft"
+  },
+  "e_ctrlt_model_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'CtrlT\\xa0antwoord'"
+  },
+  "e_ctrlt_status_draft": {
+   "status": "PASS",
+   "detail": "draft"
+  },
+  "e_ctrlt_request_sent": {
+   "status": "PASS",
+   "detail": "1 requests"
+  },
+  "g_export_txt_keeps_nbsp": {
+   "status": "PASS",
+   "detail": "'CtrlT\\xa0antwoord\\n'"
+  },
+  "trap_network_empty": {
+   "status": "PASS",
+   "detail": "[]"
+  }
+ },
+ "evidence": {
+  "undo_log_a_f": [
+   [
+    1,
+    "",
+    "Paneel vertaling NBSP",
+    "untranslated",
+    "untranslated"
+   ]
+  ],
+  "undo_b_autofill": [
+   [
+    1,
+    "Paneel vertaling NBSP",
+    "",
+    "untranslated",
+    "untranslated"
+   ],
+   [
+    1,
+    "",
+    "TM vol zin",
+    "untranslated",
+    "draft"
+   ]
+  ],
+  "undo_b_autoinsert": [
+   [
+    2,
+    "",
+    "TMauto target",
+    "untranslated",
+    "draft"
+   ],
+   [
+    2,
+    "TMauto target",
+    "TMauto target",
+    "draft",
+    "draft"
+   ]
+  ],
+  "undo_b_autoinsert_traces": [
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 229, in <module>\n    ok_ins = panel.insert_match_by_number(1)\n  File \"E:\\Dev\\SupervertalerPortable\\modules\\quicktrans.py\", line 2020, in insert_match_by_number\n    self.translation_selected.emit(text)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 35915, in _insert_quicktrans_translation\n    target_widget.setPlainText(translation)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 33309, in on_target_text_changed\n    self.record_undo_state(segment_id, old_target, new_text, old_status, new_status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 271, in <module>\n    win.table.cellWidget(0, 3).setPlainText(\"\")\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 33309, in on_target_text_changed\n    self.record_undo_state(segment_id, old_target, new_text, old_status, new_status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 275, in <module>\n    win.search_and_display_tm_matches(seg(win, 0).source)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 40642, in search_and_display_tm_matches\n    self.record_undo_state(segment.id, _undo_old_target, _undo_new_target, _undo_old_status, _fill_status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 285, in <module>\n    win._auto_insert_tm_match(seg(win, 1), f\"TMauto{NB}target\", row=1)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 52079, in _auto_insert_tm_match\n    self.record_undo_state(segment.id, _undo_old_target, target_text, _undo_old_status, fill_status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 285, in <module>\n    win._auto_insert_tm_match(seg(win, 1), f\"TMauto{NB}target\", row=1)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 52120, in _auto_insert_tm_match\n    self.update_status_icon(target_row, fill_status)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 37287, in update_status_icon\n    self.record_undo_state(segment.id, old_target, segment.target, old_status, status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 307, in <module>\n    pump(10.0)\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 178, in pump\n    app.processEvents()\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 51088, in handle_progress_update\n    self.update_status_icon(row_index, segment.status)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 37287, in update_status_icon\n    self.record_undo_state(segment.id, old_target, segment.target, old_status, status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 307, in <module>\n    pump(10.0)\n  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 178, in pump\n    app.processEvents()\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 51088, in handle_progress_update\n    self.update_status_icon(row_index, segment.status)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 37287, in update_status_icon\n    self.record_undo_state(segment.id, old_target, segment.target, old_status, status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 323, in <module>\n    QTest.keyClicks(ed, \"X\")\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 4467, in keyPressEvent\n    super().keyPressEvent(event)\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 33309, in on_target_text_changed\n    self.record_undo_state(segment_id, old_target, new_text, old_status, new_status)\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 337, in <module>\n    win.translate_current_segment()\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 49471, in translate_current_segment\n    self.record_undo_state(segment.id, _undo_old_target, translation, _undo_old_status, \"draft\")\n",
+   "  File \"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-qc\\q7r\\probe_q7r.py\", line 337, in <module>\n    win.translate_current_segment()\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 49482, in translate_current_segment\n    self.update_status_icon(current_row, \"draft\")\n  File \"E:\\Dev\\SupervertalerPortable\\Supervertaler.py\", line 37287, in update_status_icon\n    self.record_undo_state(segment.id, old_target, segment.target, old_status, status)\n"
+  ],
+  "c_targets": [
+   "'Batch\\xa0antwoord\\xa01'",
+   "'Batch\\xa0antwoord\\xa02'"
+  ],
+  "c_undo_n": 2,
+  "e_target": "'CtrlT\\xa0antwoord'",
+  "e_undo": [
+   [
+    1,
+    "",
+    "CtrlT antwoord",
+    "untranslated",
+    "draft"
+   ],
+   [
+    1,
+    "CtrlT antwoord",
+    "CtrlT antwoord",
+    "draft",
+    "draft"
+   ]
+  ],
+  "modal_log_head": [
+   "QDialog.exec QDialog 'Import Text / Markdown File'",
+   "QDialog.exec QDialog 'Import Text / Markdown File'",
+   "QDialog.exec QDialog 'Select Translation Provider'",
+   "QDialog.exec LiveProgressDialog 'Batch Translation Progress'",
+   "QDialog.exec QDialog 'Import Text / Markdown File'",
+   "QDialog.exec QDialog 'Export Simple Text File'"
+  ]
+ },
+ "checks_summary": {
+  "a_panel_exists": "PASS",
+  "a_ai_fetch_row_present": "PASS",
+  "a_result_has_nbsp": "PASS",
+  "a_model_keeps_nbsp": "PASS",
+  "a_status_unchanged_by_insert": "PASS",
+  "a_undo_single_raw_entry": "PASS",
+  "a_widget_shows_text": "PASS",
+  "f_repeat_insert_no_extra_undo": "PASS",
+  "f_repeat_insert_keeps_nbsp": "PASS",
+  "b_autofill_model_keeps_nbsp": "PASS",
+  "b_autofill_undo_once_raw": "PASS",
+  "b_autofill_status": "PASS",
+  "b_autoinsert_model_keeps_nbsp": "PASS",
+  "b_autoinsert_single_text_rewrite": "PASS",
+  "c_batch_models_keep_nbsp": "PASS",
+  "c_batch_statuses_draft": "PASS",
+  "c_batch_requests_went_to_fake": "PASS",
+  "d_cell_holds_nbsp_before_edit": "PASS",
+  "d_manual_edit_keeps_nbsp": "PASS",
+  "d_manual_undo_recorded": "PASS",
+  "d_status_stays_draft": "PASS",
+  "e_ctrlt_model_keeps_nbsp": "PASS",
+  "e_ctrlt_status_draft": "PASS",
+  "e_ctrlt_request_sent": "PASS",
+  "g_export_txt_keeps_nbsp": "PASS",
+  "trap_network_empty": "PASS"
+ },
+ "ok": true
+}
