@@ -6433,9 +6433,6 @@ class SupervertalerQt(QMainWindow):
             from PyQt6.QtCore import QTimer
             QTimer.singleShot(500, self.detach_log_window)  # 500ms delay to ensure UI is ready
 
-        # Usage statistics – opt-in dialog (once) and anonymous ping
-        self._init_usage_statistics()
-
         # Initialize auto backup timer
         self.auto_backup_timer = None
         self.last_backup_time = None
@@ -20810,32 +20807,6 @@ class SupervertalerQt(QMainWindow):
         except Exception:
             pass
         layout.addWidget(language_group)
-
-        # Usage Statistics group
-        stats_group = QGroupBox(self.tr("Privacy"))
-        stats_layout = QVBoxLayout()
-
-        # Load current setting from unified settings file
-        from modules.usage_statistics import is_opted_in
-        settings_path = self._get_unified_settings_path()
-
-        usage_stats_cb = CheckmarkCheckBox(self.tr("Share anonymous usage statistics (no personal data)"))
-        usage_stats_cb.setChecked(is_opted_in(settings_path))
-        usage_stats_cb.setToolTip(
-            "Sends a single anonymous ping on startup (app version, OS, Python version, locale).\n"
-            "No personal data, translation content, or termbase info is ever collected."
-        )
-
-        def _on_usage_stats_toggled(checked):
-            from modules.usage_statistics import set_opted_in
-            set_opted_in(self._get_unified_settings_path(), checked)
-            self.log(f"📊 Usage statistics {'enabled' if checked else 'disabled'}.")
-
-        usage_stats_cb.toggled.connect(_on_usage_stats_toggled)
-        stats_layout.addWidget(usage_stats_cb)
-
-        stats_group.setLayout(stats_layout)
-        layout.addWidget(stats_group)
 
         # Data Folder Location group
         data_folder_group = QGroupBox(self.tr("📁 Data Folder Location"))
@@ -37090,30 +37061,6 @@ class SupervertalerQt(QMainWindow):
         except Exception as e:
             self.log(f"⚠ Could not load font sizes: {e}")
     
-    def _init_usage_statistics(self):
-        """Показывает opt-in-диалог (один раз) и отправляет анонимный пинг использования, если дано согласие."""
-        try:
-            from modules.usage_statistics import (
-                has_been_asked, show_opt_in_dialog, set_opted_in, send_ping
-            )
-            settings_path = self._get_unified_settings_path()
-
-            # Show opt-in dialog once (first launch or after update that adds this)
-            if not has_been_asked(settings_path):
-                opted_in = show_opt_in_dialog(self)
-                set_opted_in(settings_path, opted_in)
-                if opted_in:
-                    self.log("📊 Usage statistics enabled – thank you!")
-                else:
-                    self.log("📊 Usage statistics declined – no data will be sent.")
-
-            # Send anonymous ping in background (only if opted in)
-            send_ping(settings_path, __version__)
-
-        except Exception:
-            # Never let stats code block startup
-            pass
-
     def restore_last_project_if_enabled(self):
         """Восстанавливает последний открытый проект при запуске, если настройка включена."""
         try:
