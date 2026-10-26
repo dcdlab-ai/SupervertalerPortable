@@ -26469,23 +26469,6 @@ class SupervertalerQt(QMainWindow):
         self._tray_start_minimized_action.toggled.connect(self._on_toggle_start_minimized)
         menu.addAction(self._tray_start_minimized_action)
 
-        # "Start with computer" – registers an HKCU Run entry on Windows,
-        # ~/Library/LaunchAgents plist on macOS, ~/.config/autostart .desktop
-        # on Linux. No elevation needed; the auto-started instance uses the
-        # GUI Python variant so no terminal window appears at boot.
-        try:
-            from modules import autostart as _autostart_mod
-            self._autostart_mod = _autostart_mod
-            if _autostart_mod.is_supported():
-                self._tray_autostart_action = QAction("Start with computer", self)
-                self._tray_autostart_action.setCheckable(True)
-                self._tray_autostart_action.setChecked(_autostart_mod.is_enabled())
-                self._tray_autostart_action.toggled.connect(self._on_toggle_autostart)
-                menu.addAction(self._tray_autostart_action)
-        except Exception as e:
-            print(f"[Tray] Autostart menu item not available: {e}")
-            self._autostart_mod = None
-
         menu.addSeparator()
 
         quit_action = QAction("Quit Supervertaler", self)
@@ -26590,32 +26573,6 @@ class SupervertalerQt(QMainWindow):
         prefs = self._load_settings_section("ui")
         prefs["start_minimized_to_tray"] = bool(checked)
         self._save_settings_section("ui", prefs)
-
-    def _on_toggle_autostart(self, checked: bool):
-        """Регистрирует или разрегистрирует Supervertaler в средстве автозапуска ОС."""
-        mod = getattr(self, "_autostart_mod", None)
-        if mod is None:
-            return
-        ok = mod.enable() if checked else mod.disable()
-        # Синхронизируем галочку с реальностью: если запись в реестр / plist
-        # молча не удалась, не оставляем в меню устаревшее состояние.
-        actual = mod.is_enabled()
-        if actual != checked:
-            self._tray_autostart_action.blockSignals(True)
-            self._tray_autostart_action.setChecked(actual)
-            self._tray_autostart_action.blockSignals(False)
-        if ok and getattr(self, "_tray_icon", None) is not None and checked:
-            try:
-                from PyQt6.QtWidgets import QSystemTrayIcon
-                self._tray_icon.showMessage(
-                    "Supervertaler",
-                    "Will start automatically with your computer. "
-                    "Tip: enable 'Start minimized to tray' to skip the window at boot.",
-                    QSystemTrayIcon.MessageIcon.Information,
-                    4000,
-                )
-            except Exception:
-                pass
 
     def _tray_quit(self):
         """Настоящий выход через меню трея — минует скрытие окна при закрытии."""
