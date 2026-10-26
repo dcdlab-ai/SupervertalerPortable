@@ -1,0 +1,26 @@
+73fb65f85a59c577e6103de6f5980174fc4c174e648068fa88d017affcb46f50  p11a_call  lines 6436-6438  113 bytes
+90b3be00348cdaf49c8be37efeff750c98770805e8e02eedd34d8ed53f48dfd6  p11a_privacy  lines 20814-20839  1187 bytes
+6b5051ddb1d63a28f1dc1c624e9685f0e93d6a0d9853125292d6a0f45cbc5076  p11a_initmethod  lines 37093-37116  1137 bytes
+e5fee073125b7685f799448f0b6aa1187ca6d694f6501ed43d390a4ea1d8feba  p11b_trayblock  lines 26501-26517  999 bytes
+d2d305c1643df2cbf0d1418b50985c0f06fd19feb397ecac856b3eb74769b18e  p11b_trayhandler  lines 26623-26648  1406 bytes
+421cf9a15c4a49e1fea6819f85816b77390828e24186be3b6194339a5b0be3a9  p12_import  lines 429-429  87 bytes
+ee058569336201d8bf8451248e0fbfcb2035d3cdc84db342b8a42cedbf39d927  p12_menuitem  lines 8536-8540  321 bytes
+e1dd4411e6c3be3bcf431c36eefe318be4f2293494c6b7951479ebb32b0444fe  p12_updatecluster  lines 48286-48827  23276 bytes
+fd538ff195a907098026ddc60b1acbc3c5d388a6359a7a98d95064c5a06309b7  p12_aboutbtn  lines 48998-49002  279 bytes
+c80bbdf3765fcc813048eeb97ec8bf61302a0f12fff1e4ea6fb56a486df007dd  FILE Supervertaler.py  55687 lines  CR=55687
+665396442bd06ae8ed343b8cf406b1c2daa0b1bd0964108f14a1be0fcdcdc828  FILE modules/usage_statistics.py  295 lines  CR=0
+a0e260c8324279d885e0228a1a0ef9af260bc1a9b91a8b8574c5b22759063382  FILE modules/autostart.py  237 lines  CR=0
+--- AST method boundaries ---
+_fetch_latest_release_info_from_github: def@48793 end@48816
+_format_version_for_display: def@48829 end@48836
+_init_usage_statistics: def@37093 end@37115
+_normalize_version_tuple: def@48818 end@48827
+_on_toggle_autostart: def@26623 end@26647
+_on_toggle_close_to_tray: def@26613 end@26616
+_on_toggle_start_minimized: def@26618 end@26621
+_setup_tray_icon: def@26416 end@26531
+_tray_quit: def@26649 end@26653
+check_for_updates: def@48286 end@48791
+copy_version_info_to_clipboard: def@48878 end@48891
+restore_last_project_if_enabled: def@37117 end@37146
+show_about: def@48949 end@49011
