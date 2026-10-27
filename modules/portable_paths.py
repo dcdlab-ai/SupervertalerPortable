@@ -2,8 +2,8 @@
 portable_paths.py – the single source of data-path resolution for Supervertaler.
 
 P1-B: the root of the build is the only source of paths. The old system
-(a pointer file in %APPDATA%/Supervertaler/config.json choosing an arbitrary
-data folder, defaulting to ~/Supervertaler) is gone; the app always keeps its
+(a pointer file in a standard OS config location choosing an arbitrary data
+folder, defaulting to the home directory) is gone; the app always keeps its
 data next to the build:
 
     <build_root>/Supervertaler/          <- data_root() default
@@ -31,7 +31,6 @@ write anything to disk. stdlib only -- this module is imported by mirrors
 """
 
 import os
-import sys
 from pathlib import Path
 
 DEV_FLAG = ".supervertaler.local"

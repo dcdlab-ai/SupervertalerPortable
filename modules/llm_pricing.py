@@ -6,8 +6,9 @@ Per-model token prices, loaded from the canonical ``pricing.json`` that is
 shared verbatim with Supervertaler for Trados (single source of truth).
 
 Resolution order:
-  1. ``<home>/Supervertaler/pricing.json`` — the shared user override. Edit this
-     one file to re-price BOTH Supervertaler products at once.
+  1. ``<data root>/pricing.json`` — the shared user override (P1-B: the data
+     root from modules/portable_paths.py, default ``<build root>/Supervertaler``).
+     Edit this one file to re-price BOTH Supervertaler products at once.
   2. ``modules/pricing.json`` bundled with this app — the default canonical list.
   3. a tiny hardcoded table — only if both files fail to load, so cost
      estimation never crashes.
@@ -31,11 +32,12 @@ _FREE_PROVIDERS = ()
 def _load_pricing() -> Dict[str, Tuple[float, float]]:
     """Load ``model_id -> (input_per_1M, output_per_1M)`` from the canonical file.
 
-    The shared override at ``~/Supervertaler/pricing.json`` (the default data
-    root, matching the Trados plugin) wins over the bundled copy when present.
+    The shared override at ``<data root>/pricing.json`` (modules/portable_paths,
+    P1-B) wins over the bundled copy when present.
     """
+    from modules.portable_paths import data_root
     candidates = [
-        Path.home() / "Supervertaler" / "pricing.json",       # shared override
+        data_root() / "pricing.json",                         # shared override
         Path(__file__).resolve().parent / "pricing.json",     # bundled default
     ]
     for path in candidates:
