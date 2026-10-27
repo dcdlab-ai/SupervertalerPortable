@@ -149,11 +149,12 @@ def _select_lang_in_combo(combo, value):
 # ============================================================================
 # Пользовательский каталог данных
 # ============================================================================
-# Все пользователи (EXE, pip, dev) используют единую систему: каталог по
-# умолчанию ~/Supervertaler/, видимый в домашней папке; пользователь может
-# выбрать другое место при первом запуске, а «файл-указатель» (pointer) в
-# стандартном каталоге ОС запоминает выбор. Это делает данные устойчивыми к
-# обновлениям pip/EXE и упрощает поиск/резервное копирование.
+# P1-B: единственный источник путей — корень сборки (modules/portable_paths.py).
+# Данные всегда лежат в <корень сборки>/Supervertaler/ (в dev-режиме с маркером
+# .supervertaler.local — <репозиторий>/user_data_private, изолированные прогоны
+# задают env SUPERVERTALER_DATA_ROOT). Приоритет: env > dev-флаг > корень
+# сборки. Файла-указателя больше нет: выбор каталога пользователем удалён
+# вместе с Settings-группой «Data Folder Location».
 
 
 def get_resource_path(relative_path: str) -> Path:
@@ -168,125 +169,18 @@ def get_resource_path(relative_path: str) -> Path:
     return base_path / relative_path
 
 
-def get_config_pointer_path() -> Path:
-    """
-    Путь к «файлу-указателю», который хранит выбранный пользователем каталог данных.
-
-    Файл лежит в стандартном для ОС месте:
-    - Windows: %APPDATA%/Supervertaler/config.json
-    - macOS:   ~/Library/Application Support/Supervertaler/config.json
-    - Linux:   ~/.config/Supervertaler/config.json
-
-    Сам файл содержит только указатель на то, где реально живут данные.
-    """
-    if sys.platform == 'win32':
-        # Windows: %APPDATA% (Roaming — синхронизируется между машинами домена)
-        appdata = os.environ.get('APPDATA', os.path.expanduser('~'))
-        return Path(appdata) / "Supervertaler" / "config.json"
-    elif sys.platform == 'darwin':
-        # macOS: ~/Library/Application Support/
-        return Path.home() / "Library" / "Application Support" / "Supervertaler" / "config.json"
-    else:
-        # Linux/BSD: ~/.config/ (XDG_CONFIG_HOME)
-        xdg_config = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
-        return Path(xdg_config) / "Supervertaler" / "config.json"
-
-
-def get_default_user_data_path() -> Path:
-    """
-    Каталог данных ПО УМОЛЧАНИЮ (виден в домашней папке).
-
-    - Windows: C:/Users/Username/Supervertaler/
-    - macOS:   ~/Supervertaler/
-    - Linux:   ~/Supervertaler/
-
-    Место выбрано намеренно заметным и легкодоступным.
-    """
-    return Path.home() / "Supervertaler"
-
-
-def save_user_data_path(path: Path) -> None:
-    """Сохраняет выбранный пользователем каталог данных в файл-указатель."""
-    pointer_path = get_config_pointer_path()
-    pointer_path.parent.mkdir(parents=True, exist_ok=True)
-
-    config = {"user_data_path": str(path)}
-    with open(pointer_path, 'w', encoding='utf-8') as f:
-        json.dump(config, f, indent=2)
-
-
-def load_user_data_path_from_config() -> Optional[Path]:
-    """
-    Читает выбранный пользователем каталог данных из файла-указателя.
-    Возвращает None, если конфига нет или путь в нём некорректен.
-    """
-    pointer_path = get_config_pointer_path()
-
-    if not pointer_path.exists():
-        return None
-
-    try:
-        with open(pointer_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
-
-        path_str = config.get('user_data_path')
-        if path_str:
-            return Path(path_str)
-    except (json.JSONDecodeError, OSError):
-        pass
-
-    return None
-
-
 def get_user_data_path() -> Path:
     """
-    Путь к каталогу пользовательских данных.
+    Путь к каталогу пользовательских данных (P1-B).
 
-    Порядок разрешения:
-    1. Файл-указатель с сохранённым выбором пользователя
-    2. Если указателя нет — проверяем каталог по умолчанию (автовосстановление)
-    3. Если ничего не найдено — возвращаем каталог по умолчанию
-       (диалог первого запуска покажут позже)
-
-    Единая система для всех способов установки (EXE, pip, dev):
-    - По умолчанию: ~/Supervertaler/ (видно в домашней папке)
-    - Пользователь выбирает своё место при первом запуске
-    - Файл-указатель запоминает выбор
-
-    Это гарантирует, что данные переживут обновления pip и EXE, и их легко
-    найти/сделать резервную копию.
-
-    Побочный эффект: при «чтении» функция может СОЗДАТЬ файл-указатель
-    (шаг автовосстановления ниже) — это не чисто читающая операция.
+    Тонкий делегат: modules.portable_paths.data_root() — корень сборки как
+    единственный источник путей (env SUPERVERTALER_DATA_ROOT > dev-флаг
+    .supervertaler.local > <корень сборки>/Supervertaler). Каталог здесь НЕ
+    создаётся — это делает __init__ (структура первого запуска), как и раньше;
+    файла-указателя больше нет, побочных записей при чтении нет.
     """
-    # 1. Есть ли сохранённый выбор пользователя
-    saved_path = load_user_data_path_from_config()
-    if saved_path and saved_path.exists():
-        return saved_path
-
-    # 2. Есть ли данные в каталоге по умолчанию
-    #    (автовосстановление, если файл-указатель удалили)
-    default_path = get_default_user_data_path()
-    if default_path.exists():
-        # Проверяем, есть ли в каталоге реальное содержимое
-        has_content = False
-        try:
-            for item in default_path.iterdir():
-                if item.is_file() or (item.is_dir() and any(item.iterdir())):
-                    has_content = True
-                    break
-        except OSError:
-            pass
-
-        if has_content:
-            # Автовосстановление: пересоздаём файл-указатель
-            save_user_data_path(default_path)
-            print(f"[Data Paths] Auto-recovered config pointer to: {default_path}")
-            return default_path
-
-    # 3. Возвращаем каталог по умолчанию (диалог первого запуска покажет MainWindow)
-    # Каталог пока не создаём — это сделает диалог
-    return default_path
+    from modules.portable_paths import data_root
+    return data_root()
 
 
 import threading
@@ -6264,28 +6158,17 @@ class SupervertalerQt(QMainWindow):
         # ============================================================================
         # USER DATA PATH INITIALIZATION
         # ============================================================================
-        # ALL users (EXE, pip, dev) now use a unified system:
-        # - Default location: ~/Supervertaler/ (visible in home folder)
-        # - User can choose custom location on first run
-        # - Config pointer stores their choice at standard config location
-        # - Auto-recovery if pointer is deleted but data exists at default location
+        # P1-B: один источник путей — modules/portable_paths.py (корень сборки).
+        # Файла-указателя и смены каталога в Settings больше нет, поэтому
+        # каталог данных фиксирован на всё время работы процесса.
         from modules.database_manager import DatabaseManager
-        
-        # Resolve the user data path via the unified pointer system for ALL
-        # users (dev, pip, EXE). The dev branch used to hardcode this to
-        # ~/Supervertaler and skip the pointer entirely, which made
-        # Settings -> Change... silently revert on restart in dev mode
-        # (the change saved to the pointer but startup never read it).
-        # The unified path also auto-recovers if the default location has
-        # content but no pointer exists, so a fresh dev install still does
-        # the right thing without a special case.
+
         self.user_data_path = get_user_data_path()
 
         # Единый IO-слой настроек (Batch #7 Stage 2, S2.1). Каталог передаётся
         # РОВНО тем выражением, которым его резолвил прежний
         # _get_settings_dir: self.user_data_path / "workbench" / "settings".
-        # Путь резолвится заново на каждом вызове (кэша нет); при смене каталога
-        # данных сервис пересоздаётся в _reinitialize_with_new_data_path().
+        # Путь резолвится заново на каждом вызове (кэша нет).
         self.settings_service = SettingsService(
             self.user_data_path / "workbench" / "settings",
             log=self.log,
@@ -6470,72 +6353,7 @@ class SupervertalerQt(QMainWindow):
                     self.match_top_tabs.setCurrentWidget(self.quicktrans_panel_match)
             finally:
                 self._restoring_dock = False
-    
-    def _reinitialize_with_new_data_path(self):
-        """Заново инициализировать менеджеры после смены пользователем пути к данным."""
-        try:
-            # Перепривязать settings-сервис к НОВОМУ каталогу данных ПЕРВЫМ делом
-            # (Batch #7 Stage 2, S2.1): миграции ниже читают/пишут
-            # <user_data>/workbench/settings через делегаты этого сервиса, поэтому
-            # старая привязка означала бы работу с покинутым каталогом.
-            self.settings_service = SettingsService(
-                self.user_data_path / "workbench" / "settings",
-                log=self.log,
-            )
 
-            # Batch #8.8: unconditional, idempotent creation of the data-folder
-            # layout (replaces the removed legacy migrations).
-            self.user_data_path.mkdir(parents=True, exist_ok=True)
-            (self.user_data_path / "workbench" / "settings").mkdir(parents=True, exist_ok=True)
-
-            # Close existing database connection
-            if hasattr(self, 'db_manager') and self.db_manager:
-                self.db_manager.close()
-            
-            # Re-initialize database manager
-            from modules.database_manager import DatabaseManager
-            self.db_manager = DatabaseManager(
-                db_path=str(self.user_data_path / "resources" / "supervertaler.db"),
-                log_callback=self.log
-            )
-            self.db_manager.connect()
-            
-            # Re-initialize TM database
-            from modules.translation_memory import TMDatabase
-            self.tm_database = TMDatabase(
-                source_lang=None,
-                target_lang=None,
-                db_path=str(self.user_data_path / "resources" / "supervertaler.db"),
-                log_callback=self.log
-            )
-            
-            # Re-initialize TM metadata manager
-            from modules.tm_metadata_manager import TMMetadataManager
-            self.tm_metadata_mgr = TMMetadataManager(self.db_manager, self.log)
-            
-            # Update other managers
-            self.spellcheck_manager = get_spellcheck_manager(str(self.user_data_path))
-            self.fr_history = FindReplaceHistory(str(self.user_data_path))
-            self.shortcut_manager = ShortcutManager(Path(self.user_data_path) / "workbench" / "settings" / "shortcuts.json")
-            
-            # Update theme manager
-            from modules.theme_manager import ThemeManager
-            self.theme_manager = ThemeManager(self.user_data_path)
-            # Apply saved global UI font scale
-            saved_font_scale = self._get_global_ui_font_scale()
-            self.theme_manager.font_scale = saved_font_scale
-            self.theme_manager.apply_theme(QApplication.instance())
-            
-            # Update recent projects file path
-            self.recent_projects_file = self.user_data_path / "workbench" / "settings" / "recent_projects.json"
-            
-            self.log(f"✅ Re-initialized all managers with new data path")
-            
-        except Exception as e:
-            self.log(f"⚠️ Error re-initializing managers: {e}")
-            import traceback
-            traceback.print_exc()
-    
     def init_ui(self):
         """Инициализировать пользовательский интерфейс."""
         # Build window title with dev mode indicator
@@ -20801,118 +20619,6 @@ class SupervertalerQt(QMainWindow):
         except Exception:
             pass
         layout.addWidget(language_group)
-
-        # Data Folder Location group
-        data_folder_group = QGroupBox(self.tr("📁 Data Folder Location"))
-        data_folder_layout = QVBoxLayout()
-        
-        data_folder_info = QLabel(
-            self.tr("Your translation memories, termbases, prompts, and settings are stored here:")
-        )
-        data_folder_info.setWordWrap(True)
-        data_folder_layout.addWidget(data_folder_info)
-        
-        # Path display with browse button
-        path_row = QHBoxLayout()
-        
-        data_path_edit = QLineEdit()
-        data_path_edit.setText(str(self.user_data_path))
-        data_path_edit.setReadOnly(True)
-        data_path_edit.setToolTip(self.tr("Current data folder location"))
-        path_row.addWidget(data_path_edit)
-        
-        change_path_btn = QPushButton(self.tr("Change..."))
-        change_path_btn.setToolTip(self.tr("Choose a different location for your data folder"))
-        
-        def change_data_path():
-            """Позволяет пользователю сменить расположение папки данных."""
-            from PyQt6.QtWidgets import QMessageBox
-            
-            folder = QFileDialog.getExistingDirectory(
-                self, 
-                "Choose New Data Folder Location",
-                str(Path.home())
-            )
-            if folder:
-                folder_path = Path(folder)
-                # Append "Supervertaler" if user didn't include it
-                if folder_path.name != "Supervertaler":
-                    folder_path = folder_path / "Supervertaler"
-                
-                # Warn if switching to a folder with existing data
-                if folder_path.exists() and folder_path != self.user_data_path:
-                    has_content = any(folder_path.iterdir())
-                    if has_content:
-                        reply = QMessageBox.question(
-                            self,
-                            "Existing Data Found",
-                            f"The folder already contains data:\n{folder_path}\n\n"
-                            "Do you want to use this existing data?",
-                            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel
-                        )
-                        if reply != QMessageBox.StandardButton.Yes:
-                            return
-                
-                # Create the folder
-                folder_path.mkdir(parents=True, exist_ok=True)
-                
-                # Ask if they want to copy existing data
-                if self.user_data_path.exists() and self.user_data_path != folder_path:
-                    reply = QMessageBox.question(
-                        self,
-                        "Copy Existing Data?",
-                        f"Would you like to copy your existing data to the new location?\n\n"
-                        f"From: {self.user_data_path}\n"
-                        f"To: {folder_path}\n\n"
-                        "This will NOT delete the original data.",
-                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                    )
-                    if reply == QMessageBox.StandardButton.Yes:
-                        import shutil
-                        try:
-                            for item in self.user_data_path.iterdir():
-                                dest = folder_path / item.name
-                                if item.is_dir():
-                                    shutil.copytree(item, dest, dirs_exist_ok=True)
-                                else:
-                                    shutil.copy2(item, dest)
-                            self.log(f"✅ Copied data to new location")
-                        except Exception as e:
-                            QMessageBox.warning(self, "Copy Error", f"Failed to copy data: {e}")
-                
-                # Save the new path
-                save_user_data_path(folder_path)
-                data_path_edit.setText(str(folder_path))
-                
-                # Update and reinitialize
-                self.user_data_path = folder_path
-                self._reinitialize_with_new_data_path()
-                
-                QMessageBox.information(
-                    self,
-                    "Data Folder Changed",
-                    f"Data folder changed to:\n{folder_path}\n\n"
-                    "All managers have been reinitialized."
-                )
-        
-        change_path_btn.clicked.connect(change_data_path)
-        path_row.addWidget(change_path_btn)
-        
-        open_folder_btn = QPushButton(self.tr("Open"))
-        open_folder_btn.setToolTip(self.tr("Open this folder in your file manager"))
-        open_folder_btn.clicked.connect(lambda: open_file(str(self.user_data_path)))
-        path_row.addWidget(open_folder_btn)
-        
-        data_folder_layout.addLayout(path_row)
-        
-        data_folder_tip = QLabel(
-            self.tr("💡 This folder persists across updates. Back it up regularly!")
-        )
-        data_folder_tip.setStyleSheet("color: #666; font-size: 9pt;")
-        data_folder_layout.addWidget(data_folder_tip)
-        
-        data_folder_group.setLayout(data_folder_layout)
-        layout.addWidget(data_folder_group)
 
         # Sound Effects group
         sound_group = QGroupBox(self.tr("🔊 Sound Effects"))
@@ -36812,8 +36518,8 @@ class SupervertalerQt(QMainWindow):
     # (Batch #7 Stage 2, под-батч S2.1). Здесь остаются ТОНКИЕ ДЕЛЕГАТЫ с
     # исходными именами и сигнатурами: их вызывают снаружи по строке
     # (main()); legacy-миграции настроек удалены в Batch #8.8.
-    # self.settings_service создаётся в __init__ и пересоздаётся при смене
-    # каталога данных в _reinitialize_with_new_data_path().
+    # self.settings_service создаётся в __init__ один раз: с P1-B каталог
+    # данных фиксирован (modules/portable_paths.py), смены каталога нет.
     # S2.2 добавил к ним ещё делегаты вне этого блока:
     # _load_general_settings_from_file и save_general_settings — каждый стоит
     # ТОЧНО на месте своего тела из HEAD. Делегат load_clipboard_privacy_settings
