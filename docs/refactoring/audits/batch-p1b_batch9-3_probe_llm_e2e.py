@@ -128,8 +128,6 @@ QFileDialog.getOpenFileName = staticmethod(fake_open)
 QFileDialog.getOpenFileNames = staticmethod(lambda *a, **k: (list(open_queue), "") if open_queue else ([], ""))
 
 import Supervertaler as SV  # noqa: E402
-import modules.usage_statistics as _us  # noqa: E402
-_us.show_opt_in_dialog = lambda parent=None: False
 
 from PyQt6.QtWidgets import QApplication  # noqa: E402
 

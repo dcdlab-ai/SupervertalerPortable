@@ -50,8 +50,6 @@ faulthandler.dump_traceback_later(150, repeat=True, file=sys.stderr)
 sys.path.insert(0, str(tree))
 
 import Supervertaler  # noqa: E402
-import modules.usage_statistics as _us  # noqa: E402
-_us.show_opt_in_dialog = lambda parent=None: False
 
 from PyQt6.QtWidgets import QApplication, QDialog, QMessageBox, QGroupBox, QCheckBox, QPushButton  # noqa: E402
 

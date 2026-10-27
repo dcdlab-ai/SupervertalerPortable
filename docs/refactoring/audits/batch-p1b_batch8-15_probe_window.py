@@ -62,8 +62,6 @@ from PyQt6.QtWidgets import QApplication, QDialog, QMessageBox  # noqa: E402
 app = QApplication(sys.argv)
 print(f"[{tag}] QApplication ok ({time.time()-t0:.1f}s)", flush=True)
 
-import modules.usage_statistics as _us  # noqa: E402
-_us.show_opt_in_dialog = lambda parent=None: False
 
 _real_exec = QDialog.exec
 

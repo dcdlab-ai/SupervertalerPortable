@@ -60,8 +60,6 @@ import modules.file_dialog_helper as fdh  # noqa: E402
 fdh.get_save_file_name = lambda *a, **k: ("", "")
 fdh.get_open_file_name = lambda *a, **k: ("", "")
 
-import modules.usage_statistics as _us  # noqa: E402
-_us.show_opt_in_dialog = lambda parent=None: False
 
 import Supervertaler as SV  # noqa: E402
 

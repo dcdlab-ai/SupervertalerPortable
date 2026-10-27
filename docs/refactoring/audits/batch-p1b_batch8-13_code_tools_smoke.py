@@ -76,8 +76,6 @@ fdh.get_save_file_name = lambda *a, **k: ("", "")
 fdh.get_open_file_name = lambda *a, **k: ("", "")
 fdh.get_existing_directory = lambda *a, **k: ""
 
-import modules.usage_statistics as _us  # noqa: E402
-_us.show_opt_in_dialog = lambda parent=None: False
 
 import Supervertaler as SV  # noqa: E402
 from modules.help_system import open_help, Topics as HelpTopics  # noqa: E402
@@ -139,7 +137,6 @@ ITEMS = [
     ("Help/Workbench-Help", lambda: win._open_url("https://docs.supervertaler.com/workbench/")),
     ("Help/Keyboard-Shortcuts", lambda: open_help(HelpTopics.KEYBOARD_SHORTCUTS)),
     ("Help/Changelog", lambda: win._open_url("https://github.com/Supervertaler/Supervertaler-Workbench/blob/main/CHANGELOG.md")),
-    ("Help/Check-for-Updates", lambda: win.check_for_updates()),
     ("Help/Copy-Version-Info", lambda: win.copy_version_info_to_clipboard()),
     ("Help/Open-Diagnostic-Log", lambda: win.open_diagnostic_log()),
     ("Help/Open-Log-Folder", lambda: win.open_diagnostic_log_folder()),

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Batch P1-B: make suite probe copies wired to the new data-path seam.
 
-Each copy is derived from its original by exactly two edits (STEP 4 test seam):
+Each copy is derived from its P1-A copy (batch-p1a_<name>, which already has
+the 2-line usage_statistics stub removed) by exactly two edits (STEP 4 test
+seam); batch8-15_regress_common.py has no P1-A copy and is taken from the
+original:
   1. os.environ["SUPERVERTALER_DATA_ROOT"] = str(iso)  -- inserted right after
      the TMP env line, so the app resolves its data root to <iso>/Supervertaler
      (the same location the old pointer seeding used to select);
@@ -50,7 +53,9 @@ RE_CFG_W = re.compile(r'^\(cfg(?:_dir)? / "config\.json"\)\.write_text\(\s*$')
 
 out = []
 for name in NAMES:
-    lines = (AUD / name).read_bytes().decode("utf-8").splitlines(keepends=True)
+    p1a = AUD / f"batch-p1a_{name}"
+    src = p1a if p1a.exists() else (AUD / name)
+    lines = src.read_bytes().decode("utf-8").splitlines(keepends=True)
     new, removed, i = [], [], 0
     while i < len(lines):
         ln = lines[i]
@@ -84,6 +89,7 @@ for name in NAMES:
         assert '"config.json"' in joined and "user_data_path" in joined, name
         # nothing pointer-related may survive in the copy
         assert "user_data_path" not in text and '"config.json"' not in text, name
+    assert "usage_statistics" not in text, name
     assert 'SUPERVERTALER_DATA_ROOT' not in (AUD / name).read_text(encoding="utf-8"), name
     copy = AUD / f"batch-p1b_{name}"
     copy.write_bytes(text.encode("utf-8"))
