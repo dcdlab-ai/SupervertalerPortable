@@ -163,6 +163,31 @@ sys.path.insert(0, os.getcwd())
 ```
 Symptom if forgotten: `ModuleNotFoundError: No module named 'modules'`.
 
+### Data paths and the test seam (Batch P1-B, P1.3)
+Since Batch P1-B the single source of data-path resolution is
+`modules/portable_paths.py` (the build root). Priority, fixed:
+1. env `SUPERVERTALER_DATA_ROOT` (must be ABSOLUTE; relative raises ValueError)
+   → data live in `<env>\Supervertaler\`;
+2. dev flag `.supervertaler.local` next to the code (repo root)
+   → `<repo>\user_data_private\`;
+3. otherwise the build root → `<build_root>\Supervertaler\` (build root =
+   parents[2] of `modules/portable_paths.py`, i.e. the dir containing the
+   code repo folder). `state_root()` = build root (service files, P1-C/P1.6).
+The old pointer file (`config.json` with `user_data_path`), the
+`~/Supervertaler` default and the Settings group "Data Folder Location" are
+removed: the app never reads or writes the real user profile for data paths.
+* EVERY new GUI probe / suite run MUST set `SUPERVERTALER_DATA_ROOT` to the
+  isolated profile directory (the same dir that is set as USERPROFILE/HOME),
+  so the seeded `<iso>\Supervertaler` keeps matching the app's data root.
+  USERPROFILE/APPDATA/LOCALAPPDATA/HOME stay pointed at (empty) isolated
+  dirs as the negative control: nothing may appear there.
+* Pre-P1-B probe copies (batch-p1a_*, b8-15, g32*, ...) seed a config.json
+  pointer that the new code ignores — they are HISTORICAL, do not rerun them
+  on the new code. Current suite copies: `batch-p1b_*` (generator:
+  `batch-p1b_make_probe_copies.py`; runner: `batch-p1b_run_full.sh`, which
+  self-seeds stage dirs and regress fixtures from
+  `docs/refactoring/audits/fixtures/regress_inputs/`).
+
 ### Path and tooling quirks (Git Bash on Windows)
 * The embedded Python does not understand Git Bash `/tmp` paths (they map to
   `D:\Temp`). Pass explicit `E:\Dev\Work_temp\SupervertalerPortable\...` paths to Python
