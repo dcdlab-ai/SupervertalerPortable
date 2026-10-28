@@ -34,6 +34,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from modules.portable_paths import data_root
+
 try:
     import requests
 except ImportError:
@@ -661,20 +663,10 @@ class OkapiSidecar:
         candidates.append(app_dir / "okapi-sidecar" / "dist")
         candidates.append(app_dir / "okapi-sidecar" / "target")
 
-        # 2. In user data directory
-        if platform.system() == "Windows":
-            appdata = os.environ.get("LOCALAPPDATA", "")
-            if appdata:
-                candidates.append(
-                    Path(appdata) / "Supervertaler" / "okapi-sidecar")
-        elif platform.system() == "Darwin":
-            candidates.append(
-                Path.home() / "Library" / "Application Support" /
-                "Supervertaler" / "okapi-sidecar")
-        else:
-            candidates.append(
-                Path.home() / ".local" / "share" /
-                "supervertaler" / "okapi-sidecar")
+        # 2. In the app's data root (where download_install() puts a
+        # lazily downloaded sidecar). The build's bundled JAR above always
+        # wins over a downloaded copy.
+        candidates.append(data_root() / "okapi-sidecar")
 
         for candidate in candidates:
             jar = candidate / "okapi-sidecar.jar"
@@ -725,12 +717,12 @@ class OkapiSidecar:
         return None
 
     def is_user_downloaded(self) -> bool:
-        """True when the active JAR is the per-user lazy-downloaded copy (as
-        opposed to a dev source build or a bundled-exe install, which are
-        managed manually and must not be auto-overwritten)."""
+        """True when the active JAR is the lazily-downloaded copy in the
+        data root (as opposed to a dev source build or a bundled-exe
+        install, which are managed manually and must not be auto-overwritten)."""
         ud = self._user_data_sidecar_dir()
         try:
-            return (ud is not None and self.is_installed()
+            return (self.is_installed()
                     and self.sidecar_dir.resolve() == ud.resolve())
         except Exception:
             return False
@@ -745,20 +737,11 @@ class OkapiSidecar:
             return False
         return self.installed_version_hint() != self.EXPECTED_VERSION
 
-    def _user_data_sidecar_dir(self) -> Optional[Path]:
-        """Where lazy-downloaded sidecar files go. Per-user, persists
-        across reinstalls. None on unsupported platforms."""
-        if platform.system() == "Windows":
-            appdata = os.environ.get("LOCALAPPDATA", "")
-            if appdata:
-                return Path(appdata) / "Supervertaler" / "okapi-sidecar"
-        elif platform.system() == "Darwin":
-            return (Path.home() / "Library" / "Application Support" /
-                    "Supervertaler" / "okapi-sidecar")
-        else:
-            return (Path.home() / ".local" / "share" /
-                    "supervertaler" / "okapi-sidecar")
-        return None
+    def _user_data_sidecar_dir(self) -> Path:
+        """Where lazy-downloaded sidecar files go: the app's data root
+        (``<data_root()>\\okapi-sidecar``), portable with the build —
+        never an OS-specific user-config directory."""
+        return data_root() / "okapi-sidecar"
 
     def download_install(self, progress_callback=None) -> bool:
         """Lazy-download the sidecar for the current platform.
@@ -770,10 +753,10 @@ class OkapiSidecar:
         Two strategies depending on platform:
 
         * **Windows** – fetch a ZIP bundle containing the JAR plus a
-          bundled Windows JRE, extract under the per-user install
+          bundled Windows JRE, extract under the data-root install
           location. Self-contained; no system Java required.
         * **macOS / Linux** – fetch the JAR alone, drop it into the
-          per-user install location. Requires the user to already have
+          data-root install location. Requires the user to already have
           Java available (JAVA_HOME or `java` on PATH). Caller is expected
           to have verified this via `_find_java()` first.
 
@@ -787,9 +770,6 @@ class OkapiSidecar:
             return False
 
         target_dir = self._user_data_sidecar_dir()
-        if target_dir is None:
-            logger.error("Could not determine a per-user install location")
-            return False
 
         target_dir.parent.mkdir(parents=True, exist_ok=True)
 
