@@ -1,0 +1,36 @@
+BATCH P1-C — last_directory в корень сборки, фикс shortcuts.json, Okapi внутри сборки (P1.4 + P1.5)
+Отчёт: docs/refactoring/reports/BATCH_P1C_REPORT.md. Не пушить. Рабочая область — E:\Dev\Work_temp\SupervertalerPortable.
+Основание: RECON_P1_0 (§1.4 H1, §1.3 L1, §4 P1.4, P1.5), вердикт P1-B (GO). Правила метода — как в прошлых батчах и по AGENTS.md. Реальные данные и реестр не трогать; все прогоны — только через шов SUPERVERTALER_DATA_ROOT и изолированные профили.
+
+Ответы координатора на вопросы отчёта P1-B: state_root() = build_root() — да; dev-флаг .supervertaler.local в репозитории не создавать (ветка 3 данных = E:\Dev\Supervertaler при запуске без шва ожидаема, агенты всегда ставят шов);
+e2e-агрегат: канонический рецепт — sha256(json(requests)) = 982e72a247f0a6ac (не 17e71049…).
+
+Коммиты раздельные: P1.4a (last_directory), P1.4b (shortcuts.json), P1.5 (Okapi). Один отчёт, один вердикт.
+
+P1.4a — last_directory:
+ modules/config_manager.py: файл состояния = <state_root()>\last_directory.json (формат {"last_directory": "<путь>"}); API get/set/update_last_directory и вызовы из file_dialog_helper НЕ менять.
+ ConfigManager сейчас жив только ради last_directory. Проверить AST/grep: если у остальных методов/полей (user_data_path, set_user_data_path, ensure_user_data_exists, is_first_launch, REQUIRED_FOLDERS-хелперы, legacy api_keys-миграция и т. д.) нет НИ ОДНОГО вызова в продукте — удалить их (это отступление от QP1.6 по причине: они содержат Path.home() и ломают гейт «нет путей вне корня»). Список удалённого — в отчёт.
+ Если у чего-то есть вызов — оставить и спросить в отчёте. Докстринг settings_service.py:11 поправить. Старый файл ~\.supervertaler_config.json не читать и не удалять (миграции нет; пользователь запомнит папку заново).
+ Запись состояния: при ошибке записи (нет прав) — тихий лог, без падения.
+P1.4b — shortcuts.json:
+ modules/keyboard_shortcuts_widget.py:231: виджет использует менеджер главного окна (как уже делает _reload_global_hotkeys_on_main_window) либо тот же абсолютный путь, что передаёт монолит (:6367/:6523);
+ shortcut_manager.py:624: относительный дефолт убрать (обязательный аргумент или резолв через portable_paths так, чтобы совпадал с путём монолита — выбрать минимальный вариант и обосновать).
+ Дефолт имени экспорта (keyboard_shortcuts_widget.py:716) — только если это тривиально (папка из last_directory); иначе не трогать.
+P1.5 — Okapi внутри сборки:
+ modules/okapi_sidecar.py: цель ленивой загрузки _user_data_sidecar_dir() → <data_root()>\okapi-sidecar; ВСЕ кандидаты поиска вне корня (LOCALAPPDATA, ~/Library/Application Support, ~/.local/share) удалить вместе с ветками внутри переписываемых функций;
+ кандидаты сборки (app_dir/okapi-sidecar и т. д.) не менять, они уже первые; штамп okapi-sidecar.version пишется рядом с новой целью; JAVA_HOME/PATH-поиск Java не трогать.
+ Остальные darwin-ветки вне этих функций не трогать (они в P1.7).
+
+Критерии приёмки: диалог Открыть после перезапуска стартует из последней папки, файл состояния лежит в корне (<root>\last_directory.json), в профиле (~) файла .supervertaler_config.json не появляется;
+конструирование редактора хоткеев при CWD≠корня не создаёт user_data\ под CWD (снапшот-диф пуст), хоткеи сохраняются и переживают перезапуск; порядок кандидатов Okapi: JAR сборки выигрывает; download_install (мок requests, без сети) кладёт файлы под <data_root>\okapi-sidecar;
+grep: LOCALAPPDATA, APPDATA, Path.home, expanduser по продукту — перечислить остатки (допустимы только crash-log ~/Desktop вне скоупа и darwin-ветки P1.7), все остальные = 0.
+Пробы: (1) fdh-функции с monkeypatch QFileDialog: файл состояния в корне (шов); перезапуск сервиса читает; (2) виджет хоткеев при CWD=stage: нет посторонних деревьев, загрузка/сохранение через абсолютный путь;
+ (3) юнит порядка кандидатов Okapi + мок-проба загрузки; (4) негатив: изолированный профиль пуст после цикла; (5) регресс 16-этапный набор.
+Защита: py_compile, AST-цепочка, pyflakes, headless, grep-gate, набор ОДНИМ процессом, regress-хэши 5a12501f934a589c / 44828d90090f046d / c413d56372e69dd9, e2e тела запросов (агрегат 982e72a247f0a6ac), smoke.
+ База до батча: AST chain 875/0; pyflakes 542 (undefined 126/4); canonical py_compile 108/0; REFERENCE 254/0; headless 89 ok/2 fail; smoke 41. Расхождения — по каждому показателю: было / стало / причина.
+
+В отчёте для Дмитрия (простым языком): список файлов для тестовой сборки; где появится last_directory.json (корень тестовой сборки = D:\SupervertalerPortable_test\); точные ручные тесты:
+ T-P1C.1 — открыть проект из папки X, закрыть приложение, запустить, File → Open Project предлагает X; в корне сборки появился last_directory.json; в D:\SupervertalerPortable_test\Supervertaler\profile\ нет файла .supervertaler_config.json.
+ T-P1C.2 — Settings → Keyboard Shortcuts: изменить одну клавишу, сохранить, перезапустить — клавиша действует; в папке, откуда запускается start.bat, не появилась папка user_data.
+ T-P1C.3 (необязательный) — Okapi: без JAR импорт DOCX с форматированием предложит загрузку; НЕ соглашаться на загрузку (она большая); достаточно, что запрос не падает.
+Стоп до вердикта.
