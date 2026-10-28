@@ -21,8 +21,8 @@ Resolution priority for data_root() (fixed, do not reorder):
        (test seam; must be an ABSOLUTE path, relative values are an error)
     2. dev flag .supervertaler.local next to the code
                                             -> <repo>/user_data_private
-       (same convention as ConfigManager / the private-features flag; keeps the
-       developer's git-ignored data inside the repo)
+       (same convention as the private-features flag; keeps the developer's
+       git-ignored data inside the repo)
     3. build root                           -> <build_root>/Supervertaler
 
 These functions are pure path math: they never create directories and never

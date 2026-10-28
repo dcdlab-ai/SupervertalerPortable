@@ -6,17 +6,19 @@
 секциями: ``"api_keys"``, ``"general"``, ``"ui"``, ``"features"``.
 
 Архитектура (решение владельца V1 по отчёту Batch #7 Stage 1): класс
-конструируется ЯВНЫМ каталогом настроек и НЕ резолвит путь к user_data сам — ни
-через ``ConfigManager`` (его указатель user_data другой:
-``~/.supervertaler_config.json`` против ``%APPDATA%/Supervertaler/config.json``
-монолита), ни через какой-либо иной источник. Каталог передаётся ровно тем же
-выражением, что было в ``SupervertalerQt._get_settings_dir``:
-``self.user_data_path / "workbench" / "settings"``. Окно пересоздаёт сервис в
+конструируется ЯВНЫМ каталогом настроек и НЕ резолвит путь к user_data сам —
+ни через какой глобальный источник путей (с P1-B он один:
+``modules.portable_paths.data_root()``; исторический указатель
+``~/.supervertaler_config.json`` класса ConfigManager удалён в P1-C вместе с
+самим указателем). Каталог передаётся ровно тем же выражением, что было в
+``SupervertalerQt._get_settings_dir``:
+``self.user_data_path / "workbench" / "settings"`` (``user_data_path`` окна —
+делегат ``data_root()``, P1-B). Исторически окно пересоздавало сервис в
 ``SupervertalerQt._reinitialize_with_new_data_path()`` — там же, где
 пересоздаются остальные зависящие от каталога данных менеджеры
-(``spellcheck_manager``, ``theme_manager`` и др.), — поэтому смена каталога
-данных не оставляет делегатов на устаревшем пути (``user_data_path``
-переприсваивается в трёх местах монолита, все три ведут в этот метод).
+(``spellcheck_manager``, ``theme_manager`` и др.); метод удалён в P1-B
+вместе с Settings-группой «Data Folder Location» (единственный источник
+смены каталога данных больше не существует).
 С ``recent_projects_file`` дело теперь обстоит иначе: с S2.5 его читает не
 только окно — путь к ``recent_projects.json`` передаётся в
 ``load_recent_projects`` / ``save_recent_projects`` этого сервиса
