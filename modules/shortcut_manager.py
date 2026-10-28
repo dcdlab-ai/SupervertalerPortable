@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtCore import QSettings
 from modules.shortcut_display import format_shortcut_for_display, format_shortcuts_in_text
+from modules.portable_paths import data_root
 
 class ShortcutManager:
     """Manages all keyboard shortcuts for Supervertaler"""
@@ -619,9 +620,13 @@ class ShortcutManager:
         Initialize ShortcutManager
         
         Args:
-            settings_file: Path to JSON file for storing custom shortcuts
+            settings_file: Path to JSON file for storing custom shortcuts.
+                When omitted, resolves to the same file the main window
+                passes: <data_root()>/workbench/settings/shortcuts.json
+                (never a CWD-relative path).
         """
-        self.settings_file = settings_file or Path("user_data/workbench/settings/shortcuts.json")
+        self.settings_file = settings_file or (
+            data_root() / "workbench" / "settings" / "shortcuts.json")
         self.custom_shortcuts = {}
         self.disabled_shortcuts = set()  # Set of disabled shortcut IDs
         # One-time default-value migrations already applied on this

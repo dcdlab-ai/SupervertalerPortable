@@ -710,10 +710,16 @@ class KeyboardShortcutsWidget(QWidget):
     
     def export_shortcuts(self):
         """Export shortcuts to JSON file"""
+        # Default to the last folder used in any file dialog (same state the
+        # file_dialog_helper wrappers use), falling back to a bare filename.
+        from modules.config_manager import get_config_manager
+        last_dir = get_config_manager().get_last_directory()
+        default_path = (str(Path(last_dir) / "supervertaler_shortcuts.json")
+                        if last_dir else "supervertaler_shortcuts.json")
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Export Shortcuts",
-            "supervertaler_shortcuts.json",
+            default_path,
             "JSON Files (*.json)"
         )
         
