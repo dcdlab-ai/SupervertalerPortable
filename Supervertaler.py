@@ -54578,7 +54578,7 @@ def main():
     # по-разному на Win10/Win11; Qt-диалоги единообразны, а наши диалоги и так
     # получают явный стартовый каталог (file_dialog_helper: last_directory).
     # Откат — удалить эту строку (решение принимал координатор).
-    # (строка setAttribute ставится отдельным коммитом P1.6c)
+    QApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs, True)
     
     app = QApplication(sys.argv)
     app.setApplicationName("Supervertaler")
