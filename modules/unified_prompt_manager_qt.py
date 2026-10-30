@@ -23,7 +23,7 @@ from PyQt6.QtWidgets import (
     # v1.10.157: AutoPrompt progress + save dialogs
     QProgressDialog, QFormLayout, QComboBox, QDialogButtonBox,
 )
-from PyQt6.QtCore import Qt, QSettings, pyqtSignal, QThread, QSize, QRect, QRectF
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QSize, QRect, QRectF
 from PyQt6.QtGui import QFont, QColor, QAction, QIcon, QPainter, QPen, QBrush, QPainterPath, QLinearGradient
 
 from modules.unified_prompt_library import UnifiedPromptLibrary

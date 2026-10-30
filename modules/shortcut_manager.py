@@ -7,7 +7,6 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from PyQt6.QtGui import QKeySequence
-from PyQt6.QtCore import QSettings
 from modules.shortcut_display import format_shortcut_for_display, format_shortcuts_in_text
 from modules.portable_paths import data_root
 

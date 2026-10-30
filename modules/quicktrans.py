@@ -24,6 +24,8 @@ from dataclasses import dataclass
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from modules.portable_paths import state_root
+
 
 # Provider chip colours, keyed by internal provider code. Shared by the popup
 # rows (MTSuggestionItem) and the docked panel (QuickTransPanel) so the colour
@@ -822,8 +824,13 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
         self.setMinimumWidth(450)
         self.setMinimumHeight(200)
 
-        # Restore saved size and position or use defaults
-        settings = QSettings("Supervertaler", "MTQuickPopup")
+        # Restore saved size and position or use defaults.
+        # P1.6a: geometry lives in <state_root()>/quicktrans.ini (build root),
+        # never in the Windows registry. The old HKCU\Software\Supervertaler\
+        # MTQuickPopup values are not read and not migrated — the geometry
+        # returns to defaults once after the move (coordinator's decision).
+        settings = QSettings(str(state_root() / "quicktrans.ini"),
+                             QSettings.Format.IniFormat)
         saved_width = settings.value("width", 650, type=int)
         saved_height = settings.value("height", 400, type=int)
         self.resize(saved_width, saved_height)
@@ -1559,8 +1566,10 @@ class MTQuickPopup(QuickTransProviderMixin, QDialog):
                 _detach_worker_for_close(w)
         self._fetch_workers = []
 
-        # Save window size and position for next time
-        settings = QSettings("Supervertaler", "MTQuickPopup")
+        # Save window size and position for next time (P1.6a: same
+        # <state_root()>/quicktrans.ini as setup_ui, not the registry)
+        settings = QSettings(str(state_root() / "quicktrans.ini"),
+                             QSettings.Format.IniFormat)
         settings.setValue("width", self.width())
         settings.setValue("height", self.height())
         settings.setValue("x", self.x())
