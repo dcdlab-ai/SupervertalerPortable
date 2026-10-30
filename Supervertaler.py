@@ -54559,6 +54559,26 @@ def main():
         # Используем более безопасный malloc, если доступен
         os.environ.setdefault("MALLOC_CHECK_", "0")
     
+    # P1.6b (батч P1.6, промпт 2026-10-30): страховка QSettings ДО создания
+    # QApplication и до любого QSettings. setDefaultFormat(IniFormat) переводит
+    # любой будущий случайный конструктор QSettings("org", "app") в ini-режим,
+    # а setPath перенаправляет такие UserScope-файлы в <data_root()>/qsettings —
+    # внутри корня сборки, а не в реестр (HKCU). Порядок вызовов проверен
+    # пробой batch-p16_unit_qsettings.py на PyQt6 6.11 (до QApplication).
+    from PyQt6.QtCore import QSettings as _QS_insurance
+    from modules.portable_paths import data_root as _data_root_insurance
+    _QS_insurance.setDefaultFormat(_QS_insurance.Format.IniFormat)
+    _QS_insurance.setPath(_QS_insurance.Format.IniFormat,
+                          _QS_insurance.Scope.UserScope,
+                          str(_data_root_insurance() / "qsettings"))
+    
+    # P1.6c (батч P1.6, промпт 2026-10-30, QP1.9): единые Qt-диалоги на всех
+    # Windows вместо нативных (AA_DontUseNativeDialogs до QApplication).
+    # Нативные диалоги пишут MRU путей в реестр (HKCU\...\ComDlg32) и выглядят
+    # по-разному на Win10/Win11; Qt-диалоги единообразны, а наши диалоги и так
+    # получают явный стартовый каталог (file_dialog_helper: last_directory).
+    # Откат — удалить эту строку (решение принимал координатор).
+    # (строка setAttribute ставится отдельным коммитом P1.6c)
     
     app = QApplication(sys.argv)
     app.setApplicationName("Supervertaler")
