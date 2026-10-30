@@ -74,30 +74,6 @@ __phase__ = "0.9"
 __release_date__ = "2026-05-12"
 __edition__ = "Qt"
 
-# --- Логирование падений при запуске из Finder на macOS (v1.9.275) ---
-# При запуске через Finder stdout/stderr никуда не пишутся; поэтому при старте
-# собранного (PyInstaller) приложения сразу создаём crash-лог на Рабочем столе:
-# если импорт или инициализация упадут, причина останется в этом файле.
-import sys as _sys
-import os as _os
-if getattr(_sys, 'frozen', False) and _sys.platform == 'darwin':
-    _crash_log = _os.path.expanduser('~/Desktop/supervertaler_crash.log')
-    try:
-        with open(_crash_log, 'w') as _f:
-            _f.write(f"Launch time: {__import__('datetime').datetime.now()}\n")
-            _f.write(f"Version: {__version__}\n")
-            _f.write(f"CWD: {_os.getcwd()}\n")
-            _f.write(f"sys.executable: {_sys.executable}\n")
-            _f.write(f"sys._MEIPASS: {getattr(_sys, '_MEIPASS', 'N/A')}\n")
-            _f.write(f"__file__: {__file__}\n")
-            _f.write(f"LANG: {_os.environ.get('LANG', 'NOT SET')}\n")
-            _f.write(f"LC_CTYPE: {_os.environ.get('LC_CTYPE', 'NOT SET')}\n")
-            _f.write("--- Starting app ---\n")
-    except Exception:
-        pass
-del _sys, _os
-# --- конец логирования падений ---
-
 # ============================================================================
 # Импорты уровня модуля (первая часть)
 # ============================================================================
@@ -116,7 +92,7 @@ from typing import List, Optional, Dict, Any, Tuple, Callable
 from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from modules.shortcut_display import format_shortcut_for_display
-from modules.platform_helpers import IS_WINDOWS, IS_MACOS, IS_LINUX, open_file, open_folder, get_hidden_subprocess_flags
+from modules.platform_helpers import IS_WINDOWS, IS_LINUX, open_file, open_folder, get_hidden_subprocess_flags
 from modules.ui_scale import scaled_pt
 
 
@@ -2525,10 +2501,9 @@ class ReadOnlyGridTextEditor(QTextEdit):
             # QuickTrans at the top of the QuickLauncher
             # v1.10.61: was "(Ctrl+M)" — that was a stale display hint
             # from an earlier version; no in-app binding ever existed.
-            # The actual hotkey is the GLOBAL pynput chord (Ctrl+Alt+Q
-            # on Windows/Linux, Meta+Ctrl+Q on macOS) which works
-            # system-wide, including inside Workbench.
-            _qt_hotkey = 'Meta+Ctrl+Q' if IS_MACOS else 'Ctrl+Alt+Q'
+            # The actual hotkey is the GLOBAL pynput chord (Ctrl+Alt+Q)
+            # which works system-wide, including inside Workbench.
+            _qt_hotkey = 'Ctrl+Alt+Q'
             qt_action = QAction(f"⚡ QuickTrans ({format_shortcut_for_display(_qt_hotkey)})", self)
             qt_action.triggered.connect(self._handle_mt_quick_lookup)
             qm_menu.addAction(qt_action)
@@ -3672,10 +3647,9 @@ class EditableGridTextEditor(QTextEdit):
             # QuickTrans at the top of the QuickLauncher
             # v1.10.61: was "(Ctrl+M)" — that was a stale display hint
             # from an earlier version; no in-app binding ever existed.
-            # The actual hotkey is the GLOBAL pynput chord (Ctrl+Alt+Q
-            # on Windows/Linux, Meta+Ctrl+Q on macOS) which works
-            # system-wide, including inside Workbench.
-            _qt_hotkey = 'Meta+Ctrl+Q' if IS_MACOS else 'Ctrl+Alt+Q'
+            # The actual hotkey is the GLOBAL pynput chord (Ctrl+Alt+Q)
+            # which works system-wide, including inside Workbench.
+            _qt_hotkey = 'Ctrl+Alt+Q'
             qt_action = QAction(f"⚡ QuickTrans ({format_shortcut_for_display(_qt_hotkey)})", self)
             qt_action.triggered.connect(self._handle_mt_quick_lookup)
             qm_menu.addAction(qt_action)
@@ -19898,7 +19872,7 @@ class SupervertalerQt(QMainWindow):
 
         # Header info
         header_info = QLabel(
-            f"⚡ <b>QuickTrans</b> - Configure which providers appear in the QuickTrans popup ({format_shortcut_for_display('Meta+Ctrl+Q') if IS_MACOS else format_shortcut_for_display('Ctrl+Alt+Q')} — system-wide hotkey, works inside Workbench too).<br>"
+            f"⚡ <b>QuickTrans</b> - Configure which providers appear in the QuickTrans popup ({format_shortcut_for_display('Ctrl+Alt+Q')} — system-wide hotkey, works inside Workbench too).<br>"
             "Enable MT engines and/or LLMs to get instant translation suggestions."
         )
         header_info.setTextFormat(Qt.TextFormat.RichText)
@@ -29058,40 +29032,27 @@ class SupervertalerQt(QMainWindow):
             return False
 
         # Path 3: not installed at all – offer a download.
-        # Four flavours by platform + arch:
-        #  - Windows:        ~70 MB bundle (JAR + bundled Windows JRE).
-        #  - Apple Silicon:  ~50 MB bundle (JAR + bundled arm64 JRE).
-        #  - Intel Mac:      ~28 MB JAR; requires system Java.
-        #  - Linux:          ~28 MB JAR; requires system Java.
+        # Two flavours by platform:
+        #  - Windows: ~70 MB bundle (JAR + bundled Windows JRE).
+        #  - Linux:   ~28 MB JAR; requires system Java.
         sysname = platform.system()
-        is_apple_silicon = (sysname == "Darwin"
-                            and platform.machine() == "arm64")
-        has_bundled_jre = (sysname == "Windows") or is_apple_silicon
+        has_bundled_jre = (sysname == "Windows")
 
         if not has_bundled_jre:
-            # Intel Mac / Linux: verify Java is reachable before
+            # Linux: verify Java is reachable before
             # downloading the JAR. Otherwise we'd download 28 MB and
             # then fail to launch, which is a worse experience than
             # telling the user up-front what's missing.
             java_path = self.okapi_sidecar._find_java()
             if java_path is None:
-                if sysname == "Darwin":
-                    install_hint = (
-                        "Install Java first (one-time setup):\n"
-                        "  • Homebrew (recommended): brew install --cask temurin@17\n"
-                        "  • Or download from https://adoptium.net\n\n"
-                        "Verify with: java -version\n"
-                        "Then restart Supervertaler and re-try the import."
-                    )
-                else:
-                    install_hint = (
-                        "Install Java first (one-time setup):\n"
-                        "  • Debian/Ubuntu: sudo apt install default-jre\n"
-                        "  • Fedora/RHEL:  sudo dnf install java-latest-openjdk\n"
-                        "  • Arch:         sudo pacman -S jre-openjdk\n"
-                        "  • Or download from https://www.java.com\n\n"
-                        "Then re-try the import."
-                    )
+                install_hint = (
+                    "Install Java first (one-time setup):\n"
+                    "  • Debian/Ubuntu: sudo apt install default-jre\n"
+                    "  • Fedora/RHEL:  sudo dnf install java-latest-openjdk\n"
+                    "  • Arch:         sudo pacman -S jre-openjdk\n"
+                    "  • Or download from https://www.java.com\n\n"
+                    "Then re-try the import."
+                )
                 self.log("⚠️ Showing 'Java required' dialog – "
                          "DOCX import blocked, no system Java found "
                          f"({sysname})")
@@ -29107,7 +29068,7 @@ class SupervertalerQt(QMainWindow):
                 return False
 
         if has_bundled_jre:
-            size_text = "about 50 MB" if is_apple_silicon else "about 70 MB"
+            size_text = "about 70 MB"
             extra_note = ""
         else:
             size_text = "about 28 MB"
@@ -48179,22 +48140,12 @@ class SupervertalerQt(QMainWindow):
 
         from PyQt6.QtWidgets import QMessageBox, QCheckBox
 
-        sysname = platform.system()
-        if sysname == "Darwin":
-            install_cmd = "brew install --cask temurin@17"
-            verify_cmd = "java -version"
-            platform_note = (
-                "Intel Macs need a separate Java install – the bundled "
-                "Java runtime in the macOS download is built for Apple "
-                "Silicon only."
-            )
-        else:
-            install_cmd = "sudo apt install default-jre   # or your distro's equivalent"
-            verify_cmd = "java -version"
-            platform_note = (
-                "On Linux the sidecar uses your system Java rather than "
-                "a bundled one."
-            )
+        install_cmd = "sudo apt install default-jre   # or your distro's equivalent"
+        verify_cmd = "java -version"
+        platform_note = (
+            "On Linux the sidecar uses your system Java rather than "
+            "a bundled one."
+        )
 
         box = QMessageBox(self)
         box.setIcon(QMessageBox.Icon.Information)
@@ -54010,16 +53961,6 @@ class SuperlookupTab(QWidget):
         else:
             qt_shortcut = 'ctrl+alt+q'
 
-        # No platform-specific rewrite needed: GlobalHotkeyManager's macOS
-        # NSEvent backend now follows Qt's Mac convention internally
-        # (stored "Ctrl" → ⌘ Cmd, "Alt" → ⌥ Option, "Meta" → ⌃ Control),
-        # so the same shortcut string fires on the SAME physical keystroke
-        # whether triggered via QShortcut in-app or via the global hotkey
-        # outside the app. The previous alt→cmd rewrite was a workaround
-        # for an older NSEvent parser that took modifier names literally
-        # and produced different physical chords for local vs global; that
-        # parser was fixed in modules/platform_helpers.py:_MacNSEventHotkey._parse.
-
         # Logging helper. Defined here (above the RegisterHotKey block)
         # so both this and the fallback block below can use the same
         # mirror-to-main-window-log behaviour.
@@ -54066,12 +54007,6 @@ class SuperlookupTab(QWidget):
             _log(f"[Global Hotkeys] Registration failed: {e}")
             import traceback
             traceback.print_exc()
-            if IS_MACOS:
-                _log("[Global Hotkeys] macOS: grant Accessibility permission "
-                     "to whichever binary launched Python (Terminal.app / "
-                     "iTerm2.app for terminal launches, Supervertaler.app "
-                     "for the bundled app) in System Settings → Privacy & "
-                     "Security → Accessibility, then restart Supervertaler.")
 
         self.hotkey_registered = False
 
@@ -54660,13 +54595,6 @@ def main():
         }
     """)
 
-    # macOS: use Fusion style instead of native QMacStyle.
-    # QMacStyle ignores QTabBar.setExpanding(False) (tabs always centered/expanded)
-    # and renders QComboBox popup items blank. Fusion respects all Qt properties
-    # and the app's custom stylesheets still apply on top.
-    if sys.platform == 'darwin':
-        app.setStyle("Fusion")
-
     # Suppress dotted focus rectangles app-wide. Native styles (notably the
     # Windows Vista style) draw PE_FrameFocusRect at the QStyle level, which
     # bypasses CSS – `outline: none` does nothing against it. A QProxyStyle
@@ -54745,19 +54673,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # Wrap main() in crash handler for macOS Finder launches (stdout/stderr go nowhere)
-    if getattr(sys, 'frozen', False) and sys.platform == 'darwin':
-        try:
-            main()
-        except Exception:
-            import traceback
-            _crash_log = os.path.expanduser('~/Desktop/supervertaler_crash.log')
-            try:
-                with open(_crash_log, 'a') as _f:
-                    _f.write('\n--- CRASH ---\n')
-                    traceback.print_exc(file=_f)
-            except Exception:
-                pass
-            raise
-    else:
-        main()
+    main()

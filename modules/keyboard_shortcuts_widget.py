@@ -15,7 +15,7 @@ from PyQt6.QtGui import QKeySequence, QKeyEvent, QFont, QPainter, QPen, QColor
 
 from modules.shortcut_manager import ShortcutManager
 from modules.shortcut_display import format_shortcut_for_display, format_shortcuts_in_text
-from modules.platform_helpers import IS_MACOS, IS_LINUX
+from modules.platform_helpers import IS_LINUX
 from modules.ui_scale import scaled_pt
 from modules.styled_widgets import HelpButton
 from modules.help_system import Topics as HelpTopics
@@ -396,10 +396,7 @@ class KeyboardShortcutsWidget(QWidget):
         hotkey_group = QGroupBox("⌨️ Global Hotkeys (QuickTrans)")
         hotkey_layout = QVBoxLayout()
 
-        if IS_MACOS:
-            qt_key = format_shortcut_for_display('Meta+Ctrl+M')   # ⌃⌘M
-        else:
-            qt_key = format_shortcut_for_display('Ctrl+Alt+Q')
+        qt_key = format_shortcut_for_display('Ctrl+Alt+Q')
         hotkey_info = QLabel(
             f"Global hotkeys allow {qt_key} (QuickTrans) to work from any application."
         )
@@ -424,7 +421,6 @@ class KeyboardShortcutsWidget(QWidget):
                     backend_label = {
                         'winapi': 'WinAPI',
                         'pynput': 'pynput',
-                        'nsevent': 'NSEvent',
                     }.get(raw, raw or 'unknown')
                 else:
                     backend_label = 'unknown'
@@ -443,23 +439,7 @@ class KeyboardShortcutsWidget(QWidget):
         hotkey_layout.addLayout(hotkey_status_layout)
 
         # Platform-specific notes
-        if IS_MACOS:
-            mac_note = QLabel(
-                "macOS: Global hotkeys require Accessibility permission on "
-                "the binary that launched Python.\n"
-                "  • Bundled Supervertaler.app → add Supervertaler\n"
-                "  • Launched from Terminal.app → add Terminal.app\n"
-                "  • Launched from iTerm2 → add iTerm2.app\n"
-                "Open System Settings → Privacy & Security → Accessibility, "
-                "tick the relevant app, then restart Supervertaler.\n\n"
-                "Also requires the pyobjc-framework-Cocoa Python package "
-                "(pip install pyobjc-framework-Cocoa)."
-            )
-            mac_note.setWordWrap(True)
-            mac_note.setStyleSheet(
-                f"color: #d97706; font-size: {scaled_pt(9):.1f}pt; padding: 5px;")
-            hotkey_layout.addWidget(mac_note)
-        elif IS_LINUX:
+        if IS_LINUX:
             linux_note = QLabel(
                 "Linux: Global hotkeys may require /dev/input access.\n"
                 "If hotkeys don't work, add your user to the 'input' group."

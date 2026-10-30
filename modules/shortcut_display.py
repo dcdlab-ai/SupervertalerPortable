@@ -1,34 +1,18 @@
-"""Helpers for platform-appropriate shortcut labels in UI text."""
+"""Platform-agnostic shortcut display helpers.
 
-import sys
-import re
-
-
-_MAC_SYMBOLS = {
-    "Ctrl": "⌘",      # Qt Ctrl = Mac Cmd
-    "Alt": "⌥",       # Qt Alt = Mac Option
-    "Shift": "⇧",
-    "Meta": "⌃",      # Qt Meta = Mac Control
-}
-
-_SHORTCUT_PATTERN = re.compile(
-    r"\b(?:Ctrl|Alt|Shift|Meta)(?:\+[A-Za-z0-9,=+\- ]+)+"
-)
+Historically these functions converted ``Ctrl``/``Alt``/``Shift``/``Meta``
+tokens to macOS symbol glyphs (⌘/⌥/⇧/⌃) on macOS. The macOS build was
+retired (batch P1.7), so on every supported platform (Windows, Linux) the
+functions are the identity transform. They are kept as the stable display
+API used throughout the UI text formatting code.
+"""
 
 
 def format_shortcut_for_display(shortcut: str) -> str:
-    """Return a platform-native shortcut label suitable for UI text."""
-    if not shortcut or sys.platform != "darwin":
-        return shortcut
-
-    parts = shortcut.split("+")
-    converted = [_MAC_SYMBOLS.get(part, part) for part in parts]
-    has_symbol = any(part in _MAC_SYMBOLS.values() for part in converted)
-    return "".join(converted) if has_symbol else "+".join(converted)
+    """Return a platform-appropriate shortcut label suitable for UI text."""
+    return shortcut
 
 
 def format_shortcuts_in_text(text: str) -> str:
     """Replace all shortcut-like tokens in text with platform-native display."""
-    if not text or sys.platform != "darwin":
-        return text
-    return _SHORTCUT_PATTERN.sub(lambda m: format_shortcut_for_display(m.group(0)), text)
+    return text

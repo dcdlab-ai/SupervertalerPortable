@@ -21,7 +21,6 @@ from typing import Optional, Callable, Dict, List
 # Platform detection constants
 # ---------------------------------------------------------------------------
 IS_WINDOWS = sys.platform == 'win32'
-IS_MACOS = sys.platform == 'darwin'
 IS_LINUX = sys.platform.startswith('linux')
 
 
@@ -38,8 +37,6 @@ def open_file(path: str) -> bool:
         path_str = str(path)
         if IS_WINDOWS:
             os.startfile(path_str)
-        elif IS_MACOS:
-            subprocess.run(['open', path_str], check=True)
         else:
             subprocess.run(['xdg-open', path_str], check=True)
         return True
@@ -67,9 +64,6 @@ def open_folder_and_select(path: str) -> bool:
         path_str = str(path)
         if IS_WINDOWS:
             subprocess.run(['explorer', '/select,', path_str])
-            return True
-        elif IS_MACOS:
-            subprocess.run(['open', '-R', path_str])
             return True
         else:
             # xdg-open on the parent folder (no select support)
@@ -206,15 +200,6 @@ def activate_window_by_title(title: str) -> bool:
                 return True
             return False
 
-        elif IS_MACOS:
-            subprocess.run(
-                ['osascript', '-e',
-                 f'tell application "System Events" to set frontmost of '
-                 f'(first process whose name contains "{title}") to true'],
-                capture_output=True
-            )
-            return True
-
         else:
             # Linux – try wmctrl, then xdotool
             wmctrl = shutil.which('wmctrl')
@@ -238,7 +223,7 @@ def activate_window_by_title(title: str) -> bool:
 def get_foreground_window():
     """Return an opaque handle for the current foreground window.
 
-    On Windows returns HWND (int), on macOS/Linux returns the window title
+    On Windows returns HWND (int), on Linux returns the window title
     (str) or None if detection fails.  Pass the result to
     ``activate_foreground_window()`` to restore focus later.
     """
@@ -246,15 +231,6 @@ def get_foreground_window():
         if IS_WINDOWS:
             import ctypes
             return ctypes.windll.user32.GetForegroundWindow()
-        elif IS_MACOS:
-            result = subprocess.run(
-                ['osascript', '-e',
-                 'tell application "System Events" to get name of '
-                 'first process whose frontmost is true'],
-                capture_output=True, text=True
-            )
-            name = result.stdout.strip()
-            return name if name else None
         else:
             xdotool = shutil.which('xdotool')
             if xdotool:
@@ -343,16 +319,6 @@ def activate_foreground_window(handle):
             # Honestly report failure so the caller can react (e.g. retry the
             # whole paste) instead of firing Ctrl+V into nowhere.
             return _is_foreground()
-
-        elif IS_MACOS:
-            # handle is the process name
-            subprocess.run(
-                ['osascript', '-e',
-                 f'tell application "System Events" to set frontmost of '
-                 f'(first process whose name is "{handle}") to true'],
-                capture_output=True
-            )
-            return True
 
         else:
             # handle is xdotool window ID
@@ -954,7 +920,7 @@ def paste_target_needs_elevation(handle) -> bool:
 #
 # On Windows: uses the native RegisterHotKey API (runs its own message pump
 #   in a background thread – works perfectly alongside PyQt6).
-# On macOS/Linux: uses pynput GlobalHotKeys.
+# On Linux: uses pynput GlobalHotKeys.
 # ---------------------------------------------------------------------------
 
 # Windows virtual-key codes for RegisterHotKey
@@ -1007,9 +973,6 @@ class GlobalHotkeyManager:
     Backends:
 
     * Windows: native ``RegisterHotKey`` API (works with PyQt6).
-    * macOS:   ``NSEvent.addGlobalMonitorForEventsMatchingMask:handler:``
-               via PyObjC. Avoids pynput's TSM-on-background-thread crash
-               on macOS 26+ by running handlers on the main runloop.
     * Linux:   ``pynput.keyboard.GlobalHotKeys``.
 
     Usage::
@@ -1025,7 +988,7 @@ class GlobalHotkeyManager:
     def __init__(self):
         self._hotkeys: Dict[str, Callable] = {}  # shortcut string -> callback
         self._running = False
-        self._backend = None  # 'winapi' | 'pynput' | 'nsevent'
+        self._backend = None  # 'winapi' | 'pynput'
 
         # Windows-specific
         self._win_thread = None
@@ -1039,17 +1002,12 @@ class GlobalHotkeyManager:
         self._listener = None
         self._pynput_hotkeys: Dict[str, Callable] = {}
 
-        # macOS-specific (NSEvent monitor)
-        self._mac_backend = None  # _MacNSEventHotkey instance
-
     # -- public API ----------------------------------------------------------
 
     @property
     def is_available(self) -> bool:
         if IS_WINDOWS:
             return True  # RegisterHotKey is always available
-        if IS_MACOS:
-            return _MacNSEventHotkey.is_available()
         # Linux: pynput
         try:
             from pynput.keyboard import GlobalHotKeys  # noqa: F401
@@ -1078,8 +1036,6 @@ class GlobalHotkeyManager:
 
         if IS_WINDOWS:
             return self._start_winapi()
-        if IS_MACOS:
-            return self._start_macos()
         return self._start_pynput()  # Linux
 
     def stop(self):
@@ -1088,41 +1044,7 @@ class GlobalHotkeyManager:
             self._stop_winapi()
         elif self._backend == 'pynput':
             self._stop_pynput()
-        elif self._backend == 'nsevent':
-            if self._mac_backend is not None:
-                try:
-                    self._mac_backend.stop()
-                except Exception as e:
-                    print(f"[GlobalHotkeyManager] NSEvent stop error: {e}")
-                self._mac_backend = None
         self._running = False
-
-    # -- macOS NSEvent backend -----------------------------------------------
-
-    def _start_macos(self) -> bool:
-        """Register hotkeys via NSEvent monitors.
-
-        Bypasses pynput because pynput's macOS listener calls Carbon's
-        TSMGetInputSourceProperty from a background CFRunLoop thread,
-        which macOS 26+ aborts with EXC_BREAKPOINT. NSEvent monitors
-        installed from the Qt main thread fire on the main runloop, so
-        no TSM violation occurs.
-        """
-        if not _MacNSEventHotkey.is_available():
-            print("[GlobalHotkeyManager] PyObjC (pyobjc-framework-Cocoa) "
-                  "not available – install it to enable global hotkeys "
-                  "on macOS:  pip install pyobjc-framework-Cocoa")
-            return False
-
-        backend = _MacNSEventHotkey()
-        for shortcut, callback in self._hotkeys.items():
-            backend.register(shortcut, callback)
-        if not backend.start():
-            return False
-        self._mac_backend = backend
-        self._running = True
-        self._backend = 'nsevent'
-        return True
 
     # -- Windows RegisterHotKey backend --------------------------------------
 
@@ -1257,16 +1179,10 @@ class GlobalHotkeyManager:
                 vk = _VK_MAP.get(part)
         return mods, vk
 
-    # -- pynput backend (macOS / Linux) --------------------------------------
+    # -- pynput backend (Linux) ----------------------------------------------
 
     def _start_pynput(self) -> bool:
-        """Register hotkeys using pynput GlobalHotKeys (Linux only).
-
-        macOS used to share this path but was switched to ``_start_macos``
-        because pynput's listener calls Carbon's TSMGetInputSourceProperty
-        from a background CFRunLoop thread, which macOS 26+ aborts with
-        EXC_BREAKPOINT (TSM hard-asserts main-thread).
-        """
+        """Register hotkeys using pynput GlobalHotKeys (Linux only)."""
         try:
             from pynput.keyboard import GlobalHotKeys
         except ImportError:
@@ -1287,16 +1203,9 @@ class GlobalHotkeyManager:
             self._backend = 'pynput'
             registered = ', '.join(self._pynput_hotkeys.keys())
             print(f"[GlobalHotkeyManager] Started (pynput) – hotkeys: {registered}")
-            if IS_MACOS:
-                print("[GlobalHotkeyManager] macOS note: global hotkeys require "
-                      "Accessibility permission (System Settings → Privacy & Security "
-                      "→ Accessibility). If hotkeys don't work, check this setting.")
             return True
         except Exception as e:
             print(f"[GlobalHotkeyManager] pynput failed to start: {e}")
-            if IS_MACOS:
-                print("[GlobalHotkeyManager] macOS: grant Accessibility permission "
-                      "to this app in System Settings → Privacy & Security → Accessibility")
             return False
 
     def _stop_pynput(self):
@@ -1329,208 +1238,6 @@ class GlobalHotkeyManager:
 
 
 # ---------------------------------------------------------------------------
-# macOS NSEvent global hotkey backend
-# ---------------------------------------------------------------------------
-class _MacNSEventHotkey:
-    """macOS global hotkey backend using NSEvent monitors via PyObjC.
-
-    Why this exists: pynput's macOS listener invokes Carbon's
-    TSMGetInputSourceProperty from a background CFRunLoop thread, and
-    macOS 26+ hard-asserts that TSM calls happen on the main thread,
-    crashing the process with EXC_BREAKPOINT. NSEvent monitors installed
-    on the Qt main thread fire on the main runloop, sidestepping the
-    issue entirely.
-
-    Limitations:
-      * Monitor-only — does not consume the keystroke. Other apps
-        receiving the same hotkey still respond (a non-issue for our
-        ⌃⌘L/M/K combos because nothing else binds them).
-      * Only the *global* monitor is installed (fires when Supervertaler
-        is NOT frontmost). When Supervertaler IS frontmost, Qt's
-        QShortcut handles the same key via the local-shortcut path. This
-        avoids double-firing.
-
-    Requires:
-      * ``pyobjc-framework-Cocoa`` installed.
-      * Accessibility permission on whichever binary launched Python.
-        For Terminal launches, that's Terminal.app (or iTerm2.app).
-        For the bundled .app, it's Supervertaler itself.
-    """
-
-    def __init__(self):
-        self._hotkeys: Dict[str, tuple] = {}  # shortcut_lower -> (mods_int, char_lower, callback)
-        self._global_monitor = None
-
-    @staticmethod
-    def is_available() -> bool:
-        try:
-            import AppKit  # noqa: F401
-            return True
-        except ImportError:
-            try:
-                import Cocoa  # noqa: F401
-                return True
-            except ImportError:
-                return False
-
-    def register(self, shortcut: str, callback: Callable) -> bool:
-        flags, char = self._parse(shortcut)
-        if char is None or flags == 0:
-            print(f"[MacNSEvent] Could not parse shortcut: {shortcut!r}")
-            return False
-        self._hotkeys[shortcut.lower()] = (flags, char, callback)
-        return True
-
-    def start(self) -> bool:
-        try:
-            from AppKit import (
-                NSEvent,
-                NSEventMaskKeyDown,
-                NSEventModifierFlagShift,
-                NSEventModifierFlagControl,
-                NSEventModifierFlagOption,
-                NSEventModifierFlagCommand,
-            )
-        except ImportError:
-            try:
-                from Cocoa import (  # type: ignore
-                    NSEvent,
-                    NSEventMaskKeyDown,
-                    NSEventModifierFlagShift,
-                    NSEventModifierFlagControl,
-                    NSEventModifierFlagOption,
-                    NSEventModifierFlagCommand,
-                )
-            except ImportError:
-                print("[MacNSEvent] PyObjC not available")
-                return False
-
-        mod_mask = (NSEventModifierFlagShift |
-                    NSEventModifierFlagControl |
-                    NSEventModifierFlagOption |
-                    NSEventModifierFlagCommand)
-        hotkeys = self._hotkeys
-
-        def _global_handler(event):
-            try:
-                event_mods = int(event.modifierFlags()) & mod_mask
-                chars = event.charactersIgnoringModifiers()
-                if not chars:
-                    return
-                ch = str(chars).lower()
-                for shortcut, (flags, target_char, callback) in hotkeys.items():
-                    if event_mods == flags and ch == target_char:
-                        try:
-                            callback()
-                        except Exception as e:
-                            print(f"[MacNSEvent] callback error for {shortcut}: {e}")
-                        return
-            except Exception as e:
-                print(f"[MacNSEvent] dispatch error: {e}")
-
-        self._global_monitor = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(
-            NSEventMaskKeyDown, _global_handler
-        )
-        if self._global_monitor is None:
-            print("[MacNSEvent] Failed to install global monitor. Grant "
-                  "Accessibility permission to Terminal.app (or iTerm2 / "
-                  "the bundled Supervertaler.app) in System Settings → "
-                  "Privacy & Security → Accessibility, then restart.")
-            return False
-
-        registered = ', '.join(self._hotkeys.keys())
-        print(f"[MacNSEvent] Started — global hotkeys: {registered}")
-        return True
-
-    def stop(self):
-        try:
-            from AppKit import NSEvent
-        except ImportError:
-            try:
-                from Cocoa import NSEvent  # type: ignore
-            except ImportError:
-                return
-        if self._global_monitor is not None:
-            try:
-                NSEvent.removeMonitor_(self._global_monitor)
-            except Exception:
-                pass
-            self._global_monitor = None
-
-    @staticmethod
-    def _parse(shortcut: str):
-        """Parse e.g. ``'ctrl+cmd+l'`` → ``(modifier_flags, 'l')``.
-
-        Returns ``(0, None)`` on failure.
-        """
-        try:
-            from AppKit import (
-                NSEventModifierFlagShift,
-                NSEventModifierFlagControl,
-                NSEventModifierFlagOption,
-                NSEventModifierFlagCommand,
-            )
-        except ImportError:
-            try:
-                from Cocoa import (  # type: ignore
-                    NSEventModifierFlagShift,
-                    NSEventModifierFlagControl,
-                    NSEventModifierFlagOption,
-                    NSEventModifierFlagCommand,
-                )
-            except ImportError:
-                return 0, None
-
-        # Map named keys to the character NSEvent's
-        # charactersIgnoringModifiers() returns when that key is pressed
-        # with our modifiers held. Add to this map as new combos appear
-        # in shortcut bindings; function keys (f1-f12) don't produce a
-        # printable character and would need keycode-based detection,
-        # so they're not in this map.
-        named_keys = {
-            'space': ' ',
-            'tab': '\t',
-            'enter': '\r',
-            'return': '\r',
-            'escape': '\x1b',
-            'esc': '\x1b',
-        }
-
-        flags = 0
-        char = None
-        for raw in shortcut.lower().split('+'):
-            part = raw.strip()
-            # Modifier mapping follows Qt's macOS convention so that the
-            # global hotkey fires on the SAME physical keystroke that
-            # local QShortcut binds to. Qt swaps Ctrl↔Cmd on macOS so a
-            # cross-platform "Ctrl+L" QShortcut fires on ⌘L on Mac; we
-            # mirror that here so a stored "Ctrl+L" registers as ⌘L
-            # globally on Mac too. "Meta" maps the other way (Control ⌃),
-            # again matching Qt's native handling.
-            if part in ('ctrl', 'control'):
-                flags |= NSEventModifierFlagCommand          # Qt Ctrl = Mac ⌘
-            elif part == 'meta':
-                flags |= NSEventModifierFlagControl          # Qt Meta = Mac ⌃
-            elif part in ('alt', 'option'):
-                flags |= NSEventModifierFlagOption           # Qt Alt = Mac ⌥
-            elif part == 'shift':
-                flags |= NSEventModifierFlagShift
-            elif part in ('cmd', 'super', 'win'):
-                # Explicit "cmd" / cross-platform aliases also mean Mac ⌘.
-                flags |= NSEventModifierFlagCommand
-            elif len(part) == 1:
-                char = part
-            elif part in named_keys:
-                char = named_keys[part]
-            elif part:
-                # Function keys etc. would need keycode-based detection
-                # rather than the character-comparison approach used here.
-                print(f"[MacNSEvent] Unsupported key in shortcut: {part!r}")
-                return 0, None
-        return flags, char
-
-
-# ---------------------------------------------------------------------------
 # Cross-platform Keystroke Sender (using pynput)
 # ---------------------------------------------------------------------------
 class CrossPlatformKeySender:
@@ -1539,7 +1246,7 @@ class CrossPlatformKeySender:
     On Windows, uses AutoHotkey (proven reliable for cross-process keystroke
     injection) with a PowerShell ``SendKeys`` fallback.
 
-    On macOS/Linux, uses ``pynput.keyboard.Controller``.
+    On Linux, uses ``pynput.keyboard.Controller``.
     """
 
     _ahk_exe: Optional[str] = None   # cached AHK path (class-level)
@@ -1548,8 +1255,7 @@ class CrossPlatformKeySender:
     def __init__(self):
         self._controller = None
         self._Key = None
-        # Only need pynput Controller on Linux (macOS uses osascript,
-        # Windows uses AHK/PowerShell)
+        # Only need pynput Controller on Linux (Windows uses AHK/PowerShell)
         if IS_LINUX:
             try:
                 from pynput.keyboard import Controller, Key
@@ -1562,8 +1268,8 @@ class CrossPlatformKeySender:
 
     @property
     def is_available(self) -> bool:
-        if IS_WINDOWS or IS_MACOS:
-            return True  # AHK/PowerShell on Windows, osascript on macOS
+        if IS_WINDOWS:
+            return True  # AHK/PowerShell on Windows
         return self._controller is not None  # Linux needs pynput
 
     # -- AHK path discovery (Windows) ----------------------------------------
@@ -1605,7 +1311,7 @@ class CrossPlatformKeySender:
     # -- Public API ----------------------------------------------------------
 
     def send_copy(self, wait: bool = True):
-        """Send Ctrl+C (or Cmd+C on macOS) to copy the current selection.
+        """Send Ctrl+C to copy the current selection.
 
         ``wait=False`` (Windows only): fire-and-forget. The AHK keystroke
         sender is launched without blocking the calling (Qt main) thread on
@@ -1617,37 +1323,14 @@ class CrossPlatformKeySender:
 
         Each platform uses a proven external mechanism:
         - Windows: AHK subprocess (or PowerShell fallback)
-        - macOS: ``osascript`` (AppleScript via System Events)
         - Linux: pynput Controller
         """
         if IS_WINDOWS:
             self._send_copy_win32(wait=wait)
-        elif IS_MACOS:
-            self._send_copy_macos()
         elif self._controller:
             Key = self._Key
             with self._controller.pressed(Key.ctrl):
                 self._controller.tap('c')
-
-    # -- macOS-specific implementation ---------------------------------------
-
-    @staticmethod
-    def _send_copy_macos():
-        """Send Cmd+C via osascript (macOS native automation).
-
-        Uses AppleScript ``System Events`` to inject a keystroke into the
-        foreground application – equivalent to AHK on Windows.  Runs as a
-        separate process, so it's thread-safe.
-        """
-        try:
-            subprocess.run(
-                ['osascript', '-e',
-                 'tell application "System Events" to keystroke "c" using command down'],
-                timeout=3,
-                capture_output=True,
-            )
-        except Exception as e:
-            print(f"[CrossPlatformKeySender] osascript Cmd+C failed: {e}")
 
     # -- Windows-specific implementation -------------------------------------
 
@@ -1753,12 +1436,12 @@ class CrossPlatformKeySender:
             print(f"[CrossPlatformKeySender] PowerShell SendKeys failed: {e}")
 
     def send_paste(self, hwnd=None, on_diag=None) -> bool:
-        """Send Ctrl+V (or Cmd+V on macOS) to paste.
+        """Send Ctrl+V to paste.
 
         ``hwnd`` (Windows only): the target window handle. When given, the
         paste path verifies that exact window is foreground (re-activating
         and waiting if needed) immediately before injecting ^v, so the
-        keystroke can't miss on a foreground wobble. Ignored on mac/Linux.
+        keystroke can't miss on a foreground wobble. Ignored on Linux.
 
         ``on_diag`` (optional): a callable that receives a human-readable
         diagnostic string when the paste path detects a problem (e.g. the
@@ -1767,7 +1450,6 @@ class CrossPlatformKeySender:
         Platform backends:
         - Windows: in-process SendInput (legacy AHK/PowerShell only as an
           emergency fallback – see ``_send_paste_win32``)
-        - macOS: osascript (AppleScript via System Events)
         - Linux: pynput Controller
 
         Returns True if a backend was invoked without raising. A True
@@ -1779,8 +1461,6 @@ class CrossPlatformKeySender:
         """
         if IS_WINDOWS:
             return self._send_paste_win32(hwnd, on_diag)
-        elif IS_MACOS:
-            return self._send_paste_macos()
         elif self._controller:
             Key = self._Key
             try:
@@ -1978,21 +1658,6 @@ class CrossPlatformKeySender:
             print(f"[CrossPlatformKeySender] PowerShell paste failed: {e}")
             return False
 
-    @staticmethod
-    def _send_paste_macos() -> bool:
-        """Send Cmd+V via osascript (macOS)."""
-        try:
-            subprocess.run(
-                ['osascript', '-e',
-                 'tell application "System Events" to keystroke "v" '
-                 'using command down'],
-                capture_output=True, timeout=5,
-            )
-            return True
-        except Exception as e:
-            print(f"[CrossPlatformKeySender] macOS paste failed: {e}")
-            return False
-
     def send_keystroke(self, keystroke: str):
         """Send a compound keystroke like ``'ctrl+s'``, ``'ctrl+shift+l'``,
         ``'f10'``, ``'shift+f10'``, etc.
@@ -2003,14 +1668,10 @@ class CrossPlatformKeySender:
 
         Uses the same platform-native approach as ``send_copy()``:
         - Windows: AHK subprocess (or PowerShell fallback)
-        - macOS: osascript (AppleScript via System Events)
         - Linux: pynput Controller
         """
         if IS_WINDOWS:
             self._send_keystroke_win32(keystroke)
-            return
-        if IS_MACOS:
-            self._send_keystroke_macos(keystroke)
             return
 
         # Linux: use pynput
@@ -2101,62 +1762,6 @@ class CrossPlatformKeySender:
                 result += part
         return result
 
-    @staticmethod
-    def _keystroke_to_applescript(keystroke: str) -> str:
-        """Convert a keystroke string to an osascript command.
-
-        Follows Qt's macOS convention so a stored ``ctrl+s`` fires ⌘S on
-        Mac (the platform-native Save shortcut), matching what the user
-        actually pressed in the press-to-capture editor and what other Mac
-        apps do. ``meta`` maps to literal Control (the ⌃ key), ``cmd`` /
-        ``command`` map to Command directly. ``alt`` is Option, ``shift``
-        is Shift, ``win`` is treated as Command for cross-platform recipes.
-        """
-        modifier_map = {
-            'ctrl': 'command down', 'control': 'command down',
-            'meta': 'control down',
-            'alt': 'option down', 'option': 'option down',
-            'shift': 'shift down',
-            'cmd': 'command down', 'command': 'command down',
-            'super': 'command down', 'win': 'command down',
-        }
-        special_keys = {
-            'enter': 'return', 'return': 'return',
-            'tab': 'tab', 'escape': 'escape', 'esc': 'escape',
-            'space': 'space', 'delete': 'delete', 'backspace': 'delete',
-            'up': 'up arrow', 'down': 'down arrow',
-            'left': 'left arrow', 'right': 'right arrow',
-            'home': 'home', 'end': 'end',
-            'pageup': 'page up', 'pagedown': 'page down',
-            'f1': 'F1', 'f2': 'F2', 'f3': 'F3', 'f4': 'F4',
-            'f5': 'F5', 'f6': 'F6', 'f7': 'F7', 'f8': 'F8',
-            'f9': 'F9', 'f10': 'F10', 'f11': 'F11', 'f12': 'F12',
-        }
-        parts = keystroke.lower().replace(' ', '').split('+')
-        mods = []
-        key = None
-        for part in parts:
-            if part in modifier_map:
-                mods.append(modifier_map[part])
-            elif part in special_keys:
-                key = special_keys[part]
-            else:
-                key = part
-        if key is None:
-            return ''
-        # Determine if we need 'keystroke' (character) or 'key code' (special)
-        is_special = keystroke.lower().replace(' ', '').split('+')[-1] in special_keys
-        if is_special:
-            action = f'key code (ASCII number of "{key}")'
-            # For special keys, use 'keystroke' with the key name isn't ideal;
-            # AppleScript uses 'keystroke' for characters. For special keys we
-            # still use keystroke with the key name – AppleScript handles most.
-        using = ''
-        if mods:
-            using = ' using {' + ', '.join(mods) + '}'
-        return (f'tell application "System Events" to keystroke "{key}"'
-                f'{using}')
-
     def _send_keystroke_win32(self, keystroke: str):
         """Send an arbitrary keystroke on Windows via AHK or PowerShell.
 
@@ -2235,18 +1840,6 @@ class CrossPlatformKeySender:
             return ''
         return prefix + key
 
-    def _send_keystroke_macos(self, keystroke: str):
-        """Send an arbitrary keystroke on macOS via osascript."""
-        try:
-            script = self._keystroke_to_applescript(keystroke)
-            if script:
-                subprocess.run(
-                    ['osascript', '-e', script],
-                    capture_output=True, timeout=5,
-                )
-        except Exception as e:
-            print(f"[CrossPlatformKeySender] macOS keystroke failed: {e}")
-
     # -- Direct text typing (for dictation) ---------------------------------
 
     def type_text(self, text: str) -> bool:
@@ -2265,8 +1858,6 @@ class CrossPlatformKeySender:
             return True
         if IS_WINDOWS:
             return self._type_text_win32(text)
-        if IS_MACOS:
-            return self._type_text_macos(text)
         if self._controller:
             try:
                 self._controller.type(text)
@@ -2337,17 +1928,3 @@ class CrossPlatformKeySender:
                         os.unlink(path)
                     except OSError:
                         pass
-
-    def _type_text_macos(self, text: str) -> bool:
-        """Type ``text`` on macOS via osascript keystroke."""
-        try:
-            escaped = text.replace('\\', '\\\\').replace('"', '\\"')
-            subprocess.run(
-                ['osascript', '-e',
-                 f'tell application "System Events" to keystroke "{escaped}"'],
-                capture_output=True, timeout=10,
-            )
-            return True
-        except Exception as e:
-            print(f"[CrossPlatformKeySender] macOS type_text failed: {e}")
-            return False

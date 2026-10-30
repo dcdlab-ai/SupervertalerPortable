@@ -3489,8 +3489,6 @@ class UnifiedPromptManagerQt:
             if platform.system() == 'Windows':
                 # Open folder and select the file
                 subprocess.run(['explorer', '/select,', str(self._current_external_file_path)])
-            elif platform.system() == 'Darwin':  # macOS
-                subprocess.run(['open', '-R', str(self._current_external_file_path)])
             else:  # Linux
                 subprocess.run(['xdg-open', str(folder_path)])
         except Exception as e:
