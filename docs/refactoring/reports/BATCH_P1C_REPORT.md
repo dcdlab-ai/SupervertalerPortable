@@ -4,7 +4,7 @@
 **База:** `4860a2e6` (P1-B закрыт полностью, вердикт GO, ручные тесты подтверждены). **Отчёт:** `docs/refactoring/reports/BATCH_P1C_REPORT.md`.
 **Коммиты:** P1.4a `8e5512cb` (last_directory) → P1.4b `f5ff6286` (shortcuts.json) → P1.5 `0746c717` (Okapi) → docs (этот коммит: отчёт + промпт + пробы P1-C).
 **Пуш не выполнялся. Стоп до вердикта координатора.**
-**Реальные данные пользователя (~\Supervertaler, %APPDATA%, реестр), dev-рантайм — не тронуты. Монолит НЕ менялся: Supervertaler.py байт-идентичен базе (54 743 строки, sha256 `f4ec3bf2b774b656…`).**
+**Реальные данные пользователя (~\Supervertaler, %APPDATA%, реестр), dev-рантайм — не тронуты. Монолит НЕ менялся: Supervertaler.py байт-идентичен базе (54 743 строки; sha256 рабочей копии CRLF `f4ec3bf2b774b656…`, sha256 блоба репозитория LF `aa87db91279c1858…` — один и тот же контент, см. §10).**
 
 ---
 
@@ -130,3 +130,25 @@ grep-gate `batch9-3_grep_gate.py`: **CLEAN** (идентичен базе).
 ## 9. Среда и дисциплина
 
 Все прогоны offscreen в `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-p1c\`; реальные пользовательские данные, реестр и dev-рантайм не читались и не писались (юнит Okapi создавал и удалял временный `E:\Dev\SupervertalerPortable\okapi-sidecar\okapi-sidecar.jar` внутри репозитория — убран пробой в finally, в git не попадал); kill только по PID-фильтру (survivors: пусто); worktree `negroot` снят после проб, `basewt` (замер REFERENCE на 442eb6ab) снят после замера. Тестовая сборка не обновлялась. `git push` не выполнялся.
+
+## 10. sha256 файлов до/после и подтверждение CRLF (добавлено по замечанию координатора 2026-10-30)
+
+**Метод.** «До» = блоб git на базе P1-C `4860a2e6`; stage-снапшоты, снятые с git HEAD до правок (`Work_temp\…\batch-p1c\snapshots\`), сверены с этими блобами побайтово — MATCH по всем 7. «После» = блоб git на `fdfc1754` (конец P1-C). Все sha256 ниже — по байтам репозитория (блоб, LF): в репо `core.autocrlf=true`, поэтому рабочая копия может отличаться от блоба только концовками строк (см. CRLF-примечание внизу). Изменённых файлов модулей шесть, по одному блоку работ: P1.4a — `config_manager.py` (+ докстринги `settings_service.py`, `portable_paths.py`); P1.4b — `shortcut_manager.py` + `keyboard_shortcuts_widget.py`; P1.5 — `okapi_sidecar.py`.
+
+| файл | до (блоб `4860a2e6`) | после (блоб `fdfc1754`) | размер до → после, байт |
+|---|---|---|---|
+| `Supervertaler.py` | `aa87db91279c1858eff4bf650fd50dd8d794185010a89bd9823b41563eab00da` | тот же (байт-идентичен) | 2 880 797 → 2 880 797 |
+| `modules/config_manager.py` | `ac7402c48346a6e4ac3e89115cbddf23c61d583a5d9fd4a0aef11193e3ca6239` | `e2c0eaec2bba12f688b86abee21a02a981d0ac27fee03a370fed6ca5028e5fe0` | 16 658 → 3 720 |
+| `modules/settings_service.py` | `095dce366b615a8c00fb0c6e4428a4b06db1122090f25a018dbdc10d12a3a4bc` | `bdebe669fcf012fc352193151fff9f6702d12226f3cb8662b603944f3b30127b` | 35 525 → 35 621 |
+| `modules/portable_paths.py` | `fb0ea2f745a0b3929116336c7df9e9aee9f1e03a91560cd98bd5589534578371` | `3facea3613a46744cb64fdec08f5085d5215dbea867432afea517236eb12d793` | 3 205 → 3 189 |
+| `modules/shortcut_manager.py` | `265396e5fd2b27c627d85a79ddade027708dec490eaa7253be414767136359b1` | `dd55542ed919700e54be13a73f5db5d7ad38331323587f762b88c180d9fd3eab` | 40 656 → 40 912 |
+| `modules/keyboard_shortcuts_widget.py` | `09e799f14f52a40bcd0fddb1548af1a8111d9bdbaa8eab3f5be8c234641feef7` | `5997eef1fdcad0543336c543942080eb1d9d52fd1186a1c1488b33e9d3f5ea4c` | 35 098 → 35 507 |
+| `modules/okapi_sidecar.py` | `b72ec4091b3e66f5cad373bbdb7958854e2f235192509372ccdbfd77f5649ab0` | `aaed69c5a80efdba6ebe854b7691f3f9326a249f1bf714f81d915228185dab64` | 39 609 → 38 743 |
+
+Контроль снапшотов (все == блобам базы): `Supervertaler.py`, `config_manager`, `settings_service`, `shortcut_manager`, `keyboard_shortcuts_widget`, `okapi_sidecar` — MATCH; снапшот `file_dialog_helper.py` (в P1-C не менялся) — MATCH `c3591cb81de9b3f8…`.
+
+**CRLF-подтверждение Supervertaler.py.** Блоб git хранится в LF (0 CRLF / 54 743 LF, и до, и после — идентичен). Рабочая копия — CRLF; её sha256 на конец P1-C `f4ec3bf2b774b656a49e8307f36a1d34ae332a722de86ca80814d0fd49330f6f` (2 935 540 байт) — это точное LF→CRLF-преобразование блоба `aa87db91…` (проверено программно, побайтово). То есть `f4ec3bf2…` в отчётах P1-B/P1-C — хэш рабочей копии (CRLF), `aa87db91…` — хэш блоба (LF): один контент, два представления из-за `core.autocrlf=true`. Число «blob `b17fbc97…`» в отчёте P1-B — это git-овский SHA-1 объекта (`b17fbc978b599c9b331bb6c9bac797f3f9dc5b58`, `git ls-tree`), в P1-C тоже не изменился. Замечание AGENTS.md о ложных диффах «git show против рабочей копии» подтверждается: сверять нужно либо блоб-с-блобом, либо рабочую-копию-с-рабочей-копией.
+
+**CRLF изменённых модулей** (блоб LF у всех): `config_manager.py`, `portable_paths.py`, `keyboard_shortcuts_widget.py`, `okapi_sidecar.py`, `shortcut_manager.py` — рабочая копия тоже LF (байт-в-байт равна блобу); `settings_service.py` — рабочая копия CRLF (601/601, файл старый, правка точечная, CRLF сохранены; sha256 рабочей копии на конец P1-C `93f6c044cbea5100f6e55de3487b3bf3ec16a857aad3274684d039c2dd47e184`). Сверка переноса кода выполнялась блоб-против-блоба, поэтому CRLF-разница рабочей копии на выводы не влияет.
+
+Замер: `Work_temp\…\batch-p1c\hashes\p1c_sha_report.py` (вывод в логе того же прогона); скрипт не входит в продукт и в репо не коммитится.
