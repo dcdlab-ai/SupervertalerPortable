@@ -1,0 +1,78 @@
+BATCH P1.6 — реестр: геометрия попапа QuickTrans в ini, страховка QSettings, AA_DontUseNativeDialogs.
+
+Отчёт: docs/refactoring/reports/BATCH_P16_REPORT.md. Не пушить. Рабочая область —
+E:\Dev\Work_temp\SupervertalerPortable.
+Основание: RECON_P1_0 (§1.1 R1, R4; §3; §4 P1.6), вердикты P1-B и P1-C (GO).
+Правила метода — как в прошлых батчах и по AGENTS.md.
+Все прогоны продукта — только через шов SUPERVERTALER_DATA_ROOT и изолированные профили.
+Реестр пользователя НЕ ТРОГАТЬ на запись; чтение через reg query разрешено только как
+метод М4 (см. ниже), чтение значений только для сравнения до/после.
+
+Основание — RECON_P1_0: §1.1 R1 (QSettings org "Supervertaler" app "MTQuickPopup" —
+геомрия попапа QuickTrans уходит в реестр HKCU\Software\Supervertaler на Windows),
+R4 (реестр — единственное место, куда продукт пишет вне дерева сборки), §3 (P1.6 =
+«geometria попапа в ini, страховка QSettings, AA_DontUseNativeDialogs»), §4 P1.6.
+Вердикты координатора на вопросы батча:
+- QP1.1: ключ геометрии попапа — переносить в ini (не читать старый реестр, не мигрировать).
+- QP1.2: quicktrans.ini — напрямую в корне сборки (<state_root()>\quicktrans.ini);
+  страховка QSettings (setPath) — в <data_root()>\qsettings\.
+- QP1.9: AA_DontUseNativeDialogs — ставить.
+
+Коммиты — три раздельных (один отчёт, один вердикт):
+- P1.6a — quicktrans.ini;
+- P1.6b — страховка QSettings;
+- P1.6c — AA_DontUseNativeDialogs отдельным однострочным коммитом (откат = удалить одну строку).
+
+P1.6a. modules/quicktrans.py: два сайта QSettings("Supervertaler","MTQuickPopup")
+(~:826 чтение при открытии попапа; ~:1563 запись в closeEvent) заменить на
+QSettings(str(portable_paths.state_root()/"quicktrans.ini"), QSettings.Format.IniFormat).
+Старое значение HKCU НЕ читать и НЕ мигрировать (геометрия один раз вернётся к
+умолчанию — принято). Мёртвые импорты QSettings (shortcut_manager.py:10,
+unified_prompt_manager_qt.py:26) — убрать, если это тривиально, иначе оставить для 8.18.
+
+P1.6b. В main() ДО создания QApplication и до любого QSettings:
+QSettings.setDefaultFormat(IniFormat) +
+QSettings.setPath(IniFormat, UserScope, str(portable_paths.data_root()/"qsettings")).
+Проверить минимальной пробой, что setPath до QApplication работает в PyQt6 в_use;
+на голом старте ничего не создаётся (папка появляется только при записи).
+
+P1.6c. В main() перед QApplication:
+QApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs, True).
+Проверить, что диалоги Open/Save получают явную стартовую папку (fdh передаёт
+last_directory) и открываются как Qt-диалоги.
+Если на этапе проб выяснится, что какой-то диалог перестаёт работать (например,
+выбор папки), — вопрос в отчёт, не обходить.
+
+Приёмка: offscreen «открыл-закрыл попап» → quicktrans.ini в корне шва содержит
+геометрию; HKCU\Software\Supervertaler при прогоне не создаётся и не меняется;
+grep QSettings( по продукту: только IniFormat-сайты (quicktrans) + два мёртвых
+импорта (см. P1.6a); grep winreg = 0; диалоги файлов открываются (offscreen смоук
+fdh через Qt-диалоги).
+
+Пробы:
+- М1: grep-гейт (см. приёмку).
+- М3: sys.modules['winreg'] заменить объектом, бросающим на любом обращении;
+  offscreen-старт + открытие попапа — нулевые обращения.
+- М4: reg query "HKCU\Software\Supervertaler" /s и
+  "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v Supervertaler
+  ДО и ПОСЛЕ полного offscreen-цикла на изолированном профиле; дифф пуст.
+  Значения реальных ключей в отчёт не выписывать, только факт «до = после».
+- unit setPath: тестовая запись QSettings идёт в <data_root>\qsettings, не в реестр.
+- смоук диалогов.
+
+Защита: py_compile, AST-цепочка, pyflakes, headless, grep-gate, набор ОДНИМ
+процессом, regress-хэши 5a12501f934a589c / 44828d90090f046d / c413d56372e69dd9,
+e2e тела запросов (агрегат 982e72a247f0a6ac), smoke. База до батча — числа из
+отчёта P1-C; расхождения по каждому показателю: было / стало / причина.
+
+Отчёт для Дмитрия (plain language): файлы тестовой сборки; ручные тесты:
+- T-P1.6a — только Дмитрий, вручную: перед тестом удалить ветку реестра
+  HKEY_CURRENT_USER\Software\Supervertaler (агент реестр не трогает); затем
+  тестовая сборка: попап Ctrl+Alt+Q, переместить/изменить размер, закрыть,
+  перезапустить — геометрия сохранена; quicktrans.ini появился в корне сборки
+  D:\SupervertalerPortable_test\; ветка реестра НЕ появилась заново.
+- T-P1.6b — вид диалогов: Файл → Открыть проект / Сохранить как; стартовая папка =
+  последняя использованная; единый Qt-вид; если не устроит — откат одной строки.
+- T-P1.6c — обычная работа: открыть проект, перевести сегмент, сохранить.
+
+Стоп до вердикта.
