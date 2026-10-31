@@ -28,10 +28,15 @@
 | `Supervertaler\workbench\settings\settings.json` | после первого сохранения настроек |
 | `Supervertaler\workbench\settings\recent_projects.json` | после первого сохранения проекта |
 | `Supervertaler\workbench\backups\<проект>\<проект>_<дата>.svproj` | автоматические бэкапы |
-| `Supervertaler\workbench\usage\usage-<ГГГГ-ММ>.jsonl` | локальный журнал использования (в файл, не в сеть) |
+| `Supervertaler\workbench\logs\supervertaler.log` (+ `supervertaler-previous.log` после ротации) | диагностический журнал, создаётся при запуске через `start.bat`; ротация ~2 МБ, хранится не более 2 файлов |
+| `Supervertaler\workbench\usage\usage-<ГГГГ-ММ>.jsonl` | только после первого AI-вызова; локальный журнал токенов (в файл, не в сеть) |
 | `quicktrans.ini` (прямо в корне сборки) | после первого закрытия попапа QuickTrans |
 | `last_directory.json` (прямо в корне сборки) | после первого файлового диалога |
 | `Supervertaler\okapi-sidecar\` | только если Okapi скачивался по кнопке диалога либо JAR положен вручную |
+
+Примечание: каталог `okapi-sidecar\` в кодовой папке `SupervertalerPortable\` — это исходники
+Java-сборщика из репозитория (dev-инструмент); в портативную сборку (zip от
+`make_portable_zip.bat`) он не входит и приложением не используется.
 
 ## Чего быть НЕ должно (проверка после работы)
 

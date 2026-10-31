@@ -48,7 +48,7 @@ mkdir "%STAGE%" 2>nul || (echo [FAIL] cannot create stage dir & goto :fail)
 rem --- code copy (clean, no VCS/docs/dev data/bytecode) --------
 echo [2/6] Copying application code...
 robocopy "%REPO%" "%STAGE%\SupervertalerPortable" /E ^
-  /XD .git .zcode docs __pycache__ user_data_private .pytest_cache ^
+  /XD .git .zcode docs __pycache__ user_data_private .pytest_cache okapi-sidecar ^
   /XF .zcodeignore .supervertaler.local *.pyc *.log /NFL /NDL /NJH /NJS
 if errorlevel 8 (echo [FAIL] robocopy code failed & goto :fail)
 if not exist "%STAGE%\SupervertalerPortable\Supervertaler.py" (
@@ -73,7 +73,10 @@ copy /y "%REPO%\docs\templates\start.bat" "%STAGE%\start.bat" >nul || (echo [FAI
 
 rem --- smoke: the _pth patch must let python find the code ------
 echo [5/6] Smoke test (import of the monolith through the patched _pth)...
+rem PYTHONDONTWRITEBYTECODE: the smoke import must not leave __pycache__
+rem in the staged code folder (bug found by T-P1.8a dry run 2026-10-31).
 pushd "%STAGE%"
+set "PYTHONDONTWRITEBYTECODE=1"
 "python-embed\python.exe" -c "import Supervertaler; print('IMPORT OK')" >nul 2>"%STAGE%\smoke_err.txt"
 set "SMOKE_RC=%ERRORLEVEL%"
 popd
