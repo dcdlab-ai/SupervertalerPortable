@@ -99,31 +99,35 @@ For repeated or potentially conflicting runs, create a unique run subdirectory, 
 Do not reuse the same temporary directory for unrelated stages when doing so could mix artifacts.
 Keep temporary artifacts that may be useful for debugging, comparison, or verification until the current task has been successfully completed.
 Temporary artifacts may be deleted after successful completion when they are no longer needed and are not required for reproducibility or debugging.
-### Frozen test build (manual-test scenarios)
-Starting 2026-10-03, manual test-build scenarios (`T*.x` from batch reports) run against:
-`D:\SupervertalerPortable_test\` (`start.bat`, `PyLauncher.exe`).
+### Test build for manual-test scenarios
+Since 2026-10-31, manual test-build scenarios (`T*.x` from batch reports) run against:
+`D:\Supervertaler_clean\` — an UNPACKED DISTRIBUTION from
+`docs/templates/make_portable_zip.bat` (zip `supervertaler-portable_20261031_1843.zip`,
+product code = HEAD after Batch P1.8; Dmitry's decision, T-P1.8a/T-P1.8b confirmed on it).
+Layout: `start.bat` + `python-embed\` (with the `_pth` patch: `..\SupervertalerPortable`,
+`Lib\site-packages`) + `SupervertalerPortable\` (code only: Supervertaler.py, assets,
+modules, pyproject.toml, requirements.txt, setup.py, translations, user_data; no .git,
+no docs, no dev tooling).
 Rules:
-* The nested repository `D:\SupervertalerPortable_test\SupervertalerPortable\.git` is a
-  FROZEN version-control reference (state `960be5d8`, 2026-10-03). Do not pull, commit,
-  or reset in it.
-* Portability is provided by the build's own `python3XX._pth` (adds
-  `..\SupervertalerPortable` to `sys.path`) — `Supervertaler.py` in the test build is
-  identical to the repository file; do not add local patches to it.
-* `start.bat` redirects the whole user profile into the build root
-  (`%ROOT%\Supervertaler\profile\`: USERPROFILE/HOME/APPDATA/LOCALAPPDATA/TEMP/TMP)
-  and runs with CWD = build root. Consequently the test build's external state
-  (pointer config, `.supervertaler_config.json`, sidecar dirs) lives under that
-  profile, NOT in `C:\Users\Dmitry`. Registry writes (QSettings MTQuickPopup, autostart)
-  remain machine-global HKCU.
-* Batches do not update the test build. Rebuilding it is a separate decision by Dmitry
-  (fresh copy from the repo + re-check `_pth`/`start.bat` + re-run py_compile).
+* The build has NO nested `.git` and NO profile redirect: `start.bat` (QP1.12) sets only
+  `TEMP/TMP` and `PYTHONPYCACHEPREFIX` inside the build root — all data lives in
+  `<build root>\Supervertaler\` plus the state-root service files (`quicktrans.ini`,
+  `last_directory.json`) in the build root. `C:\Users\Dmitry` profile stays untouched
+  except what the user saves explicitly (Documents etc.). The product writes no registry
+  (verified by the P1.8 battery M1–M4).
+* Rebuilding the test build = re-running `make_portable_zip.bat` (self-verifying: `_pth`
+  smoke import before packing) and unpacking the fresh zip — a separate decision by
+  Dmitry per batch, or on his command.
 * Code validation (py_compile, AST, pyflakes, offscreen probes) is still executed in the
-  repository `E:\Dev\SupervertalerPortable` with the `E:\Dev\python-embed` runtime.
-* Unlike `E:\Dev\python-embed`, the test build's `python-embed` DOES contain
-  PyQt6-WebEngine (≈340 MB inside `PyQt6/`) — Web Resources runs in embedded mode there.
-* The redirected profile must contain the known-folder skeleton
-  (`Desktop\`, `Documents\`, `Downloads\`), otherwise native file dialogs report
-  `<profile>\Desktop` unavailable when no `last_directory` is saved yet.
+  repository `E:\Dev\SupervertalerPortable` with the `E:\Dev\python-embed` runtime; the
+  seam `SUPERVERTALER_DATA_ROOT` isolates probe runs (AGENTS «Data paths» section).
+* Unlike the OLD test build, this distrib's `python-embed` does NOT contain
+  PyQt6-WebEngine (same as `E:\Dev\python-embed`): Web Resources runs in fallback mode.
+  Adding WebEngine to the distrib is a separate build decision.
+* HISTORICAL (2026-10-03 … 2026-10-31): the former test build
+  `D:\SupervertalerPortable_test\` (frozen repo `.git` `960be5d8`, profile-redirecting
+  `start.bat`, bundled PyQt6-WebEngine ≈340 MB) is superseded by `D:\Supervertaler_clean\`
+  as of the P1.8 portability final; its profile-redirect insurance is retired by QP1.12.
 ### Environment variables
 Do not permanently modify global Windows user or system environment variables merely to perform a project task.
 When a project command or test needs explicit temporary directories, set `TEMP` and `TMP` for that process to the appropriate stage-specific directory under:

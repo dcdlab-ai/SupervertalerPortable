@@ -307,3 +307,12 @@ start.bat из шаблона), смоук-импорт монолита чер�
    Дистрибутив пересобран: `supervertaler-portable_20261031_1843.zip` (334 878 720 байт),
    кодовая папка = `Supervertaler.py, assets, modules, pyproject.toml, requirements.txt,
    setup.py, translations, user_data` — проверено распаковкой.
+6. **Решение Дмитрия (2026-10-31): `D:\Supervertaler_clean\` — тестовая сборка** для ручных
+   сценариев T-*.x: распакованный дистрибутив `…1843.zip` (продукт = HEAD после P1.8), без
+   `.git` и без редиректа профиля (QP1.12 — все данные в корне сборки); пересборка —
+   повторный запуск `make_portable_zip.bat` + распаковка свежего zip. Раздел «Frozen test
+   build» в AGENTS.md переписан (старая сборка `D:\SupervertalerPortable_test\` с
+   замороженным `.git 960be5d8`, редиректом профиля и WebEngine — историческая). Нюанс
+   зафиксирован: в новом дистрибутиве НЕТ PyQt6-WebEngine (как и в дев-рантайме) — Web
+   Resources в fallback-режиме; добавление WebEngine в дистрибутив — отдельное сборочное
+   решение.
