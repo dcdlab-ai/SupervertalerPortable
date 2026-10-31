@@ -1,0 +1,237 @@
+=== BUILD ROOT (unpacked, top-level) ===
+    302.4 MB  dir   python-embed
+      9.7 MB  dir   SupervertalerPortable
+      0.0 MB  file  start.bat
+    312.1 MB  TOTAL
+
+=== python-embed (top-level) ===
+    278.5 MB  dir   Lib
+      5.9 MB  file  python313.dll
+      5.0 MB  file  libcrypto-3.dll
+      3.6 MB  file  python313.zip
+      2.1 MB  file  get-pip.py
+      1.5 MB  file  sqlite3.dll
+      1.4 MB  dir   Scripts
+      0.8 MB  file  libssl-3.dll
+      0.7 MB  file  unicodedata.pyd
+      0.6 MB  file  python.cat
+      0.3 MB  file  _decimal.pyd
+      0.2 MB  file  pyexpat.pyd
+      0.2 MB  file  _ssl.pyd
+      0.2 MB  file  vcruntime140.dll
+      0.2 MB  file  _lzma.pyd
+      0.1 MB  file  _elementtree.pyd
+      0.1 MB  file  _ctypes.pyd
+      0.1 MB  file  _sqlite3.pyd
+      0.1 MB  file  python.exe
+      0.1 MB  file  pythonw.exe
+      0.1 MB  file  _bz2.pyd
+      0.1 MB  file  _socket.pyd
+      0.1 MB  file  _asyncio.pyd
+      0.1 MB  file  python3.dll
+      0.1 MB  file  _hashlib.pyd
+      0.1 MB  file  _overlapped.pyd
+      0.0 MB  file  _zoneinfo.pyd
+      0.0 MB  file  vcruntime140_1.dll
+      0.0 MB  file  libffi-8.dll
+      0.0 MB  file  _wmi.pyd
+      0.0 MB  file  _multiprocessing.pyd
+      0.0 MB  file  _queue.pyd
+      0.0 MB  file  LICENSE.txt
+      0.0 MB  file  select.pyd
+      0.0 MB  file  winsound.pyd
+      0.0 MB  file  _uuid.pyd
+      0.0 MB  file  python313._pth
+
+=== site-packages: ALL entries sorted by size (top 45) ===
+    206.9 MB  dir   PyQt6
+     14.0 MB  dir   PIL
+      8.5 MB  dir   lxml
+      7.5 MB  dir   openai
+      7.0 MB  dir   spellchecker
+      5.5 MB  dir   pydantic_core
+      5.3 MB  dir   pip
+      4.9 MB  dir   spylls
+      4.4 MB  dir   pygments
+      2.1 MB  dir   chardet
+      1.7 MB  dir   pydantic
+      1.5 MB  dir   docx
+      1.3 MB  dir   _pytest
+      0.8 MB  dir   openpyxl
+      0.5 MB  dir   anyio
+      0.5 MB  dir   charset_normalizer
+      0.5 MB  dir   packaging
+      0.4 MB  dir   yaml
+      0.4 MB  dir   jiter
+      0.4 MB  dir   urllib3
+      0.4 MB  dir   openai-3.24.0.dist-info
+      0.4 MB  dir   httpx2
+      0.3 MB  dir   pyqt6_qt6-6.11.2.dist-info
+      0.3 MB  dir   markdown
+      0.3 MB  dir   idna
+      0.3 MB  dir   pyflakes
+      0.3 MB  dir   httpcore2
+      0.2 MB  dir   certifi
+      0.2 MB  dir   requests
+      0.2 MB  file  typing_extensions.py
+      0.1 MB  dir   pip-26.2.1.dist-info
+      0.1 MB  dir   pydantic-2.14.0.dist-info
+      0.1 MB  dir   pydantic_core-2.50.0.dist-info
+      0.1 MB  dir   pyqt6-6.11.0.dist-info
+      0.1 MB  dir   pillow-12.3.0.dist-info
+      0.1 MB  dir   h11
+      0.1 MB  dir   pygments-2.21.0.dist-info
+      0.1 MB  dir   pluggy
+      0.1 MB  dir   colorama
+      0.1 MB  dir   truststore
+      0.0 MB  dir   charset_normalizer-3.5.1.dist-info
+      0.0 MB  dir   jiter-0.17.0.dist-info
+      0.0 MB  dir   typing_inspection
+      0.0 MB  dir   et_xmlfile
+      0.0 MB  dir   httpcore2-2.13.1.dist-info
+    278.5 MB  site-packages TOTAL
+
+=== PyQt6 subpackages ===
+    184.0 MB  dir   Qt6
+      4.8 MB  file  QtWidgets.pyd
+      3.0 MB  dir   bindings
+      2.5 MB  file  QtCore.pyd
+      2.2 MB  file  QtGui.pyd
+      1.1 MB  file  QtOpenGL.pyd
+      0.9 MB  file  QtQuick.pyd
+      0.8 MB  file  QtNetwork.pyd
+      0.7 MB  file  QtQml.pyd
+      0.5 MB  file  QtWidgets.pyi
+      0.4 MB  file  QAxContainer.pyd
+      0.4 MB  file  QtMultimedia.pyd
+      0.4 MB  file  QtCore.pyi
+      0.4 MB  file  QtGui.pyi
+      0.3 MB  file  QtDesigner.pyd
+      0.3 MB  file  QtBluetooth.pyd
+      0.3 MB  file  QtSql.pyd
+      0.2 MB  file  QtPrintSupport.pyd
+      0.2 MB  file  QtSensors.pyd
+      0.2 MB  file  QtPositioning.pyd
+      0.2 MB  file  QtHelp.pyd
+      0.2 MB  dir   uic
+      0.2 MB  file  QtDBus.pyd
+      0.2 MB  file  QtPdf.pyd
+      0.2 MB  file  QtOpenGL.pyi
+      0.2 MB  file  QtStateMachine.pyd
+      0.1 MB  file  QtNetwork.pyi
+      0.1 MB  file  QtXml.pyd
+      0.1 MB  file  sip.cp313-win_amd64.pyd
+      0.1 MB  file  QtNfc.pyd
+      0.1 MB  file  QtPdfWidgets.pyd
+      0.1 MB  file  QtRemoteObjects.pyd
+      0.1 MB  file  QtMultimediaWidgets.pyd
+      0.1 MB  file  QtSvgWidgets.pyd
+      0.1 MB  file  QtWebSockets.pyd
+      0.1 MB  file  QtSpatialAudio.pyd
+      0.1 MB  file  QtSerialPort.pyd
+      0.1 MB  file  QtQuickWidgets.pyd
+      0.1 MB  file  QtBluetooth.pyi
+      0.1 MB  file  QtOpenGLWidgets.pyd
+      0.1 MB  file  QtQuick.pyi
+      0.1 MB  file  QtTest.pyd
+      0.1 MB  file  QtMultimedia.pyi
+      0.1 MB  file  QtQuick3D.pyd
+      0.1 MB  file  QtTextToSpeech.pyd
+      0.0 MB  file  QtSvg.pyd
+      0.0 MB  file  QtWebChannel.pyd
+      0.0 MB  dir   lupdate
+      0.0 MB  file  QtQml.pyi
+      0.0 MB  file  QtSql.pyi
+      0.0 MB  file  QtPositioning.pyi
+      0.0 MB  file  QtDBus.pyi
+      0.0 MB  file  QtDesigner.pyi
+      0.0 MB  file  QtSensors.pyi
+      0.0 MB  file  QtXml.pyi
+      0.0 MB  file  QtPrintSupport.pyi
+      0.0 MB  file  QtNfc.pyi
+      0.0 MB  file  QtStateMachine.pyi
+      0.0 MB  file  QtHelp.pyi
+      0.0 MB  file  QtPdf.pyi
+      0.0 MB  file  QtWebSockets.pyi
+      0.0 MB  file  QtSpatialAudio.pyi
+      0.0 MB  file  QtQuick3D.pyi
+      0.0 MB  file  QtRemoteObjects.pyi
+      0.0 MB  file  QtTest.pyi
+      0.0 MB  file  QtSerialPort.pyi
+      0.0 MB  file  QAxContainer.pyi
+      0.0 MB  file  QtTextToSpeech.pyi
+      0.0 MB  file  QtSvg.pyi
+      0.0 MB  file  QtQuickWidgets.pyi
+      0.0 MB  file  QtPdfWidgets.pyi
+      0.0 MB  file  QtOpenGLWidgets.pyi
+      0.0 MB  file  QtMultimediaWidgets.pyi
+      0.0 MB  file  QtSvgWidgets.pyi
+      0.0 MB  file  sip.pyi
+      0.0 MB  file  QtWebChannel.pyi
+      0.0 MB  file  __init__.py
+      0.0 MB  file  py.typed
+
+=== Junk inside site-packages ===
+__pycache__ dirs: 0 dirs, 0.0 MB
+tests dirs      : 4 dirs, 0.2 MB
+docs/examples   : 0 dirs, 0.0 MB
+dist-info entries: 40
+INSTALLED PACKAGES:
+   annotated_types-0.8.0.dist-info
+   anyio-4.15.1.dist-info
+   certifi-2026.7.22.dist-info
+   chardet-7.6.0.dist-info
+   charset_normalizer-3.5.1.dist-info
+   colorama-0.4.6.dist-info
+   et_xmlfile-2.0.0.dist-info
+   h11-0.16.0.dist-info
+   httpcore2-2.13.1.dist-info
+   httpx2-2.13.1.dist-info
+   idna-3.19.dist-info
+   iniconfig-2.3.0.dist-info
+   jiter-0.17.0.dist-info
+   lxml-6.1.3.dist-info
+   markdown-3.10.3.dist-info
+   openai-3.24.0.dist-info
+   openpyxl-3.1.5.dist-info
+   packaging-26.3.dist-info
+   pillow-12.3.0.dist-info
+   pip-26.2.1.dist-info
+   pluggy-1.6.0.dist-info
+   pydantic-2.14.0.dist-info
+   pydantic_core-2.50.0.dist-info
+   pyflakes-4.0.3.dist-info
+   pygments-2.21.0.dist-info
+   pyperclip-1.11.0.dist-info
+   pyqt6-6.11.0.dist-info
+   pyqt6_qt6-6.11.2.dist-info
+   pyqt6_sip-13.12.0.dist-info
+   pyspellchecker-0.9.0.dist-info
+   pytest-9.1.1.dist-info
+   python_docx-1.2.0.dist-info
+   pyyaml-6.0.3.dist-info
+   requests-2.34.2.dist-info
+   sniffio-1.3.1.dist-info
+   spylls-0.1.7.dist-info
+   truststore-0.10.4.dist-info
+   typing_extensions-4.16.0.dist-info
+   typing_inspection-0.4.4.dist-info
+   urllib3-2.7.0.dist-info
+
+=== SupervertalerPortable (code folder) ===
+      2.8 MB  file  Supervertaler.py
+      2.6 MB  dir   modules
+      2.6 MB  dir   translations
+      1.6 MB  dir   assets
+      0.0 MB  dir   user_data
+      0.0 MB  file  pyproject.toml
+      0.0 MB  file  setup.py
+      0.0 MB  file  requirements.txt
+
+=== ZIP: compressed sizes ===
+Traceback (most recent call last):
+  File "E:\Dev\Work_temp\SupervertalerPortable\recon-p20\sizes_a.py", line 97, in <module>
+    zf = zipfile.ZipFile(r"E:\Dev\Work_temp\SupervertalerPortable\build\supervertaler-portable_20261031_1843.zip")
+  File "zipfile\__init__.py", line 1407, in __init__
+  File "zipfile\__init__.py", line 1474, in _RealGetContents
+zipfile.BadZipFile: File is not a zip file

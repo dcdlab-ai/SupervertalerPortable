@@ -1,0 +1,125 @@
+=== MANDATORY FILES (loaded at startup via unguarded top-level imports) ===
+   Supervertaler
+   modules.config_manager
+   modules.dialogs.__init__
+   modules.dialogs.advanced_filters
+   modules.dialogs.detached_log
+   modules.dialogs.import_progress
+   modules.dialogs.live_progress
+   modules.dialogs.scratchpad
+   modules.dialogs.theme_editor
+   modules.event_filters
+   modules.file_dialog_helper
+   modules.find_replace_qt
+   modules.grid.__init__
+   modules.grid.filters
+   modules.grid.helpers
+   modules.grid.pagination
+   modules.help_system
+   modules.models
+   modules.platform_helpers
+   modules.portable_paths
+   modules.project_assets
+   modules.pseudo_translate
+   modules.pseudo_translate_dialog
+   modules.settings_service
+   modules.shortcut_display
+   modules.shortcut_manager
+   modules.spellcheck_manager
+   modules.statuses
+   modules.styled_widgets
+   modules.superlookup
+   modules.tag_manager
+   modules.termbase_entry_editor
+   modules.termlens_widget
+   modules.ui_scale
+   modules.undo_manager
+   modules.workers.__init__
+   modules.workers.glossary
+   modules.workers.proofread
+   modules.workers.tm_search
+
+TOTAL mandatory: 39 / 91 files
+
+=== LAZY/GUARDED-ONLY FILES (referenced but not startup) ===
+   modules.ai_actions
+   modules.ai_attachment_manager
+   modules.ai_file_viewer_dialog
+   modules.autocorrect
+   modules.bilingual_markdown_handler
+   modules.chat_backend
+   modules.chat_message_delegate
+   modules.chat_view_widget
+   modules.database_manager
+   modules.database_migrations
+   modules.document_analyzer
+   modules.docx_comments
+   modules.docx_handler
+   modules.figure_context_manager
+   modules.i18n
+   modules.image_extractor
+   modules.keyboard_shortcuts_widget
+   modules.lang_detect
+   modules.language_codes
+   modules.llm_clients
+   modules.llm_pricing
+   modules.merge_prompt_dialog
+   modules.okapi_sidecar
+   modules.pdf_rescue_Qt
+   modules.prompt_library_migration
+   modules.quicktrans
+   modules.segment_split_merge
+   modules.segmentation_rules
+   modules.segmentation_rules_widget
+   modules.settings_sidebar
+   modules.simple_segmenter
+   modules.statistics_analyzer
+   modules.statistics_dialog_qt
+   modules.term_picker_dialog
+   modules.termbase_import_export
+   modules.termbase_manager
+   modules.termlens_popup
+   modules.theme_manager
+   modules.tm_editor_dialog
+   modules.tm_manager_qt
+   modules.tm_metadata_manager
+   modules.tm_replace
+   modules.tmx_editor
+   modules.tmx_editor_qt
+   modules.tmx_generator
+   modules.translation_memory
+   modules.translation_results_panel
+   modules.unified_prompt_library
+   modules.unified_prompt_manager_qt
+   modules.usage_log
+   modules.usage_report_dialog
+
+=== NEVER IMPORTED (dead files?) ===
+   modules.__init__
+
+=== Importers of pdf_rescue_Qt ===
+  Supervertaler (lazy) -> modules.pdf_rescue_Qt
+
+=== Importers of llm_clients ===
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  Supervertaler (lazy) -> modules.llm_clients
+  modules.chat_backend (mandatory) -> modules.llm_clients
+  modules.chat_view_widget (mandatory) -> modules.llm_clients
+  modules.quicktrans (lazy) -> modules.llm_clients
+  modules.unified_prompt_manager_qt (mandatory) -> modules.llm_clients
+  modules.workers.proofread (lazy) -> modules.llm_clients

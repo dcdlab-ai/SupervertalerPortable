@@ -1,0 +1,105 @@
+=== PyQt6/Qt6 subdirs ===
+    142.6 MB  bin
+     15.9 MB  plugins
+     13.7 MB  qml
+     10.1 MB  translations
+      1.7 MB  qsci
+
+=== PyQt6/Qt6/bin top 25 DLLs ===
+     19.7 MB  opengl32sw.dll
+     13.4 MB  avcodec-61.dll
+      9.9 MB  Qt6Core.dll
+      9.1 MB  Qt6Gui.dll
+      6.3 MB  Qt6Quick.dll
+      6.2 MB  Qt6Widgets.dll
+      5.1 MB  Qt6Qml.dll
+      5.0 MB  Qt6Designer.dll
+      4.4 MB  Qt6Pdf.dll
+      4.2 MB  Qt6Quick3DRuntimeRender.dll
+      4.2 MB  Qt6ShaderTools.dll
+      4.0 MB  d3dcompiler_47.dll
+      3.6 MB  Qt6Quick3DPhysics.dll
+      3.0 MB  Qt6QuickControls2Imagine.dll
+      2.6 MB  Qt6QuickDialogs2QuickImpl.dll
+      2.5 MB  avformat-61.dll
+      2.0 MB  Qt6Quick3DParticles.dll
+      2.0 MB  Qt6QuickTemplates2.dll
+      1.9 MB  Qt6OpenGL.dll
+      1.8 MB  Qt6QuickControls2Material.dll
+      1.7 MB  Qt6QuickControls2Basic.dll
+      1.7 MB  Qt6Network.dll
+      1.5 MB  Qt6QuickControls2Universal.dll
+      1.4 MB  Qt6QuickControls2Fusion.dll
+      1.4 MB  Qt6Quick3D.dll
+
+=== PyQt6/Qt6/plugins ===
+      2.5 MB  sqldrivers
+      2.3 MB  sceneparsers
+      2.0 MB  assetimporters
+      1.8 MB  imageformats
+      1.5 MB  renderers
+      1.4 MB  qmlls
+      1.1 MB  platforms
+      1.0 MB  multimedia
+      0.6 MB  tls
+      0.2 MB  styles
+      0.2 MB  qmllint
+      0.2 MB  position
+      0.2 MB  texttospeech
+      0.2 MB  geometryloaders
+      0.2 MB  webview
+      0.1 MB  sensors
+      0.1 MB  generic
+      0.1 MB  scxmldatamodel
+      0.1 MB  networkinformation
+      0.1 MB  iconengines
+      0.0 MB  help
+
+=== PyQt6/Qt6/translations === TOTAL 10.1 MB
+
+=== PyQt6/Qt6/qml === TOTAL 13.7 MB
+
+=== TOP-40 biggest files in whole build root ===
+     19.7 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\opengl32sw.dll
+     13.4 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\avcodec-61.dll
+      9.9 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Core.dll
+      9.1 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Gui.dll
+      7.5 MB  python-embed\Lib\site-packages\PIL\_avif.cp313-win_amd64.pyd
+      6.3 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Quick.dll
+      6.2 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Widgets.dll
+      5.9 MB  python-embed\python313.dll
+      5.3 MB  python-embed\Lib\site-packages\pydantic_core\_pydantic_core.cp313-win_amd64.pyd
+      5.1 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Qml.dll
+      5.0 MB  python-embed\libcrypto-3.dll
+      5.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Designer.dll
+      4.8 MB  python-embed\Lib\site-packages\PyQt6\QtWidgets.pyd
+      4.4 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Pdf.dll
+      4.2 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Quick3DRuntimeRender.dll
+      4.2 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6ShaderTools.dll
+      4.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\d3dcompiler_47.dll
+      3.8 MB  python-embed\Lib\site-packages\lxml\etree.cp313-win_amd64.pyd
+      3.6 MB  python-embed\python313.zip
+      3.6 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Quick3DPhysics.dll
+      3.2 MB  python-embed\Lib\site-packages\PyQt6\Qt6\qml\QtQuick\Controls\FluentWinUI3\qtquickcontrols2fluentwinui3styleplugin.dll
+      3.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6QuickControls2Imagine.dll
+      2.8 MB  SupervertalerPortable\Supervertaler.py
+      2.6 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6QuickDialogs2QuickImpl.dll
+      2.5 MB  python-embed\Lib\site-packages\PyQt6\QtCore.pyd
+      2.5 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\avformat-61.dll
+      2.5 MB  python-embed\Lib\site-packages\PIL\_imaging.cp313-win_amd64.pyd
+      2.2 MB  python-embed\Lib\site-packages\spylls\hunspell\data\sv\sv_SE.dic
+      2.2 MB  python-embed\Lib\site-packages\PyQt6\QtGui.pyd
+      2.1 MB  python-embed\get-pip.py
+      2.1 MB  python-embed\Lib\site-packages\PIL\_imagingft.cp313-win_amd64.pyd
+      2.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\plugins\assetimporters\assimp.dll
+      2.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6Quick3DParticles.dll
+      2.0 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6QuickTemplates2.dll
+      1.9 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6OpenGL.dll
+      1.9 MB  python-embed\Lib\site-packages\PyQt6\Qt6\plugins\sqldrivers\qsqlite.dll
+      1.9 MB  python-embed\Lib\site-packages\spylls\hunspell\data\ru\ru.dic
+      1.8 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6QuickControls2Material.dll
+      1.8 MB  python-embed\Lib\site-packages\PyQt6\Qt6\plugins\sceneparsers\assimpsceneimport.dll
+      1.7 MB  python-embed\Lib\site-packages\PyQt6\Qt6\bin\Qt6QuickControls2Basic.dll
+
+=== PyQt6 .pyi stubs total ===
+36 files, 2.1 MB

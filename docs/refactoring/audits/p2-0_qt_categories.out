@@ -1,0 +1,72 @@
+    50.3 MB  Quick/QML stack (Qt6Quick*, Qt6Qml*, ShaderTools, StateMachine, SensorsQuick)
+     5.0 MB  Qt Designer (Qt6Designer)
+     5.1 MB  Pdf (Qt6Pdf*)
+    20.3 MB  Multimedia+ffmpeg (Qt6Multimedia*, SpatialAudio, av*, sw*)
+     3.2 MB  Connectivity/IoT (Bluetooth, Nfc, Positioning, SerialPort, RemoteObjects, WebSockets, TextToSpeech, Sensors, Scxml?)
+     0.0 MB  Test (Qt6Test, Qt6QuickTest)
+    19.7 MB  Software OpenGL fallback (opengl32sw)
+     0.0 MB  Help/Sql/DBus/Xml/PrintSupport/Svg/Network (KEEP-candidates, need check)
+     0.0 MB  Core+Gui+Widgets+OpenGL (required)
+     5.7 MB  MSVC runtime + d3dcompiler (keep)
+
+UNMATCHED:
+     9.9 MB  Qt6Core.dll
+     9.1 MB  Qt6Gui.dll
+     6.2 MB  Qt6Widgets.dll
+     1.9 MB  Qt6OpenGL.dll
+     1.7 MB  Qt6Network.dll
+     0.7 MB  Qt6DBus.dll
+     0.6 MB  Qt6Svg.dll
+     0.6 MB  Qt6Help.dll
+     0.4 MB  Qt6PrintSupport.dll
+     0.4 MB  Qt6Test.dll
+     0.3 MB  Qt6Sql.dll
+     0.3 MB  Qt6LabsPlatform.dll
+     0.2 MB  Qt6WebChannel.dll
+     0.2 MB  Qt6Sensors.dll
+     0.2 MB  Qt6LabsQmlModels.dll
+     0.2 MB  Qt6Xml.dll
+     0.1 MB  Qt6LabsFolderListModel.dll
+     0.1 MB  Qt6OpenGLWidgets.dll
+     0.1 MB  Qt6WebChannelQuick.dll
+     0.1 MB  Qt6LabsSettings.dll
+     0.1 MB  Qt6LabsWavefrontMesh.dll
+     0.1 MB  Qt6SvgWidgets.dll
+     0.1 MB  Qt6LabsSharedImage.dll
+     0.1 MB  Qt6LabsAnimation.dll
+     0.0 MB  Qt6Concurrent.dll
+
+PLUGINS (all):
+     2.0 MB  assetimporters
+     0.1 MB  generic
+     0.2 MB  geometryloaders
+     0.0 MB  help
+     0.1 MB  iconengines
+     1.8 MB  imageformats
+     1.0 MB  multimedia
+     0.1 MB  networkinformation
+     1.1 MB  platforms
+     0.2 MB  position
+     0.2 MB  qmllint
+     1.4 MB  qmlls
+     1.5 MB  renderers
+     2.3 MB  sceneparsers
+     0.1 MB  scxmldatamodel
+     0.1 MB  sensors
+     2.5 MB  sqldrivers
+     0.2 MB  styles
+     0.2 MB  texttospeech
+     0.6 MB  tls
+     0.2 MB  webview
+     5.3 MB  site-packages/pip
+     0.0 MB  site-packages/pytest
+     1.3 MB  site-packages/_pytest
+     0.3 MB  site-packages/pyflakes
+     4.4 MB  site-packages/pygments
+     0.0 MB  site-packages/iniconfig
+     0.1 MB  site-packages/pluggy
+     2.2 MB  site-packages/chardet
+     2.1 MB  python-embed/get-pip.py
+     2.1 MB  PyQt6 .pyi stubs
+     7.7 MB  PyQt6 *.pyd for modules not imported by product (name-list)
+     3.0 MB  PyQt6/bindings (build-time .toml)
