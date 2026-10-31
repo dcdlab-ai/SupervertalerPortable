@@ -54,6 +54,15 @@ if errorlevel 8 (echo [FAIL] robocopy code failed & goto :fail)
 if not exist "%STAGE%\SupervertalerPortable\Supervertaler.py" (
   echo [FAIL] code copy incomplete & goto :fail
 )
+rem Dev docs and dev tooling out of the distrib (T-P1.8a dry run 2026-10-31):
+rem top-level *.md, git housekeeping, scripts\, tools\. Kept: pyproject.toml
+rem (read by Supervertaler.py:57 for the version fallback), setup.py,
+rem requirements.txt, assets\, translations\, user_data\.
+del /q "%STAGE%\SupervertalerPortable\*.md" 2>nul
+del /q "%STAGE%\SupervertalerPortable\.gitattributes" 2>nul
+del /q "%STAGE%\SupervertalerPortable\.gitignore" 2>nul
+rd /s /q "%STAGE%\SupervertalerPortable\scripts" 2>nul
+rd /s /q "%STAGE%\SupervertalerPortable\tools" 2>nul
 
 rem --- runtime copy + _pth patch (P1.8 Finding 1) ---------------
 echo [3/6] Copying embedded runtime (this takes a minute)...
