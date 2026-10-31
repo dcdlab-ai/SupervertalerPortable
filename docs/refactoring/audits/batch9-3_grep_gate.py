@@ -14,7 +14,9 @@
 """
 import ast, pathlib, re, sys
 
-ROOT = pathlib.Path(r"E:\Dev\SupervertalerPortable")
+# P1.8 (Part C): optional root override so the gate can be pointed at a
+# staged tree with an injected violation (self-test of the new QSettings rule).
+ROOT = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(r"E:\Dev\SupervertalerPortable")
 MONO = (ROOT / "Supervertaler.py").read_bytes().decode("utf-8")
 mono_lines = MONO.split("\n")
 
@@ -107,11 +109,76 @@ print("== Supervertaler.py (монолит) ==")
 res = report("Supervertaler.py", MONO, True)
 print("\n".join(res) if res else "  CLEAN (0 hits)")
 
-for mod in ["modules/llm_clients.py", "modules/settings_service.py", "modules/chat_backend.py",
-            "modules/chat_view_widget.py", "modules/quicktrans.py",
-            "modules/unified_prompt_manager_qt.py", "modules/workers/proofread.py",
-            "modules/translation_results_panel.py"]:
+# --- P1.8 Part C: QSettings constructor ban (M1 battery, P1.6 verdict) ---
+# Qt 6 forces NativeFormat (HKCU) for the two-string-arg form
+# QSettings("org", "app") REGARDLESS of setDefaultFormat(IniFormat), and any
+# explicit NativeFormat is equally non-portable. Banned:
+#   - >=2 positional args that are all plain string constants
+#   - any argument expression mentioning NativeFormat
+# Allowed: QSettings(fileName), QSettings(fileName, IniFormat),
+# QSettings(fileName, IniFormat, parent), etc.
+def qsettings_audit(fname, src):
+    rows = []
+    try:
+        tree_q = ast.parse(src)
+    except SyntaxError as e:
+        return [f"  FAIL {fname}: SyntaxError {e}"]
+    for node in ast.walk(tree_q):
+        if not isinstance(node, ast.Call):
+            continue
+        f = node.func
+        name = f.id if isinstance(f, ast.Name) else (
+            f.attr if isinstance(f, ast.Attribute) else "")
+        if name != "QSettings":
+            continue
+        where = f"{fname}:{node.lineno}"
+        def is_str_const(a):
+            return isinstance(a, ast.Constant) and isinstance(a.value, str)
+        def mentions_native(a):
+            return "NativeFormat" in ast.dump(a)
+        strs = [a for a in node.args if is_str_const(a)]
+        if len(node.args) >= 2 and len(strs) == len(node.args):
+            rows.append(f"  FAIL {where}: two-arg string QSettings('org','app') "
+                        f"-> forced NativeFormat (Qt6)")
+        if any(mentions_native(a) for a in node.args) or \
+           any(mentions_native(k.value) for k in node.keywords):
+            rows.append(f"  FAIL {where}: explicit NativeFormat in QSettings")
+    if rows:
+        return rows
+    return [f"  QSettings sites OK ({_qs_count(tree_q)})"]
+
+def _qs_count(tree_q):
+    n = 0
+    for node in ast.walk(tree_q):
+        if isinstance(node, ast.Call):
+            f = node.func
+            name = f.id if isinstance(f, ast.Name) else (
+                f.attr if isinstance(f, ast.Attribute) else "")
+            if name == "QSettings":
+                n += 1
+    return n
+
+print("== QSettings constructor gate (P1.8 Part C) ==")
+qs_out = qsettings_audit("Supervertaler.py", MONO)
+print("\n".join(qs_out))
+
+GATE_MODULES = ["modules/llm_clients.py", "modules/settings_service.py", "modules/chat_backend.py",
+                "modules/chat_view_widget.py", "modules/quicktrans.py",
+                "modules/unified_prompt_manager_qt.py", "modules/workers/proofread.py",
+                "modules/translation_results_panel.py"]
+qs_fail = [r for r in qs_out if "FAIL" in r]
+for mod in GATE_MODULES:
+    c = (ROOT / mod).read_bytes().decode("utf-8")
+    out_q = qsettings_audit(mod, c)
+    print("\n".join(out_q))
+    qs_fail += [r for r in out_q if "FAIL" in r]
+
+for mod in GATE_MODULES:
     c = (ROOT / mod).read_bytes().decode("utf-8")
     print(f"== {mod} ==")
     r = report(mod, c, False)
     print("\n".join(r) if r else "  CLEAN (0 hits)")
+
+if qs_fail:
+    print("GATE-QS-FAIL")
+    sys.exit(1)
