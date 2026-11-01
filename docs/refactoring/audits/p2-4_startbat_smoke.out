@@ -1,0 +1,9 @@
+[smoke] cmd pid=12256
+[smoke] app data root populated in 3s (4 files)
+[smoke] process tree: [(12256, 'cmd /c start.bat'), (61472, '"E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-p24\\unpacked\\python-embed\\python.exe"  "E:\\Dev\\Work_temp\\SupervertalerPortable\\refactoring\\batch-p24\\unpacked\\SupervertalerPortable\\Supervertaler.py"')]
+[smoke] graceful close timed out (offscreen closeEvent shows a modal confirm - expected for an unattended run), using /F
+[smoke] python pid 61472 closed
+[smoke] unrelated survivors (left running):
+[smoke] NOTE: graceful close timed out - hard kill /F used (offscreen modal close-confirm, expected unattended)
+
+P21-START-OK

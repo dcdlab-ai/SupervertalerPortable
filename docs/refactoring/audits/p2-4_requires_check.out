@@ -1,0 +1,32 @@
+annotated-types==0.8.0 (dist-info 0.8.0): -
+anyio==4.15.1 (dist-info 4.15.1): -
+certifi==2026.7.22 (dist-info 2026.7.22): -
+charset-normalizer==3.5.1 (dist-info 3.5.1): -
+et-xmlfile==2.0.0 (dist-info 2.0.0): -
+h11==0.16.0 (dist-info 0.16.0): -
+httpcore2==2.13.1 (dist-info 2.13.1): -
+httpx2==2.13.1 (dist-info 2.13.1): -
+idna==3.19 (dist-info 3.19): -
+jiter==0.17.0 (dist-info 0.17.0): -
+lxml==6.1.3 (dist-info 6.1.3): -
+openai==3.24.0 (dist-info 3.24.0): -
+openpyxl==3.1.5 (dist-info 3.1.5): -
+pillow==12.3.0 (dist-info 12.3.0): packaging; extra == "tests" [EXTRA]
+pydantic==2.14.0 (dist-info 2.14.0): -
+pydantic_core==2.50.0 (dist-info 2.50.0): -
+pyperclip==1.11.0 (dist-info 1.11.0): -
+PyQt6==6.11.0 (dist-info 6.11.0): -
+PyQt6-Qt6==6.11.2 (dist-info 6.11.2): -
+PyQt6_sip==13.12.0 (dist-info 13.12.0): -
+pyspellchecker==0.9.0 (dist-info 0.9.0): -
+python-docx==1.2.0 (dist-info 1.2.0): -
+requests==2.34.2 (dist-info 2.34.2): -
+sniffio==1.3.1 (dist-info 1.3.1): -
+spylls==0.1.7 (dist-info 0.1.7): -
+truststore==0.10.4 (dist-info 0.10.4): -
+typing_extensions==4.16.0 (dist-info 4.16.0): -
+typing-inspection==0.4.4 (dist-info 0.4.4): -
+urllib3==2.7.0 (dist-info 2.7.0): -
+
+checked 29 lock packages; dist-info missing: none
+VERDICT: CLEAN - no lock package requires PyYAML/Markdown/packaging (extras excluded)
