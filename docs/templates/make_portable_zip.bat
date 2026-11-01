@@ -119,12 +119,16 @@ mkdir "%OUTDIR%" 2>nul
 if errorlevel 1 (echo [FAIL] zip packing/verification failed & goto :fail)
 rd /s /q "%STAGE%"
 
-echo [DONE] %ZIPFILE%
+for %%Z in ("%ZIPFILE%") do echo [DONE] %%~zZ bytes: %ZIPFILE%
 echo Unpack the zip anywhere and run start.bat inside.
+rem Keep the console open when launched by double-click (T-P2.1a note):
+rem without it the window closes before the DONE lines can be read.
+pause
 endlocal
 exit /b 0
 
 :fail
 echo [DONE-WITH-ERRORS] stage kept for inspection: %STAGE%
+pause
 endlocal
 exit /b 1
