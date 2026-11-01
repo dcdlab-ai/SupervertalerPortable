@@ -224,20 +224,22 @@ TMX Editor, Statistics (Analyse Against TM), Quick Count, Image Extractor
 4. **Провал:** ошибка при старте/переводе/сохранении, в консоли
    `ModuleNotFoundError` (например, упоминание `pdf_rescue` или `fitz`).
 
-## §11. sha256 (форма: два вида)
+## §11. sha256 (форма: две колонки — «до» и «стало», два вида внутри каждой)
 
 «Блоб (LF)» = содержимое, как ляжет в git (`core.autocrlf=true`); «рабочая копия» =
 файл на диске. `Supervertaler.py` — CRLF в рабочей копии, остальные LF (копия = блобу).
-Замер до коммита.
+Замер до коммита. Правило (вердикт P2.2, Дмитрий 2026-11-01): **во всех будущих
+отчётах для каждого изменённого файла пишутся ОБЕ колонки — «до» и «стало»**;
+правило внесено в AGENTS.md («Refactoring batch validation practices»).
 
-| Файл | блоб (LF) | рабочая копия |
-|---|---|---|
-| `Supervertaler.py` (изменён) | `72db449a1d36939de4ebaa96563baf8003157af27a9b51d8a287c7dbb27984d3` | `d493b499e0ecad29fba1c55c4be06f25672cc20a8248ff2bd88b688a86b95d40` (CRLF) |
-| `docs/refactoring/samples/pdf_rescue_prompt_for_ocr_tool.md` (новый) | `8a2b3b275934d89acab60874fb1c0d20f6fa6956644c955fba59573cc764e139` | = блобу (LF) |
-| `docs/refactoring/audits/batch9-3_grep_gate.py` (изменён; был `caadaaec…bec3fc26a`) | `2ec8b8aa37f6ec97cd15b4f6fbf259c546541b53d88dab4d8968f58bdeccb7d4` | = блобу (LF) |
-| `docs/refactoring/audits/batch-p1b_batch8-13_code_tools_smoke.py` (изменён; был `1a2bc270…7ab1b5d7a`-форма) | `40ef3fceb49d235e3dbcd1ddd99cf2a8340ddc2c7c0c31a50ca90cccdcf805f0` | = блобу (LF) |
-| `docs/refactoring/audits/batch-p22_static_run.sh` (новый) | `a64bebfac3ed57c9a1a2c49337bd1461e7f06e9b7da140dc2b2075cfc65e5641` | = блобу (LF) |
-| `modules/pdf_rescue_Qt.py` | **удалён** (был в HEAD, рабочая копия = HEAD: `9e0f44e109ea3b6ed38a54d467a091953a32bfc105e60a2dee085120719241d1`) | — |
+| Файл | блоб (LF) до | раб. копия до | блоб (LF) стало | раб. копия стало |
+|---|---|---|---|---|
+| `Supervertaler.py` (изменён) | `13aeaef58e283c0cc7f9ea46f3c0bf1fb4dca036850726f70ac083580d6d86a2` (проверено: `git show :Supervertaler.py`, HEAD перед коммитом) | `d89b1cc1…` (CRLF; из отчёта P1.7 — продукт после P1.7 не менялся; LF-снимок HEAD подтверждает блоб-форму) | `72db449a1d36939de4ebaa96563baf8003157af27a9b51d8a287c7dbb27984d3` | `d493b499e0ecad29fba1c55c4be06f25672cc20a8248ff2bd88b688a86b95d40` (CRLF) |
+| `docs/refactoring/samples/pdf_rescue_prompt_for_ocr_tool.md` (новый) | — | — | `8a2b3b275934d89acab60874fb1c0d20f6fa6956644c955fba59573cc764e139` | = блобу (LF) |
+| `docs/refactoring/audits/batch9-3_grep_gate.py` (изменён) | `caadaaec1c8a639d95fd2c3c57d9e7686caa36054f6ff9eac4038a9bec3fc26a` | = блобу (LF) | `2ec8b8aa37f6ec97cd15b4f6fbf259c546541b53d88dab4d8968f58bdeccb7d4` | = блобу (LF) |
+| `docs/refactoring/audits/batch-p1b_batch8-13_code_tools_smoke.py` (изменён) | `1a2bc270ba1ac6888c2e615619dc42fa91e5a7b398097ffc49295317ab1b5d7a` | = блобу (LF) | `40ef3fceb49d235e3dbcd1ddd99cf2a8340ddc2c7c0c31a50ca90cccdcf805f0` | = блобу (LF) |
+| `docs/refactoring/audits/batch-p22_static_run.sh` (новый) | — | — | `a64bebfac3ed57c9a1a2c49337bd1461e7f06e9b7da140dc2b2075cfc65e5641` | = блобу (LF) |
+| `modules/pdf_rescue_Qt.py` | (в HEAD) `9e0f44e109ea3b6ed38a54d467a091953a32bfc105e60a2dee085120719241d1` | = блобу (LF) | **удалён** | — |
 
 ## §12. Артефакты
 
@@ -257,3 +259,26 @@ Work_temp `E:\Dev\Work_temp\SupervertalerPortable\refactoring\batch-p22\` (уд�
 ## §13. Стоп
 
 Следующий шаг — только вердикт координатора. Пуш не выполнялся.
+
+## §14. ВЕРДИКТ координатора: GO; ручные тесты подтверждены; ответы на §9 (Дмитрий, 2026-11-01)
+
+**T-P2.2a и T-P2.2b подтверждены Дмитрием** на `D:\Supervertaler_clean`
+(точечное обновление: новый `Supervertaler.py` + удалённый там
+`modules\pdf_rescue_Qt.py`). Вердикт: **GO, пуш разрешён** (ожидается `d7504dfb` +
+коммиты P2.2; дифф по продукту впервые не пустой — ожидается ровно
+`Supervertaler.py` −33/0 и `modules/pdf_rescue_Qt.py` удалён).
+
+**Ответы на вопросы §9:**
+1. Инертные остатки: константа `TOOL_PDF_RESCUE` и комментарии (3 места) — **в 8.18**;
+   строки «PDF Rescue» в 5 .xlf — **оставить** (регенерируются, не мешают).
+2. Пакеты `anthropic`, `google-generativeai`, `PyMuPDF` — **убрать в P2.3**,
+   отдельный микробатч не нужен; requirements.txt и pyproject.toml править
+   **синхронно** (pyproject.toml строки 70, 71, 99–100, 137); версионную строку
+   pyproject.toml не трогать (её читает Supervertaler.py:57).
+3. Обновление `D:\Supervertaler_clean` точечной заменой **устраивает** (тесты
+   пройдены); полная пересборка упаковщиком — один раз после P2.3.
+
+**Дополнение метода (§11):** в отчётах для каждого изменённого файла всегда
+пишутся обе колонки sha256 — «до» и «стало»; правило внесено в AGENTS.md
+(для Supervertaler.py в §11: блоб до `13aeaef5…`, рабочая копия до `d89b1cc1…` —
+из отчёта P1.7).

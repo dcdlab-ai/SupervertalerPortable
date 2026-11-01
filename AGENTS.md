@@ -280,6 +280,13 @@ Validated in Batches #2, #3a, #3b — keep doing this:
   take their smoke baseline from the 8.13 table
   (canonical baseline log: `batch8-13_code_smoke_baseline813.log`).
 
+### Report sha256 tables (Batch P2.2, Dmitry's rule 2026-11-01)
+* Every batch report's sha256 table must have BOTH columns for every changed
+  file: «до» (before the batch) and «стало» (after), each in the two forms
+  (blob LF + working copy). New files: «до» = «—»; deleted files: «стало» = «—».
+  The "before" values are taken from the pre-edit snapshots (or the last report
+  that touched the file, e.g. P1.7 for `Supervertaler.py`).
+
 ### Behavioral comparison of duplicate/merged implementations (Batch #3c)
 When a batch merges classes into an existing module (or the plan claims code is
 a "duplicate"), prove the behavioral claim before merging:
