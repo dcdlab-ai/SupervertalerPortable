@@ -8219,10 +8219,6 @@ class SupervertalerQt(QMainWindow):
         tools_menu = menubar.addMenu(self.tr("&Tools"))
 
         # Tools (open in their own windows; no embedded Tools tab anymore)
-        pdf_rescue_action = QAction(self.tr("📄 &PDF Rescue..."), self)
-        pdf_rescue_action.triggered.connect(self.open_pdf_rescue_window)
-        tools_menu.addAction(pdf_rescue_action)
-
         superlookup_action = QAction(f"🔍 Super&lookup ({format_shortcut_for_display('Ctrl+K')})...", self)
         # Note: Actual Ctrl+K shortcut handled by QShortcut in setup_global_shortcuts()
         # which calls show_concordance_search() for proper selection capture
@@ -9621,36 +9617,7 @@ class SupervertalerQt(QMainWindow):
         self.current_preview_index = 0
         
         return tab
-    
-    def open_pdf_rescue_window(self):
-        """Открыть PDF Rescue в отдельном окне. Если окно уже открыто, повторно использует его."""
-        from PyQt6.QtCore import Qt
-        from modules.pdf_rescue_Qt import PDFRescueQt
 
-        existing = getattr(self, '_pdf_rescue_window', None)
-        if existing is not None:
-            try:
-                existing.show()
-                existing.raise_()
-                existing.activateWindow()
-                return
-            except RuntimeError:
-                self._pdf_rescue_window = None
-
-        window = QWidget()
-        window.setWindowFlags(Qt.WindowType.Window)
-        window.setWindowTitle(self.tr("🔍 PDF Rescue – Supervertaler"))
-        window.resize(1100, 800)
-
-        # PDFRescueQt builds its own header / layout into the supplied widget.
-        self.pdf_rescue_qt = PDFRescueQt(self, standalone=False)
-        self.pdf_rescue_qt.create_tab(window)
-
-        self._pdf_rescue_window = window
-        window.destroyed.connect(lambda *a: setattr(self, '_pdf_rescue_window', None))
-        window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
-        window.show()
-    
     # ═══════════════════════════════════════════════════════════════════════════
     # Image Extractor Helper Methods
     # ═══════════════════════════════════════════════════════════════════════════

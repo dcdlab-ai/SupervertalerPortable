@@ -122,8 +122,8 @@ ITEMS = [
     ("Project/Export/TMX-from-TM", lambda: win.export_tmx_from_tm_database()),
     ("Project/Export/Help-Formats", lambda: open_help(HelpTopics.IMPORT_FORMATS)),
     ("Project/Project-Info", lambda: win.show_project_info_dialog()),
-    # Tools (8495-8573)
-    ("Tools/PDF-Rescue", lambda: win.open_pdf_rescue_window()),
+    # Tools (8495-8573) — P2.2: пункт Tools/PDF-Rescue удалён вместе с
+    # open_pdf_rescue_window и modules/pdf_rescue_Qt.py; список 41 -> 40.
     ("Tools/Superlookup", lambda: win.show_concordance_search()),
     ("Tools/TMX-Editor", lambda: win.open_tmx_editor_window()),
     ("Tools/Statistics", lambda: win.show_statistics_dialog()),

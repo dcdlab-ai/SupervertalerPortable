@@ -10,7 +10,9 @@
   Мёртвые методы 8.18: _REMOVED_add_mt_and_llm_matches_progressive,
     _save_llm_settings_from_ui.
   G5 (не трогать): figure-блок translate_current_segment с provider == "gemini".
-  pdf_rescue_Qt.py — вне 9.x. docs/ — не сканируется. Комментарии — не код.
+  P2.2: модуль pdf_rescue_Qt.py удалён целиком — отдельный скан всех продуктовых
+    .py на pdf_rescue/PDFRescue/fitz (секция ниже). docs/ — не сканируется.
+  Комментарии — не код.
 """
 import ast, pathlib, re, sys
 
@@ -179,6 +181,44 @@ for mod in GATE_MODULES:
     r = report(mod, c, False)
     print("\n".join(r) if r else "  CLEAN (0 hits)")
 
-if qs_fail:
+# --- P2.2: PDF Rescue removal gate -----------------------------------------
+# modules/pdf_rescue_Qt.py удалён (решение Дмитрия 2026-10-31). Ни один
+# продуктовый .py (всё дерево, включая комментарии) не должен ссылаться на
+# pdf_rescue / PDFRescue / fitz. docs/ не сканируется (исторические отчёты
+# и сохранённый промпт samples/pdf_rescue_prompt_for_ocr_tool.md остаются).
+PDF_PATTERNS = [(r"pdf_rescue", "pdf_rescue"),
+                (r"PDFRescue", "PDFRescue"),
+                (r"\bfitz\b", "fitz")]
+PDF_SCAN_EXCLUDE = {"docs", ".git", "__pycache__", ".zcode"}
+
+def pdf_rescue_audit():
+    out = []
+    pdf_fail = 0
+    py_files = sorted(p for p in ROOT.rglob("*.py")
+                      if not (set(p.parts) & PDF_SCAN_EXCLUDE))
+    for p in py_files:
+        try:
+            text = p.read_bytes().decode("utf-8")
+        except (UnicodeDecodeError, OSError) as e:
+            out.append(f"  FAIL {p.relative_to(ROOT)}: unreadable ({e})")
+            pdf_fail += 1
+            continue
+        for i, line in enumerate(text.split("\n"), 1):
+            for pat, label in PDF_PATTERNS:
+                if re.search(pat, line):
+                    out.append(f"  FAIL {p.relative_to(ROOT)}:{i}: [{label}] {line.strip()[:110]}")
+                    pdf_fail += 1
+    if not pdf_fail:
+        out.append(f"  PDF-Rescue removal OK (0 hits pdf_rescue/PDFRescue/fitz "
+                   f"in {len(py_files)} product .py files)")
+    return out, pdf_fail
+
+print("== PDF Rescue removal gate (P2.2) ==")
+pdf_out, pdf_fail = pdf_rescue_audit()
+print("\n".join(pdf_out))
+
+if qs_fail or pdf_fail:
+    if pdf_fail:
+        print("GATE-PDF-FAIL")
     print("GATE-QS-FAIL")
     sys.exit(1)
