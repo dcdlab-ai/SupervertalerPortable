@@ -1,13 +1,17 @@
 @echo off
 rem ============================================================
-rem Supervertaler portable build - PACKAGER (Batch P1.8 follow-up)
-rem Assembles the portable build root and packs it into a ZIP that
-rem can be unpacked anywhere: start.bat is then the only entry point.
+rem Supervertaler portable build - PACKAGER (Batch P2.1)
+rem Assembles the portable build root and packs it into a REAL
+rem ZIP archive (deflate via Python zipfile - not bsdtar: bsdtar -a
+rem writes an uncompressed tar under a .zip name, P2.0 Finding 1).
+rem The zip can be unpacked anywhere: start.bat is then the only
+rem entry point.
 rem
 rem Zip layout (= build root):
 rem   start.bat                 launcher (docs/templates/start.bat)
 rem   python-embed\             embedded runtime, python313._pth patched
-rem                             (..\\SupervertalerPortable + Lib\\site-packages)
+rem                             (..\\SupervertalerPortable + Lib\\site-packages),
+rem                             dev-junk excluded (packaging_helper.py prune)
 rem   SupervertalerPortable\    application code, clean copy
 rem                             (no .git/docs/__pycache__/dev data)
 rem The data folder Supervertaler\\, temp\\ and pycache\\ are created
@@ -22,6 +26,7 @@ set "REPO=%~dp0..\.."
 pushd "%REPO%" 2>nul
 set "REPO=%CD%"
 popd
+set "HELPER=%REPO%\docs\templates\packaging_helper.py"
 
 rem --- config -------------------------------------------------
 set "RUNTIME=E:\Dev\python-embed"
@@ -40,6 +45,9 @@ if not exist "%RUNTIME%\python.exe" (
 )
 if not exist "%REPO%\docs\templates\start.bat" (
   echo [FAIL] docs\templates\start.bat missing in the repo & goto :fail
+)
+if not exist "%HELPER%" (
+  echo [FAIL] packaging helper missing: "%HELPER%" & goto :fail
 )
 echo [1/6] Preparing stage: %STAGE%
 if exist "%STAGE%" rd /s /q "%STAGE%"
@@ -75,37 +83,43 @@ if errorlevel 8 (echo [FAIL] robocopy runtime failed & goto :fail)
   echo Lib\site-packages
   echo import site
 )
+rem Dev junk out of the distributive COPY (P2.0 verdict item 4): pygments,
+rem pytest stack, pyflakes, chardet, get-pip.py (+ dist-info). pip KEPT.
+rem The exclusion list lives at the top of packaging_helper.py; the dev
+rem runtime E:\Dev\python-embed itself is never touched.
+"%RUNTIME%\python.exe" "%HELPER%" prune "%STAGE%\python-embed"
+if errorlevel 1 (echo [FAIL] runtime prune failed & goto :fail)
 
 rem --- launcher -------------------------------------------------
 echo [4/6] Adding start.bat...
 copy /y "%REPO%\docs\templates\start.bat" "%STAGE%\start.bat" >nul || (echo [FAIL] start.bat copy failed & goto :fail)
 
-rem --- smoke: the _pth patch must let python find the code ------
-echo [5/6] Smoke test (import of the monolith through the patched _pth)...
+rem --- smoke: _pth patch must let python find code + packages ----
+echo [5/6] Smoke test (monolith + key modules through the patched _pth)...
 rem PYTHONDONTWRITEBYTECODE: the smoke import must not leave __pycache__
 rem in the staged code folder (bug found by T-P1.8a dry run 2026-10-31).
 pushd "%STAGE%"
 set "PYTHONDONTWRITEBYTECODE=1"
-"python-embed\python.exe" -c "import Supervertaler; print('IMPORT OK')" >nul 2>"%STAGE%\smoke_err.txt"
+rem Smoke logs go to OUTDIR (build evidence, never into the zip).
+"python-embed\python.exe" -c "import Supervertaler; print('IMPORT OK')" >nul 2>"%OUTDIR%\smoke_%TS%.err"
 set "SMOKE_RC=%ERRORLEVEL%"
+if "%SMOKE_RC%"=="0" (
+  "python-embed\python.exe" "%HELPER%" importsmoke >"%OUTDIR%\importsmoke_%TS%.txt" 2>&1
+  if errorlevel 1 set "SMOKE_RC=1"
+)
 popd
 if not "%SMOKE_RC%"=="0" (
-  echo [FAIL] smoke import failed - see "%STAGE%\smoke_err.txt" & goto :fail
+  echo [FAIL] smoke import failed - see "%STAGE%\smoke_err.txt" / importsmoke_out.txt & goto :fail
 )
 
-rem --- pack ------------------------------------------------------
-echo [6/6] Packing ZIP...
+rem --- pack: REAL zip (deflate) via Python zipfile, then verify ---
+echo [6/6] Packing ZIP (deflate, ~40-60 s)...
 mkdir "%OUTDIR%" 2>nul
-rem bsdtar treats "E:\file.zip" as host:file - pass the archive name
-rem RELATIVE via pushd to avoid the colon.
-pushd "%OUTDIR%"
-tar -a -cf "supervertaler-portable_%TS%.zip" -C "%STAGE%" start.bat python-embed SupervertalerPortable
-set "TAR_RC=%ERRORLEVEL%"
-popd
-if not "%TAR_RC%"=="0" (echo [FAIL] tar packing failed & goto :fail)
+"%RUNTIME%\python.exe" "%HELPER%" zip "%STAGE%" "%ZIPFILE%"
+if errorlevel 1 (echo [FAIL] zip packing/verification failed & goto :fail)
 rd /s /q "%STAGE%"
 
-for %%Z in ("%ZIPFILE%") do echo [DONE] %%~zZ bytes: %ZIPFILE%
+echo [DONE] %ZIPFILE%
 echo Unpack the zip anywhere and run start.bat inside.
 endlocal
 exit /b 0
