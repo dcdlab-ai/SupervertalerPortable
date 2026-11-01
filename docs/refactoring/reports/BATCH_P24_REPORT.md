@@ -185,7 +185,7 @@ Offline (wheelhouse заполнен): runtime-шаг 35 с (распаковк�
 | grep-gate | CLEAN | **CLEAN** (rc=0, вкл. QSettings- и PDF-Rescue-секции) |
 | smoke (канонический 8.13, раннер P1-B) | 40 предметов SMOKE OK | **40 предметов, SMOKE OK (10,0 с), 0 EXC** |
 | py_compile CANONICAL | 107/0 | **107/0** |
-| py_compile REFERENCE (до коммита) | 282/0 | **282/0**; **после коммита P2.4: 286/0** (+4 новых аудит-скрипта p2-4_*) |
+| py_compile REFERENCE (до коммита) | 282/0 | **282/0**; **после коммита P2.4: 286/0** (+4 новых аудит-скрипта p2-4_*; измерено на коммите `6b92ae7e`, `docs/refactoring/audits/p2-4_pycompile_p24_after_commit.out`) |
 | git diff по продукту | пуст | **пуст** |
 
 Артефакты: `refactoring/batch-p24/` (chain_p24.out, pyflakes_p24.out, headless_repo_p24.out,
