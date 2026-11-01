@@ -82,6 +82,10 @@ dependencies = [
 # Наполненные бакеты (BATCH P2.3): всё, что продукт импортирует только
 # лениво/guarded с graceful-деградацией. ``pip install supervertaler``
 # ставит только dependencies — ядро работает без extras.
+# Пустые бакеты-ноупы (local-whisper, voice, web, pdf, mt, hunspell, windows,
+# core, all) удалены по решению координатора от 2026-11-01 (вердикт P2.3 GO;
+# исполнение решения 8.12 про web = []): они были нужны только для обратной
+# совместимости с upstream-установкой с PyPI, наша сборка так не ставится.
 import = [
     # Импорт документов в промпты (.pdf/.docx/.pptx/.xlsx -> markdown);
     # тянет onnxruntime. Без него файл вставляется заглушкой.
@@ -92,17 +96,6 @@ linux-hotkeys = [
     # (Windows использует RegisterHotKey/AHK).
     "pynput>=1.7.6; sys_platform == 'linux'",
 ]
-# Пустые бакеты сохранены как no-ops для обратной совместимости —
-# существующие скрипты, запрашивающие эти extras, не падают при установке.
-local-whisper = []
-voice = []
-web = []
-pdf = []
-mt = []
-hunspell = []
-windows = []
-core = []
-all = []
 
 [project.urls]
 Homepage = "https://supervertaler.com"
