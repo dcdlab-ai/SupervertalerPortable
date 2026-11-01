@@ -57,80 +57,43 @@ classifiers = [
 dependencies = [
     # Core UI Framework
     "PyQt6>=6.5.0",
-    "PyQt6-WebEngine>=6.5.0",
-    
+
     # Document Processing
     "python-docx>=0.8.11",
     "openpyxl>=3.1.0",
     "Pillow>=10.0.0",
-    "lxml>=4.9.0",
-    
-    # AI/LLM Providers (core - lightweight clients)
+
+    # AI/LLM provider — единственный живой после BATCH P2.2:
+    # OpenAI-совместимый API (все провайдеры идут через custom_openai)
     "openai>=1.0.0",
-    "anthropic>=0.7.0",
-    "google-generativeai>=0.3.0",
     "requests>=2.28.0",
-    
-    # Document Conversion & Analysis
-    "markitdown>=0.0.1",
-    
-    # Translation Quality Metrics (Superbench)
-    "sacrebleu>=2.3.1",
-    
+
     # Clipboard Operations
     "pyperclip>=1.8.2",
 
-    # Encoding repair (optional in code, included by default)
-    "chardet>=5.0.0",
-    
-    # YAML Support
-    "pyyaml>=6.0.0",
-    
-    # Markdown Rendering
-    "markdown>=3.4.0",
-    
     # Basic Spellchecking (lightweight, works offline)
     "pyspellchecker>=0.7.0",
 
-    # Voice dictation/commands
-    "sounddevice>=0.4.6",
-    "numpy>=1.24.0",
-
-    # PDF text extraction
-    "PyMuPDF>=1.23.0",
-
-    # MT providers
-    "boto3>=1.28.0",
-    "deepl>=1.15.0",
-
     # Advanced spellcheck (Hunspell via pure Python)
     "spylls>=0.1.7",
-
-    # Cross-platform global hotkeys and keyboard control
-    "pynput>=1.7.6",
-
-    # Windows-only AutoHotkey support for Dicta keystroke commands
-    "ahk>=1.0.0; platform_system == 'Windows'",
-    "psutil>=5.9.0",
-
-    # Voice recognition – both engines are now core deps so the Voice tab
-    # works out of the box without any "[local-whisper]" extra dance.
-    # Vosk is the default always-on engine (lightweight, free, commands-only,
-    # ~15 MB wheel + ~40 MB model on first use). faster-whisper handles
-    # running-text dictation (push-to-talk) and the optional always-on
-    # Whisper backend (~30 MB ctranslate2 wheel + model on first use).
-    "vosk>=0.3.44",
-    "faster-whisper>=1.0.0",
 ]
 
 [project.optional-dependencies]
-# All extras kept as no-ops for backward compatibility – installing
-# ``supervertaler[local-whisper]`` is harmless on existing setups but
-# the underlying package is now a core dep. Since v1.9.474 the
-# Workbench has stopped advertising any modular install paths;
-# `pip install supervertaler` gives the full surface area in one go.
-# The empty buckets are preserved here only so existing scripts that
-# request specific extras don't fail at install time.
+# Наполненные бакеты (BATCH P2.3): всё, что продукт импортирует только
+# лениво/guarded с graceful-деградацией. ``pip install supervertaler``
+# ставит только dependencies — ядро работает без extras.
+import = [
+    # Импорт документов в промпты (.pdf/.docx/.pptx/.xlsx -> markdown);
+    # тянет onnxruntime. Без него файл вставляется заглушкой.
+    "markitdown>=0.0.1",
+]
+linux-hotkeys = [
+    # Глобальные горячие клавиши / эмуляция клавиш на Linux
+    # (Windows использует RegisterHotKey/AHK).
+    "pynput>=1.7.6; sys_platform == 'linux'",
+]
+# Пустые бакеты сохранены как no-ops для обратной совместимости —
+# существующие скрипты, запрашивающие эти extras, не падают при установке.
 local-whisper = []
 voice = []
 web = []

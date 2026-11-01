@@ -1,0 +1,41 @@
+# Supervertaler requirements.lock — точные версии проверенного портативного рантайма.
+# Источник: dist-info распакованного дистрибутива BATCH P2.1
+# (Work_temp .../refactoring/batch-p21/unpacked/python-embed/Lib/site-packages,
+# zip supervertaler-portable_20261031_1843.zip, код продукта = HEAD после P1.8).
+# Снято: 2026-11-01 (BATCH P2.3). Python: 3.13.15 (embeddable).
+# Состав: все обязательные пакеты + их транзитивные зависимости, ровно как в
+# дистрибутиве; исключены только pip (26.2.1) и dev-мусор. Установка:
+#   python.exe -m pip install --no-cache-dir -r requirements.lock
+# (без -U: пинам верить, «последние» не подтягивать; см. docs/templates/RUNTIME_REBUILD.md)
+annotated-types==0.8.0
+anyio==4.15.1
+certifi==2026.7.22
+charset-normalizer==3.5.1
+et-xmlfile==2.0.0
+h11==0.16.0
+httpcore2==2.13.1
+httpx2==2.13.1
+idna==3.19
+jiter==0.17.0
+lxml==6.1.3
+Markdown==3.10.3
+openai==3.24.0
+openpyxl==3.1.5
+packaging==26.3
+pillow==12.3.0
+pydantic==2.14.0
+pydantic_core==2.50.0
+pyperclip==1.11.0
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.2
+PyQt6_sip==13.12.0
+pyspellchecker==0.9.0
+python-docx==1.2.0
+PyYAML==6.0.3
+requests==2.34.2
+sniffio==1.3.1
+spylls==0.1.7
+truststore==0.10.4
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+urllib3==2.7.0

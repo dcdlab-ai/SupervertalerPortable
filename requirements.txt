@@ -1,61 +1,38 @@
 # ==========================================
-# Supervertaler Dependencies (Portable Build)
+# Supervertaler Dependencies (core, mandatory)
 # ==========================================
-# Перед установкой выполните: 
-# python.exe -m pip install --upgrade pip setuptools wheel
+# Только пакеты, реально импортируемые продуктом при старте и в живых путях
+# (AST-рекон BATCH P2.3: docs/refactoring/reports/BATCH_P23_REPORT.md, Часть A).
+# Опциональные зависимости — отдельно, в requirements-optional.txt.
+# Точные версии проверенного дистрибутива (для воспроизводимой сборки
+# рантайма) — в requirements.lock.
 
-# === Build Tools (Критично для портативного Python!) ===
-setuptools>=68.0
-wheel>=0.41.0
-
-# === Core UI Framework ===
+# === Core UI Framework (весь GUI построен на PyQt6) ===
 PyQt6>=6.5.0
 
-# === Document Processing ===
+# === Document Processing (.docx: guarded import в docx_handler, живые пути
+# импорта/экспорта DOCX; тянет lxml транзитивно) ===
 python-docx>=0.8.11
-openpyxl>=3.1.0
-Pillow>=10.0.0
-lxml>=4.9.0
 
-# === AI/LLM Providers ===
+# === XLSX export статистики и журнала использования (lazy import) ===
+openpyxl>=3.1.0
+
+# === Images (top-level import в image_extractor; извлечение картинок из DOCX) ===
+Pillow>=10.0.0
+
+# === AI/LLM provider — единственный живой после BATCH P2.2:
+# OpenAI-совместимый API (lazy import в llm_clients; все провайдеры идут
+# через custom_openai) ===
 openai>=1.0.0
-anthropic>=0.7.0
-google-generativeai>=0.3.0
+
+# === HTTP для Okapi sidecar (guarded import в okapi_sidecar; живой путь
+# импорта/экспорта XLIFF) ===
 requests>=2.28.0
 
-# === Document Conversion & Analysis ===
-markitdown>=0.0.1
-
-# === Translation Quality Metrics (Superbench) ===
-sacrebleu>=2.3.1
-
-# === Clipboard Operations ===
+# === Clipboard (top-level import в Supervertaler.py и superlookup) ===
 pyperclip>=1.8.2
 
-# === Encoding & YAML ===
-chardet>=5.0.0
-pyyaml>=6.0.0
-
-# === Markdown Rendering ===
-markdown>=3.4.0
-
-# === Spellchecking ===
+# === Spellchecking (guarded imports в spellcheck_manager: pyspellchecker —
+# быстрый базовый, spylls — Hunspell-совместимый продвинутый) ===
 pyspellchecker>=0.7.0
 spylls>=0.1.7
-
-# === Numerical operations (раскомментировано!) ===
-numpy>=1.24.0
-
-# === PDF Processing ===
-PyMuPDF>=1.23.0
-
-# === MT Providers ===
-boto3>=1.28.0
-deepl>=1.15.0
-
-# === System & Hotkeys ===
-psutil>=5.9.0
-pynput>=1.7.6
-
-# === Platform-Specific ===
-pyobjc-framework-Cocoa>=10.0; sys_platform == "darwin"

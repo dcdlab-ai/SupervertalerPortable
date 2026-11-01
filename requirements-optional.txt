@@ -1,0 +1,26 @@
+# ==========================================
+# Supervertaler Optional Dependencies
+# ==========================================
+# НЕ устанавливаются вместе с requirements.txt — ставьте нужное вручную:
+#   pip install -r requirements-optional.txt        (всё опциональное)
+#   pip install markitdown                          (один пакет)
+# Продукт работает без всего этого списка: каждый импорт ниже — lazy/guarded
+# с graceful-деградацией (AST-рекон BATCH P2.3, Часть A).
+
+# === Импорт документов в промпты: .pdf/.docx/.pptx/.xlsx -> markdown ===
+# Используется в unified_prompt_manager_qt при добавлении файла в промпт.
+# Тянет тяжёлый onnxruntime. Без пакета файл вставляется заглушкой с
+# подсказкой «pip install markitdown» — функции не ломаются.
+markitdown>=0.0.1
+
+# === Глобальные горячие клавиши и эмуляция нажатий — ТОЛЬКО Linux ===
+# Windows использует RegisterHotKey/AHK/PowerShell; на Linux бэкенды
+# platform_helpers требуют pynput (lazy imports с проверкой ImportError).
+pynput>=1.7.6; sys_platform == "linux"
+
+# --- Примечание (не раскомментировать без решения координатора) ---
+# markdown, PyYAML, packaging стоят в проверенном дистрибутиве P2.1
+# (и включены в requirements.lock для побайтовой воспроизводимости рантайма),
+# но НИ ОДИН из них не импортируется кодом продукта (рекон P2.3, Часть A).
+# Оставлены в lock как часть проверенного рантайма; судьба — вопрос
+# координатору в отчёте BATCH_P23_REPORT.md (§ Часть A).
