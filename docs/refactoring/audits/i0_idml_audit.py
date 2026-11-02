@@ -16,6 +16,7 @@ r"""i0_idml_audit.py — BATCH I0, Часть B(г).
 Использование: python i0_idml_audit.py IDML_PATH TAGGED_TXT_PATH OUT_PATH
 """
 import sys
+import os
 import re
 import zipfile
 import collections
@@ -249,10 +250,11 @@ def main():
     tl, main_story, main_text, gps, gcs = analyze_stories(zf)
     L += tl
     L += analyze_links(zf)
-    if main_story:
+    if main_story and txt_path != '-' and os.path.exists(txt_path):
         L = compare_texts(L, main_text, txt_path)
     else:
-        L.append('ГЛАВНЫЙ РАССКАЗ НЕ НАЙДЕН')
+        L.append('Сравнение с Tagged Text пропущено (txt не передан/отсутствует; '
+                 'сверка с экспортом — по числам протокола i0_tagged_text_audit.out)')
 
     out = open(out_path, 'w', encoding='utf-8')
     out.write('\n'.join(L) + '\n')
