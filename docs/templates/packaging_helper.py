@@ -310,6 +310,8 @@ def cmd_importsmoke() -> int:
         "requests", "spellchecker", "spylls", "pydantic", "Supervertaler",
         # Batch I1: новый пакет писателя InDesign Tagged Text (только stdlib)
         "modules.tagged_text",
+        # Batch I2: окно экспорта «роль → имя стиля InDesign» (PyQt6)
+        "modules.tagged_text_export_dialog",
     ]
     import importlib
     failed = []

@@ -41,10 +41,14 @@ _COMMENT_RE = re.compile(r'^<!--.*-->\s*$')
 
 @dataclass
 class Block:
-    """Один блок вывода: роль + исходный текст строки (без роли-разметки)."""
+    """Один блок вывода: роль + исходный текст строки (без роли-разметки).
+
+    ``line`` — номер строки md (с 1) для предупреждений отчёта (Batch I2);
+    0 — блок без известной строки (прямое построение в тестах)."""
 
     role: str
     text: str
+    line: int = 0
 
 
 @dataclass
@@ -63,23 +67,23 @@ class ParseStats:
     warnings: list = field(default_factory=list)
 
 
-def _split_mixed_image(text: str, stats: ParseStats):
+def _split_mixed_image(text: str, stats: ParseStats, lineno: int = 0):
     """Строка с картинкой и текстом → блоки text/img/text."""
     stats.mixed_image_lines += 1
     stats.warnings.append(
-        'смешанная строка (текст + картинка) разрезана на блоки: '
-        + (text[:60] + '…' if len(text) > 60 else text))
+        'смешанная строка (текст + картинка) разрезана на блоки (строка %d): '
+        % lineno + (text[:60] + '…' if len(text) > 60 else text))
     blocks = []
     pos = 0
     for m in _IMAGE_RE.finditer(text):
         before = text[pos:m.start()]
         if before.strip():
-            blocks.append(Block('p', before.strip()))
-        blocks.append(Block('img', m.group(0)))
+            blocks.append(Block('p', before.strip(), line=lineno))
+        blocks.append(Block('img', m.group(0), line=lineno))
         pos = m.end()
     tail = text[pos:]
     if tail.strip():
-        blocks.append(Block('p', tail.strip()))
+        blocks.append(Block('p', tail.strip(), line=lineno))
     return blocks
 
 
@@ -88,7 +92,7 @@ def parse_markdown(md_text: str):
     stats = ParseStats()
     blocks = []
     in_fence = False
-    for raw_line in md_text.splitlines():
+    for lineno, raw_line in enumerate(md_text.splitlines(), 1):
         line = raw_line.rstrip('\r\n')
         stripped = line.strip()
         if not stripped:
@@ -105,13 +109,13 @@ def parse_markdown(md_text: str):
                 if info and info.lower() != 'csv':
                     stats.non_csv_fences += 1
                     stats.warnings.append(
-                        'ограда не csv (содержимое записано table_row): '
-                        + info)
+                        'ограда не csv (содержимое записано table_row, '
+                        'строка %d): ' % lineno + info)
             else:
                 in_fence = False
             continue
         if in_fence:
-            blocks.append(Block('table_row', stripped))
+            blocks.append(Block('table_row', stripped, line=lineno))
             stats.table_rows += 1
             continue
         if _COMMENT_RE.match(stripped):
@@ -126,34 +130,35 @@ def parse_markdown(md_text: str):
             continue
         m = _IMAGE_ONLY_RE.match(stripped)
         if m:
-            blocks.append(Block('img', m.group(0)))
+            blocks.append(Block('img', m.group(0), line=lineno))
             continue
         if '|' in stripped and stripped.startswith('|'):
-            blocks.append(Block('table_row', stripped))
+            blocks.append(Block('table_row', stripped, line=lineno))
             stats.table_rows += 1
             continue
         if _IMAGE_RE.search(stripped):
-            blocks.extend(_split_mixed_image(stripped, stats))
+            blocks.extend(_split_mixed_image(stripped, stats, lineno))
             continue
         m = _HEADING_RE.match(stripped)
         if m:
             level = len(m.group(1))
             if level <= 3:
-                blocks.append(Block('h%d' % level, m.group(2)))
+                blocks.append(Block('h%d' % level, m.group(2), line=lineno))
             else:
                 key = 'h%d' % level
                 stats.headings_downgraded[key] = (
                     stats.headings_downgraded.get(key, 0) + 1)
-                blocks.append(Block('h3', m.group(2)))
+                blocks.append(Block('h3', m.group(2), line=lineno))
             continue
         m = _BULLET_RE.match(stripped)
         if m:
-            blocks.append(Block('li', m.group(1)))
+            blocks.append(Block('li', m.group(1), line=lineno))
             continue
         m = _NUM_RE.match(stripped)
         if m:
             # «3. текст» → номер сохраняется текстом, роль li_n.
-            blocks.append(Block('li_n', m.group(1) + ' ' + m.group(2)))
+            blocks.append(Block('li_n', m.group(1) + ' ' + m.group(2),
+                                line=lineno))
             continue
-        blocks.append(Block('p', stripped))
+        blocks.append(Block('p', stripped, line=lineno))
     return blocks, stats

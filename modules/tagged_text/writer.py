@@ -374,7 +374,12 @@ def strip_emphasis_in_heading(text, process_plain, report):
     return process_plain(''.join(out))
 
 
-def _normalize_image(label_text, images_dir, report):
+def _line_suffix(lineno):
+    """« (строка N)» для предупреждений отчёта (Batch I2); 0 → пусто."""
+    return ' (строка %d)' % lineno if lineno else ''
+
+
+def _normalize_image(label_text, images_dir, report, lineno=0):
     """Картинка → текст метки с путём по правилу s11.5.
 
     Относительный ``images/<имя>`` пишется как есть; абсолютный путь →
@@ -382,11 +387,12 @@ def _normalize_image(label_text, images_dir, report):
     с выходным файлом), предупреждение при отсутствии; прочие
     относительные пути пишутся как есть (отдельное предупреждение).
     Найдено/не найдено считается для всех картинок с путём images/.
+    ``lineno`` — номер строки md для предупреждений (Batch I2).
     """
     m = re.match(r'^!\[([^\]]*)\]\(\s*([^)]+?)\s*\)$', label_text)
     if not m:
-        report.warnings.append('не удалось разобрать метку картинки: %s'
-                               % label_text[:80])
+        report.warnings.append('не удалось разобрать метку картинки%s: %s'
+                               % (_line_suffix(lineno), label_text[:80]))
         return escape_text(label_text)
     alt, raw_path = m.group(1), m.group(2)
     # I1.1: alt — текст (md-unescape), путь НЕ трогается (решение
@@ -410,14 +416,16 @@ def _normalize_image(label_text, images_dir, report):
             cand = os.path.join(images_dir, basename)
             found = cand if os.path.isfile(cand) else None
         if found is None:
-            report.warnings.append('файл не найден: %s' % raw_path)
+            report.warnings.append('файл не найден%s: %s'
+                                   % (_line_suffix(lineno), raw_path))
     elif p.startswith('images/'):
         if images_dir:
             cand = os.path.join(images_dir, p[len('images/'):])
             found = cand if os.path.isfile(cand) else None
     else:
         report.warnings.append(
-            'относительный путь вне images/ — записан как есть: %s' % p)
+            'относительный путь вне images/ — записан как есть%s: %s'
+            % (_line_suffix(lineno), p))
     if found is not None:
         report.images_found += 1
     else:
@@ -483,7 +491,7 @@ def write_tagged_text(md_text, style_map=None, *, color_table='minimal',
     for b in blocks:
         if b.role == 'img':
             # путь не проходит через protect_escapes (I1.1: пути не трогать)
-            text = _normalize_image(b.text, images_dir, report)
+            text = _normalize_image(b.text, images_dir, report, lineno=b.line)
         else:
             # I1.1: md-экранирование защищается ДО разбора выделений
             protected, escapes = protect_escapes(b.text)

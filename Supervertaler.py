@@ -7750,6 +7750,16 @@ class SupervertalerQt(QMainWindow):
         export_txt_action.triggered.connect(self.export_simple_txt)
         export_menu.addAction(export_txt_action)
 
+        # Batch I2: InDesign Tagged Text — md-структура текста через
+        # modules.tagged_text + окно соответствий «роль → имя стиля InDesign».
+        export_tagged_txt_action = QAction(self.tr("InDesign &Tagged Text (TXT)..."), self)
+        export_tagged_txt_action.setToolTip(self.tr(
+            "Export the translated text as Adobe InDesign Tagged Text "
+            "(UTF-16 TXT) with a window mapping md roles (headings, lists, "
+            "images, tables) to InDesign paragraph/character styles."))
+        export_tagged_txt_action.triggered.connect(self.export_tagged_txt)
+        export_menu.addAction(export_tagged_txt_action)
+
         export_menu.addSeparator()
 
         # Multi-file folder export
@@ -29920,6 +29930,31 @@ class SupervertalerQt(QMainWindow):
                 f"Failed to import text file:\n\n{str(e)}"
             )
     
+    def _collect_translated_lines(self, segments, use_source_fallback):
+        """Собрать строки экспорта из сегментов: группировка по paragraph_id
+        (при пословном/посложном разбиении несколько сегментов делят абзац)
+        и склейка через join_segments. Общий источник текста для
+        export_simple_txt и export_tagged_txt (Batch I2): целевой текст
+        сегмента, иначе исходник (use_source_fallback) или пустая строка;
+        пустые сегменты дают пустые строки."""
+        from itertools import groupby
+        from modules.simple_segmenter import join_segments
+        output_lines = []
+        for _para_id, group in groupby(segments, key=lambda s: s.paragraph_id):
+            parts = []
+            for seg in group:
+                if seg.target and seg.target.strip():
+                    text = seg.target
+                elif use_source_fallback:
+                    text = seg.source
+                else:
+                    text = ""
+                parts.append((text, getattr(seg, 'join_before', None)))
+            # Rejoin sentence segments with the spacing they had in the
+            # source line (a space if unknown); empty segments produce empty lines
+            output_lines.append(join_segments(parts))
+        return output_lines
+
     def export_simple_txt(self):
         """Экспортирует переводы в простой текстовый файл, одна строка на сегмент.
         
@@ -30054,24 +30089,9 @@ class SupervertalerQt(QMainWindow):
             if not file_path.lower().endswith(('.txt', '.md')):
                 file_path += default_ext
             
-            # Build output lines, grouping segments by paragraph_id
-            # (when sentence segmentation was used, multiple segments share a paragraph_id)
-            from itertools import groupby
-            from modules.simple_segmenter import join_segments
-            output_lines = []
-            for _para_id, group in groupby(segments, key=lambda s: s.paragraph_id):
-                parts = []
-                for seg in group:
-                    if seg.target and seg.target.strip():
-                        text = seg.target
-                    elif use_source_fallback:
-                        text = seg.source
-                    else:
-                        text = ""
-                    parts.append((text, getattr(seg, 'join_before', None)))
-                # Rejoin sentence segments with the spacing they had in the
-                # source line (a space if unknown); empty segments produce empty lines
-                output_lines.append(join_segments(parts))
+            # Build output lines (shared with export_tagged_txt, Batch I2)
+            output_lines = self._collect_translated_lines(
+                segments, use_source_fallback)
 
             # Write file
             with open(file_path, 'w', encoding=encoding, newline='\n') as f:
@@ -30095,7 +30115,158 @@ class SupervertalerQt(QMainWindow):
                 "Export Error",
                 f"Failed to export text file:\n\n{str(e)}"
             )
-    
+
+    def export_tagged_txt(self):
+        """Экспорт перевода в Adobe InDesign Tagged Text (.txt), Batch I2.
+
+        Источник текста — тот же, что у export_simple_txt
+        (_collect_translated_lines, правило пустого перевода то же: без
+        переводов экспорт отменяется, непереведённые сегменты — исходник
+        по выбору). Строки → modules.tagged_text (md_to_blocks → writer),
+        выход UTF-16LE+BOM+CRLF. Окно соответствий «роль → имя стиля»
+        (modules.tagged_text_export_dialog) пишет наборы (серии) в
+        <data_root>/mapping/<серия>.tagmap.json через seam
+        modules.portable_paths; последние серия и папка images — в
+        settings.json (ключи tagged_text_last_series /
+        tagged_text_last_images_dir, по образцу segmentation_rules)."""
+        try:
+            if not self.current_project or not self.current_project.segments:
+                QMessageBox.warning(self, "No Project", "Please open a project with segments first")
+                return
+
+            segments = list(self.current_project.segments)
+
+            # Правило пустого перевода — как у export_simple_txt.
+            translated_count = sum(1 for seg in segments if seg.target and seg.target.strip())
+            if translated_count == 0:
+                QMessageBox.warning(
+                    self, "No Translations",
+                    "No translated segments found.\n\n"
+                    "Please translate some segments before exporting."
+                )
+                return
+
+            # Имя по умолчанию: <проект>.tagged.txt; диалог — в последнюю
+            # папку (или в target/ проекта, как у export_simple_txt).
+            default_name = ""
+            if hasattr(self.current_project, 'original_txt_path') and self.current_project.original_txt_path:
+                base = os.path.splitext(os.path.basename(self.current_project.original_txt_path))[0]
+                default_name = f"{base}.tagged.txt"
+            elif self.current_project.name:
+                default_name = self.current_project.name.replace(" ", "_") + ".tagged.txt"
+            if default_name:
+                default_name = self._project_export_path(default_name)  # into target/ (#228)
+
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Export InDesign Tagged Text File",
+                default_name,
+                "InDesign Tagged Text (*.txt);;All Files (*.*)"
+            )
+
+            if not file_path:
+                return
+            if not file_path.lower().endswith('.txt'):
+                file_path += '.txt'
+
+            # Окно соответствий «роль → имя стиля InDesign».
+            from modules.tagged_text.stylemap import StyleMap
+            from modules.tagged_text.stylemap import load as load_stylemap
+            from modules.tagged_text_export_dialog import (
+                TaggedTextExportDialog, list_series)
+
+            maps_dir = str(get_user_data_path() / 'mapping')
+            series_names = list_series(maps_dir)
+
+            settings = self.load_general_settings()
+            last_series = str(settings.get('tagged_text_last_series', '') or '')
+            last_images_dir = str(settings.get('tagged_text_last_images_dir', '') or '')
+
+            style_map = StyleMap()
+            if last_series:
+                last_map_path = os.path.join(maps_dir, last_series + '.tagmap.json')
+                if os.path.isfile(last_map_path):
+                    try:
+                        style_map, map_warnings = load_stylemap(last_map_path)
+                        for w in map_warnings:
+                            self.log(f"⚠ {w}")
+                    except Exception as e:
+                        self.log(f"⚠ Could not read the last mapping set '{last_series}': {e}")
+
+            dialog = TaggedTextExportDialog(
+                style_map,
+                images_dir=last_images_dir,
+                series_name=last_series,
+                series_names=series_names,
+                maps_dir=maps_dir,
+                parent=self,
+            )
+            if dialog.exec() != QDialog.DialogCode.Accepted:
+                return
+
+            use_source_fallback = dialog.use_source_fallback()
+            images_dir = dialog.images_dir() or None
+
+            # Текст проекта → md-строки (тот же источник, что у simple txt).
+            md_text = '\n'.join(
+                self._collect_translated_lines(segments, use_source_fallback))
+
+            from modules.tagged_text.writer import write_tagged_text
+            data, report = write_tagged_text(
+                md_text, style_map=dialog.style_map(), images_dir=images_dir)
+            with open(file_path, 'wb') as f:
+                f.write(data)
+
+            # Последние серия и папка images — в settings.json (seam).
+            settings = self.load_general_settings()
+            settings['tagged_text_last_series'] = dialog.series_name()
+            settings['tagged_text_last_images_dir'] = dialog.images_dir()
+            self.save_general_settings(settings)
+
+            self.log(f"✓ Exported InDesign Tagged Text to: {os.path.basename(file_path)}")
+            self.log(f"  Roles: {sum(report.role_counts.values())} paragraphs, "
+                     f"warnings: {len(report.warnings)}")
+
+            self._show_tagged_text_report(report, file_path)
+
+        except Exception as e:
+            self.log(f"✗ Export failed: {str(e)}")
+            QMessageBox.critical(
+                self,
+                "Export Error",
+                f"Failed to export InDesign Tagged Text:\n\n{str(e)}"
+            )
+
+    def _show_tagged_text_report(self, report, file_path):
+        """Окно отчёта экспорта Tagged Text: ExportReport.to_text() +
+        кнопка «Копировать» (Batch I2, п.3)."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle(self.tr("InDesign Tagged Text Export Report"))
+        dialog.setMinimumSize(560, 420)
+        layout = QVBoxLayout(dialog)
+
+        path_label = QLabel(f"<b>{os.path.basename(file_path)}</b>")
+        path_label.setToolTip(file_path)
+        layout.addWidget(path_label)
+
+        report_view = QPlainTextEdit()
+        report_view.setReadOnly(True)
+        report_view.setPlainText(report.to_text())
+        layout.addWidget(report_view)
+
+        button_layout = QHBoxLayout()
+        copy_btn = QPushButton(self.tr("Copy"))
+        copy_btn.clicked.connect(
+            lambda: QApplication.clipboard().setText(report.to_text()))
+        close_btn = QPushButton(self.tr("Close"))
+        close_btn.clicked.connect(dialog.accept)
+        button_layout.addStretch()
+        button_layout.addWidget(copy_btn)
+        button_layout.addWidget(close_btn)
+        layout.addLayout(button_layout)
+
+        dialog.exec()
+
     def export_for_ai(self):
         """Экспортирует сегменты в читаемом для ИИ формате [SEGMENT].
         
