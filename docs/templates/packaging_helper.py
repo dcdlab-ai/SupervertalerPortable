@@ -308,6 +308,8 @@ def cmd_importsmoke() -> int:
     modules = [
         "PyQt6.QtWidgets", "openai", "docx", "openpyxl", "PIL", "lxml",
         "requests", "spellchecker", "spylls", "pydantic", "Supervertaler",
+        # Batch I1: новый пакет писателя InDesign Tagged Text (только stdlib)
+        "modules.tagged_text",
     ]
     import importlib
     failed = []
