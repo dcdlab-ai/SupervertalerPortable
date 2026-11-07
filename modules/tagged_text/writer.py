@@ -1,23 +1,34 @@
-"""writer — блоки Markdown → байты InDesign Tagged Text (Batch I1).
+"""writer — блоки Markdown → байты InDesign Tagged Text (Batch I1/I1.1).
 
-Формат установлен ручными тестами I0/I0-B/I0-C (s11.8–s11.9 отчёта I0):
+Формат установлен ручными тестами I0/I0-B/I0-C (s11.8–s11.9 отчёта I0)
+и ручными тестами I1 (T4c1/T4c2/T-I1a/T-I1b, отчёт I1.1):
 
 * UTF-16LE + BOM (единственная кодировка), разделитель строк CRLF;
 * строка 1 — ``<UNICODE-WIN>`` отдельно (T4b1: иначе файл читается как
   обычный текст); строка 2 — ``<Version:16.4><FeatureSet:InDesign-Roman>``
-  без ColorTable (решение координатора, s11.9); ColorTable — опциональные
-  режимы ``minimal`` (Black+Paper, T4c2) и ``gboh`` (дословно образец,
-  T4b2); далее по одному Define*Style на строку (T4b2);
+  + ColorTable. **Дефолт — ``minimal``** (Black+Paper): ручной факт I1 —
+  режим ``none`` (без ColorTable) даёт ПУСТЫЕ абзацы перед текстом, их
+  число = число строк Define*Style + 1 (T4c1: 10; T-I1a: 5; T-I1b: 8);
+  с минимальным ColorTable пустых абзацев нет (T4c2). Режим ``gboh``
+  (дословно строка 2 образца, 7 цветов) — для побайтовой регенерации
+  T4b2; далее по одному Define*Style на строку (T4b2);
 * в ТЕКСТЕ экранируются только ``\\``, ``<``, ``>`` (T5b: ``\\; \\: \\, \\=``
   в тексте дают ошибки в логе InDesign); в ЗНАЧЕНИЯХ тегов —
-  ``\\ < > : ; , = [ ]`` (минимум промпта I1; подчёркивание из образца
-  GBoH НЕ экранируется — не проверено в стиле, см. вопрос в отчёте I1);
+  ``\\ < > : ; , = [ ]`` (минимум промпта I1; подчёркивание НЕ экранируется
+  — решение координатора I1.1, подтверждено T-I1a: стиль table_row
+  применился без ``\\_``);
 * HTML-сущности (только с «;») раскодируются; ``<br>`` → одиночный LF
   (принудительный перенос внутри абзаца);
+* md-экранирование на входе (CommonMark, I1.1): ``\\`` + ASCII-пунктуация
+  → сам знак; снимается ПОСЛЕ разбора выделений (экранированный маркер
+  ``\\*`` не считается выделением), пути в ``![…](…)`` не трогаются;
+  ``\\`` + не-пунктуация остаётся буквально;
 * выделения: ``**``→Bold, ``*``/``_``→Italic, ``***``/``**_``→BoldItalic
   через ``<CharStyle:…>…<CharStyle:>``; ``_`` — только на границе слов;
   несбалансированные маркеры остаются буквально и считаются; в заголовках
   выделения снимаются (оформление даёт абзацный стиль);
+* в блоках table_row серии из 2+ пробелов схлопываются в один
+  (отступы столбцов docling; I1.1), остальной текст не трогается;
 * картинки: строка-только-картинка → абзац роли img; ``images/<имя>`` —
   как есть; абсолютный путь → базовое имя + поиск в ``images/`` рядом с
   выходом, предупреждение при отсутствии (правило s11.5);
@@ -51,8 +62,9 @@ GBOH_COLOR_LINE2 = (
     '<C\\=8 M\\=10 Y\\=18 K\\=0:COLOR:CMYK:Process:0.08,0.1,0.18,0>'
     '<Word\\_R0\\_G0\\_B0:COLOR:RGB:Process:0,0,0>>')
 
-# Минимальный ColorTable (режим color_table='minimal', T4c2: запасной
-# вариант; только Black и Paper).
+# Минимальный ColorTable (режим color_table='minimal' — ДЕФОЛТ с I1.1:
+# ручной факт — 'none' даёт пустые абзацы = Define*Style + 1; только
+# Black и Paper).
 MINIMAL_COLOR_LINE2 = (
     '<ColorTable:='
     '<Black:COLOR:CMYK:Process:0,0,0,1>'
@@ -113,6 +125,18 @@ _BOUNDARY_US_RE = re.compile(r'(?<![A-Za-z0-9_])_|_(?![A-Za-z0-9_])')
 # Абсолютный путь: диск (C:\, C:/) или ведущий слэш.
 _ABS_PATH_RE = re.compile(r'^([A-Za-z]:[\\/]|[/\\])')
 
+# md-экранирование на входе (CommonMark, I1.1): `\` + ASCII-пунктуация →
+# сам знак; `\` + не-пунктуация остаётся буквально. Защита (sentinel)
+# выполняется ДО разбора выделений — экранированный маркер `\*` не виден
+# матчеру; восстановление — в process_plain ПОСЛЕ сущностей и <br>
+# (чтобы `\&amp;` не превратился в `&`) и ПЕРЕД экранированием выхода.
+_ASCII_PUNCTUATION = set('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~')
+_ANY_ESC_RE = re.compile(r'\\(.)')
+_SENTINEL_RE = re.compile('\x00(\\d+)\x01')
+
+# Схлопывание серий пробелов (2+) — только table_row (I1.1).
+_SPACES_RUN_RE = re.compile(' {2,}')
+
 
 @dataclass
 class ExportReport:
@@ -124,6 +148,8 @@ class ExportReport:
     entities_decoded: int = 0
     entity_kinds: dict = field(default_factory=dict)
     br_breaks: int = 0
+    md_escapes_unescaped: int = 0
+    spaces_collapsed: int = 0
     emphasis_leftover: int = 0
     emphasis_stripped_headings: int = 0
     comments_dropped: int = 0
@@ -158,6 +184,10 @@ class ExportReport:
                               for k, n in sorted(self.entity_kinds.items()))
             lines.append('  по видам: %s' % kinds)
         lines.append('Принудительные переносы (<br>): %d' % self.br_breaks)
+        lines.append('md-экранирование снято (\\+пунктуация): %d'
+                     % self.md_escapes_unescaped)
+        lines.append('Серии пробелов схлопнуты (table_row): %d'
+                     % self.spaces_collapsed)
         lines.append('Несбалансированные маркеры выделения (остались буквально): %d'
                      % self.emphasis_leftover)
         lines.append('Выделения сняты в заголовках: %d'
@@ -211,9 +241,40 @@ def count_leftover_markers(s):
     return n
 
 
-def make_plain_processor(report):
-    """Замыкание обработки «сырого» текстового куска: сущности → <br> →
-    экранирование; счётчики пишутся в отчёт."""
+def protect_escapes(text):
+    """I1.1: защитить md-экранирование (``\\`` + ASCII-пунктуация) sentinel'ом
+    ДО разбора выделений. ``\\`` + не-пунктуация остаётся буквально.
+    Возвращает (текст с sentinel'ами, список экранированных знаков)."""
+    escapes = []
+
+    def repl(m):
+        ch = m.group(1)
+        if ch in _ASCII_PUNCTUATION:
+            escapes.append(ch)
+            return '\x00%d\x01' % (len(escapes) - 1)
+        return m.group(0)
+
+    return _ANY_ESC_RE.sub(repl, text), escapes
+
+
+def unescape_md(text, report):
+    """I1.1: снять md-экранирование напрямую (для alt-текста картинок,
+    где sentinel-конвейер не применяется). Пути не проходят через эту
+    функцию — вызов только на alt."""
+    def repl(m):
+        ch = m.group(1)
+        if ch in _ASCII_PUNCTUATION:
+            report.md_escapes_unescaped += 1
+            return ch
+        return m.group(0)
+
+    return _ANY_ESC_RE.sub(repl, text)
+
+
+def make_plain_processor(report, escapes):
+    """Замыкание обработки защищённого текстового куска: сущности → <br> →
+    восстановление sentinel'ов (md-unescape) → экранирование выхода;
+    счётчики пишутся в отчёт."""
 
     def process_plain(s):
         text, kinds = _decode_entities(s)
@@ -226,6 +287,12 @@ def make_plain_processor(report):
             bump(kind)
         text, n_br = _BR_RE.subn('\n', text)
         report.br_breaks += n_br
+
+        def restore(m):
+            report.md_escapes_unescaped += 1
+            return escapes[int(m.group(1))]
+
+        text = _SENTINEL_RE.sub(restore, text)
         return escape_text(text)
 
     return process_plain
@@ -322,6 +389,13 @@ def _normalize_image(label_text, images_dir, report):
                                % label_text[:80])
         return escape_text(label_text)
     alt, raw_path = m.group(1), m.group(2)
+    # I1.1: alt — текст (md-unescape), путь НЕ трогается (решение
+    # координатора); сущности в пути раскодируются как раньше.
+    alt = unescape_md(alt, report)
+    alt, alt_kinds = _decode_entities(alt)
+    report.entities_decoded += len(alt_kinds)
+    for kind in alt_kinds:
+        report.entity_kinds[kind] = report.entity_kinds.get(kind, 0) + 1
     path, kinds = _decode_entities(raw_path)
     report.entities_decoded += len(kinds)
     for kind in kinds:
@@ -352,13 +426,14 @@ def _normalize_image(label_text, images_dir, report):
     return escape_text(label)
 
 
-def write_tagged_text(md_text, style_map=None, *, color_table='none',
+def write_tagged_text(md_text, style_map=None, *, color_table='minimal',
                       char_style_policy='used', version=VERSION_DEFAULT,
                       images_dir=None):
     """Собрать Tagged Text: возвращает (bytes, ExportReport).
 
-    color_table: 'none' (по умолчанию, решение координатора s11.9) |
-    'minimal' (Black+Paper, T4c2) | 'gboh' (дословно образец, T4b2).
+    color_table: 'minimal' (Black+Paper — ДЕФОЛТ с I1.1: ручной факт —
+    'none' даёт пустые абзацы = Define*Style + 1) | 'none' | 'gboh'
+    (дословно образец, T4b2).
     char_style_policy: 'used' (только использованные) | 'all' (все три).
     """
     if style_map is None:
@@ -370,7 +445,6 @@ def write_tagged_text(md_text, style_map=None, *, color_table='none',
         raise ValueError('char_style_policy: used|all, получено %r'
                          % char_style_policy)
     report = ExportReport(color_table_mode=color_table)
-    process_plain = make_plain_processor(report)
     blocks, stats = parse_markdown(md_text)
     report.comments_dropped = stats.comments_dropped
     report.table_separators_dropped = stats.table_separators_dropped
@@ -407,12 +481,23 @@ def write_tagged_text(md_text, style_map=None, *, color_table='none',
     # --- тело ---
     body_lines = []
     for b in blocks:
-        if b.role in ('h1', 'h2', 'h3'):
-            text = strip_emphasis_in_heading(b.text, process_plain, report)
-        elif b.role == 'img':
+        if b.role == 'img':
+            # путь не проходит через protect_escapes (I1.1: пути не трогать)
             text = _normalize_image(b.text, images_dir, report)
-        else:  # p, li, li_n, table_row
-            text = apply_emphasis(b.text, style_map, process_plain, report)
+        else:
+            # I1.1: md-экранирование защищается ДО разбора выделений
+            protected, escapes = protect_escapes(b.text)
+            process_plain = make_plain_processor(report, escapes)
+            if b.role in ('h1', 'h2', 'h3'):
+                text = strip_emphasis_in_heading(
+                    protected, process_plain, report)
+            else:  # p, li, li_n, table_row
+                text = apply_emphasis(
+                    protected, style_map, process_plain, report)
+            if b.role == 'table_row':
+                # I1.1: серии пробелов (отступы столбцов docling) → один
+                text, n_sp = _SPACES_RUN_RE.subn(' ', text)
+                report.spaces_collapsed += n_sp
         name = escape_value(style_map.para_name(b.role))
         body_lines.append('<ParaStyle:%s>%s' % (name, text))
 

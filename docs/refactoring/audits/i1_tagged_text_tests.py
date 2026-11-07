@@ -93,9 +93,15 @@ def t1_header_default():
     ls = lines_of(data)
     check('T1 BOM UTF-16LE', data[:2] == b'\xff\xfe')
     check('T1 строка 1 = <UNICODE-WIN> одна', ls[0] == '<UNICODE-WIN>', repr(ls[0]))
-    check('T1 строка 2 без ColorTable',
-          ls[1] == '<Version:16.4><FeatureSet:InDesign-Roman>', repr(ls[1]))
-    check('T1 ColorTable отсутствует', 'ColorTable' not in decode(data))
+    check('T1 строка 2 = Version+FeatureSet+minimal ColorTable (дефолт I1.1)',
+          ls[1] == '<Version:16.4><FeatureSet:InDesign-Roman>'
+                   + '<ColorTable:=<Black:COLOR:CMYK:Process:0,0,0,1>'
+                     '<Paper:COLOR:CMYK:Process:0,0,0,0>>', repr(ls[1]))
+    check('T1 ColorTable ровно Black+Paper',
+          decode(data).count('COLOR:CMYK:Process') == 2, repr(ls[1]))
+    data_none, _ = write_tagged_text('Один абзац.', color_table='none')
+    check('T1 режим none по-прежнему доступен (без ColorTable)',
+          'ColorTable' not in decode(data_none))
     check('T1 DefineParaStyle:p на своей строке',
           ls[2] == '<DefineParaStyle:p=<Nextstyle:p>>', repr(ls[2]))
     check('T1 один Define на строку',
@@ -130,16 +136,40 @@ def t2_t4b2_regeneration():
     check('T2 cTypeface:Bold Italic', '<cTypeface:Bold Italic>' in decode(data))
 
 
+T4C2_SHA = 'f80f814900893465d9cb685ca6ccbe639b2f645179a12aa39e87d89fb3c6a368'
+
+
+def t2b_t4c2_regeneration():
+    """I1.1: T4c2 (минимальный ColorTable) — теперь ДЕФОЛТ писателя;
+    регенерация побайтово тем же входом, что T4b2."""
+    md = read_fixture('t4_t4b2_regeneration.md')
+    data, rep = write_tagged_text(md, char_style_policy='all')
+    h = hashlib.sha256(data).hexdigest()
+    check('T2b T4c2 побайтово (sha256)', h == T4C2_SHA, h)
+    check('T2b размер 2328 байта', len(data) == 2328, str(len(data)))
+    ls = lines_of(data)
+    check('T2b строка 2 = Version+FeatureSet+ColorTable Black+Paper',
+          ls[1] == '<Version:16.4><FeatureSet:InDesign-Roman>'
+                   '<ColorTable:=<Black:COLOR:CMYK:Process:0,0,0,1>'
+                   '<Paper:COLOR:CMYK:Process:0,0,0,0>>', repr(ls[1]))
+    check('T2b отчёт: ColorTable: minimal', rep.color_table_mode == 'minimal')
+    check('T2b дефолт color_table = minimal',
+          write_tagged_text('X.')[0] ==
+          write_tagged_text('X.', color_table='minimal')[0])
+
+
 def t3_escape_entities():
     md = read_fixture('i1_escape_entities.md')
     data, rep = write_tagged_text(md)
     body = body_of(data)
-    check('T3 слэш и скобки в тексте',
+    check('T3 слэш перед пробелом и скобки в тексте',
           body[0] == '<ParaStyle:p>Слэш \\\\ и скобки \\<b\\> и \\> конец.',
           repr(body[0]))
-    check('T3 ; : , = НЕ экранируются (двойной слэш только от \\)',
+    check('T3 md-экранирование снято: \\; \\: \\, \\= → ; : , =',
           body[1] == '<ParaStyle:p>Знаки ; : , = остаются как есть: '
-                     '\\\\; \\\\: \\\\, \\\\= конец.', repr(body[1]))
+                     '; : , = конец.', repr(body[1]))
+    check('T3 счётчик md-экранирования = 4',
+          rep.md_escapes_unescaped == 4, str(rep.md_escapes_unescaped))
     check('T3 сущности раскодированы (затем < > экранируются по правилам выхода)',
           body[2] == '<ParaStyle:p>Сущности: & \\< \\> " \' ☺ конец.', repr(body[2]))
     check('T3 неизвестная сущность и «&amp» без «;» остаются',
@@ -276,7 +306,10 @@ def t7_edge_cases():
     data, rep = write_tagged_text('')
     ls = lines_of(data)
     check('T7 пустой вход: только шапка',
-          ls == ['<UNICODE-WIN>', '<Version:16.4><FeatureSet:InDesign-Roman>', ''],
+          ls == ['<UNICODE-WIN>',
+                 '<Version:16.4><FeatureSet:InDesign-Roman>'
+                 '<ColorTable:=<Black:COLOR:CMYK:Process:0,0,0,1>'
+                 '<Paper:COLOR:CMYK:Process:0,0,0,0>>', ''],
           repr(ls))
     check('T7 пустой вход: без определений', rep.define_styles == [])
     data2, rep2 = write_tagged_text('   \n\t\n\n')
@@ -411,11 +444,61 @@ def t12_non_csv_fence():
           '<ParaStyle:table_row>print(1)' in decode(data))
 
 
+def t13_space_collapse():
+    """I1.1: серии из 2+ пробелов схлопываются ТОЛЬКО в table_row."""
+    md = ('|Текст    с пробелами|Колонка     два|\n'
+          'Обычный    абзац:    пробелы    сохраняются.\n')
+    data, rep = write_tagged_text(md)
+    body = body_of(data)
+    check('T13 table_row: серии пробелов → один',
+          body[0] == '<ParaStyle:table_row>|Текст с пробелами|Колонка два|',
+          repr(body[0]))
+    check('T13 обычный абзац: пробелы не тронуты',
+          body[1] == '<ParaStyle:p>Обычный    абзац:    пробелы    сохраняются.',
+          repr(body[1]))
+    check('T13 счётчик схлопываний = 2', rep.spaces_collapsed == 2,
+          str(rep.spaces_collapsed))
+    # перенос строки внутри table_row не склеивается
+    md2 = '|левый<br>    правый|конец|\n'
+    data2, rep2 = write_tagged_text(md2)
+    body2 = body_of(data2)
+    check('T13 пробелы после <br> не склеиваются через перенос',
+          body2[0] == '<ParaStyle:table_row>|левый\n правый|конец|', repr(body2[0]))
+    check('T13 счётчик после <br> = 1', rep2.spaces_collapsed == 1)
+
+
+def t14_md_escapes():
+    """I1.1: md-unescape по CommonMark — после разбора выделений, пути
+    в ![…](…) не трогаются, \\ + не-пунктуация остаётся."""
+    md = read_fixture('i1_md_escapes.md')
+    data, rep = write_tagged_text(md)
+    body = body_of(data)
+    check('T14 экранированные маркеры: без CharStyle, знаки видны',
+          body[0] == '<ParaStyle:p>Экранированные маркеры: *не курсив* '
+                     'и **не жирный** конец.', repr(body[0]))
+    check('T14 экранированный маркер не считается выделением',
+          rep.char_style_spans == {'bold': 0, 'italic': 0, 'bold_italic': 0},
+          repr(rep.char_style_spans))
+    check('T14 экранированный маркер не считается несбалансированным',
+          rep.emphasis_leftover == 0, str(rep.emphasis_leftover))
+    check('T14 \\ перед не-пунктуацией остаётся, \\# даёт #',
+          body[1] == '<ParaStyle:p>Слэш перед буквой \\\\н остаётся, '
+                     'перед пунктуацией # даёт #.', repr(body[1]))
+    check('T14 смешанная строка со ссылкой разрезана',
+          body[2] == '<ParaStyle:p>Ссылка с путём не тронута:'
+          and body[3] == '<ParaStyle:img>![alt](images/img.png)', repr(body[2:4]))
+    check('T14 путь с обратными слэшами не тронут (→ базовое имя)',
+          rep.images_missing == ['images/img.png'], repr(rep.images_missing))
+    check('T14 счётчик md-экранирования = 7',
+          rep.md_escapes_unescaped == 7, str(rep.md_escapes_unescaped))
+
+
 def main():
-    for fn in (t1_header_default, t2_t4b2_regeneration, t3_escape_entities,
-               t4_emphasis, t5_lists_tables, t6_images, t7_edge_cases,
-               t8_stylemap, t9_cli, t10_policy_used, t11_color_table_modes,
-               t12_non_csv_fence):
+    for fn in (t1_header_default, t2_t4b2_regeneration, t2b_t4c2_regeneration,
+               t3_escape_entities, t4_emphasis, t5_lists_tables, t6_images,
+               t7_edge_cases, t8_stylemap, t9_cli, t10_policy_used,
+               t11_color_table_modes, t12_non_csv_fence, t13_space_collapse,
+               t14_md_escapes):
         fn()
     log_path = os.path.join(STAGE, 'i1_tagged_text_tests.out')
     with open(log_path, 'w', encoding='utf-8') as f:

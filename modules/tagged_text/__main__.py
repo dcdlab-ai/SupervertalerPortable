@@ -32,9 +32,10 @@ def main(argv=None):
                         help='папка images/ для поиска картинок '
                              '(по умолчанию images/ рядом с выходом)')
     parser.add_argument('--color-table', choices=('none', 'minimal', 'gboh'),
-                        default='none',
-                        help='ColorTable в строке 2 шапки '
-                             '(по умолчанию none — решение s11.9)')
+                        default='minimal',
+                        help='ColorTable в строке 2 шапки (по умолчанию '
+                             'minimal — Black+Paper; режим none даёт пустые '
+                             'абзацы = Define*Style + 1, ручной факт I1)')
     parser.add_argument('--char-styles', choices=('used', 'all'),
                         default='used',
                         help='определять только использованные символьные '
