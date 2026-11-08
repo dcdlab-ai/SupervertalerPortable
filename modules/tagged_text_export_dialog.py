@@ -143,6 +143,15 @@ class TaggedTextExportDialog(QDialog):
         series_layout.addWidget(reset_btn)
         layout.addWidget(series_group)
 
+        # Немодальная статусная строка (Batch I2.1, T-I2c): результат Save/Load
+        # и ошибки серий — здесь, красным при ошибке; сбрасывается при смене
+        # имени серии. self.tr — как у соседей.
+        self.status_label = QLabel("")
+        self.status_label.setWordWrap(True)
+        self.status_label.setStyleSheet("font-size: 9pt; padding: 2px;")
+        layout.addWidget(self.status_label)
+        self.series_edit.textChanged.connect(self._on_series_name_changed)
+
         # ── Папка images ─────────────────────────────────────────────────
         images_group = QGroupBox(self.tr("Images folder"))
         images_layout = QHBoxLayout(images_group)
@@ -223,45 +232,67 @@ class TaggedTextExportDialog(QDialog):
             self.series_edit.setText(self.series_combo.itemText(index))
             self._load_series()
 
+    def _on_series_name_changed(self, _text):
+        """Статусная строка сбрасывается при смене имени серии (I2.1)."""
+        self._set_status('')
+
+    def _set_status(self, message, error=False):
+        """Показать немодальный статус Save/Load; error — красным (I2.1)."""
+        self.status_label.setText(message)
+        self._status_is_error = error
+        self.status_label.setStyleSheet(
+            "color: #C62828; font-size: 9pt; padding: 2px;" if error
+            else "color: #2E7D32; font-size: 9pt; padding: 2px;")
+
+    def status_is_error(self):
+        """True, если текущий статус — об ошибке (для тестов)."""
+        return getattr(self, '_status_is_error', False)
+
     def _load_series(self):
-        """Загрузить серию из <maps_dir>/<имя>.tagmap.json в таблицу."""
+        """Загрузить серию из <maps_dir>/<имя>.tagmap.json в таблицу.
+
+        Ошибки (нет файла, битый JSON) — в статусную строку, без модалок (I2.1)."""
         series = self.series_name()
         if not series:
-            QMessageBox.warning(self, "Load Mapping Set",
-                                self.tr("Enter a mapping set name first."))
+            self._set_status(self.tr("Enter a mapping set name."), error=True)
             return
         path = series_path(self._maps_dir, series)
         if not os.path.isfile(path):
-            QMessageBox.warning(self, "Load Mapping Set",
-                                f"Mapping set not found:\n{path}")
+            self._set_status(
+                self.tr("Mapping set not found: %s") % path, error=True)
             return
         try:
             from modules.tagged_text.stylemap import load as load_stylemap
             style_map, warnings = load_stylemap(path)
         except Exception as e:
-            QMessageBox.warning(self, "Load Mapping Set",
-                                f"Could not read the mapping set:\n{e}")
+            self._set_status(
+                self.tr("Could not read the mapping set: %s") % e, error=True)
             return
         self._set_map(style_map)
+        self._set_status(self.tr("Loaded: %s") % series)
         for w in warnings:
             if self.parent() is not None and hasattr(self.parent(), 'log'):
                 self.parent().log(f"⚠ {w}")
 
     def _save_series(self):
-        """Сохранить таблицу как серию в <maps_dir>/<имя>.tagmap.json."""
+        """Сохранить таблицу как серию в <maps_dir>/<имя>.tagmap.json.
+
+        Ошибки (пустое/недопустимое имя, сбой записи) — в статусную строку,
+        без модалок (I2.1); успех — «Saved: <полный путь>»."""
         series = self.series_name()
         error = self._series_error(series)
         if error:
-            QMessageBox.warning(self, "Save Mapping Set", error)
+            self._set_status(error, error=True)
             return
+        path = series_path(self._maps_dir, series)
         try:
             from modules.tagged_text.stylemap import save as save_stylemap
-            save_stylemap(series_path(self._maps_dir, series),
-                          self.style_map())
+            save_stylemap(path, self.style_map())
         except Exception as e:
-            QMessageBox.warning(self, "Save Mapping Set",
-                                f"Could not save the mapping set:\n{e}")
+            self._set_status(
+                self.tr("Could not save the mapping set: %s") % e, error=True)
             return
+        self._set_status(self.tr("Saved: %s") % path)
         if series not in self._series_names:
             self._series_names.append(series)
             self._series_names.sort()

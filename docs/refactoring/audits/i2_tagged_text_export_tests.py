@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Headless-тесты Batch I2: окно «роль → имя стиля» + хендлер export_tagged_txt.
+"""Headless-тесты Batch I2 (+ I2.1): окно «роль → имя стиля» + хендлер
+export_tagged_txt.
 
 Offscreen, модалки подменены (по образцу batch-p1b_batch8-15_regress_common.py):
 QDialog.exec → Accepted, QMessageBox.* → запись в журнал, QFileDialog → очередь
@@ -12,9 +13,9 @@ python -m modules.tagged_text того же исходника (при пуст�
 Запуск из корня репозитория:
   E:\\Dev\\python-embed\\python.exe -u i2_export_tests.py > i2.out 2>&1
 
-Финальный прогон: batch-i2/tests/run-003 (32 passed / 0 failed, 2026-11-07).
-run-002 задокументирован в BATCH_I2_REPORT.md s4 (B9 переведён на CLI с той
-же картой серии — GUI честно применяет серию из settings.json).
+Финальные прогоны: run-003 (I2, 32/0, 2026-11-07), run-005 (I2.1, 39/0,
+2026-11-08 — +A18–A23 статусная строка Save/Load; run-002 задокументирован
+в BATCH_I2_REPORT.md s4: B9 переведён на CLI с той же картой серии).
 """
 import faulthandler
 import hashlib
@@ -28,7 +29,7 @@ faulthandler.dump_traceback_later(90, repeat=True, file=sys.stderr)
 
 REPO = r'E:\Dev\SupervertalerPortable'
 STAGE = pathlib.Path(r'E:\Dev\Work_temp\SupervertalerPortable'
-                     r'\refactoring\batch-i2\tests\run-002')
+                     r'\refactoring\batch-i2\tests\run-005')
 ISO = STAGE / 'iso'
 OUT = STAGE / 'out'
 OUT.mkdir(parents=True, exist_ok=True)
@@ -196,6 +197,47 @@ dlg5.use_empty_radio.setChecked(True)
 dlg5.use_source_radio.setChecked(False)
 check('A17 переключатель непереведённых: пусто',
       dlg5.use_source_fallback() is False)
+
+# A18–A23: немодальная статусная строка (Batch I2.1, T-I2c)
+dlg6 = TaggedTextExportDialog(StyleMap(), images_dir='', series_name='',
+                              series_names=(), maps_dir=MAPS)
+n_modals = len(modal_log)
+dlg6._save_series()
+check('A18 Save с пустым именем -> статус-ошибка «Введите имя серии», без модалок',
+      dlg6.status_label.text() == 'Enter a mapping set name first.'
+      and dlg6.status_is_error()
+      and len(modal_log) == n_modals, dlg6.status_label.text())
+
+dlg6.series_edit.setText('StatusSeries')
+check('A19 статус сброшен при смене имени серии',
+      dlg6.status_label.text() == '' and not dlg6.status_is_error())
+
+n_modals = len(modal_log)
+dlg6._save_series()
+check('A20 Save ok -> «Saved: <полный путь>», без модалок',
+      dlg6.status_label.text() == 'Saved: ' + series_path(MAPS, 'StatusSeries')
+      and not dlg6.status_is_error()
+      and len(modal_log) == n_modals, dlg6.status_label.text())
+check('A20b файл серии создан', os.path.isfile(series_path(MAPS, 'StatusSeries')))
+
+dlg6._load_series()
+check('A21 Load существующей -> «Loaded: <серия>»',
+      dlg6.status_label.text() == 'Loaded: StatusSeries'
+      and not dlg6.status_is_error(), dlg6.status_label.text())
+
+dlg6.series_edit.setText('NoSuchSeries')
+dlg6._load_series()
+check('A22 Load отсутствующей -> статус-ошибка, без модалок',
+      dlg6.status_label.text().startswith('Mapping set not found:')
+      and dlg6.status_is_error(), dlg6.status_label.text())
+
+n_modals = len(modal_log)
+dlg6.series_edit.setText('')
+dlg6._load_series()
+check('A23 Load с пустым именем -> статус-ошибка, без NameError/модалок (фикс I2)',
+      dlg6.status_label.text() == 'Enter a mapping set name.'
+      and dlg6.status_is_error()
+      and len(modal_log) == n_modals, dlg6.status_label.text())
 
 # ═══ Часть B: полное приложение и хендлер ═══════════════════════════════
 import Supervertaler as SV  # noqa: E402
