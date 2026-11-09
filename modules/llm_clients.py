@@ -31,6 +31,9 @@ import time
 from typing import Dict, Optional, Literal, List, Tuple
 from dataclasses import dataclass
 
+# C1: маркеры промта + детектор эха (модуль без зависимостей, цикла нет).
+from modules.prompt_markers import looks_like_prompt_echo
+
 
 def load_api_keys() -> Dict[str, str]:
     """Load API keys from unified settings/settings.json, with legacy api_keys.txt fallback."""
@@ -183,6 +186,15 @@ class LLMConnectionError(LLMResponseError):
     connection was refused within the connect-timeout window. A genuine read
     timeout (server accepted the connection and stayed silent) stays
     LLMTimeoutError with its own message."""
+
+
+class LLMPromptEchoError(LLMResponseError):
+    """The model echoed the prompt scaffolding instead of translating (C1).
+
+    Raised only for callers that opt in via detect_prompt_echo=True (default
+    off: chat/QuickTrans/AutoTagger are untouched). The response is NOT
+    partially salvaged — the caller decides on a retry (coordinator Q2).
+    """
 
 
 # Q.8b: dedicated TCP-connect timeout (seconds) for every client this module
@@ -630,6 +642,7 @@ class LLMClient:
         system_prompt: Optional[str] = None,
         skip_cleaning: bool = False,
         enable_prompt_caching: bool = False,
+        detect_prompt_echo: bool = False,
     ) -> str:
         """
         Translate text using configured LLM
@@ -643,6 +656,9 @@ class LLMClient:
             system_prompt: Optional system prompt for AI behavior context
             skip_cleaning: If True, skip _clean_translation_response post-processing
                 (used for prompt generation where translation-related keywords are expected)
+            detect_prompt_echo: If True, raise LLMPromptEchoError when the response
+                carries prompt-echo markers absent from the source text (C1).
+                Default off — chat/QuickTrans/AutoTagger are untouched.
 
         Returns:
             Translated text
@@ -661,6 +677,7 @@ class LLMClient:
             system_prompt=system_prompt,
             skip_cleaning=skip_cleaning,
             enable_prompt_caching=enable_prompt_caching,
+            detect_prompt_echo=detect_prompt_echo,
         )
         return result
 
@@ -676,6 +693,7 @@ class LLMClient:
         system_prompt: Optional[str] = None,
         skip_cleaning: bool = False,
         enable_prompt_caching: bool = False,
+        detect_prompt_echo: bool = False,
     ) -> Tuple[str, Dict]:
         """
         Same as translate() but returns (text, usage_dict).
@@ -713,6 +731,16 @@ class LLMClient:
 
         if not skip_cleaning:
             result = self._clean_translation_response(result, prompt)
+            # C1 (координатор Q1): защита от эха промта — только по флагу
+            # (по умолчанию выключена; чат/QuickTrans/AutoTagger не затронуты).
+            # Ответ не вычищается частично — решение о повторе за вызывающим.
+            if detect_prompt_echo and looks_like_prompt_echo(result, text):
+                preview = result if len(result) <= 200 else result[:200] + '…'
+                raise LLMPromptEchoError(
+                    f"Model {self.model} echoed the prompt scaffolding in its "
+                    f"response (echo markers present while absent from the "
+                    f"source text). Response preview: {preview!r}",
+                    finish_reason=None, has_reasoning=False, reasoning_tokens=0)
 
         # Record this call to the persistent usage ledger (best-effort, metadata
         # only). When the provider returned no usage, estimate via chars/4.

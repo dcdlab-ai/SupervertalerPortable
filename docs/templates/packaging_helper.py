@@ -312,6 +312,8 @@ def cmd_importsmoke() -> int:
         "modules.tagged_text",
         # Batch I2: окно экспорта «роль → имя стиля InDesign» (PyQt6)
         "modules.tagged_text_export_dialog",
+        # Batch C1: маркеры промта + детектор эха (только stdlib)
+        "modules.prompt_markers",
     ]
     import importlib
     failed = []

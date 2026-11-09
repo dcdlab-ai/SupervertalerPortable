@@ -436,13 +436,19 @@ def _normalize_image(label_text, images_dir, report, lineno=0):
 
 def write_tagged_text(md_text, style_map=None, *, color_table='minimal',
                       char_style_policy='used', version=VERSION_DEFAULT,
-                      images_dir=None):
+                      images_dir=None, source_lines=None):
     """Собрать Tagged Text: возвращает (bytes, ExportReport).
 
     color_table: 'minimal' (Black+Paper — ДЕФОЛТ с I1.1: ручной факт —
     'none' даёт пустые абзацы = Define*Style + 1) | 'none' | 'gboh'
     (дословно образец, T4b2).
     char_style_policy: 'used' (только использованные) | 'all' (все три).
+    source_lines: необязательный список исходных текстов, выровненный 1:1 со
+    строками md_text (Batch C1). Когда передан, каждая строка-перевод
+    проверяется на эхо промта (маркеры каркаса, которых нет в исходнике) —
+    в report.warnings добавляется предупреждение с номером строки; экспорт
+    НЕ блокируется. Без source_lines проверка не выполняется (CLI/регресс
+    без изменений).
     """
     if style_map is None:
         style_map = StyleMap()
@@ -453,6 +459,17 @@ def write_tagged_text(md_text, style_map=None, *, color_table='minimal',
         raise ValueError('char_style_policy: used|all, получено %r'
                          % char_style_policy)
     report = ExportReport(color_table_mode=color_table)
+    if source_lines is not None:
+        # Batch C1: проверка эха промта по строкам перевода (до записи;
+        # предупреждение, не блокировка). source_lines выровнен со строками
+        # md_text — номера строк совпадают с нумерацией предупреждений о
+        # картинках (_line_suffix).
+        from modules.prompt_markers import looks_like_prompt_echo
+        md_lines = md_text.split('\n')
+        for lineno, (line, src) in enumerate(zip(md_lines, source_lines), 1):
+            if line and looks_like_prompt_echo(line, src):
+                report.warnings.append('похоже на эхо промта%s: %s'
+                                       % (_line_suffix(lineno), line[:80]))
     blocks, stats = parse_markdown(md_text)
     report.comments_dropped = stats.comments_dropped
     report.table_separators_dropped = stats.table_separators_dropped

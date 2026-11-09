@@ -29955,6 +29955,20 @@ class SupervertalerQt(QMainWindow):
             output_lines.append(join_segments(parts))
         return output_lines
 
+    def _collect_source_lines(self, segments):
+        """Исходные тексты, выровненные 1:1 со строками
+        _collect_translated_lines (та же группировка по paragraph_id и та же
+        склейка join_segments). Источник для проверки эха промта в
+        export_tagged_txt (Batch C1): детектор срабатывает, только когда
+        маркера нет в исходнике, поэтому писателю нужен source каждой строки."""
+        from itertools import groupby
+        from modules.simple_segmenter import join_segments
+        output_lines = []
+        for _para_id, group in groupby(segments, key=lambda s: s.paragraph_id):
+            parts = [(seg.source, getattr(seg, 'join_before', None)) for seg in group]
+            output_lines.append(join_segments(parts))
+        return output_lines
+
     def export_simple_txt(self):
         """Экспортирует переводы в простой текстовый файл, одна строка на сегмент.
         
@@ -30208,12 +30222,23 @@ class SupervertalerQt(QMainWindow):
             images_dir = dialog.images_dir() or None
 
             # Текст проекта → md-строки (тот же источник, что у simple txt).
-            md_text = '\n'.join(
-                self._collect_translated_lines(segments, use_source_fallback))
+            translated_lines = self._collect_translated_lines(
+                segments, use_source_fallback)
+            md_text = '\n'.join(translated_lines)
 
             from modules.tagged_text.writer import write_tagged_text
+            # Batch C1: исходники строк — детектор эха срабатывает только
+            # когда маркеров нет в source; экспорт не блокируется (только
+            # предупреждение в отчёте). Логические строки разворачиваются до
+            # физических (target с переводами строк даёт несколько строк md),
+            # чтобы нумерация предупреждений совпадала со строками документа.
+            _source_lines = []
+            for _src, _out in zip(self._collect_source_lines(segments),
+                                  translated_lines):
+                _source_lines.extend([_src] * (_out.count('\n') + 1))
             data, report = write_tagged_text(
-                md_text, style_map=dialog.style_map(), images_dir=images_dir)
+                md_text, style_map=dialog.style_map(), images_dir=images_dir,
+                source_lines=_source_lines)
             with open(file_path, 'wb') as f:
                 f.write(data)
 
@@ -48497,33 +48522,40 @@ class SupervertalerQt(QMainWindow):
             # Build prompt from the prompt library (Batch #9.3: локальная
             # Ollama-ветка промпта удалена вместе с провайдером).
             custom_prompt = None
-            
+            surrounding_context = ""  # C1: инициализация до try — нужна обработчику эха ниже
+
             if hasattr(self, 'prompt_manager_qt') and self.prompt_manager_qt:
                 try:
                     # Get surrounding segments if enabled
                     surrounding_segments = general_prefs.get('surrounding_segments', 5)
-                    surrounding_context = ""
-                    
+
                     if surrounding_segments > 0:
                         try:
+                            # C1: маркеры блока — из modules/prompt_markers,
+                            # строки байт-в-байт те же, что были литералами.
+                            from modules.prompt_markers import (
+                                SURROUNDING_CONTEXT_EXPLAINER,
+                                SURROUNDING_CONTEXT_HEADER,
+                                TRANSLATE_THIS_MARK,
+                            )
                             current_idx = current_row
                             start_idx = max(0, current_idx - surrounding_segments)
                             end_idx = min(len(self.current_project.segments), current_idx + surrounding_segments + 1)
                             surrounding = self.current_project.segments[start_idx:end_idx]
-                            
+
                             if len(surrounding) > 1:  # Only add if we have surrounding segments
                                 context_parts = []
                                 for i, seg in enumerate(surrounding):
                                     actual_idx = start_idx + i
                                     if actual_idx == current_idx:
-                                        context_parts.append(f">>> {seg.id}. {seg.source} <<<  [TRANSLATE THIS]")
+                                        context_parts.append(f">>> {seg.id}. {seg.source} <<<  {TRANSLATE_THIS_MARK}")
                                     else:
                                         context_parts.append(f"{seg.id}. {seg.source}")
                                         if seg.target:
                                             context_parts.append(f"    → {seg.target}")
-                                
-                                surrounding_context = "\n\n**SURROUNDING SEGMENTS FOR CONTEXT:**\n"
-                                surrounding_context += "(The segment marked with >>> <<< is the one to translate)\n\n"
+
+                                surrounding_context = "\n\n" + SURROUNDING_CONTEXT_HEADER + "\n"
+                                surrounding_context += SURROUNDING_CONTEXT_EXPLAINER + "\n\n"
                                 surrounding_context += "\n".join(context_parts)
                                 self.log(f"  Including {len(surrounding)} surrounding segments ({surrounding_segments} before/after)")
                         except Exception as e:
@@ -48620,14 +48652,54 @@ class SupervertalerQt(QMainWindow):
             
             # Translate using the module
             from modules import usage_log as _usage_log
+            from modules.llm_clients import LLMPromptEchoError
+            echo_skipped = False
             with _usage_log.UsageContext(task=("FuzzyFixer" if fuzzy_match else "Translate")):
-                translation = client.translate(
-                    text=segment.source,
-                    source_lang=self.current_project.source_lang,
-                    target_lang=self.current_project.target_lang,
-                    custom_prompt=custom_prompt,
-                    images=images
-                )
+                try:
+                    translation = client.translate(
+                        text=segment.source,
+                        source_lang=self.current_project.source_lang,
+                        target_lang=self.current_project.target_lang,
+                        custom_prompt=custom_prompt,
+                        images=images,
+                        detect_prompt_echo=True,  # C1 (координатор Q1): только здесь
+                    )
+                except LLMPromptEchoError:
+                    # C1 (координатор Q2): один повтор БЕЗ блока окружающих
+                    # сегментов — из промта убирается ровно то, что было
+                    # вставлено выше (контекст + разделяющие пустые строки).
+                    self.log(self.tr("⚠ Prompt echo detected — retrying without surrounding context (segment #%s)") % segment.id)
+                    _retry_prompt = custom_prompt
+                    if surrounding_context and custom_prompt:
+                        if surrounding_context + "\n\n" in custom_prompt:
+                            _retry_prompt = custom_prompt.replace(
+                                surrounding_context + "\n\n", "", 1)
+                        elif custom_prompt.endswith(surrounding_context):
+                            _retry_prompt = custom_prompt[: -len(surrounding_context)]
+                    try:
+                        translation = client.translate(
+                            text=segment.source,
+                            source_lang=self.current_project.source_lang,
+                            target_lang=self.current_project.target_lang,
+                            custom_prompt=_retry_prompt,
+                            images=images,
+                            detect_prompt_echo=True,
+                        )
+                        self.log(self.tr("↻ Retry without surrounding context: segment #%s translated") % segment.id)
+                    except LLMPromptEchoError:
+                        # Повторное эхо (координатор Q3): НЕ писать в target,
+                        # НЕ пополнять TM, НЕ писать undo, статус прежний;
+                        # только лог, без модальных окон.
+                        translation = None
+                        echo_skipped = True
+
+            if echo_skipped:
+                self.log(self.tr("⚠ Prompt echo in the model response — segment #%s left untranslated (%s/%s)") % (segment.id, provider, model))
+                if elapsed_timer:
+                    elapsed_timer.stop()
+                if progress_dialog:
+                    progress_dialog.close()
+                return
 
             if translation:
                 # Update segment
