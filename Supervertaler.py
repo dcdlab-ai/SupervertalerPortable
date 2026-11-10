@@ -30264,19 +30264,64 @@ class SupervertalerQt(QMainWindow):
 
     def _show_tagged_text_report(self, report, file_path):
         """Окно отчёта экспорта Tagged Text: ExportReport.to_text() +
-        кнопка «Копировать» (Batch I2, п.3)."""
+        кнопка «Копировать» (Batch I2, п.3).
+
+        Batch C1.1: окно изменяемого размера (по умолчанию 820x560,
+        минимум 720x420); просмотр в прокручиваемом поле с переносом длинных
+        строк (горизонтальная прокрутка не нужна); предупреждения об эхе
+        промта — ОТДЕЛЬНЫМ блоком наверху под своим заголовком (красным,
+        жирным), остальные предупреждения ниже обычным шрифтом; число
+        предупреждений — в заголовке окна и в первой строке. Логика экспорта
+        и writer не менялись: «Копировать» кладёт прежний report.to_text()."""
+        from html import escape as _html_escape
+
+        warnings = list(report.warnings)
+        echo_warnings = [w for w in warnings if 'похоже на эхо промта' in w]
+        other_warnings = [w for w in warnings if 'похоже на эхо промта' not in w]
+
         dialog = QDialog(self)
-        dialog.setWindowTitle(self.tr("InDesign Tagged Text Export Report"))
-        dialog.setMinimumSize(560, 420)
+        dialog.setWindowTitle(
+            self.tr("InDesign Tagged Text Export Report — %s warning(s)")
+            % len(warnings))
+        dialog.resize(820, 560)
+        dialog.setMinimumSize(720, 420)
         layout = QVBoxLayout(dialog)
 
-        path_label = QLabel(f"<b>{os.path.basename(file_path)}</b>")
+        path_label = QLabel(
+            f"<b>{os.path.basename(file_path)}</b> — "
+            f"{self.tr('%s warning(s)') % len(warnings)}")
         path_label.setToolTip(file_path)
         layout.addWidget(path_label)
 
-        report_view = QPlainTextEdit()
+        full_text = report.to_text()
+        if warnings:
+            # Сводка без секции «Предупреждения:» — она показывается блоками ниже.
+            stats_text = full_text.split('\nПредупреждения:\n', 1)[0]
+        else:
+            stats_text = full_text  # заканчивается «Предупреждения: нет»
+
+        parts = ['<html><body>']
+        if echo_warnings:
+            parts.append(
+                '<div style="color:#c00000; font-weight:bold;">⚠ %s</div>'
+                % _html_escape(self.tr("Prompt echo in the translation — %s")
+                               % len(echo_warnings)))
+            for _w in echo_warnings:
+                parts.append(
+                    '<div style="color:#c00000; font-weight:bold;">%s</div>'
+                    % _html_escape(_w))
+        parts.append('<div>%s</div>' % _html_escape(stats_text).replace('\n', '<br>'))
+        if other_warnings:
+            parts.append('<div><b>%s</b></div>'
+                         % _html_escape(self.tr("Warnings (%s)") % len(other_warnings)))
+            for _w in other_warnings:
+                parts.append('<div>%s</div>' % _html_escape(_w))
+        parts.append('</body></html>')
+
+        report_view = QTextEdit()
         report_view.setReadOnly(True)
-        report_view.setPlainText(report.to_text())
+        report_view.setHtml(''.join(parts))
+        report_view.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
         layout.addWidget(report_view)
 
         button_layout = QHBoxLayout()
