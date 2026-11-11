@@ -205,6 +205,7 @@ from modules.shortcut_manager import ShortcutManager  # Управление г�
 from modules.termlens_widget import TermLensWidget  # Виджет TermLens для отображения глоссария
 from modules.help_system import Topics as HelpTopics, install as install_help_system, set_topic as set_help_topic, open_help
 from modules.models import Comment, Segment, Project, strip_invisible_markers
+from modules.simple_import_builder import build_segments_from_lines  # Чистый построитель сегментов txt/md-импорта (Batch TBL1.2)
 from modules import tag_manager as _tag_manager  # DOCX tag-движок (Batch #2)
 from modules.tag_manager import (
     runs_to_tagged_text,
@@ -29734,34 +29735,14 @@ class SupervertalerQt(QMainWindow):
                 lines = f.readlines()
             
             # Create segments from lines
-            segments = []
-            if use_sentence_segmentation:
-                segmenter = self._make_sentence_segmenter(markdown=is_markdown)
-                for line_num, line in enumerate(lines, 1):
-                    text = line.rstrip('\r\n')
-                    if not text.strip():
-                        # Empty line → empty segment (hidden in grid, preserved for export)
-                        segments.append(Segment(
-                            id=len(segments) + 1, source=text, target="",
-                            status="untranslated", notes="", type="para",
-                            paragraph_id=line_num, document_position=line_num
-                        ))
-                    else:
-                        for sentence, separator in segmenter.segment_with_separators(text):
-                            segments.append(Segment(
-                                id=len(segments) + 1, source=sentence, target="",
-                                status="untranslated", notes="", type="para",
-                                paragraph_id=line_num, document_position=line_num,
-                                join_before=separator
-                            ))
-            else:
-                for line_num, line in enumerate(lines, 1):
-                    text = line.rstrip('\r\n')
-                    segments.append(Segment(
-                        id=len(segments) + 1, source=text, target="",
-                        status="untranslated", notes="", type="para",
-                        paragraph_id=line_num, document_position=line_num
-                    ))
+            # TBL1.2: общий построитель (modules/simple_import_builder.py) —
+            # та же логика, что раньше дублировалась здесь и в fallback-ветке
+            # кодировок ниже; segmenter=None = без разбиения на предложения.
+            segments = build_segments_from_lines(
+                lines,
+                self._make_sentence_segmenter(markdown=is_markdown)
+                if use_sentence_segmentation else None,
+            )
             
             if not segments:
                 QMessageBox.warning(
@@ -29857,33 +29838,12 @@ class SupervertalerQt(QMainWindow):
                         lines = f.readlines()
                     self.log(f"✓ Successfully read file with {encoding} encoding")
                     # Re-run import with this encoding
-                    segments = []
-                    if use_sentence_segmentation:
-                        segmenter = self._make_sentence_segmenter(markdown=is_markdown)
-                        for line_num, line in enumerate(lines, 1):
-                            text = line.rstrip('\r\n')
-                            if not text.strip():
-                                segments.append(Segment(
-                                    id=len(segments) + 1, source=text, target="",
-                                    status="untranslated", notes="", type="para",
-                                    paragraph_id=line_num, document_position=line_num
-                                ))
-                            else:
-                                for sentence, separator in segmenter.segment_with_separators(text):
-                                    segments.append(Segment(
-                                        id=len(segments) + 1, source=sentence, target="",
-                                        status="untranslated", notes="", type="para",
-                                        paragraph_id=line_num, document_position=line_num,
-                                        join_before=separator
-                                    ))
-                    else:
-                        for line_num, line in enumerate(lines, 1):
-                            text = line.rstrip('\r\n')
-                            segments.append(Segment(
-                                id=len(segments) + 1, source=text, target="",
-                                status="untranslated", notes="", type="para",
-                                paragraph_id=line_num, document_position=line_num
-                            ))
+                    # TBL1.2: тот же общий построитель, что и в основной ветке.
+                    segments = build_segments_from_lines(
+                        lines,
+                        self._make_sentence_segmenter(markdown=is_markdown)
+                        if use_sentence_segmentation else None,
+                    )
                     
                     if segments:
                         project = Project(
