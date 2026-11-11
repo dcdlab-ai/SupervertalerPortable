@@ -29906,17 +29906,81 @@ class SupervertalerQt(QMainWindow):
                 f"Failed to import text file:\n\n{str(e)}"
             )
     
+    @staticmethod
+    def _group_export_items(segments):
+        """Разложить сегменты в упорядоченные «строки экспорта» (TBL1.2).
+
+        Ячейки таблиц (table_info длины 4, формат TBL1.2) группируются ЯВНО
+        по (file_id, table_idx, row) — без опоры на соседство в списке
+        сегментов (сортировка грида не должна ломать сборку таблицы).
+        Прежний формат table_info (legacy docx, кортеж длины 3) и обычные
+        сегменты группируются по paragraph_id в порядке первого появления
+        (при сортировке грида внутри абзаца поведение прежнее — блоки
+        paragraph_id идут подряд).
+
+        Возвращает список элементов:
+          ('para', paragraph_id, [сегменты группы]) — обычный абзац;
+          ('table', (file_id, table_idx, row), [сегменты-ячейки], is_header).
+        """
+        paras = {}
+        table_rows = {}
+        order = []  # ('para'|'table', ключ группы)
+        for seg in segments:
+            ti = getattr(seg, 'table_info', None)
+            if ti is not None and len(ti) == 4:
+                key = (seg.file_id, ti[0], ti[1])
+                if key not in table_rows:
+                    table_rows[key] = ([], bool(ti[3]))
+                    order.append(('table', key))
+                table_rows[key][0].append(seg)
+            else:
+                pid = seg.paragraph_id
+                if pid not in paras:
+                    paras[pid] = []
+                    order.append(('para', pid))
+                paras[pid].append(seg)
+        items = []
+        for kind, key in order:
+            if kind == 'para':
+                items.append(('para', key, paras[key], False))
+            else:
+                cells, is_header = table_rows[key]
+                items.append(('table', key, cells, is_header))
+        return items
+
     def _collect_translated_lines(self, segments, use_source_fallback):
         """Собрать строки экспорта из сегментов: группировка по paragraph_id
         (при пословном/посложном разбиении несколько сегментов делят абзац)
         и склейка через join_segments. Общий источник текста для
         export_simple_txt и export_tagged_txt (Batch I2): целевой текст
         сегмента, иначе исходник (use_source_fallback) или пустая строка;
-        пустые сегменты дают пустые строки."""
-        from itertools import groupby
+        пустые сегменты дают пустые строки.
+
+        TBL1.2: сегменты-ячейки таблиц собираются обратно в md-строки через
+        build_table_row (группировка по (file_id, table_idx, row), текст
+        ячейки — по тому же правилу пустого перевода); после строки
+        заголовка (is_header=True) вставляется канонический разделитель
+        build_table_separator по числу ячеек заголовка; у блока без
+        заголовка разделителя нет. Строки таблицы идут подряд, вокруг
+        таблицы — как у обычных абзацев."""
         from modules.simple_segmenter import join_segments
+        from modules.md_table_cells import build_table_row, build_table_separator
         output_lines = []
-        for _para_id, group in groupby(segments, key=lambda s: s.paragraph_id):
+        for _kind, _key, group, is_header in self._group_export_items(segments):
+            if _kind == 'table':
+                cells = []
+                for seg in group:
+                    if seg.target and seg.target.strip():
+                        text = seg.target
+                    elif use_source_fallback:
+                        text = seg.source
+                    else:
+                        text = ""
+                    cells.append(text)
+                output_lines.append(build_table_row(cells))
+                if is_header:
+                    output_lines.append(build_table_separator(len(cells)))
+                continue
             parts = []
             for seg in group:
                 if seg.target and seg.target.strip():
@@ -29933,14 +29997,20 @@ class SupervertalerQt(QMainWindow):
 
     def _collect_source_lines(self, segments):
         """Исходные тексты, выровненные 1:1 со строками
-        _collect_translated_lines (та же группировка по paragraph_id и та же
-        склейка join_segments). Источник для проверки эха промта в
-        export_tagged_txt (Batch C1): детектор срабатывает, только когда
-        маркера нет в исходнике, поэтому писателю нужен source каждой строки."""
-        from itertools import groupby
+        _collect_translated_lines (та же группировка; для таблиц — те же
+        md-строки из source ячеек и разделитель после заголовка). Источник
+        для проверки эха промта в export_tagged_txt (Batch C1): детектор
+        срабатывает, только когда маркера нет в исходнике, поэтому писателю
+        нужен source каждой строки."""
         from modules.simple_segmenter import join_segments
+        from modules.md_table_cells import build_table_row, build_table_separator
         output_lines = []
-        for _para_id, group in groupby(segments, key=lambda s: s.paragraph_id):
+        for _kind, _key, group, is_header in self._group_export_items(segments):
+            if _kind == 'table':
+                output_lines.append(build_table_row([seg.source for seg in group]))
+                if is_header:
+                    output_lines.append(build_table_separator(len(group)))
+                continue
             parts = [(seg.source, getattr(seg, 'join_before', None)) for seg in group]
             output_lines.append(join_segments(parts))
         return output_lines
