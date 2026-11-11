@@ -280,7 +280,7 @@ n_modals = len(modal_log)
 win.export_tagged_txt()
 check('B3 хендлер: окно соответствий и окно отчёта открыты',
       any("'Export InDesign Tagged Text'" in m for m in modal_log[n_modals:])
-      and any("'InDesign Tagged Text Export Report'" in m
+      and any("'InDesign Tagged Text Export Report" in m
               for m in modal_log[n_modals:]), modal_log[n_modals:])
 check('B4 файл записан (UTF-16LE+BOM)',
       os.path.isfile(out_docling)
