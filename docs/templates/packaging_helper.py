@@ -314,6 +314,9 @@ def cmd_importsmoke() -> int:
         "modules.tagged_text_export_dialog",
         # Batch C1: маркеры промта + детектор эха (только stdlib)
         "modules.prompt_markers",
+        # Batch TBL1.1: разбор md-таблиц на ячейки (только stdlib, в TBL1.1
+        # продуктом не вызывается — интеграция в TBL1.2)
+        "modules.md_table_cells",
     ]
     import importlib
     failed = []
