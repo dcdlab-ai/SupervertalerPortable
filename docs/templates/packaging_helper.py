@@ -317,6 +317,9 @@ def cmd_importsmoke() -> int:
         # Batch TBL1.1: разбор md-таблиц на ячейки (только stdlib, в TBL1.1
         # продуктом не вызывается — интеграция в TBL1.2)
         "modules.md_table_cells",
+        # Batch TBL1.2: чистый построитель сегментов txt/md-импорта
+        # (без Qt; импортирует modules.models и modules.md_table_cells)
+        "modules.simple_import_builder",
     ]
     import importlib
     failed = []

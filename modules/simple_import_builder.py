@@ -30,18 +30,24 @@ from modules.md_table_cells import find_table_blocks, is_table_separator, split_
 
 
 def _map_table_rows(lines):
-    """Карта табличных строк файла: индекс физической строки (0-based) ->
-    (table_idx, row, is_header, cells).
+    """Карта табличных строк файла (0-based) -> два множества:
 
-    Разделители (включая «отброшенные» — не на 2-й позиции блока) сегментами
-    не становятся; нумерация row идёт по md-строкам данных блока подряд,
-    поэтому карта совпадает с порядком block.rows.
+    table_rows: индекс физической строки данных -> (table_idx, row,
+    is_header, cells);
+    separator_lines: индексы строк-разделителей внутри блоков — сегментами
+    не становятся (при экспорте регенерируются). Разделитель-одиночка
+    (блок без строк данных, отброшен find_table_blocks) остаётся обычным
+    текстом. Разделители, «отброшенные» внутри блока (не на 2-й позиции),
+    тоже не сегментируются. Нумерация row идёт по md-строкам данных блока
+    подряд, поэтому карта совпадает с порядком block.rows.
     """
     table_rows = {}
+    separator_lines = set()
     for table_idx, block in enumerate(find_table_blocks(lines)):
         row_idx = 0
         for line_idx in range(block.start, block.end + 1):
             if is_table_separator(lines[line_idx]):
+                separator_lines.add(line_idx)
                 continue
             cells = split_table_row(lines[line_idx])
             if cells is None:
@@ -49,7 +55,7 @@ def _map_table_rows(lines):
             table_rows[line_idx] = (table_idx, row_idx,
                                     bool(block.header and row_idx == 0), cells)
             row_idx += 1
-    return table_rows
+    return table_rows, separator_lines
 
 
 def build_segments_from_lines(lines, segmenter=None, recognize_tables=False,
@@ -66,7 +72,8 @@ def build_segments_from_lines(lines, segmenter=None, recognize_tables=False,
     НЕтабличные строки режутся на предложения (join_before = separator);
     пустые строки остаются пустыми сегментами.
 
-    recognize_tables=True — ячейки md-таблиц становятся сегментами
+    recognize_tables=True — ячейки md-таблиц становятся сегментами, а
+    строки-разделители внутри табличных блоков сегментами не становятся
     (см. шапку модуля); табличные строки предложениями не режутся.
 
     id_start — начальный id (по умолчанию 1; многофайловый импорт передаёт
@@ -78,10 +85,14 @@ def build_segments_from_lines(lines, segmenter=None, recognize_tables=False,
     """
     segments = []
     next_id = id_start
-    table_rows = _map_table_rows(lines) if recognize_tables else {}
+    if recognize_tables:
+        table_rows, separator_lines = _map_table_rows(lines)
+    else:
+        table_rows, separator_lines = {}, set()
 
     for line_num, line in enumerate(lines, 1):
-        table_entry = table_rows.get(line_num - 1)
+        idx0 = line_num - 1
+        table_entry = table_rows.get(idx0)
         if table_entry is not None:
             table_idx, row_idx, is_header, cells = table_entry
             for col, cell in enumerate(cells):
@@ -94,6 +105,11 @@ def build_segments_from_lines(lines, segmenter=None, recognize_tables=False,
                     file_id=file_id, file_name=file_name,
                 ))
                 next_id += 1
+            continue
+
+        if idx0 in separator_lines:
+            # Строка-разделитель таблицы сегментом не становится:
+            # при экспорте регенерируется (build_table_separator).
             continue
 
         text = line.rstrip('\r\n')
