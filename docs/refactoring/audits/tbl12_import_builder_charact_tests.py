@@ -39,6 +39,7 @@ from modules.models import Segment  # noqa: E402
 from modules.segmentation_rules import SegmentationRules  # noqa: E402
 from modules.simple_segmenter import MarkdownSegmenter, SimpleSegmenter  # noqa: E402
 from modules.simple_import_builder import build_segments_from_lines  # noqa: E402
+from modules.statuses import DEFAULT_STATUS  # noqa: E402
 
 STAGE = pathlib.Path(r'E:\Dev\Work_temp\SupervertalerPortable'
                      r'\refactoring\batch-tbl12\charact')
@@ -143,6 +144,47 @@ def sha(s):
     return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
 
+# ── Прежний код многофайлового TXT/MD-импорта ВЕРБАТИМ (снимок
+#    builder_block_multifile_before.py.txt из e7d91f05; _extractor_label,
+#    чтение файла и try/except — окружение монолита, тело построения —
+#    ниже дословно) ─────────────────────────────────────────────────────
+def old_build_multifile(lines, sentence_segment, txt_segmenter,
+                        current_segment_id, file_id, file_name):
+    """Точная копия прежней TXT/MD-ветки _import_multifile_project."""
+    file_segments = []
+    if sentence_segment:
+        for line_num, line in enumerate(lines, 1):
+            text = line.rstrip('\n\r')
+            if not text.strip():
+                file_segments.append(Segment(
+                    id=current_segment_id, source=text, target="",
+                    status=DEFAULT_STATUS.key, file_id=file_id,
+                    file_name=file_name, paragraph_id=line_num,
+                    document_position=line_num
+                ))
+                current_segment_id += 1
+            else:
+                for sentence, separator in txt_segmenter.segment_with_separators(text):
+                    file_segments.append(Segment(
+                        id=current_segment_id, source=sentence, target="",
+                        status=DEFAULT_STATUS.key, file_id=file_id,
+                        file_name=file_name, paragraph_id=line_num,
+                        document_position=line_num, join_before=separator
+                    ))
+                    current_segment_id += 1
+    else:
+        for line_num, line in enumerate(lines, 1):
+            text = line.rstrip('\n\r')
+            file_segments.append(Segment(
+                id=current_segment_id, source=text, target="",
+                status=DEFAULT_STATUS.key, file_id=file_id,
+                file_name=file_name, paragraph_id=line_num,
+                document_position=line_num
+            ))
+            current_segment_id += 1
+    return file_segments
+
+
 inputs = [
     ('md docling', MD_DOCLING, 'utf-8', True),
     ('md pymupdf', MD_PYMUPDF, 'utf-8', True),
@@ -172,6 +214,32 @@ for label, path, enc, is_md in inputs:
               and [s.status for s in old] == [s.status for s in new]
               and [s.join_before for s in old] == [s.join_before for s in new],
               (len(old), len(new)))
+
+# ── Многофайловый TXT/MD-импорт (ветка _import_multifile_project):
+#    recognize_tables=False (галка выключена) — байт-в-байт против прежнего
+#    кода; file_id/file_name/DEFAULT_STATUS.key/продолжающийся id ────────
+for label, path, is_md in (('multifile md docling', MD_DOCLING, True),
+                           ('multifile md pymupdf', MD_PYMUPDF, True),
+                           ('multifile synthetic', str(SYNTH), False),
+                           ('multifile cp1251', str(CP1251), False)):
+    with open(path, 'r', encoding='cp1251' if 'cp1251' in label else 'utf-8') as f:
+        lines = f.readlines()
+    for seg_mode, seg_name in ((False, 'без сегментера'),
+                               (True, 'с сегментером')):
+        seg_obj = None
+        if seg_mode:
+            rules = SegmentationRules()
+            seg_obj = (MarkdownSegmenter if is_md else SimpleSegmenter)(rules)
+        old = old_build_multifile(lines, seg_mode, seg_obj,
+                                  current_segment_id=17, file_id=3,
+                                  file_name='Input.md')
+        new = build_segments_from_lines(
+            lines, seg_obj if seg_mode else None, recognize_tables=False,
+            id_start=17, status=DEFAULT_STATUS.key, file_id=3,
+            file_name='Input.md')
+        o, n = dumps(old), dumps(new)
+        check(f'{label} [{seg_name}]: to_dict байт-в-байт',
+              o == n, (sha(o), sha(n), len(old), len(new)))
 
 print(f'CHARACT-TESTS: {_N[0]} passed / '
       f'{sum(1 for _ in [])} — всего проверок {_N[0]}', flush=True)

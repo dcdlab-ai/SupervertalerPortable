@@ -29689,6 +29689,17 @@ class SupervertalerQt(QMainWindow):
             segment_checkbox.toggled.connect(md_note.setVisible)
             layout.addWidget(md_note)
 
+        # TBL1.2: распознавание md-таблиц (по умолчанию включено; значение
+        # запоминается тем же механизмом, что соседние настройки диалога)
+        recognize_tables = general_settings.get('last_import_recognize_tables', True)
+        tables_checkbox = CheckmarkCheckBox(self.tr("Recognize tables"))
+        tables_checkbox.setChecked(recognize_tables)
+        tables_checkbox.setToolTip(
+            "When checked, Markdown table rows are imported as segments per cell\n"
+            "(the '|---|' separator row is not imported and is rebuilt on export)."
+        )
+        layout.addWidget(tables_checkbox)
+
         layout.addSpacing(20)
 
         # Buttons
@@ -29719,12 +29730,14 @@ class SupervertalerQt(QMainWindow):
         source_lang = source_combo.currentData()
         target_lang = target_combo.currentData()
         use_sentence_segmentation = segment_checkbox.isChecked()
+        recognize_tables = tables_checkbox.isChecked()
 
         # Save selected settings for next time
         general_settings = self.load_general_settings()
         general_settings['last_import_source_lang'] = source_lang
         general_settings['last_import_target_lang'] = target_lang
         general_settings['last_import_sentence_segment'] = use_sentence_segmentation
+        general_settings['last_import_recognize_tables'] = recognize_tables
         self.save_general_settings(general_settings)
 
         try:
@@ -29737,11 +29750,13 @@ class SupervertalerQt(QMainWindow):
             # Create segments from lines
             # TBL1.2: общий построитель (modules/simple_import_builder.py) —
             # та же логика, что раньше дублировалась здесь и в fallback-ветке
-            # кодировок ниже; segmenter=None = без разбиения на предложения.
+            # кодировок ниже; segmenter=None = без разбиения на предложения,
+            # recognize_tables = ячейки md-таблиц как сегменты.
             segments = build_segments_from_lines(
                 lines,
                 self._make_sentence_segmenter(markdown=is_markdown)
                 if use_sentence_segmentation else None,
+                recognize_tables=recognize_tables,
             )
             
             if not segments:
@@ -29843,6 +29858,7 @@ class SupervertalerQt(QMainWindow):
                         lines,
                         self._make_sentence_segmenter(markdown=is_markdown)
                         if use_sentence_segmentation else None,
+                        recognize_tables=recognize_tables,
                     )
                     
                     if segments:
@@ -30755,6 +30771,17 @@ class SupervertalerQt(QMainWindow):
         )
         format_layout.addWidget(segment_checkbox)
 
+        # TBL1.2: распознавание md-таблиц в TXT/MD-файлах (по умолчанию
+        # включено; тот же ключ настроек, что в одиночном импорте)
+        recognize_tables = general_settings.get('last_import_recognize_tables', True)
+        tables_checkbox = CheckmarkCheckBox(self.tr("Recognize tables (TXT/MD files)"))
+        tables_checkbox.setChecked(recognize_tables)
+        tables_checkbox.setToolTip(
+            "When checked, Markdown table rows are imported as segments per cell\n"
+            "(the '|---|' separator row is not imported and is rebuilt on export)."
+        )
+        format_layout.addWidget(tables_checkbox)
+
         # Okapi file-type options: which parts of Office documents to import
         # (defaults come from Settings → File Types). Shown in a scroll area
         # so the dialog stays compact.
@@ -30798,6 +30825,7 @@ class SupervertalerQt(QMainWindow):
         source_lang = source_combo.currentData()
         target_lang = target_combo.currentData()
         use_sentence_segmentation = segment_checkbox.isChecked()
+        recognize_tables = tables_checkbox.isChecked()
         # Per-import override of the Okapi file-type options (read by the
         # extract/merge calls via get_effective_import_options()).
         self._import_options = self._read_import_option_widgets(_io_checks)
@@ -30807,12 +30835,14 @@ class SupervertalerQt(QMainWindow):
         general_settings['last_import_source_lang'] = source_lang
         general_settings['last_import_target_lang'] = target_lang
         general_settings['last_import_sentence_segment'] = use_sentence_segmentation
+        general_settings['last_import_recognize_tables'] = recognize_tables
         self.save_general_settings(general_settings)
 
         # Import files
-        self._import_multifile_project(folder_path, selected_files, source_lang, target_lang, use_sentence_segmentation)
-    
-    def _import_multifile_project(self, folder_path: str, files: list, source_lang: str, target_lang: str, sentence_segment: bool = False):
+        self._import_multifile_project(folder_path, selected_files, source_lang, target_lang,
+                                       use_sentence_segmentation, recognize_tables)
+
+    def _import_multifile_project(self, folder_path: str, files: list, source_lang: str, target_lang: str, sentence_segment: bool = False, recognize_tables: bool = False):
         """Импортирует несколько файлов в один проект.
         
                 Аргументы:
@@ -30820,7 +30850,9 @@ class SupervertalerQt(QMainWindow):
                     files: список словарей файлов с ключами 'name', 'path', 'type'
                     source_lang: код исходного языка
                     target_lang: код целевого языка
-                    sentence_segment: разбивать ли строки TXT/MD на предложения"""
+                    sentence_segment: разбивать ли строки TXT/MD на предложения
+                    recognize_tables: распознавать ли md-таблицы в TXT/MD
+                        (ячейка = сегмент, TBL1.2)"""
         from datetime import datetime
         import shutil
 
@@ -30898,38 +30930,25 @@ class SupervertalerQt(QMainWindow):
                     with open(file_path, 'r', encoding='utf-8') as f:
                         lines = f.readlines()
 
-                    if sentence_segment:
-                        txt_segmenter = self._make_sentence_segmenter(markdown=(file_type == 'md'))
-                        for line_num, line in enumerate(lines, 1):
-                            text = line.rstrip('\n\r')
-                            if not text.strip():
-                                file_segments.append(Segment(
-                                    id=current_segment_id, source=text, target="",
-                                    status=DEFAULT_STATUS.key, file_id=file_id,
-                                    file_name=file_name, paragraph_id=line_num,
-                                    document_position=line_num
-                                ))
-                                current_segment_id += 1
-                            else:
-                                for sentence, separator in txt_segmenter.segment_with_separators(text):
-                                    file_segments.append(Segment(
-                                        id=current_segment_id, source=sentence, target="",
-                                        status=DEFAULT_STATUS.key, file_id=file_id,
-                                        file_name=file_name, paragraph_id=line_num,
-                                        document_position=line_num, join_before=separator
-                                    ))
-                                    current_segment_id += 1
-                    else:
-                        for line_num, line in enumerate(lines, 1):
-                            text = line.rstrip('\n\r')
-                            file_segments.append(Segment(
-                                id=current_segment_id, source=text, target="",
-                                status=DEFAULT_STATUS.key, file_id=file_id,
-                                file_name=file_name, paragraph_id=line_num,
-                                document_position=line_num
-                            ))
-                            current_segment_id += 1
-                
+                    # TBL1.2: общий построитель (modules/simple_import_builder.py)
+                    # — та же логика, что в import_simple_txt; file_id /
+                    # file_name и продолжающийся счётчик id — параметры.
+                    # table_idx в table_info считается по файлу (с 0); file_id
+                    # в него НЕ входит: экспорт группирует по
+                    # (file_id, table_idx, row).
+                    _built = build_segments_from_lines(
+                        lines,
+                        self._make_sentence_segmenter(markdown=(file_type == 'md'))
+                        if sentence_segment else None,
+                        recognize_tables=recognize_tables,
+                        id_start=current_segment_id,
+                        status=DEFAULT_STATUS.key,
+                        file_id=file_id,
+                        file_name=file_name,
+                    )
+                    file_segments.extend(_built)
+                    current_segment_id += len(_built)
+
                 elif file_type == 'docx':
                     # ── Okapi extraction ─────────────────────────────
                     # Calls the sidecar's /extract endpoint and converts
