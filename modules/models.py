@@ -289,6 +289,13 @@ class Segment:
                 Comment.from_dict(c) if isinstance(c, dict) else c
                 for c in raw_comments
             ]
+        # TBL1.1: JSON превращает кортеж table_info в список; на диске
+        # table_info — всегда кортеж. Нормализуем список/кортеж длины 4
+        # в кортеж; None остаётся None; прочее (неверная длина) — оставляем
+        # как пришло и не падаем (потребители сравнивают на равенство).
+        ti = filtered_data.get('table_info')
+        if isinstance(ti, list) and len(ti) == 4:
+            filtered_data['table_info'] = tuple(ti)
         return cls(**filtered_data)
 
 
