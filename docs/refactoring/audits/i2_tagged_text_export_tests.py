@@ -323,11 +323,65 @@ out_pymupdf = str(OUT / 'pymupdf_gui.tagged.txt')
 save_queue.append(out_pymupdf)
 win.export_tagged_txt()
 check('B8 pymupdf: файл записан', os.path.isfile(out_pymupdf))
+
+# --- Batch T1 (коммит 1): нормализация таблиц входа CLI для B9 ---
+# GUI-экспорт собирает таблицы канонически (build_table_row/
+# build_table_separator — решение TBL1.0 п.4), поэтому CLI-выход сравнивается
+# с GUI на входе с ТАК ЖЕ нормализованными таблицами (строки данных
+# пересобраны build_table_row(ячейки), после строки заголовка вставлен
+# build_table_separator(число ячеек заголовка); все остальные строки —
+# байт-в-байт, EOL исходника сохранён). Само сравнение — строгое байт-в-байт.
+from modules.md_table_cells import (find_table_blocks, is_table_separator,  # noqa: E402
+                                    split_table_row, build_table_row,
+                                    build_table_separator)
+
+
+def _eol_of(line):
+    for e in ('\r\n', '\n', '\r'):
+        if line.endswith(e):
+            return e
+    return ''
+
+
+def normalize_md_tables(lines):
+    """Канонизация md-таблиц (Batch T1): блоки find_table_blocks, строки
+    данных -> build_table_row, разделитель после заголовка ->
+    build_table_separator(n_cols_header); не-табличные строки без изменений."""
+    out = []
+    blocks = iter(find_table_blocks(lines))
+    cur = next(blocks, None)
+    i, n = 0, len(lines)
+    while i < n:
+        if cur is not None and i == cur.start:
+            row_idx = 0
+            for j in range(cur.start, cur.end + 1):
+                eol = _eol_of(lines[j])
+                if is_table_separator(lines[j]):
+                    continue  # исходный разделитель заменяется каноническим
+                cells = split_table_row(lines[j])
+                out.append(build_table_row(cells) + eol)
+                if cur.header and row_idx == 0:
+                    out.append(build_table_separator(cur.n_cols_header) + eol)
+                row_idx += 1
+            i = cur.end + 1
+            cur = next(blocks, None)
+            continue
+        out.append(lines[i])
+        i += 1
+    return out
+
+
 # CLI идёт с ТОЙ ЖЕ картой серии MyMap (GUI применил её из settings),
 # поэтому сравнение байт-в-байт корректно.
 cli_pymupdf = str(OUT / 'pymupdf_cli.tagged.txt')
+norm_pymupdf = OUT / 'pymupdf_cli_input_norm.md'
+norm_pymupdf.write_text(
+    ''.join(normalize_md_tables(
+        pathlib.Path(MD_PYMUPDF).read_text(encoding='utf-8')
+        .splitlines(keepends=True))),
+    encoding='utf-8', newline='')
 r = subprocess.run([sys.executable, '-m', 'modules.tagged_text',
-                    MD_PYMUPDF, cli_pymupdf,
+                    str(norm_pymupdf), cli_pymupdf,
                     '--map', series_path(MAPS, 'MyMap')],
                    cwd=REPO, capture_output=True)
 check('B9 pymupdf: GUI-экспорт == CLI-выход с картой MyMap (байт-в-байт)',
