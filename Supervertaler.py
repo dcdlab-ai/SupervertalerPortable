@@ -48602,13 +48602,11 @@ class SupervertalerQt(QMainWindow):
                 # Auto-resize the row to fit the new content
                 self._auto_resize_single_row(current_row)
                 
-                # Add to TM if not already there
-                if self.tm_database:
-                    try:
-                        self.tm_database.add_to_project_tm(segment.source, tm_match)
-                    except:
-                        pass
-                
+                # T1: мёртвый легаси-вызов add_to_project_tm удалён —
+                # tm_id='project' не существует в translation_memories,
+                # guard db-слоя блокирует запись (database_manager.py:1033);
+                # в TM сегмент сохраняется после подтверждения
+                # (save_segment_to_activated_tms).
                 self.log(f"✓ Auto-inserted 100% TM match for segment #{segment.id}")
                 self.status_bar.showMessage(f"✓ Segment #{segment.id} translated from TM (100% match)", 3000)
                 return
@@ -48818,13 +48816,9 @@ class SupervertalerQt(QMainWindow):
                 # Auto-resize the row to fit the new content
                 self._auto_resize_single_row(current_row)
                 
-                # Add to Translation Memory
-                if self.tm_database:
-                    try:
-                        self.tm_database.add_to_project_tm(segment.source, translation)
-                        self.log(f"✓ Added to TM: {segment.source[:30]}... → {translation[:30]}...")
-                    except Exception as tm_error:
-                        self.log(f"⚠ Could not add to TM: {str(tm_error)}")
+                # T1: мёртвый легаси-вызов add_to_project_tm удалён (см. выше);
+                # честный лог вместо безусловного «✓ Added to TM»:
+                self.log(f"ℹ️ Перевод сегмента #{segment.id} будет сохранён в TM после подтверждения")
                 
                 # Mark project as modified
                 self.project_modified = True
