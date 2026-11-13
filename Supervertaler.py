@@ -48745,7 +48745,17 @@ class SupervertalerQt(QMainWindow):
             # Translate using the module
             from modules import usage_log as _usage_log
             from modules.llm_clients import LLMPromptEchoError
+            from modules.prompt_markers import (
+                count_paragraphs,
+                looks_like_context_overflow,
+            )
             echo_skipped = False
+            # C2 (координатор): True, пока запрос, породивший текущий
+            # translation, реально содержал блок окружающих сегментов.
+            # Повтор без контекста допустим ровно один раз — только из этого
+            # состояния; запрос уже без контекста -> сразу пропуск.
+            _overflow_request_had_context = bool(surrounding_context)
+            overflow_skipped = False
             with _usage_log.UsageContext(task=("FuzzyFixer" if fuzzy_match else "Translate")):
                 try:
                     translation = client.translate(
@@ -48761,6 +48771,7 @@ class SupervertalerQt(QMainWindow):
                     # сегментов — из промта убирается ровно то, что было
                     # вставлено выше (контекст + разделяющие пустые строки).
                     self.log(self.tr("⚠ Prompt echo detected — retrying without surrounding context (segment #%s)") % segment.id)
+                    _overflow_request_had_context = False  # C2: повтор уже без контекста
                     _retry_prompt = custom_prompt
                     if surrounding_context and custom_prompt:
                         if surrounding_context + "\n\n" in custom_prompt:
@@ -48785,8 +48796,62 @@ class SupervertalerQt(QMainWindow):
                         translation = None
                         echo_skipped = True
 
+                # C2 (координатор, задача 2): перелив контекста — модель
+                # перевела соседние сегменты вместе с текущим (живой случай
+                # nailong-9b, сегмент #31). Тот же сценарий, что у C1:
+                # ОДИН повтор без блока окружающих сегментов; если повтор
+                # снова переливает или эхо — пропуск: target/TM/undo/статус
+                # не трогаются, без модалок. Запрос уже шёл без контекста —
+                # повтора нет, сразу пропуск.
+                if translation and looks_like_context_overflow(translation, segment.source):
+                    if _overflow_request_had_context:
+                        self.log(
+                            f"Segment #{segment.id}: response looks like a context overflow "
+                            f"({count_paragraphs(translation)} paragraphs vs "
+                            f"{count_paragraphs(segment.source)} in source); "
+                            "retrying without context")
+                        _overflow_request_had_context = False
+                        _retry_prompt = custom_prompt
+                        if surrounding_context and custom_prompt:
+                            if surrounding_context + "\n\n" in custom_prompt:
+                                _retry_prompt = custom_prompt.replace(
+                                    surrounding_context + "\n\n", "", 1)
+                            elif custom_prompt.endswith(surrounding_context):
+                                _retry_prompt = custom_prompt[: -len(surrounding_context)]
+                        try:
+                            translation = client.translate(
+                                text=segment.source,
+                                source_lang=self.current_project.source_lang,
+                                target_lang=self.current_project.target_lang,
+                                custom_prompt=_retry_prompt,
+                                images=images,
+                                detect_prompt_echo=True,
+                            )
+                        except LLMPromptEchoError:
+                            translation = None
+                            overflow_skipped = True
+                        else:
+                            if looks_like_context_overflow(translation, segment.source):
+                                translation = None
+                                overflow_skipped = True
+                    else:
+                        # Контекста в запросе не было — повтор бессмыслен.
+                        translation = None
+                        overflow_skipped = True
+
             if echo_skipped:
                 self.log(self.tr("⚠ Prompt echo in the model response — segment #%s left untranslated (%s/%s)") % (segment.id, provider, model))
+                if elapsed_timer:
+                    elapsed_timer.stop()
+                if progress_dialog:
+                    progress_dialog.close()
+                return
+
+            # C2: перелив не устранён (или запрос уже шёл без контекста) —
+            # тот же отказ, что у повторного эха: без модалок, target/TM/
+            # undo/статус не тронуты.
+            if overflow_skipped:
+                self.log(f"Segment #{segment.id}: translation skipped (context overflow persists)")
                 if elapsed_timer:
                     elapsed_timer.stop()
                 if progress_dialog:
