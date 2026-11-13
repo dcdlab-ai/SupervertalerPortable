@@ -470,6 +470,36 @@ def write_tagged_text(md_text, style_map=None, *, color_table='minimal',
             if line and looks_like_prompt_echo(line, src):
                 report.warnings.append('похоже на эхо промта%s: %s'
                                        % (_line_suffix(lineno), line[:80]))
+        # Batch C2: перелив контекста (модель перевела соседние сегменты
+        # вместе с текущим; уже сохранённый target). В отличие от эха
+        # перелив не ловится построчно — перелившийся target занимает
+        # НЕСКОЛЬКО физических строк md, а построчный вызов на каждой
+        # строке-абзаце видит 1 абзац против 1 у source. Сигнатура в этом
+        # выравнивании: серия последовательных строк с ОДНИМ и тем же
+        # source (так разворачиваются логические строки в
+        # export_tagged_txt: [src] * (out.count('\n') + 1)). Серия
+        # объединяется и сравнивается с source целиком; номер строки —
+        # первая строка серии. Предупреждение, не блокировка; легитимное
+        # совпадение source двух соседних сегментов теоретически может
+        # дать ложное срабатывание (редко; экспорт не блокируется).
+        from modules.prompt_markers import looks_like_context_overflow
+        _n_md = len(md_lines)
+        i = 0
+        while i < _n_md:
+            _src = source_lines[i] if i < len(source_lines) else None
+            if not _src or not _src.strip():
+                i += 1
+                continue
+            j = i
+            while (j < _n_md and j < len(source_lines)
+                   and source_lines[j] == _src):
+                j += 1
+            _run = '\n'.join(md_lines[i:j])
+            if looks_like_context_overflow(_run, _src):
+                report.warnings.append(
+                    'возможный перелив контекста%s: %s'
+                    % (_line_suffix(i + 1), md_lines[i][:80]))
+            i = j
     blocks, stats = parse_markdown(md_text)
     report.comments_dropped = stats.comments_dropped
     report.table_separators_dropped = stats.table_separators_dropped
