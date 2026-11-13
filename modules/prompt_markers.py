@@ -54,3 +54,74 @@ def looks_like_prompt_echo(response, source_text) -> bool:
     if _ECHO_HEADER_LITERAL in response and _ECHO_HEADER_LITERAL not in source_text:
         return True
     return False
+
+
+# C2 (перелив контекста, живой случай nailong-9b на сегменте #31): пороги
+# детектора. Подобраны по таблице пар в
+# docs/refactoring/audits/c2_context_overflow_tests.py; обоснование — §1
+# отчёта docs/refactoring/reports/BATCH_C2_REPORT.md.
+#
+# Порог «лишних абзацев»: одноабзацный source — перелив от +3 абзацев
+# (±1 — допуск на легитимное разбиение/склейку абзаца, +2 — запас на
+# граничные случаи многострочных заголовков); многоабзацный source
+# (содержит '\n\n') — порог от числа абзацев source (координатор, задача 1г).
+_OVERFLOW_EXCESS_MIN = 3
+_OVERFLOW_SHORT_SOURCE_CHARS = 60
+_OVERFLOW_LENGTH_RATIO = 10
+
+
+def _overflow_paras(text):
+    """Непустые строки текста после strip (считаются абзацами)."""
+    text = (text or "").strip()
+    if not text:
+        return []
+    return [line for line in text.split("\n") if line.strip()]
+
+
+def count_paragraphs(text) -> int:
+    """Число непустых абзацев (нужен для сообщений лога C2)."""
+    return len(_overflow_paras(text))
+
+
+def looks_like_context_overflow(response, source_text) -> bool:
+    """True, если ответ выглядит как перевод соседних сегментов вместе с текущим.
+
+    Чистая функция (без Qt и побочных эффектов, координатор задача 1).
+    Сигналы (срабатывает любой; пустой/пробельный ответ — False, пустой
+    source — False, его в вызывающем коде не бывает):
+
+    (1) абзацы: у ответа заметно больше непустых строк, чем у source
+        (после strip):
+          - одноабзацный source: избыток >= 3 абзацев (+1 — легитимный
+            допуск, +2 — запас, координатор задача 1б);
+          - многоабзацный source ('\n\n' в source): избыток >= max(3, число
+            абзацев source) (координатор, задача 1г);
+          - ответ с МЕНЬШИМ числом абзацев никогда не перелив (потерю
+            структуры ловят другие проверки).
+    (2) длина (только В СОЧЕТАНИИ с превышением абзацев, задача 1в):
+        source <= 60 знаков и ответ >= 10 x длины source при абзацев у
+        ответа строго больше. Само по себе (одна строка любой длины) — не
+        перелив: короткие заголовки легитимно дают длинный перевод.
+    """
+    source_text = source_text or ""
+    if not response or not response.strip() or not source_text.strip():
+        return False
+    src_paras = _overflow_paras(source_text)
+    resp_paras = _overflow_paras(response)
+    if not resp_paras or not src_paras:
+        return False
+    src_n = len(src_paras)
+    resp_n = len(resp_paras)
+    excess = resp_n - src_n
+    if excess <= 0:
+        return False
+    if "\n\n" in source_text.strip():
+        if excess >= max(_OVERFLOW_EXCESS_MIN, src_n):
+            return True
+    elif excess >= _OVERFLOW_EXCESS_MIN:
+        return True
+    if (len(source_text) <= _OVERFLOW_SHORT_SOURCE_CHARS
+            and len(response) >= _OVERFLOW_LENGTH_RATIO * len(source_text)
+            and resp_n > src_n):
+        return True
+    return False
