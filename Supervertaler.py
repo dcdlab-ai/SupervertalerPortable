@@ -30267,6 +30267,43 @@ class SupervertalerQt(QMainWindow):
             use_source_fallback = dialog.use_source_fallback()
             images_dir = dialog.images_dir() or None
 
+            # Batch C3: предпроход по СЕГМЕНТАМ (до сборки md-строк) —
+            # проверки, которые построчный проход писателя не видит:
+            # в строках table_row переносы внутри ячейки склеены в пробел
+            # (modules.md_table_cells.escape_cell), поэтому ячейка-перелив
+            # для детектора выглядит одной строкой; остатки каркаса промта
+            # писатель не проверяет вовсе. Ячейка = table_info длины 4
+            # (TBL1.2; legacy docx — кортеж длины 3 — «обычный» сегмент).
+            # Для обычных сегментов overflow/echo остаются за существующей
+            # проверкой писателя (не дублируются). Предупреждения, экспорт
+            # НЕ блокируется; target не меняется.
+            from modules.prompt_markers import (
+                looks_like_context_overflow,
+                looks_like_prompt_echo,
+                strip_prompt_leaks,
+            )
+            _prepass_warnings = []
+            for _seg in segments:
+                _tgt = _seg.target or ''
+                if not _tgt.strip():
+                    continue
+                _src = _seg.source or ''
+                _ti = getattr(_seg, 'table_info', None)
+                if _ti is not None and len(_ti) == 4:
+                    if looks_like_context_overflow(_tgt, _src):
+                        _prepass_warnings.append(
+                            'возможный перелив контекста (ячейка, сегмент #%s): %s'
+                            % (_seg.id, _tgt[:80]))
+                    if looks_like_prompt_echo(_tgt, _src):
+                        _prepass_warnings.append(
+                            'похоже на эхо промта (ячейка, сегмент #%s): %s'
+                            % (_seg.id, _tgt[:80]))
+                _stripped, _leaks = strip_prompt_leaks(_tgt, _src, _seg.id)
+                if _leaks:
+                    _prepass_warnings.append(
+                        'остатки разметки промта в переводе (сегмент #%s): %s'
+                        % (_seg.id, '; '.join(_leaks)[:80]))
+
             # Текст проекта → md-строки (тот же источник, что у simple txt).
             translated_lines = self._collect_translated_lines(
                 segments, use_source_fallback)
@@ -30285,6 +30322,10 @@ class SupervertalerQt(QMainWindow):
             data, report = write_tagged_text(
                 md_text, style_map=dialog.style_map(), images_dir=images_dir,
                 source_lines=_source_lines)
+            # Batch C3: предупреждения предпрохода — наверх списка, чтобы в
+            # окне отчёта идти перед проверками писателя; эхо-строки «похоже
+            # на эхо промта (ячейка, …)» попадают в красный блок, как у C1/C2.
+            report.warnings[:0] = _prepass_warnings
             with open(file_path, 'wb') as f:
                 f.write(data)
 
