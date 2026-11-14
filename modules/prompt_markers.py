@@ -125,3 +125,143 @@ def looks_like_context_overflow(response, source_text) -> bool:
             and resp_n > src_n):
         return True
     return False
+
+
+# C3 (остатки каркаса промта в переводе; живые случаи nailong-9b — эталоны
+# F1–F4 промпта BATCH C3): модель ПЕРЕВОДИТ метки промта на язык перевода,
+# поэтому ни C1 (литеральные маркеры '>>>'/'<<<'/'>>> N.'), ни C2 (избыток
+# абзацев) их не видят. strip_prompt_leaks срезает три формы по СОЧЕТАНИЮ
+# структурных признаков (координатор, задача 1) и возвращает срезанные
+# фрагменты для лога. Пороги подобраны по таблице пар в
+# docs/refactoring/audits/c3_prompt_leaks_tests.py; FP-анализ — §1 отчёта
+# docs/refactoring/reports/BATCH_C3_REPORT.md.
+#
+# Пороги правила (б) — хвостовая метка в квадратных скобках:
+_LEAK_LABEL_MAX_CHARS = 30
+_LEAK_LABEL_MIN_WORD = 3   # FP-заслон: «[ОК]»/«[OK]» — не метка (см. §1)
+_LEAK_LABEL_MAX_WORDS = 3
+# Пороги правила (в) — хвостовая строка-инструкция:
+_LEAK_LINE_HEADER_MAX = 40     # «короткий заголовок до ~40 знаков»
+_LEAK_LINE_PAREN_MIN = 10      # «скобки с текстом от 10 знаков»
+_LEAK_LINE_PAREN_MAX = 200     # верхний заслон от патологических строк
+
+# (а) префикс номера в ответе: «8. АНГЛИЧАНЕ». (?!\d) — защита от десятичных
+# дробей («8.5 см» для сегмента №8 не срезается). \s? — один пробел после
+# точки (без него «8.АНГЛИЧАНЕ» оставил бы ведущий пробел... с \s? срезается
+# ровно число+точка+один пробел).
+_LEAK_NUMBER_PREFIX_RE = re.compile(r'^\s*(\d+)\s*\.(?!\d)\s?')
+# Источник, сам начинающийся с числа («8. First item», «3) Chapter», —
+# правило (а) выключается целиком: и совпадающий, и другой номер.
+_LEAK_SOURCE_NUMBER_RE = re.compile(r'^\s*\d+\s*[.)]')
+# (б) метка в квадратных скобках в самом конце (вложенные скобки не матчатся:
+# содержимое не может содержать '['/']').
+_LEAK_BRACKET_RE = re.compile(r'\s*\[([^\[\]]*)\]\s*$')
+# (в) отдельная строка: «**ВАШ ПЕРЕВОД (укажите ТОЛЬКО переведённый текст,
+# без нумерации или меток):**», «**YOUR TRANSLATION (provide ONLY the
+# translated text, no numbering or labels):**». Заголовок без '*' и без
+# переносов; содержимое скобок без скобок/переносов; ** и двоеточие
+# необязательны (координатор, задача 1в).
+_LEAK_INSTRUCTION_LINE_RE = re.compile(
+    r'^\*{0,2}\s*([^*\n]{1,%d}?)\s*\(([^()\n]{%d,%d})\)\s*:?\s*\*{0,2}$'
+    % (_LEAK_LINE_HEADER_MAX, _LEAK_LINE_PAREN_MIN, _LEAK_LINE_PAREN_MAX))
+
+
+def _is_leak_label(inner: str) -> bool:
+    """Содержимое «[...]» похоже на метку перевода ([ПЕРЕВЕСТИ ЭТО],
+    [TRANSLATE THIS]): 1–3 слова, <=30 знаков, только буквы верхнего
+    регистра, пробелы и дефисы (координатор, задача 1б). Цифры, строчные
+    буквы, точки — не метка («[sic]», «[2024]», «[см. приложение]»)."""
+    if not inner or len(inner) > _LEAK_LABEL_MAX_CHARS:
+        return False
+    words = inner.split()
+    if not 1 <= len(words) <= _LEAK_LABEL_MAX_WORDS:
+        return False
+    for word in words:
+        for part in word.split('-'):
+            if len(part) < _LEAK_LABEL_MIN_WORD:
+                return False
+            if not all(ch.isalpha() and ch.isupper() for ch in part):
+                return False
+    return True
+
+
+def strip_prompt_leaks(response, source_text, segment_number):
+    """Срезает остатки каркаса промта из ответа модели (Batch C3).
+
+    Чистая функция (без Qt и побочных эффектов, координатор задача 1):
+    возвращает (text, removed) — срезанный текст и список срезанных
+    фрагментов для лога. Пустой после срезания текст вызывающий код
+    трактует как эхо (сценарий C1).
+
+    Правила применяются итеративно в порядке (в) -> (б) -> (а), результат
+    strip(). Каждое правило срабатывает ТОЛЬКО по сочетанию признаков,
+    чтобы не задевать обычные переводы (координатор, задача 1):
+
+    (в) последняя непустая строка ответа — ЦЕЛИКОМ инструкция-каркас
+        «заголовок до ~40 знаков + (скобки с текстом от 10 знаков) +
+        необязательное двоеточие + необязательные **» (F1: «**ВАШ ПЕРЕВОД
+        (укажите ТОЛЬКО переведённый текст, без нумерации или меток):**»),
+        и такой строки нет в source (дословно), и в строке есть признак-
+        разделитель (двоеточие или **) — срезается строка;
+    (б) ответ оканчивается «[...]», внутри скобок только буквы верхнего
+        регистра, пробелы и дефисы (1–3 слова, <=30 знаков: [ПЕРЕВЕСТИ ЭТО],
+        [ПЕРЕВЕСТИ], [TRANSLATE THIS]; FP-заслоны: слово >=3 букв, цифры/
+        строчные/точки внутри — не метка), и source не оканчивается на ']'
+        — метка срезается вместе с пробелами перед ней;
+    (а) ответ начинается с «N.» (N == segment_number — номер сегмента в
+        блоке контекста, это seg.id, НЕ индекс строки грида — блок
+        собирается из seg.id в translate_current_segment), и source сам
+        не начинается с числа («8.» / «8)» / другой номер — не трогать,
+        F4); десятичная дробь «8.5» не срезается (?!\\d).
+    """
+    text = response or ''
+    removed = []
+    source_text = source_text or ''
+    if not text.strip():
+        return (text.strip(), removed)
+
+    # (в) хвостовая строка-инструкция: последняя непустая строка, ЦЕЛИКОМ
+    # совпадающая с каркасом; «не конец абзаца с текстом» = подстрочный
+    # хвост «текст (пояснение):» не срезается (анкор ^...$ проверяет всю
+    # строку). Строка есть в source дословно — не трогать.
+    lines = text.split('\n')
+    last = None
+    for i in range(len(lines) - 1, -1, -1):
+        if lines[i].strip():
+            last = i
+            break
+    if last is not None:
+        line = lines[last].strip()
+        # FP-заслон (координатор: «только по сочетанию признаков»): голая
+        # строка «Заголовок (пояснение)» без двоеточия и без ** — легитимный
+        # перевод, не каркас. Требуем хотя бы один признак-разделитель:
+        # двоеточие (оба эталона F1) или ** (болд).
+        if (line not in source_text
+                and _LEAK_INSTRUCTION_LINE_RE.match(line)
+                and (':' in line or '*' in line)):
+            removed.append(line)
+            text = '\n'.join(lines[:last])
+
+    # (б) хвостовая метка в квадратных скобках.
+    m = _LEAK_BRACKET_RE.search(text)
+    if m:
+        inner = m.group(1).strip()
+        if (not source_text.strip().endswith(']')
+                and _is_leak_label(inner)):
+            removed.append(m.group(0).strip())
+            text = text[:m.start()]
+
+    # (а) префикс номера сегмента.
+    if not _LEAK_SOURCE_NUMBER_RE.match(source_text):
+        m = _LEAK_NUMBER_PREFIX_RE.match(text)
+        if m:
+            seg_no = None
+            try:
+                seg_no = int(segment_number)
+            except (TypeError, ValueError):
+                seg_no = None
+            if seg_no is not None and int(m.group(1)) == seg_no:
+                removed.append(text[:m.end()].strip())
+                text = text[m.end():]
+
+    return (text.strip(), removed)
