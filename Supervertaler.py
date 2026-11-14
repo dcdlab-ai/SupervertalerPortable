@@ -48748,6 +48748,7 @@ class SupervertalerQt(QMainWindow):
             from modules.prompt_markers import (
                 count_paragraphs,
                 looks_like_context_overflow,
+                strip_prompt_leaks,
             )
             echo_skipped = False
             # C2 (координатор): True, пока запрос, породивший текущий
@@ -48796,6 +48797,75 @@ class SupervertalerQt(QMainWindow):
                         translation = None
                         echo_skipped = True
 
+                    # C3: остатки каркаса срезаются и в ответе повтора;
+                    # повтор, целиком состоящий из каркаса, — отказ (второй
+                    # попытки нет — как у повторного эха).
+                    if translation:
+                        translation, _leak_removed = strip_prompt_leaks(
+                            translation, segment.source, segment.id)
+                        if _leak_removed:
+                            self.log(
+                                f"Segment #{segment.id}: removed prompt artefact(s) "
+                                f"from response: {'; '.join(_leak_removed)[:150]}")
+                        if not translation.strip():
+                            translation = None
+                            echo_skipped = True
+
+                # C3 (остатки каркаса промта в переводе): модель ПЕРЕВОДИТ
+                # метки промта на язык перевода, поэтому литеральные
+                # детекторы C1/C2 их не видят (живые случаи nailong-9b,
+                # эталоны F1–F4). Срезание — ПОСЛЕ очистки клиента
+                # (_clean_translation_response) и ДО детекторов C1/C2.
+                # Ответ, целиком состоящий из каркаса, — сценарий C1:
+                # один повтор без блока окружающих сегментов, затем пропуск.
+                if translation:
+                    translation, _leak_removed = strip_prompt_leaks(
+                        translation, segment.source, segment.id)
+                    if _leak_removed:
+                        self.log(
+                            f"Segment #{segment.id}: removed prompt artefact(s) "
+                            f"from response: {'; '.join(_leak_removed)[:150]}")
+                    if not translation.strip():
+                        if _overflow_request_had_context:
+                            self.log(
+                                f"⚠ Response contains only prompt scaffolding — "
+                                f"retrying without surrounding context "
+                                f"(segment #{segment.id})")
+                            _overflow_request_had_context = False  # C2: повтор уже без контекста
+                            _retry_prompt = custom_prompt
+                            if surrounding_context and custom_prompt:
+                                if surrounding_context + "\n\n" in custom_prompt:
+                                    _retry_prompt = custom_prompt.replace(
+                                        surrounding_context + "\n\n", "", 1)
+                                elif custom_prompt.endswith(surrounding_context):
+                                    _retry_prompt = custom_prompt[: -len(surrounding_context)]
+                            try:
+                                translation = client.translate(
+                                    text=segment.source,
+                                    source_lang=self.current_project.source_lang,
+                                    target_lang=self.current_project.target_lang,
+                                    custom_prompt=_retry_prompt,
+                                    images=images,
+                                    detect_prompt_echo=True,
+                                )
+                            except LLMPromptEchoError:
+                                translation = None
+                                echo_skipped = True
+                            else:
+                                translation, _leak_removed = strip_prompt_leaks(
+                                    translation, segment.source, segment.id)
+                                if _leak_removed:
+                                    self.log(
+                                        f"Segment #{segment.id}: removed prompt artefact(s) "
+                                        f"from response: {'; '.join(_leak_removed)[:150]}")
+                                if not translation.strip():
+                                    translation = None
+                                    echo_skipped = True
+                        else:
+                            # Запрос уже шёл без контекста — повтор бессмыслен.
+                            translation = None
+                            echo_skipped = True
+
                 # C2 (координатор, задача 2): перелив контекста — модель
                 # перевела соседние сегменты вместе с текущим (живой случай
                 # nailong-9b, сегмент #31). Тот же сценарий, что у C1:
@@ -48831,7 +48901,18 @@ class SupervertalerQt(QMainWindow):
                             translation = None
                             overflow_skipped = True
                         else:
-                            if looks_like_context_overflow(translation, segment.source):
+                            # C3: остатки каркаса срезаются и в ответе
+                            # перелив-повтора; каркасный повтор — отказ.
+                            translation, _leak_removed = strip_prompt_leaks(
+                                translation, segment.source, segment.id)
+                            if _leak_removed:
+                                self.log(
+                                    f"Segment #{segment.id}: removed prompt artefact(s) "
+                                    f"from response: {'; '.join(_leak_removed)[:150]}")
+                            if not translation.strip():
+                                translation = None
+                                echo_skipped = True
+                            elif looks_like_context_overflow(translation, segment.source):
                                 translation = None
                                 overflow_skipped = True
                     else:
