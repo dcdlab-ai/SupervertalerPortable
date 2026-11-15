@@ -1,4 +1,4 @@
-"""
+r"""
 BATCH TM1 recon test (commit 1) — «до»-воспроизведение бага
 «Delete selected» в TM-браузере (modules/tm_manager_qt.py, TMManagerDialog.delete_selected_entry).
 
