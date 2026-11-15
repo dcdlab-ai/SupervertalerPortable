@@ -84,6 +84,7 @@ import sys
 import json
 import os
 import platform
+import faulthandler
 import subprocess
 import atexit
 from contextlib import contextmanager
@@ -54797,6 +54798,55 @@ def disable_console_quickedit() -> bool:
         return False
 
 
+# Ручка файла журнала фатальных сбоев: faulthandler пишет асинхронно в любой
+# момент (в т.ч. после возврата из _enable_faulthandler), файл обязан
+# оставаться открытым всю жизнь процесса — держим его в модульной переменной.
+_fault_log_file = None
+
+
+def _enable_faulthandler():
+    """Включает faulthandler (all_threads=True) с записью в журнал рядом с
+        supervertaler.log.
+
+        Файл: <user_data_path>/workbench/logs/supervertaler-fatal.log — тот же
+        механизм путей, что у _setup_diagnostic_log (всё внутри корня сборки:
+        правило P1, не профиль пользователя, не реестр). Рост ограничен
+        ротацией «один предыдущий»: при старте старый supervertaler-fatal.log
+        переезжает в supervertaler-fatal-previous.log (предыдущая копия
+        затирается), новый открывается на запись; держится не более 2 файлов.
+
+        Ошибка открытия файла (нет прав, недоступный диск) не мешает запуску:
+        try/except, возвращается None, приложение стартует без
+        faulthandler-журнала.
+
+        Возвращает Path активного файла журнала или None при неудаче."""
+    global _fault_log_file
+    try:
+        log_dir = get_user_data_path() / "workbench" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_path = log_dir / "supervertaler-fatal.log"
+        prev_path = log_dir / "supervertaler-fatal-previous.log"
+
+        # Rotate: один предыдущий файл (same policy style as supervertaler.log).
+        try:
+            if prev_path.exists():
+                prev_path.unlink()
+            if log_path.exists():
+                log_path.rename(prev_path)
+        except Exception:
+            pass  # Ротация не критична — просто перезапишем текущий
+
+        # Line-buffered ('w': свежий журнал на каждый сеанс; сбойный вывод
+        # faulthandler не проходит через Python-буфер — он пишет системно).
+        _fault_log_file = open(log_path, 'w', encoding='utf-8',
+                               errors='replace', buffering=1)
+        faulthandler.enable(file=_fault_log_file, all_threads=True)
+        return log_path
+    except Exception:
+        _fault_log_file = None
+        return None
+
+
 def _setup_diagnostic_log():
     """Дублирует stdout + stderr в ротируемый файл журнала диагностики.
     
@@ -55012,6 +55062,10 @@ def main():
     # чтобы клик мышью в окно консоли не замораживал вывод (Translate All из
     # start.bat замирал при выделении). Без консоли (pythonw) — тихий no-op.
     disable_console_quickedit()
+    # Batch T2 (задача 4): faulthandler с журналом фатальных сбоев рядом с
+    # supervertaler.log — трассировка нативных падений (access violation в
+    # нативных библиотеках) попадает в файл, а не исчезает без консоли.
+    _enable_faulthandler()
     # Затем направляем Qt / потоки / stdlib-logging / warnings в тот же tee.
     _install_log_hooks()
 
