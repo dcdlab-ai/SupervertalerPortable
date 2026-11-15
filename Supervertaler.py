@@ -54758,6 +54758,45 @@ class SuperlookupTab(QWidget):
 # APPLICATION ENTRY POINT
 # ============================================================================
 
+def disable_console_quickedit() -> bool:
+    """Снимает флаг ENABLE_QUICK_EDIT_MODE с входного буфера консоли Windows.
+
+        QuickEdit (выделение мышью, замораживающее вывод при клике в окно
+        консоли — симптом «программа замирает при Translate All из start.bat»)
+        и ENABLE_EXTENDED_FLAGS живут на ВХОДНОМ консольном буфере
+        (GetStdHandle(STD_INPUT_HANDLE)), а не на выходном; снимать нужно
+        именно его (Console API: SetConsoleMode).
+
+        Возвращает True, если флаг снят; False — на не-Windows, без консоли
+        (pythonw, перенаправленный ввод) или при ошибке API. Все прочие биты
+        режима сохраняются: mode = (mode | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE
+        (ENABLE_EXTENDED_FLAGS обязан быть выставлен, иначе снятие QuickEdit
+        игнорируется хостом консоли).
+
+        Прецедент стиля — SetErrorMode-блок в main(). Запуск без консоли —
+        тихий no-op."""
+    if sys.platform != 'win32':
+        return False
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        STD_INPUT_HANDLE = -10        # входной буфер консоли (не -11!)
+        ENABLE_QUICK_EDIT_MODE = 0x0040
+        ENABLE_EXTENDED_FLAGS = 0x0080
+        handle = kernel32.GetStdHandle(STD_INPUT_HANDLE)
+        if not handle or handle == -1:
+            return False
+        mode = ctypes.c_ulong()
+        if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            return False  # консоли нет (pythonw / redirect) — тихий no-op
+        new_mode = (mode.value | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE
+        if not kernel32.SetConsoleMode(handle, new_mode):
+            return False
+        return True
+    except Exception:
+        return False
+
+
 def _setup_diagnostic_log():
     """Дублирует stdout + stderr в ротируемый файл журнала диагностики.
     
@@ -54969,6 +55008,10 @@ def main():
     # Перенаправляем stdout/stderr в ротируемый журнал ПЕРВЫМ ДЕЛОМ — чтобы
     # фиксировались даже падения при импорте QApplication или инициализации QWebEngine.
     _setup_diagnostic_log()
+    # Batch T2 (задача 3): снять QuickEdit с входного буфера консоли Windows,
+    # чтобы клик мышью в окно консоли не замораживал вывод (Translate All из
+    # start.bat замирал при выделении). Без консоли (pythonw) — тихий no-op.
+    disable_console_quickedit()
     # Затем направляем Qt / потоки / stdlib-logging / warnings в тот же tee.
     _install_log_hooks()
 
