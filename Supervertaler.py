@@ -37118,24 +37118,34 @@ class SupervertalerQt(QMainWindow):
         except Exception as e:
             self.log(f"Error in debounced target handler: {e}")
     
-    def update_status_icon(self, row: int, status: str):
-        """Обновляет иконку статуса для конкретной строки."""
+    def update_status_icon(self, row: int, status: str, save_to_tm: bool = True):
+        """Обновляет иконку статуса для конкретной строки.
+
+                Аргументы:
+                    save_to_tm: False отключает неявную запись в TM при
+                        status='confirmed' (Batch T2) — для вызовов, где запись
+                        уже сделана в момент подтверждения или где подтверждение
+                        повторное (цепочка авто-подтверждения 100% проходит через
+                        confirm_and_next_unconfirmed → _confirm_current_row_segment
+                        на уже подтверждённом сегменте). По умолчанию True — все
+                        прежние вызовы ведут себя как раньше."""
         if not self.current_project or row >= len(self.current_project.segments):
             return
         segment = self.current_project.segments[row]
         old_status = segment.status
         old_target = segment.target
         segment.status = status
-        
+
         # Record undo state for status change
         self.record_undo_state(segment.id, old_target, segment.target, old_status, status)
-        
+
         self._refresh_segment_status(segment)
-        
+
         # Save to TM ONLY if status changed to confirmed (user explicitly approved)
         # Do NOT save for 'draft' or 'approved' status - user must confirm first
         find_replace_active = getattr(self, 'find_replace_active', False)
-        if not find_replace_active and status == 'confirmed' and segment.target.strip():
+        if (save_to_tm and not find_replace_active
+                and status == 'confirmed' and segment.target.strip()):
             try:
                 self.save_segment_to_activated_tms(segment.source, segment.target)
             except Exception as e:
@@ -46795,12 +46805,12 @@ class SupervertalerQt(QMainWindow):
                 self.update_status_icon(row, 'confirmed')
                 self.project_modified = True
 
-                # Save to TM
-                try:
-                    self.save_segment_to_activated_tms(seg.source, seg.target)
-                    self.log(f"💾 Auto-confirmed and saved segment {seg.id} to TM")
-                except Exception as e:
-                    self.log(f"⚠️ Error saving auto-confirmed segment to TM: {e}")
+                # TM save happens implicitly inside update_status_icon() above
+                # (guard: status == 'confirmed' and non-empty target). Batch T2
+                # removed the explicit duplicate save_segment_to_activated_tms()
+                # call here — with both calls the segment was written to the TM
+                # twice per auto-confirmation.
+                self.log(f"💾 Auto-confirmed and saved segment {seg.id} to TM")
 
                 # Continue to the NEXT unconfirmed segment (skip this one)
                 self.confirm_and_next_unconfirmed()
@@ -46886,7 +46896,15 @@ class SupervertalerQt(QMainWindow):
 
         # Record undo state for Ctrl+Enter confirmation
         self.record_undo_state(segment_id, old_target, segment.target, old_status, 'confirmed')
-        self.update_status_icon(current_row, 'confirmed')
+        # Batch T2: ровно одна запись в TM на подтверждение. Если сегмент УЖЕ
+        # был подтверждён (повторный Ctrl+Enter на подтверждённом сегменте или
+        # цепочка авто-подтверждения 100% — _check_auto_confirm_100_percent
+        # после своего сохранения вызывает confirm_and_next_unconfirmed, который
+        # проходит _confirm_current_row_segment по тому же сегменту), запись в TM
+        # уже сделана в момент подтверждения; повторная в 'all' режиме упёрлась
+        # бы в UNIQUE.
+        self.update_status_icon(current_row, 'confirmed',
+                                save_to_tm=(old_status != 'confirmed'))
         # Live-update the Preview so the segment's status background colour
         # changes as you confirm (debounced; no-op when the Preview is hidden).
         self._schedule_preview_refresh()
@@ -46898,12 +46916,10 @@ class SupervertalerQt(QMainWindow):
         # Play sound effect for segment confirmation
         self._play_sound_effect('segment_confirmed')
 
-        if segment.target and segment.target.strip():
-            try:
-                self.save_segment_to_activated_tms(segment.source, segment.target)
-                self.log(f"💾 Saved segment {segment.id} to TM: '{segment.target[:50]}...'")
-            except Exception as e:
-                self.log(f"⚠️ Error saving to TM: {e}")
+        # TM save happens implicitly inside update_status_icon() above (guard:
+        # status == 'confirmed' and non-empty target). Batch T2 removed the
+        # explicit duplicate save_segment_to_activated_tms() call here — with
+        # both calls the segment was written to the TM twice per confirmation.
 
         # Auto-propagate the just-confirmed translation to identical segments
         # (memoQ/Trados-style propagate-on-confirm). Guarded + try/except inside
@@ -47042,15 +47058,16 @@ class SupervertalerQt(QMainWindow):
             row = self._find_row_for_segment(segment.id)
             if row >= 0:
                 self.update_status_icon(row, 'confirmed')
-            
-            # Save to TM if target has content
+
+            # TM save happens implicitly inside update_status_icon() above
+            # (guard: status == 'confirmed' and non-empty target). Batch T2
+            # removed the explicit duplicate save_segment_to_activated_tms()
+            # call here — with both calls the segment was written to the TM
+            # twice per confirmation. The counter keeps the "saved N to TM"
+            # log accurate; the condition matches the implicit-save guard.
             if segment.target and segment.target.strip():
-                try:
-                    self.save_segment_to_activated_tms(segment.source, segment.target)
-                    tm_saved_count += 1
-                except Exception as e:
-                    self.log(f"⚠️ Error saving segment {segment.id} to TM: {e}")
-        
+                tm_saved_count += 1
+
         if confirmed_count > 0:
             self.project_modified = True
             self.update_window_title()
