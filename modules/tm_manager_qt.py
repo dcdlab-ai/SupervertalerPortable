@@ -800,16 +800,45 @@ class TMManagerDialog(QDialog):
                 self.db_manager.cursor.execute(query, params)
                 entries = [dict(row) for row in self.db_manager.cursor.fetchall()]
             
-            # Populate table
-            self.browser_table.setRowCount(len(entries))
+            # Populate table. Sorting must be suspended while filling: with
+            # sorting enabled every setItem() triggers a re-sort, rows move
+            # mid-fill and the cells of one entry scatter across different
+            # display rows (BATCH TM1.1: duplicated IDs, Delete Selected
+            # removing entries other than the ones shown).
+            table = self.browser_table
+            table.setSortingEnabled(False)
+            table.setUpdatesEnabled(False)
+            table.clearContents()
+            table.setRowCount(len(entries))
             for row, entry in enumerate(entries):
-                self.browser_table.setItem(row, 0, QTableWidgetItem(str(entry['id'])))
-                self.browser_table.setItem(row, 1, QTableWidgetItem(entry['source_text'][:100]))
-                self.browser_table.setItem(row, 2, QTableWidgetItem(entry['target_text'][:100]))
-                self.browser_table.setItem(row, 3, QTableWidgetItem(entry['tm_id']))
-                self.browser_table.setItem(row, 4, QTableWidgetItem(str(entry.get('usage_count', 0))))
-                self.browser_table.setItem(row, 5, QTableWidgetItem(entry.get('modified_date', '')[:16]))
-            
+                entry_id = int(entry['id'])
+                # ID as int DisplayRole: sorts numerically; entry id also kept
+                # in Qt.UserRole on EVERY cell so deletion keys stay valid
+                # no matter which column the user sorted by.
+                id_item = QTableWidgetItem()
+                id_item.setData(Qt.ItemDataRole.DisplayRole, entry_id)
+                id_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 0, id_item)
+                source_item = QTableWidgetItem(entry['source_text'][:100])
+                source_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 1, source_item)
+                target_item = QTableWidgetItem(entry['target_text'][:100])
+                target_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 2, target_item)
+                tm_item = QTableWidgetItem(entry['tm_id'])
+                tm_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 3, tm_item)
+                usage_item = QTableWidgetItem(str(entry.get('usage_count', 0)))
+                usage_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 4, usage_item)
+                modified_item = QTableWidgetItem(entry.get('modified_date', '')[:16])
+                modified_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                table.setItem(row, 5, modified_item)
+            table.setUpdatesEnabled(True)
+            # Re-enable sorting AFTER the table is complete: rows are now
+            # moved as whole units, so the display matches the database.
+            table.setSortingEnabled(True)
+
             self.browser_status.setText(f"Showing {len(entries)} entries")
             self.log(f"TM Browser: Loaded {len(entries)} entries")
             
@@ -826,7 +855,9 @@ class TMManagerDialog(QDialog):
         """Delete ALL selected TM entries in one confirmed transaction"""
         # Collect unique entry ids from every selected row (Shift-range,
         # Ctrl-click, Ctrl+A). Cell-level selections collapse to the row's id
-        # via the ID column, never via row indices (rows are not stable db keys).
+        # read from Qt.UserRole (stored on every cell by refresh_browser),
+        # never via row indices and never via display text: the user may have
+        # re-sorted the table, so display rows are not stable db keys.
         rows = sorted({index.row() for index in self.browser_table.selectedIndexes()})
         if not rows:
             QMessageBox.warning(self, "No Selection", "Please select an entry to delete")
@@ -838,7 +869,11 @@ class TMManagerDialog(QDialog):
             id_item = self.browser_table.item(row, 0)
             if id_item is None:
                 continue
-            entry_ids.append(int(id_item.text()))
+            entry_id = id_item.data(Qt.ItemDataRole.UserRole)
+            if entry_id is None:
+                # Fallback for cells created before the UserRole convention.
+                entry_id = int(id_item.text())
+            entry_ids.append(int(entry_id))
             tm_item = self.browser_table.item(row, 3)
             if tm_item is not None:
                 tm_ids.add(tm_item.text())
@@ -851,10 +886,22 @@ class TMManagerDialog(QDialog):
         else:
             scope_display = f"{len(tm_ids)} TMs ({', '.join(sorted(tm_ids))})"
 
+        # List the ids about to be deleted (up to 10, then a "… and K more").
+        sorted_ids = sorted(entry_ids)
+        if len(sorted_ids) <= 10:
+            ids_display = ", ".join(str(i) for i in sorted_ids)
+        else:
+            ids_display = (
+                ", ".join(str(i) for i in sorted_ids[:10])
+                + self.tr(" … and {k} more").format(k=len(sorted_ids) - 10)
+            )
+
         # Confirm deletion (one dialog for the whole batch)
         reply = QMessageBox.question(
             self, "Confirm Deletion",
-            f"Delete {len(entry_ids)} selected entries from {scope_display}?\n\nThis cannot be undone.",
+            self.tr(
+                "Delete {n} selected entries from {scope}?\n\nIDs: {ids}\n\nThis cannot be undone."
+            ).format(n=len(entry_ids), scope=scope_display, ids=ids_display),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
