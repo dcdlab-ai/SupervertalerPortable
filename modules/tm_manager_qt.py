@@ -823,33 +823,73 @@ class TMManagerDialog(QDialog):
         pass
     
     def delete_selected_entry(self):
-        """Delete the selected TM entry"""
-        selected_rows = self.browser_table.selectedItems()
-        if not selected_rows:
+        """Delete ALL selected TM entries in one confirmed transaction"""
+        # Collect unique entry ids from every selected row (Shift-range,
+        # Ctrl-click, Ctrl+A). Cell-level selections collapse to the row's id
+        # via the ID column, never via row indices (rows are not stable db keys).
+        rows = sorted({index.row() for index in self.browser_table.selectedIndexes()})
+        if not rows:
             QMessageBox.warning(self, "No Selection", "Please select an entry to delete")
             return
-        
-        row = self.browser_table.currentRow()
-        entry_id = int(self.browser_table.item(row, 0).text())
-        source = self.browser_table.item(row, 1).text()
-        target = self.browser_table.item(row, 2).text()
-        
-        # Confirm deletion
+
+        entry_ids = []
+        tm_ids = set()
+        for row in rows:
+            id_item = self.browser_table.item(row, 0)
+            if id_item is None:
+                continue
+            entry_ids.append(int(id_item.text()))
+            tm_item = self.browser_table.item(row, 3)
+            if tm_item is not None:
+                tm_ids.add(tm_item.text())
+        if not entry_ids:
+            QMessageBox.warning(self, "No Selection", "Please select an entry to delete")
+            return
+
+        if len(tm_ids) == 1:
+            scope_display = f"TM {next(iter(tm_ids))}"
+        else:
+            scope_display = f"{len(tm_ids)} TMs ({', '.join(sorted(tm_ids))})"
+
+        # Confirm deletion (one dialog for the whole batch)
         reply = QMessageBox.question(
             self, "Confirm Deletion",
-            f"Delete this TM entry?\n\nSource: {source}\nTarget: {target}\n\nThis cannot be undone.",
+            f"Delete {len(entry_ids)} selected entries from {scope_display}?\n\nThis cannot be undone.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
-        
-        if reply == QMessageBox.StandardButton.Yes:
+
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            conn = self.db_manager.connection
+            cursor = self.db_manager.cursor
+            # Flush any pending implicit transaction first, so the rollback on
+            # error below covers exactly this batch and nothing partial stays.
+            conn.commit()
+            # Whole batch in ONE transaction: DELETE ... WHERE id IN (...)
+            # in chunks of <= 500 ids, single commit at the end.
+            for start in range(0, len(entry_ids), 500):
+                chunk = entry_ids[start:start + 500]
+                placeholders = ",".join("?" * len(chunk))
+                cursor.execute(
+                    f"DELETE FROM translation_units WHERE id IN ({placeholders})",
+                    chunk,
+                )
+            conn.commit()
+            deleted = len(entry_ids)
+        except Exception as e:
             try:
-                self.db_manager.cursor.execute("DELETE FROM translation_units WHERE id = ?", (entry_id,))
-                self.db_manager.connection.commit()
-                self.log(f"Deleted TM entry {entry_id}")
-                self.refresh_browser()
-                QMessageBox.information(self, "Success", "Entry deleted successfully")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to delete entry: {str(e)}")
+                conn.rollback()
+            except Exception:
+                pass
+            QMessageBox.critical(self, "Error", f"Failed to delete entries: {str(e)}")
+            return
+
+        self.log(f"TM Browser: deleted {deleted} entries from {scope_display}")
+        # One refresh for the whole batch (re-reads the table and the entry
+        # counts; the FTS/trigram indexes are trigger-maintained by SQLite).
+        self.refresh_browser()
     
     def do_concordance_search(self):
         """Perform concordance search"""
