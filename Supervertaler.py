@@ -49022,7 +49022,7 @@ class SupervertalerQt(QMainWindow):
                 
                 # T1: мёртвый легаси-вызов add_to_project_tm удалён (см. выше);
                 # честный лог вместо безусловного «✓ Added to TM»:
-                self.log(f"ℹ️ Перевод сегмента #{segment.id} будет сохранён в TM после подтверждения")
+                self.log(f"ℹ️ Segment #{segment.id} will be saved to TM after confirmation")
                 
                 # Mark project as modified
                 self.project_modified = True
