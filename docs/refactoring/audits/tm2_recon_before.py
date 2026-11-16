@@ -350,17 +350,35 @@ def r6_delete_key_dead():
     return db
 
 
+def _row_layout_of(child):
+    """QHBoxLayout верхнего уровня, в котором лежит виджет (или None)."""
+    parent = child.parentWidget()
+    if parent is None or parent.layout() is None:
+        return None
+    top = parent.layout()
+    for i in range(top.count()):
+        sub = top.itemAt(i).layout()
+        if sub is None:
+            continue
+        for j in range(sub.count()):
+            if sub.itemAt(j).widget() is child:
+                return sub
+    return None
+
+
 def r7_layout():
     db = make_db()
     add(db, "layout probe", "layout probe target")
     db.connection.commit()
     dlg = TMManagerDialog(None, db, log_callback=lambda m: None)
     # В ДО-коде в верхней строке: Filter, Show (spinbox), Refresh — определяем
-    # по составу родительского layout спинбокса.
-    spin_parent_is_filter_row = dlg.browser_limit.parentWidget() is dlg.browser_filter.parentWidget()
+    # по факту: оба лежат в ОДНОМ QHBoxLayout.
+    lay_filter = _row_layout_of(dlg.browser_filter)
+    lay_limit = _row_layout_of(dlg.browser_limit)
+    same_row = lay_filter is not None and lay_filter is lay_limit
     record("R7 Show/Refresh sit in the SAME top row as Filter (target layout: they move to bottom panel)",
-           True, spin_parent_is_filter_row,
-           "before-code: browser_limit.parentWidget() == browser_filter.parentWidget()")
+           True, same_row,
+           f"filter layout={lay_filter}, limit layout={lay_limit}")
     dlg.close()
     close_db(db)
     return db
