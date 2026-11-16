@@ -16,6 +16,7 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
                               QStyledItemDelegate)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt6.QtGui import QColor, QFont, QPalette
+import re
 import sqlite3
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -297,6 +298,25 @@ class HighlightDelegate(QStyledItemDelegate):
         return QSize(int(doc.idealWidth()), max(int(doc.size().height()) + 8, 50))
 
 
+class _BrowserTable(QTableWidget):
+    """Browse All table with Delete-key support (BATCH TM2, задача 4).
+
+    Qt.Key_Delete is a key CODE, so the handler works in any keyboard layout
+    (the letter on the key differs, the code does not). The signal fires only
+    when there is a selection and the table has focus: Delete typed in the
+    Filter line edit goes to QLineEdit and never reaches this handler.
+    """
+
+    delete_requested = pyqtSignal()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Delete and self.selectedIndexes():
+            self.delete_requested.emit()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+
 class ConcordanceSearchDialog(QDialog):
     """
     Lightweight Concordance Search dialog for Ctrl+K.
@@ -541,6 +561,9 @@ class TMManagerDialog(QDialog):
         self.parent_app = parent
         self.filter_tm_ids = tm_ids  # Optional filter: only show entries from these TM IDs
         self._initial_concordance_query = initial_concordance_query
+        # SQL helper sv_casefold регистрируется лениво при первом фильтре
+        # (BATCH TM2, задача 2: регистронезависимый поиск и для кириллицы).
+        self._casefold_registered = False
 
         self.setWindowTitle("Translation Memory Manager")
         self.resize(1000, 700)
@@ -597,31 +620,43 @@ class TMManagerDialog(QDialog):
         """Create TM browser tab"""
         widget = QGroupBox()
         layout = QVBoxLayout()
-        
-        # Filter controls
+
+        # Filter controls (BATCH TM2, задача 2). Верхняя строка — только
+        # фильтр: поле + кнопка Filter + Clear + область поиска + Whole words.
+        # Глобальные действия (Refresh, Show) переехали в нижнюю панель.
         filter_layout = QHBoxLayout()
         filter_layout.addWidget(QLabel("Filter:"))
         self.browser_filter = QLineEdit()
-        self.browser_filter.setPlaceholderText("Type to filter entries...")
-        self.browser_filter.textChanged.connect(self.filter_browser_entries)
+        self.browser_filter.setPlaceholderText(
+            self.tr("Type to filter entries, then press Enter or Filter..."))
+        self.browser_filter.returnPressed.connect(self.refresh_browser)
         filter_layout.addWidget(self.browser_filter)
-        
-        self.browser_limit = QSpinBox()
-        self.browser_limit.setRange(100, 10000)
-        self.browser_limit.setValue(500)
-        self.browser_limit.setSingleStep(100)
-        self.browser_limit.setPrefix("Show: ")
-        self.browser_limit.setSuffix(" entries")
-        filter_layout.addWidget(self.browser_limit)
-        
-        refresh_btn = QPushButton("🔄 Refresh")
-        refresh_btn.clicked.connect(self.refresh_browser)
-        filter_layout.addWidget(refresh_btn)
-        
+
+        self.browser_filter_btn = QPushButton(self.tr("Filter"))
+        self.browser_filter_btn.clicked.connect(self.refresh_browser)
+        filter_layout.addWidget(self.browser_filter_btn)
+
+        self.browser_clear_btn = QPushButton(self.tr("Clear"))
+        self.browser_clear_btn.clicked.connect(self.clear_browser_filter)
+        filter_layout.addWidget(self.browser_clear_btn)
+
+        filter_layout.addWidget(QLabel("Search in:"))
+        self.browser_search_in = QComboBox()
+        self.browser_search_in.addItem(self.tr("Source and Target"), "both")
+        self.browser_search_in.addItem(self.tr("Source only"), "source")
+        self.browser_search_in.addItem(self.tr("Target only"), "target")
+        self.browser_search_in.setToolTip(self.tr("Choose where to search"))
+        filter_layout.addWidget(self.browser_search_in)
+
+        self.browser_whole_words = QCheckBox(self.tr("Whole words"))
+        self.browser_whole_words.setToolTip(
+            self.tr("Match whole words only (word boundaries, not substrings)"))
+        filter_layout.addWidget(self.browser_whole_words)
+
         layout.addLayout(filter_layout)
-        
+
         # Table
-        self.browser_table = QTableWidget()
+        self.browser_table = _BrowserTable()
         self.browser_table.setColumnCount(6)
         self.browser_table.setHorizontalHeaderLabels([
             "ID", "Source", "Target", "TM", "Usage", "Modified"
@@ -632,20 +667,34 @@ class TMManagerDialog(QDialog):
         self.browser_table.setAlternatingRowColors(True)
         # Enable sorting by clicking column headers
         self.browser_table.setSortingEnabled(True)
+        # Delete key on the table deletes the selected rows (BATCH TM2, задача 4)
+        self.browser_table.delete_requested.connect(self.delete_selected_entry)
         layout.addWidget(self.browser_table)
-        
-        # Action buttons
+
+        # Bottom panel (BATCH TM2, задача 2): построчные действия + глобальные.
         btn_layout = QHBoxLayout()
         delete_btn = QPushButton("🗑️ Delete Selected")
         delete_btn.clicked.connect(self.delete_selected_entry)
         btn_layout.addWidget(delete_btn)
         btn_layout.addStretch()
-        
+
+        self.browser_limit = QSpinBox()
+        self.browser_limit.setRange(100, 10000)
+        self.browser_limit.setValue(500)
+        self.browser_limit.setSingleStep(100)
+        self.browser_limit.setPrefix("Show: ")
+        self.browser_limit.setSuffix(" entries")
+        btn_layout.addWidget(self.browser_limit)
+
+        refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.clicked.connect(self.refresh_browser)
+        btn_layout.addWidget(refresh_btn)
+
         self.browser_status = QLabel("Ready")
         btn_layout.addWidget(self.browser_status)
-        
+
         layout.addLayout(btn_layout)
-        
+
         widget.setLayout(layout)
         return widget
     
@@ -779,27 +828,9 @@ class TMManagerDialog(QDialog):
         try:
             limit = self.browser_limit.value()
             filter_text = self.browser_filter.text().strip()
-            
-            # Build TM filter clause
-            tm_filter = ""
-            params = []
-            if self.filter_tm_ids:
-                placeholders = ','.join('?' * len(self.filter_tm_ids))
-                tm_filter = f" WHERE tm_id IN ({placeholders})"
-                params = self.filter_tm_ids[:]
-            
-            # Get entries from database
-            if filter_text:
-                entries = self.db_manager.concordance_search(filter_text)
-                # Apply TM filter to concordance results
-                if self.filter_tm_ids:
-                    entries = [e for e in entries if e.get('tm_id') in self.filter_tm_ids]
-            else:
-                # Get recent entries
-                query = f"SELECT * FROM translation_units{tm_filter} ORDER BY modified_date DESC LIMIT {limit}"
-                self.db_manager.cursor.execute(query, params)
-                entries = [dict(row) for row in self.db_manager.cursor.fetchall()]
-            
+
+            entries = self._fetch_browser_entries(limit, filter_text)
+
             # Populate table. Sorting must be suspended while filling: with
             # sorting enabled every setItem() triggers a re-sort, rows move
             # mid-fill and the cells of one entry scatter across different
@@ -810,6 +841,11 @@ class TMManagerDialog(QDialog):
             table.setUpdatesEnabled(False)
             table.clearContents()
             table.setRowCount(len(entries))
+            # BATCH TM2, задача 3: в item кладём ПОЛНЫЙ текст (+ tooltip);
+            # ячейки переносятся (word wrap) с авто-высотой строк. Порог
+            # elide НЕ введён: замер заполнения 500 строк с ~2000-символьными
+            # текстами дал 0.19 c (<1 c) — см. отчёт BATCH TM2, задача 3.
+            table.setWordWrap(True)
             for row, entry in enumerate(entries):
                 entry_id = int(entry['id'])
                 # ID as int DisplayRole: sorts numerically; entry id also kept
@@ -819,11 +855,13 @@ class TMManagerDialog(QDialog):
                 id_item.setData(Qt.ItemDataRole.DisplayRole, entry_id)
                 id_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 0, id_item)
-                source_item = QTableWidgetItem(entry['source_text'][:100])
+                source_item = QTableWidgetItem(entry['source_text'])
                 source_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                source_item.setToolTip(entry['source_text'])
                 table.setItem(row, 1, source_item)
-                target_item = QTableWidgetItem(entry['target_text'][:100])
+                target_item = QTableWidgetItem(entry['target_text'])
                 target_item.setData(Qt.ItemDataRole.UserRole, entry_id)
+                target_item.setToolTip(entry['target_text'])
                 table.setItem(row, 2, target_item)
                 tm_item = QTableWidgetItem(entry['tm_id'])
                 tm_item.setData(Qt.ItemDataRole.UserRole, entry_id)
@@ -835,21 +873,108 @@ class TMManagerDialog(QDialog):
                 modified_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 5, modified_item)
             table.setUpdatesEnabled(True)
+            # BATCH TM2, задача 1: валидный индикатор сортировки (ID asc) с
+            # самого начала и после каждого refresh. setSortIndicator идёт ДО
+            # включения сортировки (урок BATCH TM1.1: setSortingEnabled(True)
+            # применяет текущий индикатор ко всей таблице сразу). Клик по
+            # заголовку по-прежнему меняет сортировку пользователем.
+            table.horizontalHeader().setSortIndicator(0, Qt.SortOrder.AscendingOrder)
             # Re-enable sorting AFTER the table is complete: rows are now
             # moved as whole units, so the display matches the database.
             table.setSortingEnabled(True)
+            table.resizeRowsToContents()
 
             self.browser_status.setText(f"Showing {len(entries)} entries")
             self.log(f"TM Browser: Loaded {len(entries)} entries")
-            
+
         except Exception as e:
             self.browser_status.setText(f"Error: {str(e)}")
             self.log(f"Error refreshing TM browser: {e}")
-    
-    def filter_browser_entries(self):
-        """Filter browser entries as user types"""
-        # Auto-refresh on filter change (with debouncing in real implementation)
-        pass
+
+    def _ensure_casefold_function(self):
+        """Register the SQL helper sv_casefold once per dialog connection.
+
+        SQLite LIKE folds case for ASCII only; wrapping both sides in
+        str.casefold gives case-insensitive substring search for Cyrillic
+        (and any other Unicode script) too. '%' and '_' are ordinary
+        characters because the query is escaped and searched with ESCAPE.
+        """
+        if self._casefold_registered:
+            return
+        self.db_manager.connection.create_function(
+            "sv_casefold", 1, str.casefold, deterministic=True)
+        self._casefold_registered = True
+
+    def _browser_search_fields(self):
+        """Column names searched by the Browse All filter ('Search in' mode)."""
+        mode = self.browser_search_in.currentData()
+        if mode == 'source':
+            return ('source_text',)
+        if mode == 'target':
+            return ('target_text',)
+        return ('source_text', 'target_text')
+
+    @staticmethod
+    def _entry_whole_word_match(entry, pattern, fields):
+        """Whole-word match: Unicode word boundaries (Python re \\b covers
+        Cyrillic; re.IGNORECASE does Unicode case folding)."""
+        return any(pattern.search(entry[col] or "") for col in fields)
+
+    def _fetch_browser_entries(self, limit, filter_text):
+        """Fetch Browse All entries.
+
+        BATCH TM2, задачи 1–2:
+        - без фильтра отбор N записей остался прежним (N самых свежих по
+          modified_date DESC, теперь с детерминированным тай-брейком id DESC),
+          порядок ОТОБРАЖЕНИЯ задаёт индикатор сортировки (ID asc);
+        - с фильтром подстрока/Whole words применяются ко ВСЕМ записям
+          выбранных TM ДО лимита Show (тоже newest-first, затем [:limit]).
+        - подстрока: sv_casefold с обеих сторон + ESCAPE — регистр игнорируется
+          и для кириллицы, '%' и '_' — обычные символы.
+        """
+        tm_filter = ""
+        params = []
+        if self.filter_tm_ids:
+            placeholders = ','.join('?' * len(self.filter_tm_ids))
+            tm_filter = f" WHERE tm_id IN ({placeholders})"
+            params = list(self.filter_tm_ids)
+
+        cursor = self.db_manager.cursor
+        if not filter_text:
+            query = (f"SELECT * FROM translation_units{tm_filter} "
+                     f"ORDER BY modified_date DESC, id DESC LIMIT {int(limit)}")
+            cursor.execute(query, params)
+            return [dict(row) for row in cursor.fetchall()]
+
+        self._ensure_casefold_function()
+        fields = self._browser_search_fields()
+        needle = (filter_text.casefold()
+                  .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
+        pattern = f"%{needle}%"
+        col_conditions = " OR ".join(
+            f"sv_casefold({col}) LIKE ? ESCAPE '\\'" for col in fields)
+        where = (f"{tm_filter} AND ({col_conditions})" if tm_filter
+                 else f" WHERE ({col_conditions})")
+        query = (f"SELECT * FROM translation_units{where} "
+                 f"ORDER BY modified_date DESC, id DESC")
+        cursor.execute(query, params + [pattern] * len(fields))
+        entries = [dict(row) for row in cursor.fetchall()]
+
+        if self.browser_whole_words.isChecked():
+            word_pattern = re.compile(
+                r"\b" + re.escape(filter_text) + r"\b", re.IGNORECASE)
+            entries = [e for e in entries
+                       if self._entry_whole_word_match(e, word_pattern, fields)]
+
+        return entries[:limit]
+
+    def clear_browser_filter(self):
+        """Clear the filter and reload the unfiltered table (BATCH TM2, задача 2).
+
+        No blank rows and no duplicates can appear: the unfiltered path
+        re-reads the database directly (one row per translation_units entry)."""
+        self.browser_filter.clear()
+        self.refresh_browser()
     
     def delete_selected_entry(self):
         """Delete ALL selected TM entries in one confirmed transaction"""
