@@ -8,7 +8,8 @@
 |---|---|---|
 | 1 | `5ee70401` | recon-тест «до» `tm2_recon_before.py` (18/18 находок воспроизводятся) |
 | 2 | `4775a76d` | реализация задач 1–4 (`modules/tm_manager_qt.py`, монолит НЕ тронут) |
-| 3 | (этот) | сьют `tm2_browse_all_tests.py` + отчёт + PROJECT_STATUS |
+| 3 | `3fc2d40f` | сьют `tm2_browse_all_tests.py` + отчёт + PROJECT_STATUS |
+| 4 | `64870d36` | фикс R7-проя recon-теста (layout-проверка вместо parentWidget) |
 
 ---
 
@@ -266,7 +267,8 @@ git log --oneline origin/main..HEAD
 git diff --stat origin/main..HEAD -- translations assets requirements.txt pyproject.toml requirements.lock
 ```
 
-Ожидание: вторая команда — пусто; первая — 3 коммита TM2 (5ee70401, 4775a76d, коммит 3).
+Ожидание: вторая команда — пусто; первая — 4 коммита TM2 (5ee70401, 4775a76d,
+3fc2d40f, 64870d36).
 
 ---
 
