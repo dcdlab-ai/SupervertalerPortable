@@ -10895,6 +10895,20 @@ class SupervertalerQt(QMainWindow):
         temp_manager = TMManagerDialog(self, self.db_manager, self.log)
         tm_tabs.addTab(temp_manager.browser_tab, "📖 Browse All")
 
+        # BATCH TM3, задача 8: операции со списком TM (создание/импорт/
+        # удаление, контекстное меню) завершаются refresh_callback() ==
+        # refresh_tm_list; навешиваем перезагрузку Browse All поверх, чтобы
+        # вкладка не показывала устаревшие записи (ручной тест TM2: после
+        # удаления TM записи удалённой TM оставались в Browse All до
+        # нажатия Refresh). Скрытая подвкладка помечается dirty и
+        # перезагружается при показе (on_tm_list_changed / _on_browser_shown).
+        _prev_tm_list_refresh = getattr(self, 'tm_tab_refresh_callback', None)
+        if _prev_tm_list_refresh is not None:
+            def _refresh_tm_list_and_browse():
+                _prev_tm_list_refresh()
+                temp_manager.on_tm_list_changed()
+            self.tm_tab_refresh_callback = _refresh_tm_list_and_browse
+
         # Statistics (now a "Copy stats" button on the TM List tab – copies a
         # markdown report to the clipboard) and Maintenance (now a button that
         # opens a focused cleanup dialog) used to be sibling sub-tabs here.
@@ -18767,6 +18781,11 @@ class SupervertalerQt(QMainWindow):
         from modules.tm_editor_dialog import TMEditorDialog
         dialog = TMEditorDialog(self, self.db_manager, self.log, tm_id=tm['tm_id'], tm_name=tm_name)
         dialog.exec()
+        # BATCH TM3, задача 8: правки записей внутри TM Editor (удаление
+        # записей, импорт) должны доехать до TM List (счётчики) и Browse All
+        # (обычно скрыт — перезагрузится при показе через dirty-флаг).
+        if hasattr(self, 'tm_tab_refresh_callback') and self.tm_tab_refresh_callback:
+            self.tm_tab_refresh_callback()
     
     # ========================================================================
     # SETTINGS TAB
@@ -33995,6 +34014,12 @@ class SupervertalerQt(QMainWindow):
             return
 
         self.log(f"🗑️ Deleted TM entry from '{tm_name}'")
+
+        # BATCH TM3, задача 8: удаление записи ТМ из Match Panel тоже
+        # должно доехать до TM List (счётчики) и Browse All (обычно скрыт —
+        # перезагрузится при показе через dirty-флаг).
+        if hasattr(self, 'tm_tab_refresh_callback') and self.tm_tab_refresh_callback:
+            self.tm_tab_refresh_callback()
 
         # Remove from the in-memory list and update display
         self.match_panel_tm_matches.pop(self.match_panel_tm_index)
