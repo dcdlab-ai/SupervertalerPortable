@@ -193,6 +193,11 @@ def main():
     dialog.show()
     dialog.resize(1000, 600)
     pump(app)
+    # Ждём дебаунс высот (если он есть в проверяемом коде): на ДО-коде
+    # таймера нет и заморозка остаётся, на ПОСЛЕ-коде высоты пересчитаются.
+    from PyQt6.QtTest import QTest
+    QTest.qWait(300)
+    pump(app)
     colw = table.columnWidth(1)
     shown_h0, shown_h1 = table.rowHeight(0), table.rowHeight(1)
     src_item = table.item(0, 1)
@@ -213,6 +218,8 @@ def main():
     # (б) изменение ширины окна: колонки Stretch расширяются, текст
     # занимает меньше строк, но высоты строк НЕ пересчитываются.
     dialog.resize(1700, 600)
+    pump(app)
+    QTest.qWait(300)
     pump(app)
     colw2 = table.columnWidth(1)
     stale_h0 = table.rowHeight(0)

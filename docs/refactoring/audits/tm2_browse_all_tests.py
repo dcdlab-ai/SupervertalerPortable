@@ -15,7 +15,8 @@ N = 30 записей; у каждого сценария своя БД):
   S3 раскладка (T21–T23): верхняя строка — Filter/Filter/Clear/Search in/
      Whole words; нижняя панель — Delete Selected + Show + Refresh + статус.
   S4 полный текст (T24–T26): длинный source (>300 символов) целиком в item
-     и в tooltip; word wrap на таблицах <=300 строк, elide на >300.
+     (BATCH TM3: tooltip убран — задача 2, T29/T32 обновлены); word wrap на
+     таблицах <=300 строк, elide на >300.
   S5 Delete (T27–T30): QTest.keyClick(table, Key_Delete) при замоканном
      подтверждении удаляет ровно выделенные записи; в поле Filter клавиша
      Delete ничего не удаляет; с пустым выделением — без диалога; работает
@@ -438,8 +439,12 @@ def s4_full_text():
           it1.text() == long_source, f"len={len(it1.text())} vs {len(long_source)}")
     check("T28 long target with newline fully in item",
           it2.text() == long_target, f"len={len(it2.text())}")
-    check("T29 tooltip carries full source text",
-          it1.toolTip() == long_source, f"tooltip len={len(it1.toolTip())}")
+    # BATCH TM3, задача 2: tooltip на Source/Target УБРАН (намеренное
+    # изменение — полный текст виден в ячейке); проверяем отсутствие
+    # tooltip и сохранность полного текста в item.
+    check("T29 tooltip removed from Source cell (BATCH TM3 task 2)",
+          it1.toolTip() == "" and it1.text() == long_source,
+          f"tooltip len={len(it1.toolTip())}, item len={len(it1.text())}")
     check("T30 word wrap enabled after fill",
           dlg.browser_table.wordWrap() is True)
 
@@ -454,8 +459,11 @@ def s4_full_text():
           dlg.browser_table.wordWrap() is True,
           f"rows={dlg.browser_table.rowCount()}")
     it_bulk = dlg.browser_table.item(0, 1)
+    # BATCH TM3, задача 2: tooltip убран — копия полного текста живёт
+    # только в item.
     check("T32 full text stays in item for bulk tables (copy intact)",
-          it_bulk is not None and len(it_bulk.text()) > 0 and it_bulk.toolTip() == it_bulk.text())
+          it_bulk is not None and len(it_bulk.text()) > 0
+          and it_bulk.toolTip() == "")
     dlg.close()
     close_db(db)
 
