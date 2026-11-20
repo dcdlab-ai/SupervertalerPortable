@@ -14,10 +14,11 @@ from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QTabWidget,
                               QGroupBox, QTextEdit, QComboBox, QSpinBox,
                               QProgressBar, QProgressDialog, QWidget, QStyle,
                               QStyledItemDelegate, QApplication,
-                              QStyleOptionViewItem)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize, QRectF, QTimer
-from PyQt6.QtGui import (QColor, QFont, QPalette, QTextDocument,
-                         QAbstractTextDocumentLayout, QKeySequence)
+                              QAbstractItemView, QStyleOptionViewItem)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize, QRect, QRectF, QTimer
+from PyQt6.QtGui import (QColor, QFont, QImage, QPainter, QPalette,
+                         QTextDocument, QAbstractTextDocumentLayout,
+                         QKeySequence)
 import re
 import sqlite3
 import xml.etree.ElementTree as ET
@@ -302,25 +303,59 @@ class HighlightDelegate(QStyledItemDelegate):
         return QSize(int(doc.idealWidth()), max(int(doc.size().height()) + 8, 50))
 
 
+def _wcag_luminance(color) -> float:
+    """WCAG relative luminance of a QColor (0..1). Used to pick the text
+    colour that stays readable on the actual cell background (BATCH TM3.1,
+    задача 2)."""
+    def _chan(v):
+        v = v / 255.0
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+    return (0.2126 * _chan(color.red())
+            + 0.7152 * _chan(color.green())
+            + 0.0722 * _chan(color.blue()))
+
+
 class _BrowserCellDelegate(QStyledItemDelegate):
-    """Cell painter for the Browse All table (BATCH TM3, задачи 3 + 7).
+    """Cell painter for the Browse All table (BATCH TM3/TM3.1).
 
     Paints the whole cell itself so it can layer three things the default
     delegate cannot combine:
       - selected-row background stays as-is, while the CURRENT cell gets a
-        darker shade of the same highlight colour (задача 7);
+        darker shade of the SAME background (задача 7 / TM3.1 задача 2);
       - Source/Target text is wrapped at the real column width and the
-        matches of the APPLIED filter are highlighted (задача 3) — paint
-        only, the item text/data are never modified;
+        matches of the APPLIED filter are highlighted — paint only, the
+        item text/data are never modified;
       - sizeHint mirrors the paint geometry (same padding constants), so
         resizeRowsToContents() computes heights from the true wrapped
-        height instead of the QCommonStyle wrap heuristic (задача 1).
+        height instead of the QCommonStyle wrap heuristic.
+
+    BATCH TM3.1, задача 1 (S1): ONE rendering path for paint() and
+    sizeHint() — both build the same QTextDocument at the same width with
+    the same font, with or without a filter term. TM3 drew unhighlighted
+    cells with painter.drawText (no word wrap → a single clipped line)
+    while the row height was computed from a multi-line document.
+
+    BATCH TM3.1, задача 2 (S2): the text colour is chosen from the
+    background the style ACTUALLY paints (measured with a probe render —
+    under a stylesheet theme the ::item:selected background lives in the
+    QSS rule, NOT in palette.highlight(): measured palette #0078d7 vs
+    painted #e3f2fd). White on dark backgrounds, black on light ones;
+    both candidates stay >= 4.5:1 on either side of the luminance
+    threshold. Highlighted matches keep their #FFD54F background with
+    always-dark text.
     """
 
     # Total padding inside a cell, used by both paint() and sizeHint().
     PAD_X = 8   # 4 left + 4 right
     PAD_Y = 6   # 3 top + 3 bottom
-    HIGHLIGHT_CSS = "background-color: #FFD54F;"
+    HIGHLIGHT_CSS = "background-color: #FFD54F; color: #1A1A1A;"
+    # WCAG relative luminance threshold: white below it, black above it.
+    # white  >= 4.5:1 while L <= 0.1833; black >= 4.5:1 while L >= 0.175 —
+    # 0.179 sits between, so both candidates always reach the goal.
+    DARK_BG_LUMINANCE = 0.179
+    # Probe tile size for the measured background (see _style_painted_bg).
+    _BG_TILE_W = 48
+    _BG_TILE_H = 32
 
     def __init__(self, table, column: int, highlightable: bool):
         super().__init__(table)
@@ -330,6 +365,7 @@ class _BrowserCellDelegate(QStyledItemDelegate):
         self._term = ""
         self._whole_words = False
         self._enabled = True
+        self._bg_cache = {}
 
     def set_highlight(self, term: str, whole_words: bool = False,
                       enabled: bool = True):
@@ -380,7 +416,9 @@ class _BrowserCellDelegate(QStyledItemDelegate):
         # Plain text when nothing is highlighted: setHtml() resolves the
         # document font differently (taller line metrics on the fontless
         # test platform), so height and text rendering must not go through
-        # HTML unless there is something to highlight.
+        # HTML unless there is something to highlight. Both branches wrap
+        # at the same width — paint() and sizeHint() share this method, so
+        # the drawn text and the row height always agree.
         if self._term and self._enabled:
             doc.setHtml(self._build_html(text))
             doc.setDefaultFont(option.font)  # setHtml may reset the font
@@ -388,6 +426,67 @@ class _BrowserCellDelegate(QStyledItemDelegate):
             doc.setPlainText(text)
         doc.setTextWidth(max(10, option.rect.width() - self.PAD_X))
         return doc
+
+    def _style_painted_bg(self, opt, selected: bool, alternate: bool):
+        """The colour the style ACTUALLY paints behind this cell state.
+
+        Under a stylesheet theme the ::item:selected background lives in
+        the QSS rule, not in palette.highlight() (recon TM3.1: palette
+        #0078d7, painted #e3f2fd), so the only reliable source is a render
+        of the style itself into a small tile over the base colour. Cached
+        per (selected, alternate, palette identity) — a handful of tiles
+        per theme, then dict lookups.
+        """
+        key = (selected, alternate, opt.palette.cacheKey())
+        cached = self._bg_cache.get(key)
+        if cached is not None:
+            return cached
+        tile = QImage(self._BG_TILE_W, self._BG_TILE_H,
+                      QImage.Format.Format_RGB32)
+        tile.fill(opt.palette.base().color())
+        painter = QPainter(tile)
+        probe = QStyleOptionViewItem()
+        probe.rect = QRect(0, 0, self._BG_TILE_W, self._BG_TILE_H)
+        probe.palette = opt.palette
+        probe.font = opt.font
+        probe.state = (QStyle.StateFlag.State_Enabled
+                       | QStyle.StateFlag.State_Active)
+        if selected:
+            probe.state |= QStyle.StateFlag.State_Selected
+        if alternate:
+            probe.features |= QStyleOptionViewItem.ViewItemFeature.Alternate
+        self._table.style().drawControl(
+            QStyle.ControlElement.CE_ItemViewItem, probe, painter,
+            self._table)
+        painter.end()
+        counts = {}
+        for y in range(tile.height()):
+            for x in range(tile.width()):
+                name = tile.pixelColor(x, y).name()
+                counts[name] = counts.get(name, 0) + 1
+        bg = QColor(max(counts, key=counts.get))
+        self._bg_cache[key] = bg
+        return bg
+
+    def _effective_bg(self, opt, index):
+        """Effective cell background: measured style background; the
+        current cell of a selected row is the same colour darkened 25 %
+        (BATCH TM3, задача 7 — now relative to the real background)."""
+        selected = bool(opt.state & QStyle.StateFlag.State_Selected)
+        alternate = (not selected
+                     and bool(opt.features
+                              & QStyleOptionViewItem.ViewItemFeature.Alternate))
+        bg = self._style_painted_bg(opt, selected, alternate)
+        if selected and index == self._table.currentIndex():
+            bg = bg.darker(125)
+        return bg
+
+    def _text_color(self, bg):
+        """Text colour for the measured background: white on dark, black on
+        light (>= 4.5:1 in every state — TM3.1, задача 2)."""
+        if _wcag_luminance(bg) < self.DARK_BG_LUMINANCE:
+            return QColor("#FFFFFF")
+        return QColor("#000000")
 
     def paint(self, painter, option, index):
         painter.save()
@@ -400,28 +499,17 @@ class _BrowserCellDelegate(QStyledItemDelegate):
         opt.text = ""
         self._table.style().drawControl(
             QStyle.ControlElement.CE_ItemViewItem, opt, painter, self._table)
-        # BATCH TM3, задача 7: текущая ячейка выделенной строки — более
-        # тёмный оттенок того же цвета выделения.
+        # BATCH TM3, задача 7 + TM3.1 задача 2: текущая ячейка выделенной
+        # строки — тот же РЕАЛЬНЫЙ фон, затемнённый на 25 %.
         if ((opt.state & QStyle.StateFlag.State_Selected)
                 and index == self._table.currentIndex()):
-            painter.fillRect(
-                option.rect, option.palette.highlight().color().darker(125))
+            painter.fillRect(option.rect, self._effective_bg(opt, index))
 
         text = index.data(Qt.ItemDataRole.DisplayRole)
-        if self._highlightable and self._enabled and self._term and text:
-            doc = self._make_doc(option, index)
-            ctx = QAbstractTextDocumentLayout.PaintContext()
-            if opt.state & QStyle.StateFlag.State_Selected:
-                ctx.palette.setColor(
-                    QPalette.ColorRole.Text,
-                    opt.palette.highlightedText().color())
-            painter.translate(option.rect.left() + self.PAD_X // 2,
-                              option.rect.top() + self.PAD_Y // 2)
-            painter.setClipRect(QRectF(0, 0,
-                                       option.rect.width() - self.PAD_X,
-                                       option.rect.height() - self.PAD_Y))
-            doc.documentLayout().draw(painter, ctx)
-        else:
+        if not self._highlightable:
+            # Plain columns (ID / TM / Usage / Modified): short values, the
+            # theme's own text colour, single line (остальные колонки не
+            # меняем — рисуются штатно, TM3.1 задача 2).
             painter.setPen(option.palette.text().color())
             if text is not None:
                 painter.drawText(
@@ -429,6 +517,24 @@ class _BrowserCellDelegate(QStyledItemDelegate):
                                          -(self.PAD_X // 2), 0),
                     Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
                     str(text))
+            painter.restore()
+            return
+        # BATCH TM3.1, задача 1: единый путь Source/Target — документ из
+        # sizeHint() (перенос по словам по ширине колонки, с фильтром и
+        # без).
+        doc = self._make_doc(option, index)
+        ctx = QAbstractTextDocumentLayout.PaintContext()
+        # BATCH TM3.1, задача 2: цвет текста по яркости реального фона;
+        # подсвеченные совпадения несут собственный тёмный цвет в HTML.
+        ctx.palette.setColor(
+            QPalette.ColorRole.Text,
+            self._text_color(self._effective_bg(opt, index)))
+        painter.translate(option.rect.left() + self.PAD_X // 2,
+                          option.rect.top() + self.PAD_Y // 2)
+        painter.setClipRect(QRectF(0, 0,
+                                   option.rect.width() - self.PAD_X,
+                                   option.rect.height() - self.PAD_Y))
+        doc.documentLayout().draw(painter, ctx)
         painter.restore()
 
     def sizeHint(self, option, index):
@@ -743,9 +849,9 @@ class TMManagerDialog(QDialog):
         # SQL helper sv_casefold регистрируется лениво при первом фильтре
         # (BATCH TM2, задача 2: регистронезависимый поиск и для кириллицы).
         self._casefold_registered = False
-        # BATCH TM3, задача 8: данные (список TM / записи) изменились, пока
-        # подвкладка Browse All была скрыта — перезагрузить при показе.
-        self._data_dirty = False
+        # BATCH TM3.1, задача 4: dirty-флаг больше не нужен — показ
+        # перезагружает данные ВСЕГДА (_on_browser_shown), перезагрузка
+        # дешёвая (один ограниченный SQL-запрос).
         # BATCH TM3, задача 1: дебаунс пересчёта высот строк (showEvent /
         # resizeEvent / изменение ширины колонок приходят пачками).
         self._height_timer = QTimer(self)
@@ -849,6 +955,11 @@ class TMManagerDialog(QDialog):
         self.browser_search_in.addItem(self.tr("Source only"), "source")
         self.browser_search_in.addItem(self.tr("Target only"), "target")
         self.browser_search_in.setToolTip(self.tr("Choose where to search"))
+        # BATCH TM3.1, задача 3: смена «Search in»/«Whole words» применяется
+        # СРАЗУ при непустом поле Filter (recon R3a/R3b: без подключения
+        # режим не переприменялся — строки и подсветка оставались старыми).
+        self.browser_search_in.currentIndexChanged.connect(
+            self._on_browser_search_state_changed)
         filter_layout.addWidget(self.browser_search_in)
 
         # BATCH TM3, задача 4: CheckmarkCheckBox вместо голого QCheckBox —
@@ -859,6 +970,8 @@ class TMManagerDialog(QDialog):
         self.browser_whole_words = CheckmarkCheckBox(self.tr("Whole words"))
         self.browser_whole_words.setToolTip(
             self.tr("Match whole words only (word boundaries, not substrings)"))
+        self.browser_whole_words.toggled.connect(
+            self._on_browser_search_state_changed)
         filter_layout.addWidget(self.browser_whole_words)
 
         layout.addLayout(filter_layout)
@@ -875,6 +988,11 @@ class TMManagerDialog(QDialog):
         self.browser_table.setAlternatingRowColors(True)
         # Enable sorting by clicking column headers
         self.browser_table.setSortingEnabled(True)
+        # BATCH TM3.1, задача 5: ячейки Browse All только для чтения —
+        # правки остаются в Edit/Maintain TM (реализация записи в БД из
+        # таблицы — отдельное решение, задача 6 BATCH TM3 остановлена).
+        self.browser_table.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers)
         # Delete key on the table deletes the selected rows (BATCH TM2, задача 4)
         self.browser_table.delete_requested.connect(self.delete_selected_entry)
         # BATCH TM3, задачи 1+3+7: ячейки рисует свой делегат (перенос по
@@ -1058,6 +1176,13 @@ class TMManagerDialog(QDialog):
             limit = self.browser_limit.value()
             filter_text = self.browser_filter.text().strip()
 
+            # BATCH TM3.1, задача 4: список «TM:» пересобирается при каждом
+            # refresh_browser (удалённая/переименованная TM исчезает, новая
+            # появляется без перезапуска). Выбранная TM сохраняется, если
+            # она ещё существует, иначе «All TMs»; сигналы заблокированы,
+            # поэтому данные ниже читаются уже с новым ограничением.
+            self._reload_browser_tm_combo()
+
             # BATCH TM3, задача 3: подсветка — только по ПРИМЕНЁННОМУ
             # фильтру (то, что выполнили Enter/Filter/Clear/TM-выбор), а не
             # по набранному в поле тексту. Делегаты читают этот термин при
@@ -1097,23 +1222,26 @@ class TMManagerDialog(QDialog):
                 # ID as int DisplayRole: sorts numerically; entry id also kept
                 # in Qt.UserRole on EVERY cell so deletion keys stay valid
                 # no matter which column the user sorted by.
-                id_item = QTableWidgetItem()
+                # BATCH TM3.1, задача 5: все ячейки только для чтения
+                # (_ro_item — без ItemIsEditable; правки записей остаются
+                # в Edit/Maintain TM).
+                id_item = self._ro_item()
                 id_item.setData(Qt.ItemDataRole.DisplayRole, entry_id)
                 id_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 0, id_item)
-                source_item = QTableWidgetItem(entry['source_text'])
+                source_item = self._ro_item(entry['source_text'])
                 source_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 1, source_item)
-                target_item = QTableWidgetItem(entry['target_text'])
+                target_item = self._ro_item(entry['target_text'])
                 target_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 2, target_item)
-                tm_item = QTableWidgetItem(entry['tm_id'])
+                tm_item = self._ro_item(entry['tm_id'])
                 tm_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 3, tm_item)
-                usage_item = QTableWidgetItem(str(entry.get('usage_count', 0)))
+                usage_item = self._ro_item(str(entry.get('usage_count', 0)))
                 usage_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 4, usage_item)
-                modified_item = QTableWidgetItem(entry.get('modified_date', '')[:16])
+                modified_item = self._ro_item(entry.get('modified_date', '')[:16])
                 modified_item.setData(Qt.ItemDataRole.UserRole, entry_id)
                 table.setItem(row, 5, modified_item)
             table.setUpdatesEnabled(True)
@@ -1138,6 +1266,14 @@ class TMManagerDialog(QDialog):
         except Exception as e:
             self.browser_status.setText(f"Error: {str(e)}")
             self.log(f"Error refreshing TM browser: {e}")
+
+    @staticmethod
+    def _ro_item(text: str = "") -> QTableWidgetItem:
+        """Read-only table item (BATCH TM3.1, задача 5): флаги без
+        ItemIsEditable, никаких itemChanged-эффектов."""
+        item = QTableWidgetItem(text)
+        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        return item
 
     def _ensure_casefold_function(self):
         """Register the SQL helper sv_casefold once per dialog connection.
@@ -1276,27 +1412,46 @@ class TMManagerDialog(QDialog):
         """«TM:» selection reloads the table immediately (задача 9)."""
         self.refresh_browser()
 
+    def _on_browser_search_state_changed(self):
+        """«Search in» / «Whole words» changed (BATCH TM3.1, задача 3).
+
+        Re-applies the filter immediately when the Filter field is
+        non-empty (the row list and the highlight update at once, recon
+        R3a/R3b); with an empty field the new state is simply remembered
+        until the next Enter / Filter. Clear resets both as in TM3."""
+        if self.browser_filter.text().strip():
+            self.refresh_browser()
+
     def _on_browser_shown(self):
-        """Browse All became visible (задача 8а + высоты, задача 1)."""
-        if self._data_dirty:
-            self._data_dirty = False
-            self._reload_browser_tm_combo()
-            self.refresh_browser(keep_sort=True)
+        """Browse All became visible (BATCH TM3.1, задача 4).
+
+        Reloads on EVERY show, without a dirty flag (the reload is cheap —
+        one bounded SQL read): «TM:», rows, filter/mode/Whole words state
+        and the sort indicator are all refreshed, the selection resets.
+        Filter/mode/Whole words/TM choice live in the widgets and survive
+        refresh_browser; keep_sort=True preserves the user's sort."""
+        self._reload_browser_tm_combo()
+        self.refresh_browser(keep_sort=True)
+        self.log(f"TM Browser: reloaded on show "
+                 f"({self.browser_table.rowCount()} entries)")
         self._schedule_row_height_sync()
 
     def on_tm_list_changed(self):
-        """Hook for the main window (BATCH TM3, задача 8б).
+        """Hook for the main window (BATCH TM3, задача 8; TM3.1, задача 4).
 
-        Called after TM list operations (create / delete / import / rename)
-        and after entry deletions elsewhere in the app. A visible sub-tab
-        reloads immediately (keeping filter, mode, Whole words, TM selection
-        and sort state — refresh_browser only re-reads the data); a hidden
-        one is marked dirty and reloads on the next show."""
+        Called from the monolith's single refresh point (refresh_tm_list —
+        create / import / delete / rename all end there; TMEditorDialog and
+        Match Panel arrive via tm_tab_refresh_callback). A visible sub-tab
+        reloads immediately (keeping filter, mode, Whole words, TM
+        selection and sort state); a hidden one logs the deferral and
+        reloads on the next show — _on_browser_shown reloads on EVERY
+        show, so no dirty flag is needed."""
         if self.browser_table.isVisible():
+            self.log("TM Browser: TM list changed, reloading")
             self._reload_browser_tm_combo()
             self.refresh_browser(keep_sort=True)
         else:
-            self._data_dirty = True
+            self.log("TM Browser: TM list changed (reload deferred to show)")
 
     def _schedule_row_height_sync(self):
         """Debounced row-height recompute (задача 1): showEvent, viewport

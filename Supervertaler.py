@@ -10895,19 +10895,15 @@ class SupervertalerQt(QMainWindow):
         temp_manager = TMManagerDialog(self, self.db_manager, self.log)
         tm_tabs.addTab(temp_manager.browser_tab, "📖 Browse All")
 
-        # BATCH TM3, задача 8: операции со списком TM (создание/импорт/
-        # удаление, контекстное меню) завершаются refresh_callback() ==
-        # refresh_tm_list; навешиваем перезагрузку Browse All поверх, чтобы
-        # вкладка не показывала устаревшие записи (ручной тест TM2: после
-        # удаления TM записи удалённой TM оставались в Browse All до
-        # нажатия Refresh). Скрытая подвкладка помечается dirty и
-        # перезагружается при показе (on_tm_list_changed / _on_browser_shown).
-        _prev_tm_list_refresh = getattr(self, 'tm_tab_refresh_callback', None)
-        if _prev_tm_list_refresh is not None:
-            def _refresh_tm_list_and_browse():
-                _prev_tm_list_refresh()
-                temp_manager.on_tm_list_changed()
-            self.tm_tab_refresh_callback = _refresh_tm_list_and_browse
+        # BATCH TM3.1, задача 4: единая точка проводки свежести Browse All.
+        # Подмена атрибута tm_tab_refresh_callback (BATCH TM3) не работает:
+        # create/import/delete получают замыкание refresh_tm_list как
+        # ПАРАМЕТР, поэтому вызывают его в обход любой подмены атрибута.
+        # Вызов on_tm_list_changed теперь стоит в конце тела самого
+        # замыкания refresh_tm_list (см. _create_tm_list_tab) — туда
+        # сходятся ВСЕ пути (create/import/delete/rename, контекстное меню,
+        # TMEditorDialog и Match Panel через tm_tab_refresh_callback).
+        self._tm_browse_manager = temp_manager
 
         # Statistics (now a "Copy stats" button on the TM List tab – copies a
         # markdown report to the clipboard) and Maintenance (now a button that
@@ -11263,6 +11259,19 @@ class SupervertalerQt(QMainWindow):
 
             # v1.10.169: re-enable sorting now that the rebuild is done.
             tm_table.setSortingEnabled(_prev_tm_sorting)
+
+            # BATCH TM3.1, задача 4: проводка свежести Browse All из ЕДИНОЙ
+            # точки — сюда сходятся все пути, меняющие список TM (кнопки
+            # create/import/delete, контекстное меню, переименование) и все
+            # вызовы tm_tab_refresh_callback (TMEditorDialog, Match Panel,
+            # загрузка проекта). Скрытая подвкладка перезагрузится при
+            # показе (_on_browser_shown перезагружает всегда).
+            browse_mgr = getattr(self, '_tm_browse_manager', None)
+            if browse_mgr is not None:
+                try:
+                    browse_mgr.on_tm_list_changed()
+                except Exception:
+                    pass
 
         # Store callback as instance attribute so load_project can refresh UI after restoration
         self.tm_tab_refresh_callback = refresh_tm_list
