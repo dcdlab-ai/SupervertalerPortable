@@ -58,6 +58,7 @@ class TMXImportThread(QThread):
             tus = body.findall('tu')
             total = len(tus)
             imported = 0
+            refused = 0
             
             for idx, tu in enumerate(tus):
                 # Extract source and target
@@ -88,7 +89,7 @@ class TMXImportThread(QThread):
                     # upsert) == overwrite=False. The call used to pass a
                     # nonexistent save_mode kwarg and died with a TypeError,
                     # turning every import into "Import failed".
-                    self.db_manager.add_translation_unit(
+                    entry_id = self.db_manager.add_translation_unit(
                         source=source_text,
                         target=target_text,
                         source_lang=self.source_lang,
@@ -96,14 +97,27 @@ class TMXImportThread(QThread):
                         tm_id=self.tm_id,
                         overwrite=False
                     )
-                    imported += 1
+                    # BATCH TM5: the DB layer refuses writes to a tm_id that
+                    # has no row in translation_memories (phantom-TM guard,
+                    # returns None). Count only real writes, so the user is
+                    # not told "Successfully imported N entries" when nothing
+                    # was stored.
+                    if entry_id is not None:
+                        imported += 1
+                    else:
+                        refused += 1
                 
                 # Update progress every 10 entries
                 if idx % 10 == 0:
                     progress_pct = int((idx / total) * 100)
                     self.progress.emit(progress_pct, f"Importing... {idx}/{total}")
             
-            self.finished.emit(True, f"Successfully imported {imported} entries", imported)
+            message = f"Successfully imported {imported} entries"
+            if refused:
+                message += (f"; {refused} entries refused "
+                            f"(TM ID '{self.tm_id}' has no row in "
+                            f"translation_memories)")
+            self.finished.emit(imported > 0, message, imported)
 
         except Exception as e:
             self.finished.emit(False, f"Import failed: {str(e)}", 0)
