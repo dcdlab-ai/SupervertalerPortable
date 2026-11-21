@@ -83,13 +83,18 @@ class TMXImportThread(QThread):
                 
                 # Add to TM if both source and target found
                 if source_text and target_text:
+                    # BATCH TM5: 'all' import semantics (never clobber
+                    # existing variants, re-import of the same pair is an
+                    # upsert) == overwrite=False. The call used to pass a
+                    # nonexistent save_mode kwarg and died with a TypeError,
+                    # turning every import into "Import failed".
                     self.db_manager.add_translation_unit(
                         source=source_text,
                         target=target_text,
                         source_lang=self.source_lang,
                         target_lang=self.target_lang,
                         tm_id=self.tm_id,
-                        save_mode='all'  # Always use 'all' mode for imports
+                        overwrite=False
                     )
                     imported += 1
                 
