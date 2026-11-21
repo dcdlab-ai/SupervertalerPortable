@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tmx version="1.4">
+  <header creationtool="SupervertalerBatchTM5" creationtoolversion="1.10.371" srclang="en-US" adminlang="en" segtype="sentence" datatype="plaintext"/>
+  <body>
+    <tu>
+      <tuv xml:lang="en-US"><seg>The monthly report was approved by the board.</seg></tuv>
+      <tuv xml:lang="ru-RU"><seg>Ежемесячный отчёт был утверждён советом директоров.</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en-US"><seg>Please confirm the delivery date before Friday.</seg></tuv>
+      <tuv xml:lang="ru-RU"><seg>Пожалуйста, подтвердите дату поставки до пятницы.</seg></tuv>
+    </tu>
+    <tu>
+      <tuv xml:lang="en-US"><seg>The invoice total includes value added tax.</seg></tuv>
+      <tuv xml:lang="ru-RU"><seg>Итоговая сумма счёта включает налог на добавленную стоимость.</seg></tuv>
+    </tu>
+  </body>
+</tmx>
