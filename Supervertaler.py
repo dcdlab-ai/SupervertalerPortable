@@ -11148,6 +11148,18 @@ class SupervertalerQt(QMainWindow):
                     if success:
                         status = "readable" if checked else "not readable"
                         self.log(f"✅ TM {tm_id} set to {status}")
+                        # BATCH TM5: keep the project's active-TM snapshot
+                        # (tm_settings['activated_tm_ids'], read by
+                        # _show_instant_tm_match and the F5 path) in sync with
+                        # the DB activation. It used to refresh only at
+                        # project save/load, so exact matches from a freshly
+                        # ticked Read did not appear until the project was
+                        # saved.
+                        if curr_proj_id:
+                            if not self.current_project.tm_settings:
+                                self.current_project.tm_settings = {}
+                            self.current_project.tm_settings['activated_tm_ids'] = \
+                                tm_metadata_mgr.get_active_tm_ids(curr_proj_id)
                         # Update name to be bold if readable
                         name_item = tm_table.item(row_idx, 0)
                         if name_item:
@@ -28161,6 +28173,13 @@ class SupervertalerQt(QMainWindow):
                 if cache_size > 0:
                     self.translation_matches_cache.clear()
                     self.log(f"🔄 Full cache invalidated ({cache_size} segments cleared)")
+                # BATCH TM5: the instant exact-match dedup guard is keyed on
+                # (segment, source) and remembers MISSES too — a TM activation
+                # can turn an old miss into a hit, so reset it together with
+                # the cache. The guard's own comment promises a reset on TM
+                # refresh, but nothing ever cleared it, so a segment that once
+                # had no exact match stayed suppressed for the whole session.
+                self._instant_tm_guard = None
             else:
                 # Smart invalidation: Only clear segments ahead of current position
                 if hasattr(self, 'table') and self.table:
