@@ -44,44 +44,61 @@ class TMXImportThread(QThread):
     
     def run(self):
         """Import TMX file in background"""
+        # BATCH TM5: the caller's db_manager owns a GUI-thread sqlite
+        # connection (check_same_thread=True). Using it from this QThread
+        # raised "SQLite objects created in a thread..." on every entry —
+        # masked until fix A removed the TypeError that aborted before any
+        # DB access. Open a dedicated writer connection here instead (the
+        # same pattern TMCleanupThread uses); WAL lets it coexist with the
+        # main writer connection.
+        try:
+            from modules.database_manager import DatabaseManager
+            db = DatabaseManager(db_path=self.db_manager.db_path,
+                                 log_callback=self.db_manager.log)
+            db.connect()
+        except Exception as e:
+            self.finished.emit(False,
+                               f"Import failed: could not open database: {e}", 0)
+            return
+
         try:
             tree = ET.parse(self.tmx_path)
             root = tree.getroot()
-            
+
             # Find body element
             body = root.find('.//body')
             if body is None:
                 self.finished.emit(False, "Invalid TMX file: no body element found", 0)
                 return
-            
+
             # Get all translation units
             tus = body.findall('tu')
             total = len(tus)
             imported = 0
             refused = 0
-            
+
             for idx, tu in enumerate(tus):
                 # Extract source and target
                 tuvs = tu.findall('tuv')
                 if len(tuvs) < 2:
                     continue
-                
+
                 source_text = None
                 target_text = None
-                
+
                 for tuv in tuvs:
-                    lang = tuv.get('{http://www.w3.org/XML/1998/namespace}lang', 
+                    lang = tuv.get('{http://www.w3.org/XML/1998/namespace}lang',
                                   tuv.get('lang', ''))
                     seg = tuv.find('seg')
                     if seg is None or seg.text is None:
                         continue
-                    
+
                     # Simple language matching (could be improved)
                     if not source_text:
                         source_text = seg.text
                     else:
                         target_text = seg.text
-                
+
                 # Add to TM if both source and target found
                 if source_text and target_text:
                     # BATCH TM5: 'all' import semantics (never clobber
@@ -89,7 +106,7 @@ class TMXImportThread(QThread):
                     # upsert) == overwrite=False. The call used to pass a
                     # nonexistent save_mode kwarg and died with a TypeError,
                     # turning every import into "Import failed".
-                    entry_id = self.db_manager.add_translation_unit(
+                    entry_id = db.add_translation_unit(
                         source=source_text,
                         target=target_text,
                         source_lang=self.source_lang,
@@ -106,12 +123,12 @@ class TMXImportThread(QThread):
                         imported += 1
                     else:
                         refused += 1
-                
+
                 # Update progress every 10 entries
                 if idx % 10 == 0:
                     progress_pct = int((idx / total) * 100)
                     self.progress.emit(progress_pct, f"Importing... {idx}/{total}")
-            
+
             message = f"Successfully imported {imported} entries"
             if refused:
                 message += (f"; {refused} entries refused "
@@ -121,6 +138,11 @@ class TMXImportThread(QThread):
 
         except Exception as e:
             self.finished.emit(False, f"Import failed: {str(e)}", 0)
+        finally:
+            try:
+                db.close()
+            except Exception:
+                pass
 
 
 class TMCleanupThread(QThread):
