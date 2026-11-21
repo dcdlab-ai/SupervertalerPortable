@@ -37,10 +37,14 @@ class TMEditorDialog(QDialog):
         self.log = log_callback
         self.tm_id = tm_id
         self.tm_name = tm_name
-        
+        # BATCH TM5: the application window that opened this dialog; init_ui
+        # hands it to the embedded TM Manager as parent_app so its import
+        # uses the project's language pair.
+        self._creator_window = parent
+
         self.setWindowTitle(f"TM Editor - {tm_name}")
         self.setMinimumSize(1000, 700)
-        
+
         self.init_ui()
     
     def init_ui(self):
@@ -72,6 +76,15 @@ class TMEditorDialog(QDialog):
         
         # Create nested TM Manager for this specific TM
         tm_manager = TMManagerDialog(self, self.db_manager, self.log, tm_ids=[self.tm_id])
+
+        # BATCH TM5: scope the embedded Import/Export tab to THIS TM and to
+        # the real application. The TM ID field used to keep its generic
+        # "imported" default (so importing from the TM Editor silently
+        # targeted the wrong TM), and parent_app stayed this dialog, whose
+        # lack of current_project made the import fall back to a fixed
+        # en → de language pair instead of the project's.
+        tm_manager.import_tm_id.setText(self.tm_id)
+        tm_manager.parent_app = self._creator_window
         
         # Create tab widget with only relevant tabs for editing a specific TM
         tabs = QTabWidget()

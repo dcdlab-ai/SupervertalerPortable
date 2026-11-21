@@ -1629,7 +1629,12 @@ class TMManagerDialog(QDialog):
         tm_id = self.import_tm_id.text().strip() or "imported"
         
         # Get source and target languages from parent app
-        if hasattr(self.parent_app, 'current_project'):
+        # BATCH TM5: also require a LOADED project — when the parent is the
+        # main window with no project open, current_project is None and the
+        # bare attribute access raised AttributeError instead of using the
+        # defaults.
+        if (hasattr(self.parent_app, 'current_project')
+                and self.parent_app.current_project):
             source_lang = self.parent_app.current_project.source_lang
             target_lang = self.parent_app.current_project.target_lang
         else:
