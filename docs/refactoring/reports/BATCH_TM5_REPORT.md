@@ -149,12 +149,12 @@ stage). **13/13 симптомов/эталонов воспроизведено
 | `181a5973` | recon-before (артефакт разведки) | docs/refactoring/audits/tm5_recon_import.py | +495 |
 | `9380cbbb` | **A**: `save_mode='all'` → `overwrite=False` (та же семантика «all»: варианты не затираются, повторная пара — upsert) | modules/tm_manager_qt.py | +6/−1 |
 | `87007d7e` | **B**: честный счётчик записей/отказов, `success=imported>0` | modules/tm_manager_qt.py | +17/−3 |
-| `a6e890d6` | **F**: TM Editor импорт в свою TM + parent_app = главное окно + защита None-проекта | modules/tm_editor_dialog.py, modules/tm_manager_qt.py | +16/−1 |
+| `a6e890d6` | **F**: TM Editor импорт в свою TM + parent_app = главное окно + защита None-проекта | modules/tm_editor_dialog.py, modules/tm_manager_qt.py | +15/−2 (tm_editor_dialog +15/−2, tm_manager_qt +6/−1) |
 | `ca66d0ad` | **C**: импорт-«создать TM» активирует TM (Read=on) как «+Create New TM» + англ. лог одной строкой `TM import: created TM '…' (…), Read=on` | Supervertaler.py | +15 |
 | `5f4fbe74` | **D**: сброс `_instant_tm_guard` в `invalidate_translation_cache` (полная ветка) + пересчёт снапшота в `on_read_toggle` | Supervertaler.py | +19 |
 | `1dad9c5e` | **E**: после активации при импорте — пересчёт снапшота + `invalidate_translation_cache(smart_invalidation=False)` | Supervertaler.py | +11 |
 | `76afb6c3` | **G**: `tm['id']` → `tm['tm_id']` в языковой проверке подсказки | Supervertaler.py | +6/−1 |
-| `f170bba5` | **H**: TMXImportThread пишет через собственный writer-коннект (WAL), close в finally | modules/tm_manager_qt.py | +58/−48 (реструктуризация run: тело под try/finally) |
+| `f170bba5` | **H**: TMXImportThread пишет через собственный writer-коннект (WAL), close в finally | modules/tm_manager_qt.py | +33/−11 (реструктуризация run: тело под try/finally; в первой версии таблицы ошибочно стояло +58/−48 — оценка вместо замера, исправлено по предпуш-проверке Дмитрия) |
 
 Монолит: 55 309 → **55 359** строк (нетто **+50**: фикс C +15, D +19,
 E +11, G +6/−1 = +5). Схема БД не менялась; `database_manager.py` не
@@ -219,7 +219,7 @@ and Import TMX...» в реальном `TMEditorDialog`), реальный по
 | Проверка | Было (защита) | Стало |
 |---|---|---|
 | py_compile CANONICAL | 116/0 | **116/0** |
-| py_compile REFERENCE | 325 +2 (аудит-файлы TM4, см. примечание) | **328/328** на момент батареи → **329/329 подтверждено финальным замером** после коммита сьюта (4e56f2e6, +1 файл `tm5_import_tests.py`; лог `static_tm5_final.log`) |
+| py_compile REFERENCE | 325 +2 (аудит-файлы TM4, см. примечание) | **328/328** на момент батареи → **329/329 подтверждено финальным замером** после коммита сьюта (4e56f2e6, дозамерено и довключено в тот же коммит amend-ом → итоговый хэш 00678eaf; +1 файл `tm5_import_tests.py`; лог `static_tm5_final.log`) |
 | pyflakes (canonical, 99 файлов) | 517 | **517** |
 | AST startup chain | 876/0 | **876/0** |
 | AST parse tracked .py | 327 | **328/328** на момент батареи → 329/329 после коммита сьюта |
@@ -266,7 +266,7 @@ iso-профиль стирается (`rm -rf`) — неочищенный пр
 | Файл | до | стало | причина |
 |---|---|---|---|
 | `Supervertaler.py` | рабочая CRLF `92148004…`, блоб LF `89b036d0…`, 55 309 строк | рабочая CRLF `7f62a6d8…`, блоб LF `cad2f7c4…`, **55 359 строк** (+50) | фиксы C (+15), D (+19), E (+11), G (+6/−1) |
-| `modules/tm_manager_qt.py` | `efab8bbe…` (LF), 1963 строк | `3def997a…` (LF), 2009 строк (+46) | фиксы A (+6/−1), B (+17/−3), F (+6/−1), H (+58/−48) |
+| `modules/tm_manager_qt.py` | `efab8bbe…` (LF), 1963 строк | `3def997a…` (LF), 2009 строк (+46) | фиксы A (+6/−1), B (+17/−3), F (+6/−1), H (+33/−11); сумма нетто +5+14+5+22 = +46 — сходится с 2009−1963 |
 | `modules/tm_editor_dialog.py` | `ed0bb688…` (LF), 99 строк | `9df0b257…` (LF), 112 строк (+13) | фикс F (+13) |
 | `modules/database_manager.py` | `7fba2c18…`, 3408 строк | **без изменений** | правка не требовалась |
 | `docs/refactoring/audits/tm5_recon_import.py` | — (новый) | блоб = рабочая копия | артефакт разведки |
