@@ -18454,6 +18454,21 @@ class SupervertalerQt(QMainWindow):
             # not the older one that owns the id we asked for.
             created = tm_metadata_mgr.get_tm(db_id) or {}
             target_tm_id = created.get('tm_id') or tm_id
+
+            # BATCH TM5: the "+ Create New TM" button activates the TM it
+            # creates (activate_tm right after create_tm in
+            # _show_create_tm_dialog), so its Read checkbox comes on by
+            # default. The TMX-import path skipped the activation, leaving
+            # Read off — entries were stored but never matched in the Editor
+            # until the user ticked Read by hand. Same mechanism, same key
+            # (tm_activation for the current project, or global 0).
+            _import_project_id = (self.current_project.id
+                                  if (hasattr(self, 'current_project')
+                                      and self.current_project
+                                      and hasattr(self.current_project, 'id'))
+                                  else 0)
+            tm_metadata_mgr.activate_tm(db_id, _import_project_id)
+            self.log(f"TM import: created TM '{name}' ({target_tm_id}), Read=on")
         else:
             # Use existing TM
             target_tm_id = tm_combo.currentData()
