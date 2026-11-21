@@ -1047,13 +1047,56 @@ class DatabaseManager:
         target_hash = hashlib.md5(_normalize_for_matching(target).encode('utf-8')).hexdigest()
 
         try:
-            # If overwrite mode, delete ALL existing entries with same source_hash and tm_id
-            # This ensures only the latest translation is kept
+            # BATCH TM4: overwrite mode ("Save only latest translation") used to
+            # DELETE the existing row(s) and INSERT a fresh one, so re-confirming
+            # an edited translation always produced a NEW entry id (e.g. 463 ->
+            # 499) while the edit is still the same TM entry. The row is now
+            # updated IN PLACE: id, created_date and usage_count survive; the
+            # tu_fts_update / tu_trig_update triggers keep both FTS indexes in
+            # step with the new target. A source that has no row in this TM yet
+            # still falls through to the plain INSERT below (new id — correct).
             if overwrite:
                 self.cursor.execute("""
-                    DELETE FROM translation_units
+                    SELECT id, target_text FROM translation_units
                     WHERE source_hash = ? AND tm_id = ?
+                    ORDER BY modified_date DESC, id DESC
+                    LIMIT 1
                 """, (source_hash, tm_id))
+                _existing = self.cursor.fetchone()
+                if _existing:
+                    if (_existing['target_text'] or '') == target:
+                        # Identical translation re-confirmed: nothing to write.
+                        # Keep the entry exactly as it is (id, created_date,
+                        # usage_count untouched). Legacy multi-variant rows for
+                        # this source collapse to the one kept row — the same
+                        # end state the old DELETE produced.
+                        self.cursor.execute("""
+                            DELETE FROM translation_units
+                            WHERE source_hash = ? AND tm_id = ? AND id != ?
+                        """, (source_hash, tm_id, _existing['id']))
+                        self.connection.commit()
+                        return _existing['id']
+                    self.cursor.execute("""
+                        UPDATE translation_units
+                        SET source_text = ?, target_text = ?, source_lang = ?,
+                            target_lang = ?, project_id = ?, context_before = ?,
+                            context_after = ?, target_hash = ?, notes = ?,
+                            modified_date = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    """, (source, target, source_lang, target_lang, project_id,
+                          context_before, context_after, target_hash, notes,
+                          _existing['id']))
+                    self.log(f"💾 TM entry #{_existing['id']} updated in place "
+                             f"(TM: {tm_id})")
+                    # 'latest' contract: exactly one row per (source, TM) —
+                    # collapse any legacy duplicates the same way the old
+                    # unconditional DELETE did.
+                    self.cursor.execute("""
+                        DELETE FROM translation_units
+                        WHERE source_hash = ? AND tm_id = ? AND id != ?
+                    """, (source_hash, tm_id, _existing['id']))
+                    self.connection.commit()
+                    return _existing['id']
 
             self.cursor.execute("""
                 INSERT INTO translation_units
