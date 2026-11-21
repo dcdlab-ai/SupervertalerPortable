@@ -40559,7 +40559,12 @@ class SupervertalerQt(QMainWindow):
                         all_tms = self.tm_metadata_mgr.get_all_tms()
                         has_matching_language = False
                         for tm in all_tms:
-                            if tm['id'] in tm_ids:
+                            # BATCH TM5: compare the tm_id STRING against the
+                            # active list (which holds tm_id strings). The old
+                            # tm['id'] (numeric DB PK) never matched, so the
+                            # "Activated TMs don't match project language"
+                            # hint appeared even when the languages were fine.
+                            if tm['tm_id'] in tm_ids:
                                 tm_source = (tm.get('source_lang') or '').lower()
                                 tm_target = (tm.get('target_lang') or '').lower()
                                 # Match if languages align (bidirectional) or TM has no language set
