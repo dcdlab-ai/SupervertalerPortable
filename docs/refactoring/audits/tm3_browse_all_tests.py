@@ -277,6 +277,46 @@ def s1_heights():
     dlg.browser_filter.clear()
     dlg.refresh_browser()
 
+    # BATCH TM3.1, задача 1: отрисовка согласована с расчётом — протяжённость
+    # чернил в ячейке без фильтра совпадает с фильтром (единый путь
+    # QTextDocument; до TM3.1 без фильтра рисовалась ОДНА строка drawText'ом,
+    # а высота считалась многострочной — recon S1/R1a).
+    from PyQt6.QtGui import QColor, QImage
+
+    def _ink_extent(tbl, it):
+        img = tbl.viewport().grab().toImage().convertToFormat(
+            QImage.Format.Format_RGB32)
+        rect = tbl.visualItemRect(it)
+        x0, x1 = max(rect.left(), 0), min(rect.right(), img.width() - 1)
+        y0, y1 = max(rect.top(), 0), min(rect.bottom(), img.height() - 1)
+        counts = {}
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                nm = img.pixelColor(xx, yy).name()
+                counts[nm] = counts.get(nm, 0) + 1
+        bg = QColor(max(counts, key=counts.get))
+        rows = []
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                c = img.pixelColor(xx, yy)
+                if (abs(c.red() - bg.red()) + abs(c.green() - bg.green())
+                        + abs(c.blue() - bg.blue())) > 70:
+                    rows.append(yy)
+                    break
+        return (max(rows) - min(rows) + 1) if rows else 0
+
+    ext_nofilter = _ink_extent(table, table.item(0, 1))
+    dlg.browser_filter.setText("infantry")
+    dlg.refresh_browser()
+    pump()
+    ext_filter = _ink_extent(table, table.item(0, 1))
+    dlg.browser_filter.clear()
+    dlg.refresh_browser()
+    check("T3.1 (TM3.1) отрисовка без фильтра занимает столько же строк "
+          "по вертикали, сколько с фильтром (единый путь)",
+          ext_nofilter > 0 and abs(ext_nofilter - ext_filter) <= max(4, ext_filter // 4),
+          f"чернила без фильтра {ext_nofilter}px, с фильтром {ext_filter}px")
+
     # T4 (M): заполнение 500 длинных строк < 1 c (порог BATCH TM2).
     for i in range(500):
         add(db, f"entry {i} " + "translation " * 150,
@@ -466,14 +506,18 @@ def s5_clear():
 # ============================================================
 
 def s6_editor_stop():
-    print("--- S6 редактор (задача 6 ОСТАНОВЛЕНО по промпту) ---")
+    print("--- S6 редактор (задача 6 ОСТАНОВЛЕНО; BATCH TM3.1 задача 5: "
+          "ячейки read-only) ---")
     db = make_db()
     add_tm(db, "TM3 suite TM", "tma")
     add(db, "editable source text", "editable target text")
     dlg = TMManagerDialog(None, db, log_callback=lambda m: None)
     table = dlg.browser_table
-    check("T21 состояние не менялось: ячейки редактируемы (как до батча)",
-          bool(table.item(0, 1).flags() & Qt.ItemFlag.ItemIsEditable))
+    # BATCH TM3.1, задача 5 (намеренное изменение): ячейки только для
+    # чтения — правки остаются в Edit/Maintain TM, записи в БД из таблицы
+    # не делаются.
+    check("T21 BATCH TM3.1: ячейки без ItemIsEditable (read-only)",
+          not bool(table.item(0, 1).flags() & Qt.ItemFlag.ItemIsEditable))
     editor = table.itemDelegateForColumn(1).createEditor(
         table, QStyleOptionViewItem(), table.model().index(0, 1))
     check("T22 делегат НЕ создаёт QPlainTextEdit (задача 6 снята)",
@@ -623,16 +667,16 @@ def s8_freshness():
     dlg.hide()
     add(db, "new C3", "новый C3", tm_id="tmc")
     db.connection.commit()
-    dlg.on_tm_list_changed()  # вкладка скрыта → только dirty
+    dlg.on_tm_list_changed()  # BATCH TM3.1: скрытая — перезагрузка при показе
     check("T33 скрытая: перезагрузки нет (данные до показа не изменились)",
-          dlg.browser_table.rowCount() == 2 and dlg._data_dirty is True,
-          f"rows={dlg.browser_table.rowCount()}, dirty={dlg._data_dirty}")
+          dlg.browser_table.rowCount() == 2,
+          f"rows={dlg.browser_table.rowCount()}")
     dlg.show()
     pump()
     ids = display_ids(dlg.browser_table)
-    check("T34 показ: dirty перезагрузка, фильтр сохранён, сортировка ID desc",
-          dlg.browser_table.rowCount() == 3 and ids == sorted(ids, reverse=True)
-          and dlg._data_dirty is False,
+    check("T34 показ: перезагрузка (всегда — TM3.1 задача 4), фильтр "
+          "сохранён, сортировка ID desc",
+          dlg.browser_table.rowCount() == 3 and ids == sorted(ids, reverse=True),
           f"ids (порядок отображения)={ids}")
     dlg.browser_filter.clear()
     dlg.refresh_browser()
