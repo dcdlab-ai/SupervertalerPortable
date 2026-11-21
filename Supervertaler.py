@@ -18481,6 +18481,17 @@ class SupervertalerQt(QMainWindow):
                                   else 0)
             tm_metadata_mgr.activate_tm(db_id, _import_project_id)
             self.log(f"TM import: created TM '{name}' ({target_tm_id}), Read=on")
+
+            # BATCH TM5: refresh the project's active-TM snapshot and the
+            # match caches so the instant exact-match path sees the newly
+            # imported TM without a project save (the same state a Read
+            # toggle computes after activating a TM).
+            if _import_project_id:
+                if not self.current_project.tm_settings:
+                    self.current_project.tm_settings = {}
+                self.current_project.tm_settings['activated_tm_ids'] = \
+                    tm_metadata_mgr.get_active_tm_ids(_import_project_id)
+                self.invalidate_translation_cache(smart_invalidation=False)
         else:
             # Use existing TM
             target_tm_id = tm_combo.currentData()
